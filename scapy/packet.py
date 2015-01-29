@@ -1184,11 +1184,12 @@ def bind_layers(lower, upper, __fval=None, **fval):
 def split_bottom_up(lower, upper, __fval=None, **fval):
     if __fval is not None:
         fval.update(__fval)
-    def do_filter((f,u),upper=upper,fval=fval):
-        if u != upper:
+    #def do_filter((f,u),upper=upper,fval=fval):
+    def do_filter(s,upper=upper,fval=fval):
+        if s[1] != upper:
             return True
         for k in fval:
-            if k not in f or f[k] != fval[k]:
+            if k not in s[0] or s[0][k] != fval[k]:
                 return True
         return False
     lower.payload_guess = filter(do_filter, lower.payload_guess)

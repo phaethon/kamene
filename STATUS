@@ -2,6 +2,7 @@ Implementad changes in all files:
 - updating print to function form
 - replaced raise e, v -> raise e(v) (PEP3109)
 - replaced except e, v -> except e as v (PEP3110)
+- fixed nested def parameter with sublist
 
 Converted, verified and tested files:
 
