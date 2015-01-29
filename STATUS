@@ -1,5 +1,6 @@
 Implementad changes in all files:
 - updating print to function form
+- replaced raise e, v -> raise e(v)
 
 Converted, verified and tested files:
 

@@ -1084,7 +1084,7 @@ class NoPayload(Packet):
         elif attr in self.__class__.__dict__:
             return self.__class__.__dict__[attr]
         else:
-            raise AttributeError, attr
+            raise AttributeError(attr)
     def hide_defaults(self):
         pass
     def __iter__(self):

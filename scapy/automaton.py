@@ -692,7 +692,8 @@ class Automaton:
             elif c.type == _ATMT_Command.BREAKPOINT:
                 raise self.Breakpoint("breakpoint triggered on state [%s]"%c.state.state, state=c.state.state)
             elif c.type == _ATMT_Command.EXCEPTION:
-                raise c.exc_info[0],c.exc_info[1],c.exc_info[2]
+                raise c.exc_info[0](c.exc_info[1])
+                #raise c.exc_info[0],c.exc_info[1],c.exc_info[2]
 
     def runbg(self, resume=None, wait=False):
         self.run(resume, wait)
