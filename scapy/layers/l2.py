@@ -536,7 +536,7 @@ class ARP_am(AnsweringMachine):
 def etherleak(target, **kargs):
     """Exploit Etherleak flaw"""
     return srpflood(Ether()/ARP(pdst=target), 
-                    prn=lambda (s,r): conf.padding_layer in r and hexstr(r[conf.padding_layer].load),
+                    prn=lambda a: conf.padding_layer in a[1] and hexstr(a[1][conf.padding_layer].load),
                     filter="arp", **kargs)
 
 

@@ -921,7 +921,8 @@ def _packetlist_timeskew_graph(self, ip, **kargs):
     if not c:
         warning("No timestamps found in packet list")
         return
-    d = map(lambda (x,y): (x%2000,((x-c[0][0])-((y-c[0][1])/1000.0))),c)
+    #d = map(lambda (x,y): (x%2000,((x-c[0][0])-((y-c[0][1])/1000.0))),c)
+    d = map(lambda a: (a[0]%2000,((a[0]-c[0][0])-((a[1]-c[0][1])/1000.0))),c)
     g = Gnuplot.Gnuplot()
     g.plot(Gnuplot.Data(d,**kargs))
     return g

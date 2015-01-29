@@ -309,8 +309,10 @@ lfilter: truth function to apply to each packet to decide whether it will be dis
                 M = 1
             return m,M
 
-        mins,maxs = minmax(map(lambda (x,y): x, sl.values()))
-        mine,maxe = minmax(map(lambda (x,y): x, el.values()))
+        #mins,maxs = minmax(map(lambda (x,y): x, sl.values()))
+        mins,maxs = minmax(map(lambda a: a[0], sl.values()))
+        #mine,maxe = minmax(map(lambda (x,y): x, el.values()))
+        mine,maxe = minmax(map(lambda a: a[0], el.values()))
         mind,maxd = minmax(dl.values())
     
         gr = 'digraph "afterglow" {\n\tedge [len=2.5];\n'

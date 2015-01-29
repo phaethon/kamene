@@ -264,7 +264,8 @@ class Automaton_metaclass(type):
             
 
         for v in cls.timeout.itervalues():
-            v.sort(lambda (t1,f1),(t2,f2): cmp(t1,t2))
+            #v.sort(lambda (t1,f1),(t2,f2): cmp(t1,t2))
+            v.sort(lambda a1,a2: cmp(a1[0],a2[0]))
             v.append((None, None))
         for v in itertools.chain(cls.conditions.itervalues(),
                                  cls.recv_conditions.itervalues(),

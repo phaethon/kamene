@@ -155,7 +155,8 @@ def find_ifaddr2(addr, plen, laddr):
     if dstAddrType == IPV6_ADDR_LOOPBACK: 
         return None
 
-    tmp = [[]] + map(lambda (x,y,z): (in6_getAddrType(x), x, y, z), laddr)
+    #tmp = [[]] + map(lambda (x,y,z): (in6_getAddrType(x), x, y, z), laddr)
+    tmp = [[]] + map(lambda a: (in6_getAddrType(a[0]), a[0], a[1], a[2]), laddr)
     def filterSameScope(l, t):
         if (t[0] & dstAddrType & IPV6_ADDR_SCOPE_MASK) == 0:
             l.append(t)

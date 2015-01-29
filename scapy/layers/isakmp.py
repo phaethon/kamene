@@ -99,22 +99,23 @@ del(val)
 
 class ISAKMPTransformSetField(StrLenField):
     islist=1
-    def type2num(self, (typ,val)):
-        type_val,enc_dict,tlv = ISAKMPTransformTypes.get(typ, (typ,{},0))
-        val = enc_dict.get(val, val)
+    #def type2num(self, (typ,val)):
+    def type2num(self, typval):
+        type_val,enc_dict,tlv = ISAKMPTransformTypes.get(typval[0], (typval[0],{},0))
+        typval[1] = enc_dict.get(typval[1], typval[1])
         s = ""
-        if (val & ~0xffff):
+        if (typval[1] & ~0xffff):
             if not tlv:
-                warning("%r should not be TLV but is too big => using TLV encoding" % typ)
+                warning("%r should not be TLV but is too big => using TLV encoding" % typval[0])
             n = 0
-            while val:
-                s = chr(val&0xff)+s
-                val >>= 8
+            while typval[1]:
+                s = chr(typval[1]&0xff)+s
+                typval[1] >>= 8
                 n += 1
-            val = n
+            typval[1] = n
         else:
             type_val |= 0x8000
-        return struct.pack("!HH",type_val, val)+s
+        return struct.pack("!HH",type_val, typval[1])+s
     def num2type(self, typ, enc):
         val = ISAKMPTransformNum.get(typ,(typ,{}))
         enc = val[1].get(enc,enc)

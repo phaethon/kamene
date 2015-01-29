@@ -82,10 +82,12 @@ vzM985aHXOHAxQN2UQZbQkUv3D4Vc+lyvalAffv3Tyg4ks3a22kPXiyeCGweviNX
 0K8TKasyOhGsVamTUAZBXfQVw1zmdS4rHDnbHgtIjX3DcCt6UIr0BHTYjdV0JbPj
 r1APYgXihjQwM2M83AKIhwQQJv/F3JFOFCQNsEI0QA==""")
     def get_local_dict(cls):
-        return dict(map(lambda (x,y): (x, y.name),  filter(lambda (x,y): isinstance(y, File), cls.__dict__.items())))
+        #return dict(map(lambda (x,y): (x, y.name),  filter(lambda (x,y): isinstance(y, File), cls.__dict__.items())))
+        return dict(map(lambda a: (a[0], a[1].name),  filter(lambda a: isinstance(a[1], File), cls.__dict__.items())))
     get_local_dict = classmethod(get_local_dict)
     def get_URL_dict(cls):
-        return dict(map(lambda (x,y): (x, y.URL),  filter(lambda (x,y): isinstance(y, File), cls.__dict__.items())))
+        #return dict(map(lambda (x,y): (x, y.URL),  filter(lambda (x,y): isinstance(y, File), cls.__dict__.items())))
+        return dict(map(lambda a: (a[0], a[1].URL),  filter(lambda a: isinstance(a[1], File), cls.__dict__.items())))
     get_URL_dict = classmethod(get_URL_dict)
 
 

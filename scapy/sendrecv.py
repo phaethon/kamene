@@ -442,7 +442,8 @@ srloop(pkts, [prn], [inter], [count], ...) --> None"""
     return __sr_loop(srp, pkts, *args, **kargs)
 
 
-def sndrcvflood(pks, pkt, prn=lambda (s,r):r.summary(), chainCC=0, store=1, unique=0):
+#def sndrcvflood(pks, pkt, prn=lambda (s,r):r.summary(), chainCC=0, store=1, unique=0):
+def sndrcvflood(pks, pkt, prn=lambda a:a[1].summary(), chainCC=0, store=1, unique=0):
     if not isinstance(pkt, Gen):
         pkt = SetGen(pkt)
     tobesent = [p for p in pkt]
