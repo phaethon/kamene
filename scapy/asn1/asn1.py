@@ -196,7 +196,7 @@ class ASN1_Object:
     def strshow(self, lvl=0):
         return ("  "*lvl)+repr(self)+"\n"
     def show(self, lvl=0):
-        print self.strshow(lvl)
+        print(self.strshow(lvl))
     def __eq__(self, other):
         return self.val == other
     def __cmp__(self, other):

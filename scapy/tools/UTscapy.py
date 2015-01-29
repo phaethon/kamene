@@ -200,35 +200,35 @@ def parse_campaign_file(campaign_file):
         else:
             if test is None:
                 if l.strip():
-                    print >>sys.stderr, "Unkonwn content [%s]" % l.strip()
+                    print("Unkonwn content [%s]" % l.strip(), file = sys.stderr) 
             else:
                 test.test += l
     return test_campaign
 
 def dump_campaign(test_campaign):
-    print "#"*(len(test_campaign.title)+6)
-    print "## %(title)s ##" % test_campaign
-    print "#"*(len(test_campaign.title)+6)
+    print("#"*(len(test_campaign.title)+6))
+    print("## %(title)s ##" % test_campaign)
+    print("#"*(len(test_campaign.title)+6))
     if test_campaign.sha and test_campaign.crc:
-        print "CRC=[%(crc)s] SHA=[%(sha)s]" % test_campaign
-    print "from file %(filename)s" % test_campaign
-    print
+        print("CRC=[%(crc)s] SHA=[%(sha)s]" % test_campaign)
+    print("from file %(filename)s" % test_campaign)
+    print()
     for ts in test_campaign:
         if ts.crc:
-            print "+--[%s]%s(%s)--" % (ts.name,"-"*max(2,80-len(ts.name)-18),ts.crc)
+            print("+--[%s]%s(%s)--" % (ts.name,"-"*max(2,80-len(ts.name)-18),ts.crc))
         else:
-            print "+--[%s]%s" % (ts.name,"-"*max(2,80-len(ts.name)-6))
+            print("+--[%s]%s" % (ts.name,"-"*max(2,80-len(ts.name)-6)))
         if ts.keywords:
-            print "  kw=%s" % ",".join(ts.keywords)
+            print("  kw=%s" % ",".join(ts.keywords))
         for t in ts:
-            print "%(num)03i %(name)s" % t
+            print("%(num)03i %(name)s" % t)
             c = k = ""
             if t.keywords:
                 k = "kw=%s" % ",".join(t.keywords)
             if t.crc:
                 c = "[%(crc)s] " % t
             if c or k:
-                print "    %s%s" % (c,k) 
+                print("    %s%s" % (c,k) )
 
 #### COMPUTE CAMPAIGN DIGESTS ####
 
@@ -313,12 +313,12 @@ def run_campaign(test_campaign, get_interactive_session, verb=2):
                 failed += 1
             t.result = res
             if verb > 1:
-                print >>sys.stderr,"%(result)6s %(crc)s %(name)s" % t
+                print("%(result)6s %(crc)s %(name)s" % t, file = sys.stderr)
     test_campaign.passed = passed
     test_campaign.failed = failed
     if verb:
-        print >>sys.stderr,"Campaign CRC=%(crc)s  SHA=%(sha)s" % test_campaign
-        print >>sys.stderr,"PASSED=%i FAILED=%i" % (passed, failed)
+        print("Campaign CRC=%(crc)s  SHA=%(sha)s" % test_campaign, file = sys.stderr)
+        print("PASSED=%i FAILED=%i" % (passed, failed), file = sys.stderr)
 
 
 #### INFO LINES ####
@@ -492,7 +492,7 @@ def campaign_to_LATEX(test_campaign):
 #### USAGE ####
                       
 def usage():
-    print >>sys.stderr,"""Usage: UTscapy [-m module] [-f {text|ansi|HTML|LaTeX}] [-o output_file] 
+    print("""Usage: UTscapy [-m module] [-f {text|ansi|HTML|LaTeX}] [-o output_file] 
                [-t testfile] [-k keywords [-k ...]] [-K keywords [-K ...]]
                [-l] [-d|-D] [-F] [-q[q]] [-P preexecute_python_code]
                [-s /path/to/scpay]
@@ -509,7 +509,7 @@ def usage():
 -k <kw1>,<kw2>,...\t: include only tests with one of those keywords (can be used many times)
 -K <kw1>,<kw2>,...\t: remove tests with one of those keywords (can be used many times)
 -P <preexecute_python_code>
-"""
+""", file = sys.stderr)
     raise SystemExit
 
 
@@ -594,7 +594,7 @@ def main(argv):
                 raise getopt.GetoptError("cannot import [%s]: %s" % (m,e))
                 
     except getopt.GetoptError,msg:
-        print >>sys.stderr,"ERROR:",msg
+        print("ERROR:",msg, file = sys.stderr)
         raise SystemExit
 
     autorun_func = {

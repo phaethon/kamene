@@ -26,7 +26,7 @@ a=Ether(src="00:01:02:03:04:05")
 b=IP(src="1.2.3.4")
 c=IGMP(type=0x12, gaddr="224.2.3.4")
 c.igmpize(b, a)
-print "Joining IP " + c.gaddr + " MAC " + a.dst
+print("Joining IP " + c.gaddr + " MAC " + a.dst)
 sendp(a/b/c, iface="en0")
 
     Parameters:
@@ -146,7 +146,7 @@ IGMPv2 message format   http://www.faqs.org/rfcs/rfc2236.html
           ip.dst = self.gaddr                    # IP rule 3a
           retCode = True
         else:
-          print "Warning: Using invalid Group Address"
+          print("Warning: Using invalid Group Address")
           retCode = False
       elif ((self.type == 0x17) and isValidMCAddr(self.gaddr)):
           ip.dst = "224.0.0.2"                   # IP rule 2
@@ -155,10 +155,10 @@ IGMPv2 message format   http://www.faqs.org/rfcs/rfc2236.html
           ip.dst = self.gaddr                    # IP rule 3b
           retCode = True
       else:
-        print "Warning: Using invalid IGMP Type"
+        print("Warning: Using invalid IGMP Type")
         retCode = False
     else:
-      print "Warning: No IGMP Group Address set"
+      print("Warning: No IGMP Group Address set")
       retCode = False
     if retCode == True:
        ip.ttl=1                                  # IP Rule 4

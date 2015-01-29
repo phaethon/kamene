@@ -225,7 +225,7 @@ class TestAction(Packet):
     _priv1 = None
     _priv2 = None
     def my_action(self, val, fld, priv1, priv2):
-        print "Action (%i)!" %val
+        print("Action (%i)!" %val)
 	self._val, self._fld, self._priv1, self._priv2 = val, fld, priv1, priv2
 
 = Triggering action

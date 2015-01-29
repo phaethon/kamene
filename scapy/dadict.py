@@ -39,7 +39,7 @@ class DADict:
     def _show(self):
         for k in self.__dict__.keys():
             if k and k[0] != "_":
-                print "%10s = %r" % (k,getattr(self,k))
+                print("%10s = %r" % (k,getattr(self,k)))
     def __repr__(self):
         return "<%s/ %s>" % (self._name," ".join(filter(lambda x:x and x[0]!="_",self.__dict__.keys())))
 

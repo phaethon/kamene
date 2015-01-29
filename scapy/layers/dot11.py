@@ -445,7 +445,7 @@ iwconfig wlan0 mode managed
         return [p,q]
     
     def print_reply(self):
-        print p.sprintf("Sent %IP.src%:%IP.sport% > %IP.dst%:%TCP.dport%")
+        print(p.sprintf("Sent %IP.src%:%IP.sport% > %IP.dst%:%TCP.dport%"))
 
     def send_reply(self, reply):
         sendp(reply, iface=self.ifto, **self.optsend)
@@ -464,11 +464,11 @@ def get_toDS():
             continue
         if p.FCfield & 1:
             plst.append(p)
-            print "."
+            print(".")
 
 
 #    if not ifto.endswith("ap"):
-#        print "iwpriv %s hostapd 1" % ifto
+#        print("iwpriv %s hostapd 1" % ifto)
 #        os.system("iwpriv %s hostapd 1" % ifto)
 #        ifto += "ap"
 #        
@@ -529,7 +529,7 @@ iwconfig wlan0 mode managed
         sendp([p,q], iface=ifto, verbose=0)
 #        print "send",repr(p)        
 #        print "send",repr(q)
-        print p.sprintf("Sent %IP.src%:%IP.sport% > %IP.dst%:%TCP.dport%")
+        print(p.sprintf("Sent %IP.src%:%IP.sport% > %IP.dst%:%TCP.dport%"))
 
     sniff(iface=iffrom,prn=do_airpwn)
 

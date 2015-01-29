@@ -25,14 +25,14 @@ class PipeEngine:
             doc = pc.__doc__ or ""
             if doc:
                 doc = doc.splitlines()[0]
-            print "%20s: %s" % (pn, doc)
+            print("%20s: %s" % (pn, doc))
     @classmethod
     def list_pipes_detailed(cls):
         for pn,pc in sorted(cls.pipes.items()):
             if pc.__doc__:
-                print "###### %s\n %s" % (pn ,pc.__doc__)
+                print("###### %s\n %s" % (pn ,pc.__doc__))
             else:
-                print "###### %s" % pn
+                print("###### %s" % pn)
     
     def __init__(self, *pipes):
         self.active_pipes = set()
@@ -147,7 +147,7 @@ class PipeEngine:
                 else:
                     warning("Pipe engine thread not running")
         except KeyboardInterrupt:
-            print "Interrupted by user."
+            print("Interrupted by user.")
 
     def add(self, *pipes):
         pipes = self._add_pipes(*pipes)
@@ -353,9 +353,9 @@ class ConsoleSink(Sink):
      +-------+
 """
     def push(self, msg):
-        print ">%r" % msg
+        print(">%r" % msg)
     def high_push(self, msg):
-        print ">>%r" % msg
+        print(">>%r" % msg)
 
 class RawConsoleSink(Sink):
     """Print messages on low and high entries
@@ -556,7 +556,7 @@ def _testmain():
     p.graph(type="png",target="> /tmp/pipe.png")
 
     p.start()
-    print p.threadid
+    print(p.threadid)
     time.sleep(5)
     p.stop()
 

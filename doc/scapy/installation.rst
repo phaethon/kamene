@@ -294,7 +294,7 @@ Install libpcap and its Python wrapper::
 
 Optionally: Install readline::
 
- $ python `python -c "import pimp; print pimp.__file__"` -i readline
+ $ python `python -c "import pimp; print(pimp.__file__)"` -i readline
 
 OpenBSD
 -------
