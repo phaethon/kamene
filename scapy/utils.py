@@ -9,14 +9,14 @@ General utility functions.
 
 import os,sys,socket,types
 import random,time
-import gzip,zlib,cPickle
+import gzip,zlib,pickle
 import re,struct,array
 import subprocess
 
 import warnings
 warnings.filterwarnings("ignore","tempnam",RuntimeWarning, __name__)
 
-from config import conf
+from .config import conf
 from data import MTU
 from error import log_runtime,log_loading,log_interactive, Scapy_Exception
 from base_classes import BasePacketList

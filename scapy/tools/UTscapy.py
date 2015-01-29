@@ -518,7 +518,7 @@ def usage():
 #### MAIN ####
 
 def main(argv):
-    import __builtin__
+    import builtins
 
     # Parse arguments
     
@@ -591,7 +591,7 @@ def main(argv):
         for m in MODULES:
             try:
                 mod = import_module(m)
-                __builtin__.__dict__.update(mod.__dict__)
+                builtins.__dict__.update(mod.__dict__)
             except ImportError as e:
                 raise getopt.GetoptError("cannot import [%s]: %s" % (m,e))
                 

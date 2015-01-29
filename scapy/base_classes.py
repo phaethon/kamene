@@ -12,8 +12,8 @@ Generators and packet meta classes.
 ################
 
 import re,random,socket
-import config
-import error
+from . import config
+from . import error
 
 class Gen(object):
     def __iter__(self):

@@ -23,7 +23,7 @@
 #############################################################################
 
 from scapy.all import *
-import __builtin__
+import builtins
 
 #####################################################################
 # Helpers and constants
@@ -485,7 +485,7 @@ class Skinny(Packet):
 # An helper 
 def get_cls(name, fallback_cls):
     return globals().get(name, fallback_cls)
-    #return __builtin__.__dict__.get(name, fallback_cls)
+    #return builtins.__dict__.get(name, fallback_cls)
 
 for msgid,strcls in skinny_messages_cls.items():
     cls=get_cls(strcls, SkinnyMessageGeneric)

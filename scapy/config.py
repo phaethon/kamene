@@ -8,10 +8,10 @@ Implementation for of the configuration object.
 """
 
 import os,time,socket,sys
-from data import *
-import base_classes
-import themes
-from error import log_scapy
+from .data import *
+from . import base_classes
+from . import themes
+from .error import log_scapy
 
 ############
 ## Config ##

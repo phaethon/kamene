@@ -1219,8 +1219,8 @@ def ls(obj=None):
     """List  available layers, or infos on a given layer"""
     if obj is None:
         
-        import __builtin__
-        all = __builtin__.__dict__.copy()
+        import builtins
+        all = builtins.__dict__.copy()
         all.update(globals())
         objlst = sorted(conf.layers, key=lambda x:x.__name__)
         for o in objlst:

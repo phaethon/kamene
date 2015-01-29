@@ -8,8 +8,8 @@ Global variables and functions for handling external data sets.
 """
 
 import os,sys,re
-from dadict import DADict
-from error import log_loading
+from .dadict import DADict
+from .error import log_loading
 
 ############
 ## Consts ##
