@@ -4,6 +4,7 @@ Implementad changes in all files:
 - replaced except e, v -> except e as v (PEP3110)
 - fixed nested function definition parameter with sublist (parameter unpacking)
 - ditto for lambda
+- removed L from long integers
 
 Converted, verified and tested files:
 

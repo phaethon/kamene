@@ -280,7 +280,7 @@ def ltoa(x):
     return inet_ntoa(struct.pack("!I", x&0xffffffff))
 
 def itom(x):
-    return (0xffffffff00000000L>>x)&0xffffffffL
+    return (0xffffffff00000000>>x)&0xffffffff
 
 def do_graph(graph,prog=None,format=None,target=None,type=None,string=None,options=None):
     """do_graph(graph, prog=conf.prog.dot, format="svg",
@@ -640,7 +640,7 @@ class RawPcapWriter:
             if g.read(16):
                 return
             
-        self.f.write(struct.pack(self.endian+"IHHIIII", 0xa1b2c3d4L,
+        self.f.write(struct.pack(self.endian+"IHHIIII", 0xa1b2c3d4,
                                  2, 4, 0, 0, MTU, self.linktype))
         self.f.flush()
     

@@ -185,8 +185,8 @@ def read_routes():
             else:
                 warning("Interface %s: unkown address family (%i)"%(iff, addrfamily))
                 continue
-        routes.append((socket.htonl(long(dst,16))&0xffffffffL,
-                       socket.htonl(long(msk,16))&0xffffffffL,
+        routes.append((socket.htonl(long(dst,16))&0xffffffff,
+                       socket.htonl(long(msk,16))&0xffffffff,
                        scapy.utils.inet_ntoa(struct.pack("I",long(gw,16))),
                        iff, ifaddr))
     
@@ -395,7 +395,7 @@ class L3PacketSocket(SuperSocket):
             sx = str(ll(x))
             x.sent_time = time.time()
             self.outs.sendto(sx, sdto)
-        except socket.error,msg:
+        except socket.error as msg:
             x.sent_time = time.time()  # bad approximation
             if conf.auto_fragment and msg[0] == 90:
                 for p in x.fragment():

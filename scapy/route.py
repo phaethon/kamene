@@ -138,7 +138,7 @@ class Route:
         for d,m,gw,i,a in self.routes:
             aa = atol(a)
             if aa == dst:
-                pathes.append((0xffffffffL,(LOOPBACK_NAME,a,"0.0.0.0")))
+                pathes.append((0xffffffff,(LOOPBACK_NAME,a,"0.0.0.0")))
             if (dst & m) == (d & m):
                 pathes.append((m,(i,a,gw)))
         if not pathes:
@@ -154,8 +154,8 @@ class Route:
             
     def get_if_bcast(self, iff):
         for net, msk, gw, iface, addr in self.routes:
-            if (iff == iface and net != 0L):
-                bcast = atol(addr)|(~msk&0xffffffffL); # FIXME: check error in atol()
+            if (iff == iface and net != 0):
+                bcast = atol(addr)|(~msk&0xffffffff); # FIXME: check error in atol()
                 return ltoa(bcast);
         warning("No broadcast address found for iface %s\n" % iff);
 
