@@ -291,7 +291,7 @@ def sendpfast(x, pps=None, mbps=None, realtime=None, loop=0, file_cache=False, i
         subprocess.check_call(argv)
     except KeyboardInterrupt:
         log_interactive.info("Interrupted by user")
-    except Exception,e:
+    except Exception as e:
         log_interactive.error("while trying to exec [%s]: %s" % (argv[0],e))
     finally:
         os.unlink(f)

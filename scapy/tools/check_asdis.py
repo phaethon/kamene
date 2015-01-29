@@ -39,7 +39,7 @@ def main(argv):
         if PCAP_IN is None:
             raise getopt.GetoptError("Missing pcap file (-i)")
     
-    except getopt.GetoptError,e:
+    except getopt.GetoptError as e:
         print("ERROR: %s" % e, file = sys.stderr)
         raise SystemExit
     
@@ -72,7 +72,7 @@ def main(argv):
             p2 = str(p2d)
         except KeyboardInterrupt:
             raise
-        except Exception,e:
+        except Exception as e:
             print("Dissection error on packet %i" % i)
             failed += 1
         else:

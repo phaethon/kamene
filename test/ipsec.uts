@@ -100,7 +100,7 @@ e[ESP].data = e[ESP].data.replace('\x01', '\x21')
 try:
     d = sa.decrypt(e)
     assert(False)
-except IPSecIntegrityError, err:
+except IPSecIntegrityError as err:
     err
 
 #######################################
@@ -206,7 +206,7 @@ e[ESP].data = e[ESP].data.replace('\x01', '\x21')
 try:
     d = sa.decrypt(e)
     assert(False)
-except IPSecIntegrityError, err:
+except IPSecIntegrityError as err:
     err
 
 ###############################################################################
@@ -309,7 +309,7 @@ e[ESP].data = e[ESP].data.replace('\x01', '\x21')
 try:
     d = sa.decrypt(e)
     assert(False)
-except IPSecIntegrityError, err:
+except IPSecIntegrityError as err:
     err
 
 #######################################
@@ -412,7 +412,7 @@ e[ESP].data = e[ESP].data.replace('\x01', '\x21')
 try:
     d = sa.decrypt(e)
     assert(False)
-except IPSecIntegrityError, err:
+except IPSecIntegrityError as err:
     err
 
 ###############################################################################
@@ -483,7 +483,7 @@ e[TCP].sport = 5
 try:
     d = sa.decrypt(e)
     assert(False)
-except IPSecIntegrityError, err:
+except IPSecIntegrityError as err:
     err
 
 #######################################
@@ -551,7 +551,7 @@ e.dst = '4.4.4.4'
 try:
     d = sa.decrypt(e)
     assert(False)
-except IPSecIntegrityError, err:
+except IPSecIntegrityError as err:
     err
 
 ###############################################################################
@@ -620,7 +620,7 @@ e[TCP].dport = 46
 try:
     d = sa.decrypt(e)
     assert(False)
-except IPSecIntegrityError, err:
+except IPSecIntegrityError as err:
     err
 
 #######################################
@@ -688,7 +688,7 @@ e.src = 'cc::ee'
 try:
     d = sa.decrypt(e)
     assert(False)
-except IPSecIntegrityError, err:
+except IPSecIntegrityError as err:
     err
 
 ###############################################################################

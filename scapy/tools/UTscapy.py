@@ -300,7 +300,7 @@ def run_campaign(test_campaign, get_interactive_session, verb=2):
             try:
                 if res is None or res:
                     the_res= True
-            except Exception,msg:
+            except Exception as msg:
                 t.output+="UTscapy: Error during result interpretation:\n"
                 t.output+="".join(traceback.format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback,))
             if the_res:
@@ -556,7 +556,7 @@ def main(argv):
             elif opt == "-f":
                 try:
                     FORMAT = Format.from_string(optarg)
-                except KeyError,msg:
+                except KeyError as msg:
                     raise getopt.GetoptError("Unknown output format %s" % msg)
             elif opt == "-t":
                 TESTFILE = open(optarg)
@@ -583,17 +583,17 @@ def main(argv):
         
         try:
             from scapy import all as scapy
-        except ImportError,e:
+        except ImportError as e:
             raise getopt.GetoptError("cannot import [%s]: %s" % (SCAPY,e))
 
         for m in MODULES:
             try:
                 mod = import_module(m)
                 __builtin__.__dict__.update(mod.__dict__)
-            except ImportError,e:
+            except ImportError as e:
                 raise getopt.GetoptError("cannot import [%s]: %s" % (m,e))
                 
-    except getopt.GetoptError,msg:
+    except getopt.GetoptError as msg:
         print("ERROR:",msg, file = sys.stderr)
         raise SystemExit
 

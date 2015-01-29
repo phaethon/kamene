@@ -358,7 +358,7 @@ class IP(Packet, IPTools):
         for p in self:
             try:
                 s.sendto(str(p), (p.dst,0))
-            except socket.error, msg:
+            except socket.error as msg:
                 log_runtime.error(msg)
             if slp:
                 time.sleep(slp)

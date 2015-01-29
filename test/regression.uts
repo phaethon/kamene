@@ -1015,7 +1015,7 @@ a.BEGIN.intercepts()
 while True:
     try:
         x = a.run()
-    except Automaton.InterceptionPoint,p:
+    except Automaton.InterceptionPoint as p:
         a.accept_packet(Raw(p.packet.load.lower()), wait=False)
     else:
         break
