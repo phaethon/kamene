@@ -1260,7 +1260,7 @@ class TracerouteResult(SndRcvList):
     
     
         for rtk in rt:
-            s += "#---[%s\n" % `rtk`
+            s += "#---[%s\n" % repr(rtk)
             s += '\t\tedge [color="#%s%s%s"];\n' % forecolorlist.next()
             trace = rt[rtk]
             k = trace.keys()
@@ -1476,7 +1476,8 @@ report_ports(target, ports) -> string"""
 def IPID_count(lst, funcID=lambda x:x[1].id, funcpres=lambda x:x[1].summary()):
     idlst = map(funcID, lst)
     idlst.sort()
-    classes = [idlst[0]]+map(lambda x:x[1],filter(lambda (x,y): abs(x-y)>50, map(lambda x,y: (x,y),idlst[:-1], idlst[1:])))
+    #classes = [idlst[0]]+map(lambda x:x[1],filter(lambda (x,y): abs(x-y)>50, map(lambda x,y: (x,y),idlst[:-1], idlst[1:])))
+    classes = [idlst[0]]+map(lambda x:x[1],filter(lambda a: abs(a[0]-a[1])>50, map(lambda x,y: (x,y),idlst[:-1], idlst[1:])))
     lst = map(lambda x:(funcID(x), funcpres(x)), lst)
     lst.sort()
     print("Probably %i classes:" % len(classes), classes)
