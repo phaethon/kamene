@@ -126,7 +126,7 @@ class DNSRRField(StrField):
             del(rr.rdlen)
         elif type in dnsRRdispatcher.keys():
             rr = dnsRRdispatcher[type]("\x00"+ret+s[p:p+rdlen])
-	else:
+        else:
           del(rr.rdlen)
         
         p += rdlen
@@ -303,7 +303,7 @@ class EDNS0TLV(Packet):
                     StrLenField("optdata", "", length_from=lambda pkt: pkt.optlen) ]
 
     def extract_padding(self, p):
-	return "", p
+        return "", p
 
 class DNSRROPT(Packet):
     name = "DNS OPT Resource Record"
@@ -337,16 +337,16 @@ class TimeField(IntField):
 
     def any2i(self, pkt, x):
         if type(x) == str:
-	    import time, calendar
-	    t = time.strptime(x, "%Y%m%d%H%M%S")
+            import time, calendar
+            t = time.strptime(x, "%Y%m%d%H%M%S")
             return int(calendar.timegm(t))
         return x
 
     def i2repr(self, pkt, x):
-	import time
-	x = self.i2h(pkt, x)
-	t = time.strftime("%Y%m%d%H%M%S", time.gmtime(x))
-	return "%s (%d)" % (t ,x) 
+        import time
+        x = self.i2h(pkt, x)
+        t = time.strftime("%Y%m%d%H%M%S", time.gmtime(x))
+        return "%s (%d)" % (t ,x) 
 
 
 def bitmap2RRlist(bitmap):
@@ -360,31 +360,31 @@ def bitmap2RRlist(bitmap):
 
     while bitmap:
 
-	if len(bitmap) < 2:
-	    warning("bitmap too short (%i)" % len(bitmap))
-	    return
+        if len(bitmap) < 2:
+            warning("bitmap too short (%i)" % len(bitmap))
+            return
    
-	window_block = ord(bitmap[0]) # window number
-	offset = 256*window_block # offset of the Ressource Record
-	bitmap_len = ord(bitmap[1]) # length of the bitmap in bytes
+        window_block = ord(bitmap[0]) # window number
+        offset = 256*window_block # offset of the Ressource Record
+        bitmap_len = ord(bitmap[0]) # length of the bitmap in bytes
+        
+        if bitmap_len <= 0 or bitmap_len > 32:
+            warning("bitmap length is no valid (%i)" % bitmap_len)
+            return
+        
+        tmp_bitmap = bitmap[2:2+bitmap_len]
+        
+        # Let's compare each bit of tmp_bitmap and compute the real RR value
+        for b in range(len(tmp_bitmap)):
+            v = 128
+            for i in range(8):
+                if ord(tmp_bitmap[b]) & v:
+                    # each of the RR is encoded as a bit
+                    RRlist += [ offset + b*8 + i ] 
+                v = v >> 1
 
-	if bitmap_len <= 0 or bitmap_len > 32:
-	    warning("bitmap length is no valid (%i)" % bitmap_len)
-	    return
-
-	tmp_bitmap = bitmap[2:2+bitmap_len]
-
-	# Let's compare each bit of tmp_bitmap and compute the real RR value
-	for b in xrange(len(tmp_bitmap)):
-	    v = 128
-	    for i in xrange(8):
-		if ord(tmp_bitmap[b]) & v:
-		    # each of the RR is encoded as a bit
-		    RRlist += [ offset + b*8 + i ] 
-		v = v >> 1
-	
-	# Next block if any
-	bitmap = bitmap[2+bitmap_len:]
+# Next block if any
+        bitmap = bitmap[2+bitmap_len:]
 
     return RRlist
 
@@ -409,9 +409,9 @@ def RRlist2bitmap(lst):
     max_window_blocks = int(math.ceil(lst[-1] / 256.))
     min_window_blocks = int(math.floor(lst[0] / 256.))
     if min_window_blocks == max_window_blocks:
-	max_window_blocks += 1
+        max_window_blocks += 1
 
-    for wb in xrange(min_window_blocks, max_window_blocks+1):
+    for wb in range(min_window_blocks, max_window_blocks+1):
         # First, filter out RR not encoded in the current window block
         # i.e. keep everything between 256*wb <= 256*(wb+1)
         rrlist = filter(lambda x: 256*wb <= x and x < 256*(wb+1), lst)
@@ -421,18 +421,18 @@ def RRlist2bitmap(lst):
      
         # Compute the number of bytes used to store the bitmap
         if rrlist[-1] == 0: # only one element in the list
-	    bytes = 1
+            bytes = 1
         else:
-	    max = rrlist[-1] - 256*wb
-	    bytes = int(math.ceil(max / 8)) + 1  # use at least 1 byte
+            max = rrlist[-1] - 256*wb
+            bytes = int(math.ceil(max / 8)) + 1  # use at least 1 byte
         if bytes > 32: # Don't encode more than 256 bits / values
-	    bytes = 32
+            bytes = 32
 
         bitmap += struct.pack("B", wb)
         bitmap += struct.pack("B", bytes)
 
         # Generate the bitmap
-        for tmp in xrange(bytes):
+        for tmp in range(bytes):
             v = 0
             # Remove out of range Ressource Records
             tmp_rrlist = filter(lambda x: 256*wb+8*tmp <= x and x < 256*wb+8*tmp+8, rrlist)
@@ -450,14 +450,14 @@ def RRlist2bitmap(lst):
 
 class RRlistField(StrField):
     def h2i(self, pkt, x):
-	if type(x) == list:
-	    return RRlist2bitmap(x)
-	return x
+        if type(x) == list:
+            return RRlist2bitmap(x)
+        return x
 
     def i2repr(self, pkt, x):
-	x = self.i2h(pkt, x)
-	rrlist = bitmap2RRlist(x)
-	return [ dnstypes.get(rr, rr) for rr in rrlist ]
+        x = self.i2h(pkt, x)
+        rrlist = bitmap2RRlist(x)
+        return [ dnstypes.get(rr, rr) for rr in rrlist ]
 
 
 class _DNSRRdummy(Packet):
@@ -565,15 +565,15 @@ class DNSRRNSEC3(_DNSRRdummy):
                     ShortEnumField("rclass", 1, dnsclasses),
                     IntField("ttl", 0),
                     ShortField("rdlen", None),
-		    ByteField("hashalg", 0), 
+                    ByteField("hashalg", 0), 
                     BitEnumField("flags", 0, 8, {1:"Opt-Out"}),
-		    ShortField("iterations", 0), 
-		    FieldLenField("saltlength", 0, fmt="!B", length_of="salt"),
-		    StrLenField("salt", "", length_from=lambda x: x.saltlength),
-		    FieldLenField("hashlength", 0, fmt="!B", length_of="nexthashedownername"),
-		    StrLenField("nexthashedownername", "", length_from=lambda x: x.hashlength),
+                    ShortField("iterations", 0), 
+                    FieldLenField("saltlength", 0, fmt="!B", length_of="salt"),
+                    StrLenField("salt", "", length_from=lambda x: x.saltlength),
+                    FieldLenField("hashlength", 0, fmt="!B", length_of="nexthashedownername"),
+                    StrLenField("nexthashedownername", "", length_from=lambda x: x.hashlength),
                     RRlistField("typebitmaps", "")
-		  ]
+                  ]
 
 
 class DNSRRNSEC3PARAM(_DNSRRdummy):
@@ -583,12 +583,12 @@ class DNSRRNSEC3PARAM(_DNSRRdummy):
                     ShortEnumField("rclass", 1, dnsclasses),
                     IntField("ttl", 0),
                     ShortField("rdlen", None),
-		    ByteField("hashalg", 0), 
-		    ByteField("flags", 0), 
-		    ShortField("iterations", 0), 
-		    FieldLenField("saltlength", 0, fmt="!B", length_of="salt"),
-		    StrLenField("salt", "", length_from=lambda pkt: pkt.saltlength)
-		  ]
+                    ByteField("hashalg", 0), 
+                    ByteField("flags", 0), 
+                    ShortField("iterations", 0), 
+                    FieldLenField("saltlength", 0, fmt="!B", length_of="salt"),
+                    StrLenField("salt", "", length_from=lambda pkt: pkt.saltlength)
+                  ]
 
 
 dnssecclasses = [ DNSRROPT, DNSRRRSIG, DNSRRDLV, DNSRRDNSKEY, DNSRRNSEC, DNSRRDS, DNSRRNSEC3, DNSRRNSEC3PARAM ]

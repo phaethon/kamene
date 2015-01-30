@@ -8,11 +8,11 @@ Fields: basic data structures that make up parts of packets.
 """
 
 import struct,copy,socket
-from config import conf
-from volatile import *
-from data import *
-from utils import *
-from base_classes import BasePacket,Gen,Net
+from .config import conf
+from .volatile import *
+from .data import *
+from .utils import *
+from .base_classes import BasePacket,Gen,Net
 
 
 ############
@@ -76,7 +76,7 @@ class Field:
             return x.copy()
         if type(x) is list:
             x = x[:]
-            for i in xrange(len(x)):
+            for i in range(len(x)):
                 if isinstance(x[i], BasePacket):
                     x[i] = x[i].copy()
         return x
@@ -708,7 +708,7 @@ class EnumField(Field):
         i2s = self.i2s = {}
         s2i = self.s2i = {}
         if type(enum) is list:
-            keys = xrange(len(enum))
+            keys = range(len(enum))
         else:
             keys = enum.keys()
         if filter(lambda x: type(x) is str, keys):

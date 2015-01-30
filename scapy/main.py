@@ -44,8 +44,8 @@ def _usage():
     sys.exit(0)
 
 
-from config import conf
-from themes import DefaultTheme
+from .config import conf
+from .themes import DefaultTheme
 
 
 ######################
@@ -179,7 +179,7 @@ def scapy_write_history_file(readline):
 def interact(mydict=None,argv=None,mybanner=None,loglevel=20):
     global session
     import code,sys,pickle,os,getopt,re
-    from config import conf
+    from .config import conf
     conf.interactive = True
     if loglevel is not None:
         conf.logLevel=loglevel
@@ -275,7 +275,7 @@ def interact(mydict=None,argv=None,mybanner=None,loglevel=20):
     if PRESTART_FILE:
         _read_config_file(PRESTART_FILE)
 
-    scapy_builtins = __import__("all",globals(),locals(),".").__dict__
+    scapy_builtins = __import__("scapy.all",globals(),locals(),".").__dict__
     builtins.__dict__.update(scapy_builtins)
     globkeys = scapy_builtins.keys()
     globkeys.append("scapy_session")

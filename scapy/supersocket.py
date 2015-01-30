@@ -8,8 +8,8 @@ SuperSocket.
 """
 
 import socket,time
-from config import conf
-from data import *
+from .config import conf
+from .data import *
 from scapy.error import warning, log_runtime
 
 class _SuperSocket_metaclass(type):
@@ -138,4 +138,4 @@ class StreamSocket(SimpleSocket):
 if conf.L3socket is None:
     conf.L3socket = L3RawSocket
 
-import sendrecv
+import scapy.sendrecv as sendrecv

@@ -14,23 +14,24 @@ import socket,struct
 
 def inet_pton(af, addr):
     """Convert an IP address from text representation into binary form"""
+    print('hello')
     if af == socket.AF_INET:
         return inet_aton(addr)
     elif af == socket.AF_INET6:
         # IPv6: The use of "::" indicates one or more groups of 16 bits of zeros.
         # We deal with this form of wildcard using a special marker. 
-        JOKER = "*"
-        while "::" in addr:
-            addr = addr.replace("::", ":" + JOKER + ":")
+        JOKER = b"*"
+        while b"::" in addr:
+            addr = addr.replace(b"::", b":" + JOKER + b":")
         joker_pos = None 
         
         # The last part of an IPv6 address can be an IPv4 address
         ipv4_addr = None
-        if "." in addr:
-            ipv4_addr = addr.split(":")[-1]
+        if b"." in addr:
+            ipv4_addr = addr.split(b":")[-1]
            
-        result = ""
-        parts = addr.split(":")
+        result = b""
+        parts = addr.split(b":")
         for part in parts:
             if part == JOKER:
                 # Wildcard is only allowed once
@@ -44,13 +45,13 @@ def inet_pton(af, addr):
             else:
                 # Each part must be 16bit. Add missing zeroes before decoding. 
                 try:
-                    result += part.rjust(4, "0").decode("hex")
+                    result += part.rjust(4, b"0").decode("hex")
                 except TypeError:
                     raise Exception("Illegal syntax for IP address")
                     
         # If there's a wildcard, fill up with zeros to reach 128bit (16 bytes) 
         if JOKER in addr:
-            result = (result[:joker_pos] + "\x00" * (16 - len(result))
+            result = (result[:joker_pos] + b"\x00" * (16 - len(result))
                       + result[joker_pos:])
     
         if len(result) != 16:
@@ -76,14 +77,14 @@ def inet_ntop(af, addr):
             except TypeError:
                 raise Exception("Illegal syntax for IP address")
             parts.append(hexstr.lstrip("0").lower())
-        result = ":".join(parts)
-        while ":::" in result:
-            result = result.replace(":::", "::")
+        result = b":".join(parts)
+        while b":::" in result:
+            result = result.replace(b":::", b"::")
         # Leaving out leading and trailing zeros is only allowed with ::
-        if result.endswith(":") and not result.endswith("::"):
-            result = result + "0"
-        if result.startswith(":") and not result.startswith("::"):
-            result = "0" + result
+        if result.endswith(b":") and not result.endswith(b"::"):
+            result = result + b"0"
+        if result.startswith(b":") and not result.startswith(b"::"):
+            result = b"0" + result
         return result
     else:
         raise Exception("Address family not supported yet")        

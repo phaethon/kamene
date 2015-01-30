@@ -17,9 +17,9 @@ Routing and network interface handling for IPv6.
 #############################################################################
 
 import socket
-from config import conf
-from utils6 import *
-from arch import *
+from .config import conf
+from .utils6 import *
+from .arch import *
 
 
 class Route6:
@@ -39,15 +39,15 @@ class Route6:
         # TODO : At the moment, resync will drop existing Teredo routes
         #        if any. Change that ...
         self.invalidate_cache()
-	self.routes = read_routes6()
-	if self.routes == []:
-	     log_loading.info("No IPv6 support in kernel")
+        self.routes = read_routes6()
+        if self.routes == []:
+             log_loading.info("No IPv6 support in kernel")
         
     def __repr__(self):
         rtlst = [('Destination', 'Next Hop', "iface", "src candidates")]
 
         for net,msk,gw,iface,cset in self.routes:
-	    rtlst.append(('%s/%i'% (net,msk), gw, iface, ", ".join(cset)))
+            rtlst.append(('%s/%i'% (net,msk), gw, iface, ", ".join(cset)))
 
         colwidth = map(lambda x: max(map(lambda y: len(y), x)), apply(zip, rtlst))
         fmt = "  ".join(map(lambda x: "%%-%ds"%x, colwidth))
@@ -63,11 +63,11 @@ class Route6:
     def make_route(self, dst, gw=None, dev=None):
         """Internal function : create a route for 'dst' via 'gw'.
         """
-        prefix, plen = (dst.split("/")+["128"])[:2]
+        prefix, plen = (dst.split(b"/")+[b"128"])[:2]
         plen = int(plen)
 
         if gw is None:
-            gw = "::"
+            gw = b"::"
         if dev is None:
             dev, ifaddr, x = self.route(gw)
         else:
@@ -96,8 +96,8 @@ class Route6:
         delt(dst="2001:db8:cafe:f000::/56") 
         delt(dst="2001:db8:cafe:f000::/56", gw="2001:db8:deca::1") 
         """
-        tmp = dst+"/128"
-        dst, plen = tmp.split('/')[:2]
+        tmp = dst+b"/128"
+        dst, plen = tmp.split(b'/')[:2]
         dst = in6_ptop(dst)
         plen = int(plen)
         l = filter(lambda x: in6_ptop(x[0]) == dst and x[1] == plen, self.routes)
@@ -114,7 +114,7 @@ class Route6:
             del(self.routes[i])
         
     def ifchange(self, iff, addr):
-        the_addr, the_plen = (addr.split("/")+["128"])[:2]
+        the_addr, the_plen = (addr.split(b"/")+[b"128"])[:2]
         the_plen = int(the_plen)
 
         naddr = inet_pton(socket.AF_INET6, the_addr)
@@ -125,7 +125,7 @@ class Route6:
             net,plen,gw,iface,addr = self.routes[i]
             if iface != iff:
                 continue
-            if gw == '::':
+            if gw == b'::':
                 self.routes[i] = (the_net,the_plen,gw,iface,the_addr)
             else:
                 self.routes[i] = (net,the_plen,gw,iface,the_addr)
@@ -155,14 +155,14 @@ class Route6:
             prefix length value can be omitted. In that case, a value of 128
             will be used.
         """
-        addr, plen = (addr.split("/")+["128"])[:2]
+        addr, plen = (addr.split(b"/")+[b"128"])[:2]
         addr = in6_ptop(addr)
         plen = int(plen)
         naddr = inet_pton(socket.AF_INET6, addr)
         nmask = in6_cidr2mask(plen)
         prefix = inet_ntop(socket.AF_INET6, in6_and(nmask,naddr))
         self.invalidate_cache()
-        self.routes.append((prefix,plen,'::',iff,[addr]))
+        self.routes.append((prefix,plen,b'::',iff,[addr]))
 
     def route(self, dst, dev=None):
         """
@@ -180,17 +180,17 @@ class Route6:
         is performed to limit search to route associated to that interface.
         """
         # Transform "2001:db8:cafe:*::1-5:0/120" to one IPv6 address of the set
-        dst = dst.split("/")[0]
+        dst = dst.split(b"/")[0]
         savedst = dst # In case following inet_pton() fails 
-        dst = dst.replace("*","0")
-        l = dst.find("-")
+        dst = dst.replace(b"*",b"0")
+        l = dst.find(b"-")
         while l >= 0:
-            m = (dst[l:]+":").find(":")
+            m = (dst[l:]+b":").find(b":")
             dst = dst[:l]+dst[l+m:]
-            l = dst.find("-")
+            l = dst.find(b"-")
             
         try:
-            inet_pton(socket.AF_INET6, dst)
+            inet_pton(socket.AF_INET6, dst.decode('utf-8'))
         except socket.error:
             dst = socket.getaddrinfo(savedst, None, socket.AF_INET6)[0][-1][0]
             # TODO : Check if name resolution went well
@@ -270,7 +270,7 @@ class Route6:
 
 conf.route6 = Route6()
 
-_res = conf.route6.route("::/0")
+_res = conf.route6.route(b"::/0")
 if _res:
     iff, gw, addr = _res
     conf.iface6 = iff

@@ -17,9 +17,9 @@ import warnings
 warnings.filterwarnings("ignore","tempnam",RuntimeWarning, __name__)
 
 from .config import conf
-from data import MTU
-from error import log_runtime,log_loading,log_interactive, Scapy_Exception
-from base_classes import BasePacketList
+from .data import MTU
+from .error import log_runtime,log_loading,log_interactive, Scapy_Exception
+from .base_classes import BasePacketList
 
 WINDOWS=sys.platform.startswith("win32")
 
@@ -388,13 +388,15 @@ class EnumElement:
         return self._key
     def __eq__(self, other):
         return self._value == int(other)
+    def __hash__(self):
+        return self._value
 
 
 class Enum_metaclass(type):
     element_class = EnumElement
     def __new__(cls, name, bases, dct):
         rdict={}
-        for k,v in dct.iteritems():
+        for k,v in dct.items():
             if type(v) is int:
                 v = cls.element_class(k,v)
                 dct[k] = v
@@ -439,7 +441,7 @@ def corrupt_bytes(s, p=0.01, n=None):
     l = len(s)
     if n is None:
         n = max(1,int(l*p))
-    for i in random.sample(xrange(l), n):
+    for i in random.sample(range(l), n):
         s[i] = (s[i]+random.randint(1,255))%256
     return s.tostring()
 
@@ -450,7 +452,7 @@ def corrupt_bits(s, p=0.01, n=None):
     l = len(s)*8
     if n is None:
         n = max(1,int(l*p))
-    for i in random.sample(xrange(l), n):
+    for i in random.sample(range(l), n):
         s[i/8] ^= 1 << (i%8)
     return s.tostring()
 

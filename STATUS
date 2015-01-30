@@ -1,3 +1,7 @@
+'python3 setup.py install' executes without errors, but it does not run yet.
+There is a lot of str<>bytes conversions needed.
+
+
 Implementad changes in all files:
 - updating print to function form
 - replaced raise e, v -> raise e(v) (PEP3109)
@@ -6,6 +10,14 @@ Implementad changes in all files:
 - ditto for lambda
 - removed L from long integers
 - changed backticks to repr()
+- changed xrange to range
+
+Working:
+Nothing yet
+
+Not working:
+Everything
+Unresolved import issue in plist.py
 
 Converted, verified and tested files:
 

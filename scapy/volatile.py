@@ -8,8 +8,8 @@ Fields that hold random numbers.
 """
 
 import random,time,math
-from base_classes import Net
-from utils import corrupt_bits,corrupt_bytes
+from .base_classes import Net
+from .utils import corrupt_bits,corrupt_bytes
 
 ####################
 ## Random numbers ##
@@ -47,7 +47,7 @@ class RandomEnumeration:
         while True:
             if self.turns == 0 or (self.i == 0 and self.renewkeys):
                 self.cnt_key = self.rnd.randint(0,2**self.n-1)
-                self.sbox = [self.rnd.randint(0,self.fsmask) for k in xrange(self.sbox_size)]
+                self.sbox = [self.rnd.randint(0,self.fsmask) for k in range(self.sbox_size)]
             self.turns += 1
             while self.i < 2**self.n:
                 ct = self.i^self.cnt_key
@@ -313,14 +313,14 @@ class RandOID(RandString):
             return "<%s [%s]>" % (self.__class__.__name__, self.ori_fmt)
     def _fix(self):
         if self.fmt is None:
-            return ".".join(map(str, [self.idnum for i in xrange(1+self.depth)]))
+            return ".".join(map(str, [self.idnum for i in range(1+self.depth)]))
         else:
             oid = []
             for i in self.fmt:
                 if i == "*":
                     oid.append(str(self.idnum))
                 elif i == "**":
-                    oid += map(str, [self.idnum for i in xrange(1+self.depth)])
+                    oid += map(str, [self.idnum for i in range(1+self.depth)])
                 elif type(i) is tuple:
                     oid.append(str(random.randrange(*i)))
                 else:
@@ -354,7 +354,7 @@ class RandRegExp(RandField):
                 s = s[:p-1]+rng+s[p+1:]
         res = m+s
         if invert:
-            res = "".join([chr(x) for x in xrange(256) if chr(x) not in res])
+            res = "".join([chr(x) for x in range(256) if chr(x) not in res])
         return res
 
     @staticmethod
@@ -471,7 +471,7 @@ class RandRegExp(RandField):
                 if random.randint(0,1):
                     current.pop()
             elif c == '.':
-                current.append(RandChoice(*[chr(x) for x in xrange(256)]))
+                current.append(RandChoice(*[chr(x) for x in range(256)]))
             elif c == '$' or c == '^':
                 pass
             else:

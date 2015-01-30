@@ -169,7 +169,7 @@ class Dot11(Packet):
     def guess_payload_class(self, payload):
         if self.type == 0x02 and (self.subtype >= 0x08 and self.subtype <=0xF and self.subtype != 0xD):
             return Dot11QoS
-	elif self.FCfield & 0x40:
+        elif self.FCfield & 0x40:
             return Dot11WEP
         else:
             return Packet.guess_payload_class(self, payload)

@@ -110,9 +110,9 @@ def getmacbyip6(ip6, chainCC=0):
 
     if res is not None:
         if ICMPv6NDOptDstLLAddr in res:
-	  mac = res[ICMPv6NDOptDstLLAddr].lladdr
-	else:
-	  mac = res.src
+            mac = res[ICMPv6NDOptDstLLAddr].lladdr
+    else:
+        mac = res.src
         conf.netcache.in6_neighbor[ip6] = mac
         return mac
 
@@ -146,14 +146,14 @@ class Net6(Gen): # syntax ex. fec0::/126
         def m8(i):
             if i % 8 == 0:
                 return i
-        tuple = filter(lambda x: m8(x), xrange(8, 129))
+        tuple = filter(lambda x: m8(x), range(8, 129))
 
         a = in6_and(self.net, self.mask)
         tmp = map(lambda x:  x, struct.unpack('16B', a))
    
         def parse_digit(a, netmask):
             netmask = min(8,max(netmask,0))
-            a = (int(a) & (0xffL<<netmask),(int(a) | (0xffL>>(8-netmask)))+1)
+            a = (int(a) & (0xff<<netmask),(int(a) | (0xff>>(8-netmask)))+1)
             return a
         self.parsed = map(lambda x,y: parse_digit(x,y), tmp, map(lambda x,nm=self.plen: x-nm, tuple))
 
@@ -166,7 +166,7 @@ class Net6(Gen): # syntax ex. fec0::/126
                 return l
             else:
                 ll = []
-                for i in xrange(*self.parsed[n]):
+                for i in range(*self.parsed[n]):
                     for y in l:
                         ll += [y+sep+'%.2x'%i]
                 return rec(n+1, ll)
@@ -1485,8 +1485,8 @@ class ICMPv6NDOptPrefixInfo(_ICMPv6NDGuessPayload, Packet):
                     BitField("A",1,1),
                     BitField("R",0,1),
                     BitField("res1",0,5),
-                    XIntField("validlifetime",0xffffffffL),
-                    XIntField("preferredlifetime",0xffffffffL),
+                    XIntField("validlifetime",0xffffffff),
+                    XIntField("preferredlifetime",0xffffffff),
                     XIntField("res2",0x00000000),
                     IP6Field("prefix","::") ]
     def mysummary(self):                        
@@ -2150,9 +2150,11 @@ class NIReplyDataField(StrField):
             ttl,dnsstr = tmp
             return s+ struct.pack("!I", ttl) + dnsstr
         elif t == 3:
-            return s + "".join(map(lambda (x,y): struct.pack("!I", x)+inet_pton(socket.AF_INET6, y), tmp))
+            #return s + "".join(map(lambda (x,y): struct.pack("!I", x)+inet_pton(socket.AF_INET6, y), tmp))
+            return s + "".join(map(lambda a: struct.pack("!I", a[0])+inet_pton(socket.AF_INET6, a[1]), tmp))
         elif t == 4:
-            return s + "".join(map(lambda (x,y): struct.pack("!I", x)+inet_pton(socket.AF_INET, y), tmp))
+            #return s + "".join(map(lambda (x,y): struct.pack("!I", x)+inet_pton(socket.AF_INET, y), tmp))
+            return s + "".join(map(lambda a: struct.pack("!I", a[0])+inet_pton(socket.AF_INET, a[1]), tmp))
         else:
             return s + tmp
                 
@@ -2205,7 +2207,8 @@ class NIReplyDataField(StrField):
                 l = dnsrepr2names(l)
                 return "ttl:%d %s" % (ttl, ", ".join(l))
             elif t == 3 or t == 4:
-                return "[ %s ]" % (", ".join(map(lambda (x,y): "(%d, %s)" % (x, y), val)))
+                #return "[ %s ]" % (", ".join(map(lambda (x,y): "(%d, %s)" % (x, y), val)))
+                return "[ %s ]" % (", ".join(map(lambda a: "(%d, %s)" % a, val)))
             return repr(val)
         return repr(x) # XXX should not happen
 
@@ -2868,9 +2871,10 @@ class  AS_resolver6(AS_resolver_riswhois):
 
 class TracerouteResult6(TracerouteResult):
     def show(self):
-        return self.make_table(lambda (s,r): (s.sprintf("%-42s,IPv6.dst%:{TCP:tcp%TCP.dport%}{UDP:udp%UDP.dport%}{ICMPv6EchoRequest:IER}"), # TODO: ICMPv6 !
-                                              s.hlim,
-                                              r.sprintf("%-42s,IPv6.src% {TCP:%TCP.flags%}"+
+        #return self.make_table(lambda (s,r): (s.sprintf("%-42s,IPv6.dst%:{TCP:tcp%TCP.dport%}{UDP:udp%UDP.dport%}{ICMPv6EchoRequest:IER}"), # TODO: ICMPv6 !
+        return self.make_table(lambda a: (a[0].sprintf("%-42s,IPv6.dst%:{TCP:tcp%TCP.dport%}{UDP:udp%UDP.dport%}{ICMPv6EchoRequest:IER}"), # TODO: ICMPv6 !
+                                              a[0].hlim,
+                                              a[1].sprintf("%-42s,IPv6.src% {TCP:%TCP.flags%}"+
                                                         "{ICMPv6DestUnreach:%ir,type%}{ICMPv6PacketTooBig:%ir,type%}"+
                                                         "{ICMPv6TimeExceeded:%ir,type%}{ICMPv6ParamProblem:%ir,type%}"+
                                                         "{ICMPv6EchoReply:%ir,type%}")))

@@ -7,10 +7,10 @@
 Classes that implement ASN.1 data structures.
 """
 
-from asn1.asn1 import *
-from asn1.ber import *
-from volatile import *
-from base_classes import BasePacket
+from scapy.asn1.asn1 import *
+from scapy.asn1.ber import *
+from scapy.volatile import *
+from scapy.base_classes import BasePacket
 
 
 #####################
@@ -81,7 +81,7 @@ class ASN1F_field(ASN1F_element):
             return x.copy()
         if type(x) is list:
             x = x[:]
-            for i in xrange(len(x)):
+            for i in range(len(x)):
                 if isinstance(x[i], BasePacket):
                     x[i] = x[i].copy()
         return x
@@ -136,7 +136,7 @@ class ASN1F_enum_INTEGER(ASN1F_INTEGER):
         i2s = self.i2s = {}
         s2i = self.s2i = {}
         if type(enum) is list:
-            keys = xrange(len(enum))
+            keys = range(len(enum))
         else:
             keys = enum.keys()
         if filter(lambda x: type(x) is str, keys):
@@ -327,4 +327,4 @@ class ASN1F_CHOICE(ASN1F_PACKET):
             
     
 # This import must come in last to avoid problems with cyclic dependencies
-import packet
+import scapy.packet

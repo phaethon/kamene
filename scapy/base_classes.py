@@ -12,7 +12,7 @@ Generators and packet meta classes.
 ################
 
 import re,random,socket
-from . import config
+import scapy.config
 from . import error
 
 class Gen(object):
@@ -80,10 +80,10 @@ class Net(Gen):
 
                                                                                                
     def __iter__(self):
-        for d in xrange(*self.parsed[3]):
-            for c in xrange(*self.parsed[2]):
-                for b in xrange(*self.parsed[1]):
-                    for a in xrange(*self.parsed[0]):
+        for d in range(*self.parsed[3]):
+            for c in range(*self.parsed[2]):
+                for b in range(*self.parsed[1]):
+                    for a in range(*self.parsed[0]):
                         yield "%i.%i.%i.%i" % (a,b,c,d)
     def choice(self):
         ip = []
@@ -182,7 +182,7 @@ class Packet_metaclass(type):
             newcls.register_variant()
         for f in newcls.fields_desc:                
             f.register_owner(newcls)
-        config.conf.layers.register(newcls)
+        scapy.config.conf.layers.register(newcls)
         return newcls
 
     def __getattr__(self, attr):

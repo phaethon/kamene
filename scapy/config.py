@@ -9,8 +9,8 @@ Implementation for of the configuration object.
 
 import os,time,socket,sys
 from .data import *
-from . import base_classes
-from . import themes
+import scapy.base_classes
+import scapy.themes
 from .error import log_scapy
 
 ############
@@ -351,7 +351,7 @@ extensions_paths: path or list of paths where extensions are to be looked for
     route6 = None # Filed by route6.py
     auto_fragment = 1
     debug_dissector = 0
-    color_theme = Interceptor("color_theme", themes.NoTheme(), _prompt_changer)
+    color_theme = Interceptor("color_theme", scapy.themes.NoTheme(), _prompt_changer)
     warning_threshold = 5
     prog = ProgPath()
     resolve = Resolve()

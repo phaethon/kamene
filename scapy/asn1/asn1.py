@@ -68,8 +68,8 @@ class ASN1Codec(EnumElement):
 class ASN1_Codecs_metaclass(Enum_metaclass):
     element_class = ASN1Codec
 
-class ASN1_Codecs:
-    __metaclass__ = ASN1_Codecs_metaclass
+class ASN1_Codecs(metaclass = ASN1_Codecs_metaclass):
+    #__metaclass__ = ASN1_Codecs_metaclass
     BER = 1
     DER = 2
     PER = 3

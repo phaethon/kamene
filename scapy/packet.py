@@ -9,12 +9,12 @@ Packet class. Binding mechanism. fuzz() method.
 
 import time,itertools,os
 import copy
-from fields import StrField,ConditionalField,Emph,PacketListField
-from config import conf
-from base_classes import BasePacket,Gen,SetGen,Packet_metaclass,NewDefaultValues
-from volatile import VolatileValue
-from utils import import_hexcap,tex_escape,colgen,get_temp_file
-from error import Scapy_Exception,log_runtime
+from .fields import StrField,ConditionalField,Emph,PacketListField
+from .config import conf
+from .base_classes import BasePacket,Gen,SetGen,Packet_metaclass,NewDefaultValues
+from .volatile import VolatileValue
+from .utils import import_hexcap,tex_escape,colgen,get_temp_file
+from .error import Scapy_Exception,log_runtime
 import subprocess
 
 try:

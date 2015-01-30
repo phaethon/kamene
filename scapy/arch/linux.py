@@ -67,7 +67,7 @@ RTF_REJECT = 0x0200
 
 
 
-LOOPBACK_NAME="lo"
+LOOPBACK_NAME=b"lo"
 
 with os.popen("tcpdump -V 2> /dev/null") as _f:
     if _f.close() >> 8 == 0x7f:
@@ -150,7 +150,7 @@ def set_promisc(s,iff,val=1):
 
 def read_routes():
     try:
-        f=open("/proc/net/route","r")
+        f=open("/proc/net/route","rb")
     except IOError:
         warning("Can't open /proc/net/route !")
         return []
@@ -185,9 +185,9 @@ def read_routes():
             else:
                 warning("Interface %s: unkown address family (%i)"%(iff, addrfamily))
                 continue
-        routes.append((socket.htonl(long(dst,16))&0xffffffff,
-                       socket.htonl(long(msk,16))&0xffffffff,
-                       scapy.utils.inet_ntoa(struct.pack("I",long(gw,16))),
+        routes.append((socket.htonl(int(dst,16))&0xffffffff,
+                       socket.htonl(int(msk,16))&0xffffffff,
+                       scapy.utils.inet_ntoa(struct.pack("I",int(gw,16))),
                        iff, ifaddr))
     
     f.close()
@@ -215,14 +215,14 @@ def in6_getifaddr():
     for i in l:
         # addr, index, plen, scope, flags, ifname
         tmp = i.split()
-        addr = struct.unpack('4s4s4s4s4s4s4s4s', tmp[0])
-        addr = scapy.utils6.in6_ptop(':'.join(addr))
+        addr = struct.unpack('4s4s4s4s4s4s4s4s', bytes(tmp[0], 'utf-8'))
+        addr = scapy.utils6.in6_ptop(b':'.join(addr))
         ret.append((addr, int(tmp[3], 16), tmp[5])) # (addr, scope, iface)
     return ret
 
 def read_routes6():
     try:
-        f = open("/proc/net/ipv6_route","r")
+        f = open("/proc/net/ipv6_route","rb")
     except IOError as err:
         return []
     # 1. destination network
@@ -238,7 +238,7 @@ def read_routes6():
     routes = []
     def proc2r(p):
         ret = struct.unpack('4s4s4s4s4s4s4s4s', p)
-        ret = ':'.join(ret)
+        ret = b':'.join(ret)
         return scapy.utils6.in6_ptop(ret)
     
     lifaddr = in6_getifaddr() 
@@ -274,7 +274,7 @@ def read_routes6():
 
 def get_if(iff,cmd):
     s=socket.socket()
-    ifreq = ioctl(s, cmd, struct.pack("16s16x",iff))
+    ifreq = ioctl(s, cmd, struct.pack("16s16x",bytes(iff,'utf-8')))
     s.close()
     return ifreq
 
