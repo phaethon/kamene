@@ -14,7 +14,7 @@ log = logging.getLogger("scapy.loading")
 
 def _import_star(m):
     mod = __import__(m, globals(), locals())
-    for k,v in mod.__dict__.iteritems():
+    for k,v in mod.__dict__.items():
         globals()[k] = v
 
 for _l in conf.load_layers:

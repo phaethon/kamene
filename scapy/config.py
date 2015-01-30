@@ -26,7 +26,7 @@ class ConfClass(object):
         s=""
         keys = self.__class__.__dict__.copy()
         keys.update(self.__dict__)
-        keys = keys.keys()
+        keys = list(keys.keys())
         keys.sort()
         for i in keys:
             if i[0] != "_":
@@ -124,13 +124,13 @@ class Num2Layer:
     
     def __repr__(self):
         lst = []
-        for num,layer in self.num2layer.iteritems():
+        for num,layer in self.num2layer.items():
             if layer in self.layer2num and self.layer2num[layer] == num:
                 dir = "<->"
             else:
                 dir = " ->"
             lst.append((num,"%#6x %s %-20s (%s)" % (num,dir,layer.__name__,layer.name)))
-        for layer,num in self.layer2num.iteritems():
+        for layer,num in self.layer2num.items():
             if num not in self.num2layer or self.num2layer[num] != layer:
                 lst.append((num,"%#6x <-  %-20s (%s)" % (num,layer.__name__,layer.name)))
         lst.sort()
@@ -188,11 +188,11 @@ class CacheInstance(dict):
     def update(self, other):
         dict.update(self, other)
         self._timetable.update(other._timetable)
-    def iteritems(self):
+    def items(self):
         if self.timeout is None:
-            return dict.iteritems(self)
+            return dict.items(self)
         t0=time.time()
-        return ((k,v) for (k,v) in dict.iteritems(self) if t0-self._timetable[k] < self.timeout) 
+        return ((k,v) for (k,v) in dict.items(self) if t0-self._timetable[k] < self.timeout) 
     def iterkeys(self):
         if self.timeout is None:
             return dict.iterkeys(self)
@@ -204,12 +204,12 @@ class CacheInstance(dict):
         if self.timeout is None:
             return dict.itervalues(self)
         t0=time.time()
-        return (v for (k,v) in dict.iteritems(self) if t0-self._timetable[k] < self.timeout)
+        return (v for (k,v) in dict.items(self) if t0-self._timetable[k] < self.timeout)
     def items(self):
         if self.timeout is None:
             return dict.items(self)
         t0=time.time()
-        return [(k,v) for (k,v) in dict.iteritems(self) if t0-self._timetable[k] < self.timeout]
+        return [(k,v) for (k,v) in dict.items(self) if t0-self._timetable[k] < self.timeout]
     def keys(self):
         if self.timeout is None:
             return dict.keys(self)
@@ -219,7 +219,7 @@ class CacheInstance(dict):
         if self.timeout is None:
             return dict.values(self)
         t0=time.time()
-        return [v for (k,v) in dict.iteritems(self) if t0-self._timetable[k] < self.timeout]
+        return [v for (k,v) in dict.items(self) if t0-self._timetable[k] < self.timeout]
     def __len__(self):
         if self.timeout is None:
             return dict.__len__(self)
@@ -231,7 +231,7 @@ class CacheInstance(dict):
         if self:
             mk = max(len(k) for k in self.iterkeys())
             fmt = "%%-%is %%s" % (mk+1)
-            for item in self.iteritems():
+            for item in self.items():
                 s.append(fmt % item)
         return "\n".join(s)
             

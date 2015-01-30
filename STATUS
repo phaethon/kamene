@@ -12,6 +12,7 @@ Implementad changes in all files:
 - changed backticks to repr()
 - changed xrange to range
 - converted tabs to spaces, some files had mix of them
+- replaced iteritems to items
 
 Working:
 Can be installed with 'python3 setup.py install'

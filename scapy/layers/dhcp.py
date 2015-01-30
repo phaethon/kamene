@@ -140,7 +140,7 @@ DHCPOptions = {
 
 DHCPRevOptions = {}
 
-for k,v in DHCPOptions.iteritems():
+for k,v in DHCPOptions.items():
     if type(v) is str:
         n = v
         v = None

@@ -108,12 +108,12 @@ class ASN1_Class_metaclass(Enum_metaclass):
     element_class = ASN1Tag
     def __new__(cls, name, bases, dct): # XXX factorise a bit with Enum_metaclass.__new__()
         for b in bases:
-            for k,v in b.__dict__.iteritems():
+            for k,v in b.__dict__.items():
                 if k not in dct and isinstance(v,ASN1Tag):
                     dct[k] = v.clone()
 
         rdict = {}
-        for k,v in dct.iteritems():
+        for k,v in dct.items():
             if type(v) is int:
                 v = ASN1Tag(k,v) 
                 dct[k] = v

@@ -38,7 +38,7 @@ class Message:
         self.__dict__.update(args)
     def __repr__(self):
         return "<Message %s>" % " ".join("%s=%r"%(k,v)
-                                         for (k,v) in self.__dict__.iteritems()
+                                         for (k,v) in self.__dict__.items()
                                          if not k.startswith("_"))
 
 class _instance_state:
@@ -226,7 +226,7 @@ class Automaton_metaclass(type):
         while classes:
             c = classes.pop(0) # order is important to avoid breaking method overloading
             classes += list(c.__bases__)
-            for k,v in c.__dict__.iteritems():
+            for k,v in c.__dict__.items():
                 if k not in members:
                     members[k] = v
 
@@ -271,7 +271,7 @@ class Automaton_metaclass(type):
                                  cls.recv_conditions.itervalues(),
                                  cls.ioevents.itervalues()):
             v.sort(lambda c1,c2: cmp(c1.atmt_prio,c2.atmt_prio))
-        for condname,actlst in cls.actions.iteritems():
+        for condname,actlst in cls.actions.items():
             actlst.sort(lambda c1,c2: cmp(c1.atmt_cond[condname], c2.atmt_cond[condname]))
 
         for ioev in cls.iosupersockets:
@@ -308,7 +308,7 @@ class Automaton_metaclass(type):
                         for x in self.actions[f.atmt_condname]:
                             l += "\\l>[%s]" % x.func_name
                         s += '\t"%s" -> "%s" [label="%s", color=%s];\n' % (k,n,l,c)
-        for k,v in self.timeout.iteritems():
+        for k,v in self.timeout.items():
             for t,f in v:
                 if f is None:
                     continue

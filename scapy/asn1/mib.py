@@ -135,9 +135,9 @@ def load_mib(filenames):
                 mib_register(ident, oid, the_mib, unresolved)
 
     newmib = MIBDict(_name="MIB")
-    for k,o in the_mib.iteritems():
+    for k,o in the_mib.items():
         newmib[k]=".".join(o)
-    for k,o in unresolved.iteritems():
+    for k,o in unresolved.items():
         newmib[k]=".".join(o)
 
     conf.mib=newmib
