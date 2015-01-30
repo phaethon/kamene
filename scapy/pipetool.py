@@ -9,13 +9,13 @@ from __future__ import with_statement
 
 import scapy.utils
 from scapy.config import conf
-import os,thread,select
+import os,_thread,select
 import subprocess
 import itertools
 import collections
 import time
 from scapy.error import log_interactive,warning
-import Queue
+from queue import Queue
 
 class PipeEngine:
     pipes = {}
@@ -40,8 +40,8 @@ class PipeEngine:
         self.active_drains = set()
         self.active_sinks = set()
         self._add_pipes(*pipes)
-        self.thread_lock = thread.allocate_lock()
-        self.command_lock = thread.allocate_lock()
+        self.thread_lock = _thread.allocate_lock()
+        self.command_lock = _thread.allocate_lock()
         self.__fdr,self.__fdw = os.pipe()
         self.threadid = None
     def __getattr__(self, attr):
@@ -131,7 +131,7 @@ class PipeEngine:
 
     def start(self):
         if self.thread_lock.acquire(0):
-            self.threadid = thread.start_new_thread(self.run,())
+            self.threadid = _thread.start_new_thread(self.run,())
         else:
             warning("Pipe engine already running")
     def wait_and_stop(self):
@@ -338,7 +338,7 @@ class ThreadGenSource(AutoSource):
         pass
     def start(self):
         self.RUN = True
-        thread.start_new_thread(self.generate,())
+        _thread.start_new_thread(self.generate,())
     def stop(self):
         self.RUN = False
 

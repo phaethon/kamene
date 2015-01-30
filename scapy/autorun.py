@@ -8,10 +8,10 @@ Run commands when the Scapy interpreter starts.
 """
 
 import code,sys
-from config import conf
-from themes import *
-from error import Scapy_Exception
-from utils import tex_escape
+from .config import conf
+from .themes import *
+from .error import Scapy_Exception
+from .utils import tex_escape
 
 
 #########################

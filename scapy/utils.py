@@ -255,7 +255,7 @@ try:
 except socket.error:
     def inet_aton(x):
         if x == "255.255.255.255":
-            return "\xff"*4
+            return b"\xff"*4
         else:
             return socket.inet_aton(x)
 else:

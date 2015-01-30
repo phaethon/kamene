@@ -640,8 +640,8 @@ def in6_getnsmac(a): # return multicast Ethernet address associated with multica
     """
 
     a = struct.unpack('16B', a)[-4:]
-    mac = b'33:33:'
-    mac += b':'.join(map(lambda x: b'%.2x' %x, a))
+    mac = '33:33:'
+    mac += (b':'.join(map(lambda x: b'%.2x' %x, a))).decode('utf-8')
     return mac
 
 def in6_getha(prefix): 
@@ -650,7 +650,7 @@ def in6_getha(prefix):
     subnet.
     """
     r = in6_and(inet_pton(socket.AF_INET6, prefix), in6_cidr2mask(64))
-    r = in6_or(r, inet_pton(socket.AF_INET6, b'::fdff:ffff:ffff:fffe'))
+    r = in6_or(r, inet_pton(socket.AF_INET6, '::fdff:ffff:ffff:fffe'))
     return inet_ntop(socket.AF_INET6, r)
 
 def in6_ptop(s): 
@@ -658,15 +658,15 @@ def in6_ptop(s):
     Normalizes IPv6 addresses provided in printable format, returning the 
     same address in printable format. (2001:0db8:0:0::1 -> 2001:db8::1)
     """
-    return inet_ntop(socket.AF_INET6, inet_pton(socket.AF_INET6, s.decode('utf-8')))
+    return inet_ntop(socket.AF_INET6, inet_pton(socket.AF_INET6, s))
 
 def in6_isincluded(addr, prefix, plen):
     """
     Returns True when 'addr' belongs to prefix/plen. False otherwise.
     """
-    temp = inet_pton(socket.AF_INET6, addr.decode('utf-8'))
+    temp = inet_pton(socket.AF_INET6, addr)
     pref = in6_cidr2mask(plen)
-    zero = inet_pton(socket.AF_INET6, prefix.decode('utf-8'))
+    zero = inet_pton(socket.AF_INET6, prefix)
     return zero == in6_and(temp, pref)
 
 def in6_isdocaddr(s):
@@ -675,14 +675,14 @@ def in6_isdocaddr(s):
     2001:db8::/32 address space reserved for documentation (as defined 
     in RFC 3849).
     """
-    return in6_isincluded(s, b'2001:db8::', 32)
+    return in6_isincluded(s, '2001:db8::', 32)
 
 def in6_islladdr(s):
     """
     Returns True if provided address in printable format belongs to
     _allocated_ link-local unicast address space (fe80::/10)
     """
-    return in6_isincluded(s, b'fe80::', 10)
+    return in6_isincluded(s, 'fe80::', 10)
 
 def in6_issladdr(s):
     """
@@ -691,14 +691,14 @@ def in6_issladdr(s):
     been deprecated, address being now reserved by IANA. Function 
     will remain for historic reasons.
     """
-    return in6_isincluded(s, b'fec0::', 10)
+    return in6_isincluded(s, 'fec0::', 10)
 
 def in6_isuladdr(s):
     """
     Returns True if provided address in printable format belongs to
     Unique local address space (fc00::/7).
     """
-    return in6_isincluded(s, b'fc00::', 7)
+    return in6_isincluded(s, 'fc00::', 7)
 
 # TODO : we should see the status of Unique Local addresses against
 #        global address space.
@@ -711,35 +711,35 @@ def in6_isgladdr(s):
     Unique Local addresses (FC00::/7) are not part of global address
     space, and won't match.
     """
-    return in6_isincluded(s, b'2000::', 3)
+    return in6_isincluded(s, '2000::', 3)
 
 def in6_ismaddr(s):
     """
     Returns True if provided address in printable format belongs to 
     allocated Multicast address space (ff00::/8).
     """
-    return in6_isincluded(s, b'ff00::', 8)
+    return in6_isincluded(s, 'ff00::', 8)
 
 def in6_ismnladdr(s):
     """
     Returns True if address belongs to node-local multicast address
     space (ff01::/16) as defined in RFC 
     """
-    return in6_isincluded(s, b'ff01::', 16)
+    return in6_isincluded(s, 'ff01::', 16)
 
 def in6_ismgladdr(s):
     """
     Returns True if address belongs to global multicast address
     space (ff0e::/16).
     """
-    return in6_isincluded(s, b'ff0e::', 16)
+    return in6_isincluded(s, 'ff0e::', 16)
 
 def in6_ismlladdr(s):
     """
     Returns True if address balongs to link-local multicast address
     space (ff02::/16)
     """
-    return in6_isincluded(s, b'ff02::', 16)
+    return in6_isincluded(s, 'ff02::', 16)
 
 def in6_ismsladdr(s):
     """
@@ -747,14 +747,14 @@ def in6_ismsladdr(s):
     space (ff05::/16). Site local address space has been deprecated.
     Function remains for historic reasons.
     """
-    return in6_isincluded(s, b'ff05::', 16)
+    return in6_isincluded(s, 'ff05::', 16)
 
 def in6_isaddrllallnodes(s):
     """
     Returns True if address is the link-local all-nodes multicast 
     address (ff02::1). 
     """
-    return (inet_pton(socket.AF_INET6, b"ff02::1") ==
+    return (inet_pton(socket.AF_INET6, "ff02::1") ==
             inet_pton(socket.AF_INET6, s))
 
 def in6_isaddrllallservers(s):
@@ -762,7 +762,7 @@ def in6_isaddrllallservers(s):
     Returns True if address is the link-local all-servers multicast 
     address (ff02::2). 
     """
-    return (inet_pton(socket.AF_INET6, b"ff02::2") ==
+    return (inet_pton(socket.AF_INET6, "ff02::2") ==
             inet_pton(socket.AF_INET6, s))
 
 def in6_getscope(addr):

@@ -235,7 +235,7 @@ class Route6:
 
         if res == []:
             warning("Found a route for IPv6 destination '%s', but no possible source address." % dst)
-            return (LOOPBACK_NAME, "::", "::") # XXX Linux specific
+            return (LOOPBACK_NAME, b"::", b"::") # XXX Linux specific
 
         # Symptom  : 2 routes with same weight (our weight is plen)
         # Solution : 

@@ -67,7 +67,7 @@ RTF_REJECT = 0x0200
 
 
 
-LOOPBACK_NAME=b"lo"
+LOOPBACK_NAME="lo"
 
 with os.popen("tcpdump -V 2> /dev/null") as _f:
     if _f.close() >> 8 == 0x7f:
@@ -99,6 +99,7 @@ def get_if_list():
     f.readline()
     for l in f:
         lst.append(l.split(":")[0].strip())
+    f.close()
     return lst
 def get_working_if():
     for i in get_if_list():
@@ -156,10 +157,10 @@ def read_routes():
         return []
     routes = []
     s=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    ifreq = ioctl(s, SIOCGIFADDR,struct.pack("16s16x",LOOPBACK_NAME))
+    ifreq = ioctl(s, SIOCGIFADDR,struct.pack("16s16x",LOOPBACK_NAME.encode('utf-8')))
     addrfamily = struct.unpack("h",ifreq[16:18])[0]
     if addrfamily == socket.AF_INET:
-        ifreq2 = ioctl(s, SIOCGIFNETMASK,struct.pack("16s16x",LOOPBACK_NAME))
+        ifreq2 = ioctl(s, SIOCGIFNETMASK,struct.pack("16s16x",LOOPBACK_NAME.encode('utf-8')))
         msk = socket.ntohl(struct.unpack("I",ifreq2[20:24])[0])
         dst = socket.ntohl(struct.unpack("I",ifreq[20:24])[0]) & msk
         ifaddr = scapy.utils.inet_ntoa(ifreq[20:24])
@@ -216,8 +217,9 @@ def in6_getifaddr():
         # addr, index, plen, scope, flags, ifname
         tmp = i.split()
         addr = struct.unpack('4s4s4s4s4s4s4s4s', bytes(tmp[0], 'utf-8'))
-        addr = scapy.utils6.in6_ptop(b':'.join(addr))
+        addr = scapy.utils6.in6_ptop(b':'.join(addr).decode('utf-8'))
         ret.append((addr, int(tmp[3], 16), tmp[5])) # (addr, scope, iface)
+    f.close()
     return ret
 
 def read_routes6():
@@ -238,7 +240,7 @@ def read_routes6():
     routes = []
     def proc2r(p):
         ret = struct.unpack('4s4s4s4s4s4s4s4s', p)
-        ret = b':'.join(ret)
+        ret = b':'.join(ret).decode('utf-8')
         return scapy.utils6.in6_ptop(ret)
     
     lifaddr = in6_getifaddr() 
@@ -257,9 +259,9 @@ def read_routes6():
 
         cset = [] # candidate set (possible source addresses)
         if dev == LOOPBACK_NAME:
-            if d == '::':
+            if d == b'::':
                 continue
-            cset = ['::1']
+            cset = [b'::1']
         else:
             devaddrs = filter(lambda x: x[2] == dev, lifaddr)
             cset = scapy.utils6.construct_source_candidate_set(d, dp, devaddrs, LOOPBACK_NAME)

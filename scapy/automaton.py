@@ -11,13 +11,13 @@ from __future__ import with_statement
 import types,itertools,time,os,sys,socket
 from select import select
 from collections import deque
-import thread
-from config import conf
-from utils import do_graph
-from error import log_interactive
-from plist import PacketList
-from data import MTU
-from supersocket import SuperSocket
+import _thread
+from .config import conf
+from .utils import do_graph
+from .error import log_interactive
+from .plist import PacketList
+from .data import MTU
+from .supersocket import SuperSocket
 
 class ObjectPipe:
     def __init__(self):
@@ -437,7 +437,7 @@ class Automaton:
     def __init__(self, *args, **kargs):
         external_fd = kargs.pop("external_fd",{})
         self.send_sock_class = kargs.pop("ll", conf.L3socket)
-        self.started = thread.allocate_lock()
+        self.started = _thread.allocate_lock()
         self.threadid = None
         self.breakpointed = None
         self.breakpoints = set()
@@ -507,12 +507,12 @@ class Automaton:
 
     def _do_start(self, *args, **kargs):
         
-        thread.start_new_thread(self._do_control, args, kargs)
+        _thread.start_new_thread(self._do_control, args, kargs)
 
 
     def _do_control(self, *args, **kargs):
         with self.started:
-            self.threadid = thread.get_ident()
+            self.threadid = _thread.get_ident()
 
             # Update default parameters
             a = args+self.init_args[len(args):]

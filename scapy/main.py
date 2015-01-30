@@ -276,7 +276,7 @@ def interact(mydict=None,argv=None,mybanner=None,loglevel=20):
 
     scapy_builtins = __import__("scapy.all",globals(),locals(),".").__dict__
     builtins.__dict__.update(scapy_builtins)
-    globkeys = scapy_builtins.keys()
+    globkeys = list(scapy_builtins.keys())
     globkeys.append("scapy_session")
     scapy_builtins=None # XXX replace with "with" statement
     if mydict is not None:

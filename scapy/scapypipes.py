@@ -3,8 +3,8 @@
 ## Copyright (C) Philippe Biondi <phil@secdev.org>
 ## This program is published under a GPLv2 license
 
-from pipetool import Source,Drain,Sink
-from config import conf
+from .pipetool import Source,Drain,Sink
+from .config import conf
 
 
 class SniffSource(Source):
