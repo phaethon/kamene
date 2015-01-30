@@ -1,6 +1,13 @@
-'python3 setup.py install' executes without errors, but it does not run yet.
-There is a lot of str<>bytes conversions needed.
+Working:
+Can be installed with 'python3 setup.py install'
+scapy prompt loads
 
+Working commands:
+- lsc()
+
+Not working:
+Unresolved import issue in plist.py affecting gnuplot
+layers/inet.py issue with replacing new.instancemethod
 
 Implementad changes in all files:
 - updating print to function form
@@ -13,13 +20,6 @@ Implementad changes in all files:
 - changed xrange to range
 - converted tabs to spaces, some files had mix of them
 - replaced iteritems to items
-
-Working:
-Can be installed with 'python3 setup.py install'
-
-Not working:
-Everything else
-Unresolved import issue in plist.py affecting gnuplot
 
 Converted, verified and tested files:
 

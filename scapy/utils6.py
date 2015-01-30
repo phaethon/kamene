@@ -71,14 +71,14 @@ def construct_source_candidate_set(addr, plen, laddr, loname):
         cset = filter(lambda x: x[1] == IPV6_ADDR_SITELOCAL, laddr)
     elif in6_ismaddr(addr):
         if in6_ismnladdr(addr):
-            cset = [(b'::1', 16, loname)]
+            cset = [('::1', 16, loname)]
         elif in6_ismgladdr(addr):
             cset = filter(lambda x: x[1] == IPV6_ADDR_GLOBAL, laddr)
         elif in6_ismlladdr(addr):
             cset = filter(lambda x: x[1] == IPV6_ADDR_LINKLOCAL, laddr)
         elif in6_ismsladdr(addr):
             cset = filter(lambda x: x[1] == IPV6_ADDR_SITELOCAL, laddr)
-    elif addr == b'::' and plen == 0:
+    elif addr == '::' and plen == 0:
         cset = filter(lambda x: x[1] == IPV6_ADDR_GLOBAL, laddr)
     cset = [ x[0] for x in cset ]
     cset.sort(key = cmp_to_key(cset_sort)) # Sort with global addresses first
@@ -226,9 +226,9 @@ def in6_getAddrType(addr):
             addrType = (IPV6_ADDR_GLOBAL | IPV6_ADDR_MULTICAST)
     elif ((naddr[0] == b'\xfe') and ((int(paddr[2], 16) & 0xC) == 0x8)):
         addrType = (IPV6_ADDR_UNICAST | IPV6_ADDR_LINKLOCAL)
-    elif paddr == b"::1":
+    elif paddr == "::1":
         addrType = IPV6_ADDR_LOOPBACK
-    elif paddr == b"::":
+    elif paddr == "::":
         addrType = IPV6_ADDR_UNSPECIFIED
     else:
         # Everything else is global unicast (RFC 3513)
@@ -263,7 +263,7 @@ def in6_ifaceidtomac(ifaceid): # TODO: finish commenting function behavior
     is returned on error.
     """
     try:
-        ifaceid = inet_pton(socket.AF_INET6, b"::"+ifaceid)[8:16]
+        ifaceid = inet_pton(socket.AF_INET6, "::"+ifaceid)[8:16]
     except:
         return None
     if ifaceid[3:5] != b'\xff\xfe':
@@ -281,7 +281,7 @@ def in6_addrtomac(addr):
     Extract the mac address from provided address. None is returned
     on error.
     """
-    mask = inet_pton(socket.AF_INET6, b"::ffff:ffff:ffff:ffff")
+    mask = inet_pton(socket.AF_INET6, "::ffff:ffff:ffff:ffff")
     x = in6_and(mask, inet_pton(socket.AF_INET6, addr))
     ifaceid = inet_ntop(socket.AF_INET6, x)[2:]
     return in6_ifaceidtomac(ifaceid)
@@ -414,7 +414,7 @@ def in6_getLocalUniquePrefix():
     rawmac = get_if_raw_hwaddr(conf.iface6)[1]
     mac = b":".join(map(lambda x: b"%.02x" % ord(x), list(rawmac)))
     # construct modified EUI-64 ID
-    eui64 = inet_pton(socket.AF_INET6, b'::' + in6_mactoifaceid(mac))[8:] 
+    eui64 = inet_pton(socket.AF_INET6, '::' + in6_mactoifaceid(mac))[8:] 
     import sha
     globalid = sha.new(tod+eui64).digest()[:5]
     return inet_ntop(socket.AF_INET6, b'\xfd' + globalid + b'\x00'*10)
@@ -446,7 +446,7 @@ def in6_getRandomizedIfaceId(ifaceid, previous=None):
         for i in range(8):
             s += random.choice(d)
         previous = s
-    s = inet_pton(socket.AF_INET6, b"::"+ifaceid)[8:] + previous
+    s = inet_pton(socket.AF_INET6, "::"+ifaceid)[8:] + previous
     import md5
     s = md5.new(s).digest()
     s1,s2 = s[:8],s[8:]

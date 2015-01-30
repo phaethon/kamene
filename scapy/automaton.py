@@ -98,16 +98,16 @@ class ATMT:
     def state(initial=0,final=0,error=0):
         def deco(f,initial=initial, final=final):
             f.atmt_type = ATMT.STATE
-            f.atmt_state = f.func_name
+            f.atmt_state = f.__name__
             f.atmt_initial = initial
             f.atmt_final = final
             f.atmt_error = error
             def state_wrapper(self, *args, **kargs):
                 return ATMT.NewStateRequested(f, self, *args, **kargs)
 
-            state_wrapper.func_name = "%s_wrapper" % f.func_name
+            state_wrapper.__name__ = "%s_wrapper" % f.__name__
             state_wrapper.atmt_type = ATMT.STATE
-            state_wrapper.atmt_state = f.func_name
+            state_wrapper.atmt_state = f.__name__
             state_wrapper.atmt_initial = initial
             state_wrapper.atmt_final = final
             state_wrapper.atmt_error = error
@@ -128,7 +128,7 @@ class ATMT:
         def deco(f, state=state):
             f.atmt_type = ATMT.CONDITION
             f.atmt_state = state.atmt_state
-            f.atmt_condname = f.func_name
+            f.atmt_condname = f.__name__
             f.atmt_prio = prio
             return f
         return deco
@@ -137,7 +137,7 @@ class ATMT:
         def deco(f, state=state):
             f.atmt_type = ATMT.RECV
             f.atmt_state = state.atmt_state
-            f.atmt_condname = f.func_name
+            f.atmt_condname = f.__name__
             f.atmt_prio = prio
             return f
         return deco
@@ -146,7 +146,7 @@ class ATMT:
         def deco(f, state=state):
             f.atmt_type = ATMT.IOEVENT
             f.atmt_state = state.atmt_state
-            f.atmt_condname = f.func_name
+            f.atmt_condname = f.__name__
             f.atmt_ioname = name
             f.atmt_prio = prio
             f.atmt_as_supersocket = as_supersocket
@@ -158,7 +158,7 @@ class ATMT:
             f.atmt_type = ATMT.TIMEOUT
             f.atmt_state = state.atmt_state
             f.atmt_timeout = timeout
-            f.atmt_condname = f.func_name
+            f.atmt_condname = f.__name__
             return f
         return deco
 
@@ -306,7 +306,7 @@ class Automaton_metaclass(type):
                     if n in self.states:
                         l = f.atmt_condname
                         for x in self.actions[f.atmt_condname]:
-                            l += "\\l>[%s]" % x.func_name
+                            l += "\\l>[%s]" % x.__name__
                         s += '\t"%s" -> "%s" [label="%s", color=%s];\n' % (k,n,l,c)
         for k,v in self.timeout.items():
             for t,f in v:
@@ -316,7 +316,7 @@ class Automaton_metaclass(type):
                     if n in self.states:
                         l = "%s/%.1fs" % (f.atmt_condname,t)                        
                         for x in self.actions[f.atmt_condname]:
-                            l += "\\l>[%s]" % x.func_name
+                            l += "\\l>[%s]" % x.__name__
                         s += '\t"%s" -> "%s" [label="%s",color=blue];\n' % (k,n,l)
         s += "}\n"
         return do_graph(s, **kargs)
@@ -496,7 +496,7 @@ class Automaton:
             if cond.atmt_type == ATMT.RECV:
                 self.packets.append(args[0])
             for action in self.actions[cond.atmt_condname]:
-                self.debug(2, "   + Running action [%s]" % action.func_name)
+                self.debug(2, "   + Running action [%s]" % action.__name__)
                 action(self, *state_req.action_args, **state_req.action_kargs)
             raise
         except Exception as e:

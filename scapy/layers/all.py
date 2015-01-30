@@ -7,13 +7,15 @@
 All layers. Configurable with conf.load_layers.
 """
 
+import importlib
 from scapy.config import conf
 from scapy.error import log_loading
 import logging
 log = logging.getLogger("scapy.loading")
 
 def _import_star(m):
-    mod = __import__(m, globals(), locals())
+    #mod = __import__("." + m, globals(), locals())
+    mod = importlib.import_module("scapy.layers." + m)
     for k,v in mod.__dict__.items():
         globals()[k] = v
 

@@ -9,7 +9,7 @@ Implementation for of the configuration object.
 
 import os,time,socket,sys
 from .data import *
-import scapy.base_classes
+import scapy.base_classes as base_classes
 import scapy.themes
 from .error import log_scapy
 
@@ -214,7 +214,7 @@ class CacheInstance(dict):
         if self.timeout is None:
             return dict.keys(self)
         t0=time.time()
-        return [k for k in dict.iterkeys(self) if t0-self._timetable[k] < self.timeout]
+        return [k for k in dict.keys(self) if t0-self._timetable[k] < self.timeout]
     def values(self):
         if self.timeout is None:
             return dict.values(self)

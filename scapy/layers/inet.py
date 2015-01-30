@@ -7,7 +7,7 @@
 IPv4 (Internet Protocol v4).
 """
 
-import os,time,struct,re,socket,new
+import os,time,struct,re,socket,types
 from select import select
 from collections import defaultdict
 from scapy.utils import checksum
@@ -927,7 +927,7 @@ def _packetlist_timeskew_graph(self, ip, **kargs):
     g.plot(Gnuplot.Data(d,**kargs))
     return g
 
-PacketList.timeskew_graph = new.instancemethod(_packetlist_timeskew_graph, None, PacketList)
+#PacketList.timeskew_graph = types.MethodType(_packetlist_timeskew_graph, None)
 
 
 ### Create a new packet list

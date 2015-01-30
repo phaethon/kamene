@@ -138,4 +138,4 @@ class StreamSocket(SimpleSocket):
 if conf.L3socket is None:
     conf.L3socket = L3RawSocket
 
-import scapy.sendrecv as sendrecv
+import scapy.sendrecv
