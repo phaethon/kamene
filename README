@@ -1,4 +1,4 @@
 This is a fork of scapy project to make it compatible with python3.
 Fork based on v2.3.1
 File STATUS contains the list of converted and not converted files.
-Using python 3.4 for testing.
+Using python 3.4 on Ubuntu linux for testing.

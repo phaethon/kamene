@@ -8,7 +8,7 @@ Unit testing infrastructure for Scapy
 """
 
 import sys,getopt,imp
-import bz2, base64, os.path, time, traceback, zlib, sha
+import bz2, base64, os.path, time, traceback, zlib, hashlib
 
 
 #### Import tool ####
@@ -202,7 +202,7 @@ def parse_campaign_file(campaign_file):
         else:
             if test is None:
                 if l.strip():
-                    print("Unkonwn content [%s]" % l.strip(), file = sys.stderr) 
+                    print("Unknown content [%s]" % l.strip(), file = sys.stderr)
             else:
                 test.test += l
     return test_campaign

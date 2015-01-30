@@ -7,13 +7,12 @@
 Main module for interactive startup.
 """
 
-from __future__ import generators
 import os,sys
 import glob
 import builtins
 from .error import *
 from . import utils
-    
+
 
 def _probe_config_file(cf):
     cf_path = os.path.join(os.path.expanduser("~"), cf)

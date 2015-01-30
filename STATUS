@@ -11,17 +11,21 @@ Implementad changes in all files:
 - removed L from long integers
 - changed backticks to repr()
 - changed xrange to range
+- converted tabs to spaces, some files had mix of them
 
 Working:
-Nothing yet
+Can be installed with 'python3 setup.py install'
 
 Not working:
-Everything
-Unresolved import issue in plist.py
+Everything else
+Unresolved import issue in plist.py affecting gnuplot
 
 Converted, verified and tested files:
 
 Converted files:
+./scapy/data.py
+./setup.py
+./scapy/dadict.py # seems to work, but has to be converted to more efficient python3 methods
 
 Not converted files:
 ./scapy/plist.py
@@ -81,7 +85,6 @@ Not converted files:
 ./scapy/error.py
 ./scapy/crypto/__init__.py
 ./scapy/crypto/cert.py
-./scapy/data.py
 ./scapy/asn1/mib.py
 ./scapy/asn1/asn1.py
 ./scapy/asn1/ber.py
@@ -132,8 +135,6 @@ Not converted files:
 ./scapy/__init__.py
 ./scapy/config.py
 ./scapy/sendrecv.py
-./scapy/dadict.py
 ./scapy/packet.py
 ./scapy/themes.py
 ./doc/scapy/conf.py
-./setup.py
