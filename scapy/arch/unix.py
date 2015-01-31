@@ -127,7 +127,7 @@ def in6_getifaddr():
     for int in i:
         ifname = int['name']
         v6 = []
-        if int.has_key('alias_addrs'):
+        if 'alias_addrs' in int:
             v6 = int['alias_addrs']
         for a in v6:
             if a.type != dnet.ADDR_TYPE_IP6:

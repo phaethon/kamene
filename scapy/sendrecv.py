@@ -311,7 +311,7 @@ verbose:  set verbosity level
 multi:    whether to accept multiple answers for the same stimulus
 filter:   provide a BPF filter
 iface:    listen answers only on the given interface"""
-    if not kargs.has_key("timeout"):
+    if not "timeout" in kargs:
         kargs["timeout"] = -1
     s = conf.L3socket(filter=filter, iface=iface, nofilter=nofilter)
     a,b=sndrcv(s,x,*args,**kargs)
@@ -329,7 +329,7 @@ verbose:  set verbosity level
 multi:    whether to accept multiple answers for the same stimulus
 filter:   provide a BPF filter
 iface:    listen answers only on the given interface"""
-    if not kargs.has_key("timeout"):
+    if not "timeout" in kargs:
         kargs["timeout"] = -1
     s=conf.L3socket(filter=filter, nofilter=nofilter, iface=iface)
     a,b=sndrcv(s,x,*args,**kargs)
@@ -350,7 +350,7 @@ verbose:  set verbosity level
 multi:    whether to accept multiple answers for the same stimulus
 filter:   provide a BPF filter
 iface:    work only on the given interface"""
-    if not kargs.has_key("timeout"):
+    if not "timeout" in kargs:
         kargs["timeout"] = -1
     if iface is None and iface_hint is not None:
         iface = conf.route.route(iface_hint)[0]
@@ -370,7 +370,7 @@ verbose:  set verbosity level
 multi:    whether to accept multiple answers for the same stimulus
 filter:   provide a BPF filter
 iface:    work only on the given interface"""
-    if not kargs.has_key("timeout"):
+    if not "timeout" in kargs:
         kargs["timeout"] = -1
     a,b=srp(*args,**kargs)
     if len(a) > 0:

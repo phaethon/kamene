@@ -112,7 +112,7 @@ def nmap_udppacket_sig(S,T):
 def nmap_match_one_sig(seen, ref):
     c = 0
     for k in seen.keys():
-        if ref.has_key(k):
+        if k in ref:
             if seen[k] in ref[k].split("|"):
                 c += 1
     if c == 0 and seen.get("Resp") == "N":

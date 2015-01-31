@@ -125,7 +125,7 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
                 self.__dict__["payload"] = payload
                 payload.add_underlayer(self)
                 for t in self.aliastypes:
-                    if payload.overload_fields.has_key(t):
+                    if t in payload.overload_fields:
                         self.overloaded_fields = payload.overload_fields[t]
                         break
             elif type(payload) is str:
@@ -184,7 +184,7 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
         raise AttributeError(attr)
 
     def setfieldval(self, attr, val):
-        if self.default_fields.has_key(attr):
+        if attr in self.default_fields:
             fld = self.get_field(attr)
             if fld is None:
                 any2i = lambda x,y: y
@@ -210,11 +210,11 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
         self.__dict__[attr] = val
 
     def delfieldval(self, attr):
-        if self.fields.has_key(attr):
+        if attr in self.fields:
             del(self.fields[attr])
             self.explicit = 0 # in case a default value must be explicited
             self.raw_packet_cache = None
-        elif self.default_fields.has_key(attr):
+        elif attr in self.default_fields:
             pass
         elif attr == "payload":
             self.remove_payload()
@@ -229,7 +229,7 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
                 pass
             else:
                 return
-        if self.__dict__.has_key(attr):
+        if attr in self.__dict__:
             del(self.__dict__[attr])
         else:
             raise AttributeError(attr)
@@ -620,7 +620,7 @@ Creates an EPS file describing a packet. If filename is not provided a temporary
     def hide_defaults(self):
         """Removes fields' values that are the same as default values."""
         for k in self.fields.keys():
-            if self.default_fields.has_key(k):
+            if k in self.default_fields:
                 if self.default_fields[k] == self.fields[k]:
                     del(self.fields[k])
         self.payload.hide_defaults()

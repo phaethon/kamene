@@ -112,7 +112,7 @@ def save_session(fname=None, session=None, pickleProto=-1):
 
     to_be_saved = session.copy()
         
-    if to_be_saved.has_key("__builtins__"):
+    if "__builtins__" in to_be_saved:
         del(to_be_saved["__builtins__"])
 
     for k in to_be_saved.keys():

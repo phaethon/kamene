@@ -767,22 +767,16 @@ def __make_table(yfmtfunc, fmtfunc, endline, list, fxyz, sortx=None, sorty=None,
         vxk.sort(sortx)
     else:
         try:
-            vxk.sort(lambda x,y:int(x)-int(y))
+            vxk.sort(key = lambda x: atol(x))
         except:
-            try:
-                vxk.sort(key = lambda x: atol(x))
-            except:
-                vxk.sort()
+            vxk.sort()
     if sorty:
         vyk.sort(sorty)
     else:
         try:
-            vyk.sort(lambda x,y:int(x)-int(y))
+            vyk.sort(key = lambda x: atol(x))
         except:
-            try:
-                vyk.sort(key = lambda x: atol(x))
-            except:
-                vyk.sort()
+            vyk.sort()
 
 
     if seplinefunc:

@@ -159,7 +159,7 @@ def pkcs_mgf1(mgfSeed, maskLen, h):
     """
 
     # steps are those of Appendix B.2.1
-    if not _hashFuncParams.has_key(h):
+    if not h in _hashFuncParams:
         warning("pkcs_mgf1: invalid hash (%s) provided")
         return None
     hLen = _hashFuncParams[h][0]
@@ -521,7 +521,7 @@ class _EncryptAndVerify:
         mLen = len(M)
         if h is None:
             h = "sha1"
-        if not _hashFuncParams.has_key(h):
+        if not h in _hashFuncParams:
             warning("Key._rsaes_oaep_encrypt(): unknown hash function %s.", h)
             return None
         hLen = _hashFuncParams[h][0]
@@ -642,7 +642,7 @@ class _EncryptAndVerify:
         # Set default parameters if not provided
         if h is None: # By default, sha1
             h = "sha1"
-        if not _hashFuncParams.has_key(h):
+        if not h in _hashFuncParams:
             warning("Key._rsassa_pss_verify(): unknown hash function "
                     "provided (%s)" % h)
             return False
@@ -890,7 +890,7 @@ class _DecryptAndSignMethods(OSSLHelper):
                                                     # 1.a) is not done
         if h is None:
             h = "sha1"
-        if not _hashFuncParams.has_key(h):
+        if not h in _hashFuncParams:
             warning("Key._rsaes_oaep_decrypt(): unknown hash function %s.", h)
             return None
         hLen = _hashFuncParams[h][0]
@@ -1043,7 +1043,7 @@ class _DecryptAndSignMethods(OSSLHelper):
         # Set default parameters if not provided
         if h is None: # By default, sha1
             h = "sha1"
-        if not _hashFuncParams.has_key(h):
+        if not h in _hashFuncParams:
             warning("Key._rsassa_pss_sign(): unknown hash function "
                     "provided (%s)" % h)
             return None
@@ -1849,7 +1849,7 @@ class Cert(OSSLHelper, _EncryptAndVerify):
             l = map(lambda x: x.strip(), v.split(','))
             while l:
                 c = l.pop()
-                if ku_mapping.has_key(c):
+                if c in ku_mapping:
                     self.keyUsage.append(ku_mapping[c])
                 else:
                     self.keyUsage.append(c) # Add it anyway
@@ -1879,7 +1879,7 @@ class Cert(OSSLHelper, _EncryptAndVerify):
             l = map(lambda x: x.strip(), v.split(','))
             while l:
                 c = l.pop()
-                if eku_mapping.has_key(c):
+                if c in eku_mapping:
                     self.extKeyUsage.append(eku_mapping[c])
                 else:
                     self.extKeyUsage.append(c) # Add it anyway
@@ -1977,7 +1977,7 @@ class Cert(OSSLHelper, _EncryptAndVerify):
         res = [self]
         cur = self
         while not cur.isSelfSigned():
-            if d.has_key(cur.issuer):
+            if cur.issuer in d:
                 possible_issuer = d[cur.issuer]
                 if cur.isIssuerCert(possible_issuer):
                     res.append(possible_issuer)

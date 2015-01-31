@@ -258,7 +258,7 @@ def read_routes():
             except OSError:
                 log_loading.warning("Building Scapy's routing table: Couldn't get outgoing interface for destination %s" % dest)
                 continue               
-            if not intf.has_key("addr"):
+            if not "addr" in intf:
                 break
             addr = str(intf["addr"])
             addr = addr.split("/")[0]

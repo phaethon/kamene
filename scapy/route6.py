@@ -49,9 +49,11 @@ class Route6:
         for net,msk,gw,iface,cset in self.routes:
             rtlst.append(('%s/%i'% (net,msk), gw, iface, ", ".join(cset)))
 
-        colwidth = map(lambda x: max(map(lambda y: len(y), x)), apply(zip, rtlst))
+        #colwidth = map(lambda x: max(map(lambda y: len(y), x)), apply(zip, rtlst))
+        rtlst = zip(rtlst)
+        colwidth = [ max([len(y) for y in x]) for x in rtlst]
         fmt = "  ".join(map(lambda x: "%%-%ds"%x, colwidth))
-        rt = "\n".join(map(lambda x: fmt % x, rtlst))
+        rt = "\n".join([ fmt % x for x in rtlst])
 
         return rt
 
