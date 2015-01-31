@@ -127,9 +127,9 @@ def attach_filter(s, filter):
     if f.close():
         raise Scapy_Exception("Filter parse error")
     nb = int(lines[0])
-    bpf = ""
+    bpf = b""
     for l in lines[1:]:
-        bpf += struct.pack("HBBI",*map(long,l.split()))
+        bpf += struct.pack("HBBI",*[int(x) for x in l.split()])
 
     # XXX. Argl! We need to give the kernel a pointer on the BPF,
     # python object header seems to be 20 bytes. 36 bytes for x86 64bits arch.
@@ -189,7 +189,7 @@ def read_routes():
         routes.append((socket.htonl(int(dst,16))&0xffffffff,
                        socket.htonl(int(msk,16))&0xffffffff,
                        scapy.utils.inet_ntoa(struct.pack("I",int(gw,16))),
-                       iff, ifaddr))
+                       iff.decode('utf-8'), ifaddr))
     
     f.close()
     return routes

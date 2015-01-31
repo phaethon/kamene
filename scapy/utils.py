@@ -54,7 +54,7 @@ def sane(x):
     return r
 
 def lhex(x):
-    if type(x) in (int,long):
+    if type(x) is int:
         return hex(x)
     elif type(x) is tuple:
         return "(%s)" % ", ".join(map(lhex, x))

@@ -125,7 +125,7 @@ class Route:
         # Transform "192.168.*.1-5" to one IP of the set
         dst = dest.split("/")[0]
         dst = dst.replace("*","0") 
-        while 1:
+        while True:
             l = dst.find("-")
             if l < 0:
                 break
