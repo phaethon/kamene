@@ -230,7 +230,7 @@ class Automaton_metaclass(type):
                 if k not in members:
                     members[k] = v
 
-        decorated = [v for v in members.itervalues()
+        decorated = [v for v in members.values()
                      if type(v) is types.FunctionType and hasattr(v, "atmt_type")]
         
         for m in decorated:
@@ -263,16 +263,16 @@ class Automaton_metaclass(type):
                     cls.actions[c].append(m)
             
 
-        for v in cls.timeout.itervalues():
+        for v in cls.timeout.values():
             #v.sort(lambda (t1,f1),(t2,f2): cmp(t1,t2))
-            v.sort(lambda a1,a2: cmp(a1[0],a2[0]))
+            v.sort(key = lambda x: x[0])
             v.append((None, None))
-        for v in itertools.chain(cls.conditions.itervalues(),
-                                 cls.recv_conditions.itervalues(),
-                                 cls.ioevents.itervalues()):
-            v.sort(lambda c1,c2: cmp(c1.atmt_prio,c2.atmt_prio))
+        for v in itertools.chain(cls.conditions.values(),
+                                 cls.recv_conditions.values(),
+                                 cls.ioevents.values()):
+            v.sort(key = lambda x: x.atmt_prio)
         for condname,actlst in cls.actions.items():
-            actlst.sort(lambda c1,c2: cmp(c1.atmt_cond[condname], c2.atmt_cond[condname]))
+            actlst.sort(key = lambda x: x.atmt_cond[condname])
 
         for ioev in cls.iosupersockets:
             setattr(cls, ioev.atmt_as_supersocket, _ATMT_to_supersocket(ioev.atmt_as_supersocket, ioev.atmt_ioname, cls))
@@ -283,7 +283,7 @@ class Automaton_metaclass(type):
         s = 'digraph "%s" {\n'  % self.__class__.__name__
         
         se = "" # Keep initial nodes at the begining for better rendering
-        for st in self.states.itervalues():
+        for st in self.states.values():
             if st.atmt_initial:
                 se = ('\t"%s" [ style=filled, fillcolor=blue, shape=box, root=true];\n' % st.atmt_state)+se
             elif st.atmt_final:
@@ -323,8 +323,7 @@ class Automaton_metaclass(type):
         
 
 
-class Automaton:
-    __metaclass__ = Automaton_metaclass
+class Automaton(metaclass = Automaton_metaclass):
 
     ## Methods to overload
     def parse_args(self, debug=0, store=1, **kargs):

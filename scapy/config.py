@@ -193,16 +193,16 @@ class CacheInstance(dict):
             return dict.items(self)
         t0=time.time()
         return ((k,v) for (k,v) in dict.items(self) if t0-self._timetable[k] < self.timeout) 
-    def iterkeys(self):
+    def keys(self):
         if self.timeout is None:
-            return dict.iterkeys(self)
+            return dict.keys(self)
         t0=time.time()
-        return (k for k in dict.iterkeys(self) if t0-self._timetable[k] < self.timeout)
+        return (k for k in dict.keys(self) if t0-self._timetable[k] < self.timeout)
     def __iter__(self):
-        return self.iterkeys()
-    def itervalues(self):
+        return self.keys()
+    def values(self):
         if self.timeout is None:
-            return dict.itervalues(self)
+            return dict.values(self)
         t0=time.time()
         return (v for (k,v) in dict.items(self) if t0-self._timetable[k] < self.timeout)
     def items(self):
@@ -229,7 +229,7 @@ class CacheInstance(dict):
     def __repr__(self):
         s = []
         if self:
-            mk = max(len(k) for k in self.iterkeys())
+            mk = max(len(k) for k in self.keys())
             fmt = "%%-%is %%s" % (mk+1)
             for item in self.items():
                 s.append(fmt % item)

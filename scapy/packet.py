@@ -32,8 +32,7 @@ class RawVal:
         return "<RawVal [%r]>" % self.val
 
 
-class Packet(BasePacket):
-    __metaclass__ = Packet_metaclass
+class Packet(BasePacket, metaclass = Packet_metaclass):
     name=None
 
     fields_desc = []
@@ -64,7 +63,7 @@ class Packet(BasePacket):
         for lower,fval in self.overload_fields.items():
             print("%-20s  %s" % (lower.__name__, ", ".join("%-12s" % ("%s=%r"%i) for i in fval.items())))
 
-    def __init__(self, _pkt="", post_transform=None, _internal=0, _underlayer=None, **fields):
+    def __init__(self, _pkt=b"", post_transform=None, _internal=0, _underlayer=None, **fields):
         self.time  = time.time()
         self.sent_time = 0
         if self.name is None:
@@ -298,7 +297,7 @@ class Packet(BasePacket):
     def self_build(self, field_pos_list=None):
         if self.raw_packet_cache is not None:
             return self.raw_packet_cache
-        p=""
+        p=b""
         for f in self.fields_desc:
             val = self.getfieldval(f.name)
             if isinstance(val, RawVal):
@@ -340,9 +339,9 @@ class Packet(BasePacket):
         return self.payload.build_done(p)
 
     def do_build_ps(self):
-        p=""
+        p=b""
         pl = []
-        q=""
+        q=b""
         for f in self.fields_desc:
             if isinstance(f, ConditionalField) and not f._evalcond(self):
                 continue
@@ -351,7 +350,7 @@ class Packet(BasePacket):
                 r = p[len(q):]
                 q = p
             else:
-                r = ""
+                r = b""
             pl.append( (f, f.i2repr(self,self.getfieldval(f.name)), r) )
             
         pkt,lst = self.payload.build_ps(internal=1)
@@ -736,8 +735,8 @@ Creates an EPS file describing a packet. If filename is not provided a temporary
         if type(cls) is int:
             nb = cls+1
             cls = None
-        if type(cls) is str and "." in cls:
-            ccls,fld = cls.split(".",1)
+        if type(cls) is str and b"." in cls:
+            ccls,fld = cls.split(b".",1)
         else:
             ccls,fld = cls,None
         if cls is None or self.__class__ == cls or self.__class__.name == ccls:

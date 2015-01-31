@@ -770,7 +770,7 @@ def __make_table(yfmtfunc, fmtfunc, endline, list, fxyz, sortx=None, sorty=None,
             vxk.sort(lambda x,y:int(x)-int(y))
         except:
             try:
-                vxk.sort(lambda x,y: cmp(atol(x),atol(y)))
+                vxk.sort(key = lambda x: atol(x))
             except:
                 vxk.sort()
     if sorty:
@@ -780,7 +780,7 @@ def __make_table(yfmtfunc, fmtfunc, endline, list, fxyz, sortx=None, sorty=None,
             vyk.sort(lambda x,y:int(x)-int(y))
         except:
             try:
-                vyk.sort(lambda x,y: cmp(atol(x),atol(y)))
+                vyk.sort(key = lambda x: atol(x))
             except:
                 vyk.sort()
 

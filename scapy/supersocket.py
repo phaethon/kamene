@@ -20,8 +20,7 @@ class _SuperSocket_metaclass(type):
             return "<%s>" % self.__name__
 
 
-class SuperSocket:
-    __metaclass__ = _SuperSocket_metaclass
+class SuperSocket(metaclass = _SuperSocket_metaclass):
     desc = None
     closed=0
     def __init__(self, family=socket.AF_INET,type=socket.SOCK_STREAM, proto=0):

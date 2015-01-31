@@ -790,7 +790,7 @@ def defrag(plist):
         frags[uniq].append(p)
     defrag = []
     missfrag = []
-    for lst in frags.itervalues():
+    for lst in frags.values():
         lst.sort(key=lambda x: x.frag)
         p = lst[0]
         lastp = lst[-1]
@@ -851,7 +851,7 @@ def defragment(plist):
 
     defrag = []
     missfrag = []
-    for lst in frags.itervalues():
+    for lst in frags.values():
         lst.sort(key=lambda x: x.frag)
         p = lst[0]
         lastp = lst[-1]

@@ -1,9 +1,10 @@
 Working:
 Can be installed with 'python3 setup.py install'
-scapy prompt loads
+scapy prompt loads, layers load
 
 Working commands:
 - lsc()
+- ls()
 
 Not working:
 Unresolved import issue in plist.py affecting gnuplot
@@ -19,7 +20,8 @@ Implementad changes in all files:
 - changed backticks to repr()
 - changed xrange to range
 - converted tabs to spaces, some files had mix of them
-- replaced iteritems to items
+- replaced iteritems,iterkeys,itervalues to items,keys,values
+- replaced __metaclass__ with (metaclass=)
 
 Converted, verified and tested files:
 
