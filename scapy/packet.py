@@ -263,7 +263,11 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
                                   ct.punct("|"),
                                   repr(self.payload),
                                   ct.punct(">"))
+    #def __str__(self):
+    #TODO3 FIX
     def __str__(self):
+        raise
+    def bytes(self):
         return self.build()
     def __div__(self, other):
         if isinstance(other, Packet):
@@ -314,7 +318,7 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
 
     def do_build(self):
         if not self.explicit:
-            self = self.__iter__().next()
+            self = next(self.__iter__())
         pkt = self.self_build()
         for t in self.post_transforms:
             pkt = t(pkt)
@@ -1060,15 +1064,15 @@ class NoPayload(Packet):
     def __nonzero__(self):
         return False
     def do_build(self):
-        return ""
+        return b""
     def build(self):
-        return ""
+        return b""
     def build_padding(self):
-        return ""
+        return b""
     def build_done(self, p):
         return p
     def build_ps(self, internal=0):
-        return "",[]
+        return b"",[]
     def getfieldval(self, attr):
         raise AttributeError(attr)
     def getfield_and_val(self, attr):

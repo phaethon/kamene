@@ -7,7 +7,7 @@
 Functions to send and receive packets.
 """
 
-import pickle,os,sys,time,subprocess
+import pickle,os,sys,time,subprocess,itertools
 from select import select
 from .data import *
 import scapy.arch
@@ -71,8 +71,8 @@ def sndrcv(pks, pkt, timeout = None, inter = 0, verbose=None, chainCC=0, retry=0
             timeout = None
             
         rdpipe,wrpipe = os.pipe()
-        rdpipe=os.fdopen(rdpipe)
-        wrpipe=os.fdopen(wrpipe,"w")
+        rdpipe=os.fdopen(rdpipe, "rb")
+        wrpipe=os.fdopen(wrpipe,"wb")
 
         pid=1
         try:
@@ -121,7 +121,7 @@ def sndrcv(pks, pkt, timeout = None, inter = 0, verbose=None, chainCC=0, retry=0
                                 if remaintime <= 0:
                                     break
                             r = None
-                            if arch.FREEBSD or arch.DARWIN:
+                            if scapy.arch.FREEBSD or scapy.arch.DARWIN:
                                 inp, out, err = select(inmask,[],[], 0.05)
                                 if len(inp) == 0 or pks in inp:
                                     r = pks.nonblock_recv()
@@ -159,7 +159,7 @@ def sndrcv(pks, pkt, timeout = None, inter = 0, verbose=None, chainCC=0, retry=0
                                 break
                             if not ok:
                                 if verbose > 1:
-                                    os.write(1, ".")
+                                    os.write(1, b".")
                                 nbrecv += 1
                                 if conf.debug_match:
                                     debug.recv.append(r)
@@ -180,7 +180,8 @@ def sndrcv(pks, pkt, timeout = None, inter = 0, verbose=None, chainCC=0, retry=0
             if pid == 0:
                 os._exit(0)
 
-        remain = reduce(list.__add__, hsent.values(), [])
+        #remain = reduce(list.__add__, hsent.values(), [])
+        remain = list(itertools.chain(*[ i for i in hsent.values() ]))
         if multi:
             remain = filter(lambda p: not hasattr(p, '_answered'), remain);
             

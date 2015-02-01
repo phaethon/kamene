@@ -102,7 +102,7 @@ class Field:
 
 
 class Emph:
-    fld = ""
+    fld = b""
     def __init__(self, fld):
         self.fld = fld
     def __getattr__(self, attr):
@@ -156,7 +156,7 @@ class PadField:
     def __init__(self, fld, align, padwith=None):
         self._fld = fld
         self._align = align
-        self._padwith = padwith or ""
+        self._padwith = padwith or b""
 
     def padlen(self, flen):
         return -flen%self._align
@@ -179,7 +179,7 @@ class MACField(Field):
         Field.__init__(self, name, default, "6s")
     def i2m(self, pkt, x):
         if x is None:
-            return "\0\0\0\0\0\0"
+            return b"\0\0\0\0\0\0"
         return mac2str(x)
     def m2i(self, pkt, x):
         return str2mac(x)
@@ -339,7 +339,7 @@ class StrField(Field):
         return len(i)
     def i2m(self, pkt, x):
         if x is None:
-            x = ""
+            x = b""
         elif type(x) is not str:
             x=str(x)
         return x
@@ -347,7 +347,7 @@ class StrField(Field):
         return s+self.i2m(pkt, val)
     def getfield(self, pkt, s):
         if self.remain == 0:
-            return "",self.m2i(pkt, s)
+            return b"",self.m2i(pkt, s)
         else:
             return s[-self.remain:],self.m2i(pkt, s[:-self.remain])
     def randval(self):
@@ -434,18 +434,18 @@ class PacketListField(PacketField):
                 if conf.debug_dissector:
                     raise
                 p = conf.raw_layer(load=remain)
-                remain = ""
+                remain = b""
             else:
                 if conf.padding_layer in p:
                     pad = p[conf.padding_layer]
                     remain = pad.load
                     del(pad.underlayer.payload)
                 else:
-                    remain = ""
+                    remain = b""
             lst.append(p)
         return remain+ret,lst
     def addfield(self, pkt, s, val):
-        return s+"".join(map(str, val))
+        return s+b"".join(map(str, val))
 
 
 class StrFixedLenField(StrField):

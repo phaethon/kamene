@@ -81,7 +81,7 @@ class IPOption(Packet):
                     StrLenField("value", "",length_from=lambda pkt:pkt.length-2) ]
     
     def extract_padding(self, p):
-        return "",p
+        return b"",p
 
     registered_ip_options = {}
     @classmethod
@@ -268,16 +268,16 @@ class TCPOptionsField(StrField):
         for oname,oval in x:
             if type(oname) is str:
                 if oname == "NOP":
-                    opt += "\x01"
+                    opt += b"\x01"
                     continue
                 elif oname == "EOL":
-                    opt += "\x00"
+                    opt += b"\x00"
                     continue
                 elif TCPOptions[1].has_key(oname):
                     onum = TCPOptions[1][oname]
                     ofmt = TCPOptions[0][onum][1]
                     if onum == 5: #SAck
-                        ofmt += "%iI" % len(oval)
+                        ofmt += b"%iI" % len(oval)
                     if ofmt is not None and (type(oval) is not str or "s" in ofmt):
                         if type(oval) is not tuple:
                             oval = (oval,)
@@ -291,7 +291,7 @@ class TCPOptionsField(StrField):
                     warning("option [%i] is not string."%onum)
                     continue
             opt += chr(onum)+chr(2+len(oval))+oval
-        return opt+"\x00"*(3-((len(opt)+3)%4))
+        return opt+b"\x00"*(3-((len(opt)+3)%4))
     def randval(self):
         return [] # XXX
     
@@ -338,16 +338,16 @@ class IP(Packet, IPTools):
                     PacketListField("options", [], IPOption, length_from=lambda p:p.ihl*4-20) ]
     def post_build(self, p, pay):
         ihl = self.ihl
-        p += "\0"*((-len(p))%4) # pad IP options if needed
+        p += b"\0"*((-len(p))%4) # pad IP options if needed
         if ihl is None:
-            ihl = len(p)/4
-            p = chr(((self.version&0xf)<<4) | ihl&0x0f)+p[1:]
+            ihl = len(p)//4
+            p = bytes([((self.version&0xf)<<4) | ihl&0x0f])+p[1:]
         if self.len is None:
             l = len(p)+len(pay)
             p = p[:2]+struct.pack("!H", l)+p[4:]
         if self.chksum is None:
             ck = checksum(p)
-            p = p[:10]+chr(ck>>8)+chr(ck&0xff)+p[12:]
+            p = p[:10]+bytes([ck>>8])+bytes([ck&0xff])+p[12:]
         return p+pay
 
     def extract_padding(self, s):

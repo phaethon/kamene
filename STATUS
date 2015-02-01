@@ -7,6 +7,7 @@ Working commands:
 - ls
 - lsc
 - pkg.show() # quickly tested for IP and Ether layers
+- sr1 # testint needed
 
 Not working:
 Unresolved import issue in plist.py affecting gnuplot

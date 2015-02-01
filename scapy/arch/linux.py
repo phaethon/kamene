@@ -400,7 +400,7 @@ class L3PacketSocket(SuperSocket):
         if sn[3] in conf.l2types:
             ll = lambda x:conf.l2types[sn[3]]()/x
         try:
-            sx = str(ll(x))
+            sx = ll(x).bytes()
             x.sent_time = time.time()
             self.outs.sendto(sx, sdto)
         except socket.error as msg:
@@ -410,7 +410,6 @@ class L3PacketSocket(SuperSocket):
                     self.outs.sendto(str(ll(p)), sdto)
             else:
                 raise
-                    
 
 
 

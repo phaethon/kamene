@@ -241,7 +241,8 @@ def warning(x):
     log_runtime.warning(x)
 
 def mac2str(mac):
-    return "".join(map(lambda x: chr(int(x,16)), mac.split(":")))
+    #return "".join(map(lambda x: chr(int(x,16)), mac.split(":")))
+    return b''.join([ str(i).encode('ascii') for i in mac ])
 
 def str2mac(s):
     return ("%02x:"*6)[:-1] % tuple(map(ord, s)) 
