@@ -671,7 +671,7 @@ Creates an EPS file describing a packet. If filename is not provided a temporary
         else:
             todo = [ k for (k,v) in itertools.chain(self.default_fields.items(),
                                                     self.overloaded_fields.items())
-                     if isinstance(v, VolatileValue) ] + self.fields.keys()
+                     if isinstance(v, VolatileValue) ] + list(self.fields.keys())
             done = {}
         return loop(todo, done)
 
@@ -1093,7 +1093,7 @@ class NoPayload(Packet):
             return True
         return False
     def hashret(self):
-        return ""
+        return b""
     def answers(self, other):
         return isinstance(other, NoPayload) or isinstance(other, conf.padding_layer)
     def haslayer(self, cls):

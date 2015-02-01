@@ -247,7 +247,8 @@ def str2mac(s):
     return ("%02x:"*6)[:-1] % tuple(map(ord, s)) 
 
 def strxor(x,y):
-    return "".join(map(lambda x,y:chr(ord(x)^ord(y)),x,y))
+    #return "".join(map(lambda i,j:chr(ord(i)^ord(j)),x,y))
+    return bytes([ i[0] ^ i[1] for i in zip(x,y) ] )
 
 # Workarround bug 643005 : https://sourceforge.net/tracker/?func=detail&atid=105470&aid=643005&group_id=5470
 try:

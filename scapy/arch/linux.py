@@ -7,8 +7,7 @@
 Linux specific functions.
 """
 
-from __future__ import with_statement
-import sys,os,struct,socket,time
+import sys,os,struct,socket,time,ctypes
 from select import select
 from fcntl import ioctl
 import scapy.utils
@@ -65,6 +64,9 @@ SOL_SOCKET = 1
 RTF_UP = 0x0001  # Route usable
 RTF_REJECT = 0x0200
 
+# From pcap/pcap.h
+PCAP_ERRBUF_SIZE=256
+
 
 
 LOOPBACK_NAME="lo"
@@ -76,7 +78,7 @@ with os.popen("tcpdump -V 2> /dev/null") as _f:
     else:
         TCPDUMP=1
 del(_f)
-    
+
 
 def get_if_raw_hwaddr(iff):
     return struct.unpack("16xh6s8x",get_if(iff,SIOCGIFHWADDR))
@@ -133,10 +135,14 @@ def attach_filter(s, filter):
 
     # XXX. Argl! We need to give the kernel a pointer on the BPF,
     # python object header seems to be 20 bytes. 36 bytes for x86 64bits arch.
-    if scapy.arch.X86_64:
-        bpfh = struct.pack("HL", nb, id(bpf)+36)
-    else:
-        bpfh = struct.pack("HI", nb, id(bpf)+20)  
+    bpf_buf = ctypes.create_string_buffer(bpf)
+    class BpfProgram(ctypes.Structure):
+      _fields_ = [ ("bf_len", ctypes.c_int), ("bf_insn", ctypes.POINTER(type(bpf_buf))) ]
+    #if scapy.arch.X86_64:
+    #    bpfh = struct.pack("HL", nb, id(bpf)+36)
+    #else:
+    #    bpfh = struct.pack("HI", nb, id(bpf)+20)  
+    bpfh = BpfProgram(nb, ctypes.pointer(bpf_buf))
     s.setsockopt(SOL_SOCKET, SO_ATTACH_FILTER, bpfh)
 
 def set_promisc(s,iff,val=1):
