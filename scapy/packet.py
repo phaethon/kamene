@@ -24,12 +24,15 @@ except ImportError:
 
 
 class RawVal:
-    def __init__(self, val=""):
+    def __init__(self, val=b""):
+        assert type(val) == bytes
         self.val = val
     def __str__(self):
         return str(self.val)
     def __repr__(self):
         return "<RawVal [%r]>" % self.val
+    def bytes(self):
+        return self.val
 
 
 class Packet(BasePacket, metaclass = Packet_metaclass):
@@ -305,7 +308,8 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
         for f in self.fields_desc:
             val = self.getfieldval(f.name)
             if isinstance(val, RawVal):
-                sval = str(val)
+                #sval = str(val)
+                sval = val.bytes()
                 p += sval
                 if field_pos_list is not None:
                     field_pos_list.append( (f.name, sval.encode("string_escape"), len(p), len(sval) ) )

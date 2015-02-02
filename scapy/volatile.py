@@ -197,25 +197,27 @@ class RandChoice(RandField):
         return random.choice(self._choice)
     
 class RandString(RandField):
-    def __init__(self, size=None, chars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"):
+    def __init__(self, size=None, chars=b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"):
         if size is None:
             size = RandNumExpo(0.01)
         self.size = size
         self.chars = chars
     def _fix(self):
-        s = ""
+        s = b""
         for i in range(self.size):
             s += random.choice(self.chars)
         return s
 
 class RandBin(RandString):
     def __init__(self, size=None):
-        RandString.__init__(self, size, "".join(map(chr,range(256))))
+        #RandString.__init__(self, size, b"".join(map(chr,range(256))))
+        RandString.__init__(self, size, b"".join([bytes([i]) for i in range(256)]))
 
 
 class RandTermString(RandString):
     def __init__(self, size, term):
-        RandString.__init__(self, size, "".join(map(chr,range(1,256))))
+        #RandString.__init__(self, size, b"".join(map(chr,range(1,256))))
+        RandString.__init__(self, size, b"".join([bytes([i]) for i in range(1,256)]))
         self.term = term
     def _fix(self):
         return RandString._fix(self)+self.term
@@ -543,60 +545,60 @@ class RandSingSLong(RandSingNum):
 
 class RandSingString(RandSingularity):
     def __init__(self):
-        self._choice = [ "",
-                         "%x",
-                         "%%",
-                         "%s",
-                         "%i",
-                         "%n",
-                         "%x%x%x%x%x%x%x%x%x",
-                         "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
-                         "%",
-                         "%%%",
-                         "A"*4096,
-                         "\x00"*4096,
-                         "\xff"*4096,
-                         "\x7f"*4096,
-                         "\x80"*4096,
-                         " "*4096,
-                         "\\"*4096,
-                         "("*4096,
-                         "../"*1024,
-                         "/"*1024,
-                         "${HOME}"*512,
-                         " or 1=1 --",
-                         "' or 1=1 --",
-                         '" or 1=1 --',
-                         " or 1=1; #",
-                         "' or 1=1; #",
-                         '" or 1=1; #',
-                         ";reboot;",
-                         "$(reboot)",
-                         "`reboot`",
-                         "index.php%00",
-                         "\x00",
-                         "%00",
-                         "\\",
-                         "../../../../../../../../../../../../../../../../../etc/passwd",
-                         "%2e%2e%2f" * 20 + "etc/passwd",
-                         "%252e%252e%252f" * 20 + "boot.ini",
-                         "..%c0%af" * 20 + "etc/passwd",
-                         "..%c0%af" * 20 + "boot.ini",
-                         "//etc/passwd",
-                         r"..\..\..\..\..\..\..\..\..\..\..\..\..\..\..\..\..\boot.ini",
-                         "AUX:",
-                         "CLOCK$",
-                         "COM:",
-                         "CON:",
-                         "LPT:",
-                         "LST:",
-                         "NUL:",
-                         "CON:",
-                         r"C:\CON\CON",
-                         r"C:\boot.ini",
-                         r"\\myserver\share",
-                         "foo.exe:",
-                         "foo.exe\\", ]
+        self._choice = [ b"",
+                         b"%x",
+                         b"%%",
+                         b"%s",
+                         b"%i",
+                         b"%n",
+                         b"%x%x%x%x%x%x%x%x%x",
+                         b"%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+                         b"%",
+                         b"%%%",
+                         b"A"*4096,
+                         b"\x00"*4096,
+                         b"\xff"*4096,
+                         b"\x7f"*4096,
+                         b"\x80"*4096,
+                         b" "*4096,
+                         b"\\"*4096,
+                         b"("*4096,
+                         b"../"*1024,
+                         b"/"*1024,
+                         b"${HOME}"*512,
+                         b" or 1=1 --",
+                         b"' or 1=1 --",
+                         b'" or 1=1 --',
+                         b" or 1=1; #",
+                         b"' or 1=1; #",
+                         b'" or 1=1; #',
+                         b";reboot;",
+                         b"$(reboot)",
+                         b"`reboot`",
+                         b"index.php%00",
+                         b"\x00",
+                         b"%00",
+                         b"\\",
+                         b"../../../../../../../../../../../../../../../../../etc/passwd",
+                         b"%2e%2e%2f" * 20 + "etc/passwd",
+                         b"%252e%252e%252f" * 20 + "boot.ini",
+                         b"..%c0%af" * 20 + "etc/passwd",
+                         b"..%c0%af" * 20 + "boot.ini",
+                         b"//etc/passwd",
+                         br"..\..\..\..\..\..\..\..\..\..\..\..\..\..\..\..\..\boot.ini",
+                         b"AUX:",
+                         b"CLOCK$",
+                         b"COM:",
+                         b"CON:",
+                         b"LPT:",
+                         b"LST:",
+                         b"NUL:",
+                         b"CON:",
+                         rb"C:\CON\CON",
+                         rb"C:\boot.ini",
+                         rb"\\myserver\share",
+                         b"foo.exe:",
+                         b"foo.exe\\", ]
                              
 
 class RandPool(RandField):
@@ -637,7 +639,7 @@ class ZuluTime(AutoTime):
 
 
 class DelayedEval(VolatileValue):
-    """ Exemple of usage: DelayedEval("time.time()") """
+    """ Example of usage: DelayedEval("time.time()") """
     def __init__(self, expr):
         self.expr = expr
     def _fix(self):

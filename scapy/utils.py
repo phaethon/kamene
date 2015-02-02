@@ -242,7 +242,7 @@ def warning(x):
 
 def mac2str(mac):
     #return "".join(map(lambda x: chr(int(x,16)), mac.split(":")))
-    return b''.join([ str(i).encode('ascii') for i in mac ])
+    return b''.join([ bytes([int(i, 16)]) for i in mac.split(":") ])
 
 def str2mac(s):
     return ("%02x:"*6)[:-1] % tuple(s) 

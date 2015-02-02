@@ -340,8 +340,8 @@ class StrField(Field):
     def i2m(self, pkt, x):
         if x is None:
             x = b""
-        elif type(x) is not str:
-            x=str(x)
+        elif type(x) is not bytes:
+            x=str(x).decode('utf-8')
         return x
     def addfield(self, pkt, s, val):
         return s+self.i2m(pkt, val)
@@ -364,7 +364,7 @@ class PacketField(StrField):
         return self.cls(m)
     def getfield(self, pkt, s):
         i = self.m2i(pkt, s)
-        remain = ""
+        remain = b""
         if conf.padding_layer in i:
             r = i[conf.padding_layer]
             del(r.underlayer.payload)
@@ -419,7 +419,7 @@ class PacketListField(PacketField):
             c = self.count_from(pkt)
             
         lst = []
-        ret = ""
+        ret = b""
         remain = s
         if l is not None:
             remain,ret = s[:l],s[l:]
@@ -456,7 +456,7 @@ class StrFixedLenField(StrField):
             self.length_from = lambda pkt,length=length: length
     def i2repr(self, pkt, v):
         if type(v) is str:
-            v = v.rstrip("\0")
+            v = v.rstrip(b"\0")
         return repr(v)
     def getfield(self, pkt, s):
         l = self.length_from(pkt)
@@ -490,15 +490,15 @@ class NetBIOSNameField(StrFixedLenField):
     def i2m(self, pkt, x):
         l = self.length_from(pkt)/2
         if x is None:
-            x = ""
-        x += " "*(l)
+            x = b""
+        x += b" "*(l)
         x = x[:l]
-        x = "".join(map(lambda x: chr(0x41+(ord(x)>>4))+chr(0x41+(ord(x)&0xf)), x))
-        x = " "+x
+        x = b"".join(map(lambda x: chr(0x41+(ord(x)>>4))+chr(0x41+(ord(x)&0xf)), x))
+        x = b" "+x
         return x
     def m2i(self, pkt, x):
-        x = x.strip("\x00").strip(" ")
-        return "".join(map(lambda x,y: chr((((ord(x)-1)&0xf)<<4)+((ord(y)-1)&0xf)), x[::2],x[1::2]))
+        x = x.strip(b"\x00").strip(b" ")
+        return b"".join(map(lambda x,y: chr((((ord(x)-1)&0xf)<<4)+((ord(y)-1)&0xf)), x[::2],x[1::2]))
 
 class StrLenField(StrField):
     def __init__(self, name, default, fld=None, length_from=None):
@@ -547,7 +547,7 @@ class FieldListField(Field):
             c = self.count_from(pkt)
 
         val = []
-        ret=""
+        ret=b""
         if l is not None:
             s,ret = s[:l],s[l:]
             
@@ -582,9 +582,9 @@ class FieldLenField(Field):
 
 class StrNullField(StrField):
     def addfield(self, pkt, s, val):
-        return s+self.i2m(pkt, val)+"\x00"
+        return s+self.i2m(pkt, val)+b"\x00"
     def getfield(self, pkt, s):
-        l = s.find("\x00")
+        l = s.find(b"\x00")
         if l < 0:
             #XXX \x00 not found
             return "",s
@@ -600,7 +600,7 @@ class StrStopField(StrField):
     def getfield(self, pkt, s):
         l = s.find(self.stop)
         if l < 0:
-            return "",s
+            return b"",s
 #            raise Scapy_Exception,"StrStopField: stop value [%s] not found" %stop
         l += len(self.stop)+self.additionnal
         return s[l:],s[:l]
