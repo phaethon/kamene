@@ -751,22 +751,22 @@ def hexedit(x):
     os.unlink(f)
     return x
 
-def __make_table(yfmtfunc, fmtfunc, endline, list, fxyz, sortx=None, sorty=None, seplinefunc=None):
+def __make_table(yfmtfunc, fmtfunc, endline, li, fxyz, sortx=None, sorty=None, seplinefunc=None):
     vx = {} 
     vy = {} 
     vz = {}
     vxf = {}
     vyf = {}
     l = 0
-    for e in list:
+    for e in li:
         xx,yy,zz = map(str, fxyz(e))
         l = max(len(yy),l)
         vx[xx] = max(vx.get(xx,0), len(xx), len(zz))
         vy[yy] = None
         vz[(xx,yy)] = zz
 
-    vxk = vx.keys()
-    vyk = vy.keys()
+    vxk = list(vx.keys())
+    vyk = list(vy.keys())
     if sortx:
         vxk.sort(sortx)
     else:

@@ -2,20 +2,20 @@ Working:
 Can be installed with 'python3 setup.py install'
 scapy prompt loads, layers load (not all tested), can create and send packet (e.g. pkt = Ether() / IP() )
 
-Somewhat working commands:
+Working commands (but much more testing needed):
 - conf
 - hexdump
 - ls
 - lsc
-- pkg.show() # quickly tested for IP and Ether layers
+- pkg.show(), pkg.show2()
 - rdpcap
 - sr1,sr, srp1, srp
 - sniff
+- traceroute
 - wrpcap
 
 Not working:
-Unresolved import issue in plist.py affecting gnuplot
-layers/inet.py issue with replacing new.instancemethod
+- gnuplot (Unresolved import issue in plist.py affecting gnuplot, layers/inet.py issue with replacing new.instancemethod)
 
 Implementad changes in all files:
 - updating print to function form

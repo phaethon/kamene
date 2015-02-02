@@ -90,7 +90,8 @@ class IPOption(Packet):
     @classmethod
     def dispatch_hook(cls, pkt=None, *args, **kargs):
         if pkt:
-            opt = ord(pkt[0])&0x1f
+            #opt = ord(pkt[0])&0x1f
+            opt = pkt[0]&0x1f
             if opt in cls.registered_ip_options:
                 return cls.registered_ip_options[opt]
         return cls
@@ -235,7 +236,8 @@ class TCPOptionsField(StrField):
     def m2i(self, pkt, x):
         opt = []
         while x:
-            onum = ord(x[0])
+            #onum = ord(x[0])
+            onum = (x[0])
             if onum == 0:
                 opt.append(("EOL",None))
                 x=x[1:]
@@ -244,7 +246,8 @@ class TCPOptionsField(StrField):
                 opt.append(("NOP",None))
                 x=x[1:]
                 continue
-            olen = ord(x[1])
+            #olen = ord(x[1])
+            olen = (x[1])
             if olen < 2:
                 warning("Malformed TCP option (announced length is %i)" % olen)
                 olen = 2
@@ -264,7 +267,7 @@ class TCPOptionsField(StrField):
         return opt
     
     def i2m(self, pkt, x):
-        opt = ""
+        opt = b""
         for oname,oval in x:
             if type(oname) is str:
                 if oname == "NOP":
@@ -290,7 +293,7 @@ class TCPOptionsField(StrField):
                 if type(oval) is not str:
                     warning("option [%i] is not string."%onum)
                     continue
-            opt += chr(onum)+chr(2+len(oval))+oval
+            opt += bytes([(onum), (2+len(oval)), oval])
         return opt+b"\x00"*(3-((len(opt)+3)%4))
     def randval(self):
         return [] # XXX
@@ -357,7 +360,7 @@ class IP(Packet, IPTools):
     def send(self, s, slp=0):
         for p in self:
             try:
-                s.sendto(str(p), (p.dst,0))
+                s.sendto(p.bytes(), (p.dst,0))
             except socket.error as msg:
                 log_runtime.error(msg)
             if slp:
@@ -410,7 +413,7 @@ class IP(Packet, IPTools):
             fl = fl.underlayer
         
         for p in fl:
-            s = str(p[fnb].payload)
+            s = (p[fnb].payload).bytes()
             nb = (len(s)+fragsize-1)/fragsize
             for i in range(nb):            
                 q = p.copy()
@@ -446,8 +449,8 @@ class TCP(Packet):
         p += pay
         dataofs = self.dataofs
         if dataofs is None:
-            dataofs = 5+((len(self.get_field("options").i2m(self,self.options))+3)/4)
-            p = p[:12]+chr((dataofs << 4) | ord(p[12])&0x0f)+p[13:]
+            dataofs = 5+((len(self.get_field("options").i2m(self,self.options))+3)//4)
+            p = p[:12]+bytes([(dataofs << 4) | (p[12])&0x0f])+p[13:]
         if self.chksum is None:
             if isinstance(self.underlayer, IP):
                 if self.underlayer.len is not None:
@@ -743,7 +746,7 @@ def fragment(pkt, fragsize=1480):
     fragsize = (fragsize+7)/8*8
     lst = []
     for p in pkt:
-        s = str(p[IP].payload)
+        s = (p[IP].payload).bytes()
         nb = (len(s)+fragsize-1)/fragsize
         for i in range(nb):            
             q = p.copy()
@@ -827,7 +830,7 @@ def defrag(plist):
             defrag.append(p)
     defrag2=PacketList()
     for p in defrag:
-        defrag2.append(p.__class__(str(p)))
+        defrag2.append(p.__class__(p.bytes()))
     return nofrag,defrag2,missfrag
             
 @conf.commands.register
@@ -889,7 +892,7 @@ def defragment(plist):
             defrag.append(p)
     defrag2=[]
     for p in defrag:
-        q = p.__class__(str(p))
+        q = p.__class__(p.bytes())
         q._defrag_pos = p._defrag_pos
         defrag2.append(q)
     final += defrag2
@@ -1402,7 +1405,7 @@ class TCP_client(Automaton):
             raise self.ESTABLISHED().action_parameters(pkt)
     @ATMT.action(incoming_data_received)
     def receive_data(self,pkt):
-        data = str(pkt[TCP].payload)
+        data = (pkt[TCP].payload.bytes())
         if data and self.l4[TCP].ack == pkt[TCP].seq:
             self.l4[TCP].ack += len(data)
             self.l4[TCP].flags = "A"

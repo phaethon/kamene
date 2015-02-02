@@ -183,7 +183,10 @@ class CacheInstance(dict):
         except KeyError:
             return default
     def __setitem__(self, item, v):
-        self._timetable[item] = time.time()
+        try:
+          self._timetable[item] = time.time()
+        except AttributeError:
+          pass
         dict.__setitem__(self, item,v)
     def update(self, other):
         dict.update(self, other)

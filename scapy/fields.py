@@ -243,7 +243,8 @@ class SourceIPField(IPField):
         if x is None:
             dst=getattr(pkt,self.dstname)
             if isinstance(dst,Gen):
-                r = map(conf.route.route, dst)
+                #r = map(conf.route.route, dst)
+                r = [ conf.route.route(i) for i in dst ]
                 r.sort()
                 if r[0] != r[-1]:
                     warning("More than one possible route for %s"%repr(dst))
@@ -410,7 +411,8 @@ class PacketListField(PacketField):
     def i2len(self, pkt, val):
         return sum( len(p) for p in val )
     def do_copy(self, x):
-        return map(lambda p:p.copy(), x)
+        #return map(lambda p:p.copy(), x)
+        return [ i.copy() for i in x ]
     def getfield(self, pkt, s):
         c = l = None
         if self.length_from is not None:
@@ -445,7 +447,7 @@ class PacketListField(PacketField):
             lst.append(p)
         return remain+ret,lst
     def addfield(self, pkt, s, val):
-        return s+b"".join(map(str, val))
+        return s+b"".join([ i.bytes() for i in val ])
 
 
 class StrFixedLenField(StrField):
@@ -493,7 +495,8 @@ class NetBIOSNameField(StrFixedLenField):
             x = b""
         x += b" "*(l)
         x = x[:l]
-        x = b"".join(map(lambda x: chr(0x41+(ord(x)>>4))+chr(0x41+(ord(x)&0xf)), x))
+        #x = b"".join(map(lambda x: chr(0x41+(ord(x)>>4))+chr(0x41+(ord(x)&0xf)), x))
+        x = b"".join([ bytes([0x41+(i>>4),0x41+(i&0xf)]) for i in x ])
         x = b" "+x
         return x
     def m2i(self, pkt, x):
@@ -852,7 +855,8 @@ class FlagsField(BitField):
     def any2i(self, pkt, x):
         if type(x) is str:
             if self.multi:
-                x = map(lambda y:[y], x.split("+"))
+                #x = map(lambda y:[y], x.split("+"))
+                x = [ [y] for y in x.split("+") ]
             y = 0
             for i in x:
                 y |= 1 << self.names.index(i)
