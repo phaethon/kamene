@@ -145,7 +145,7 @@ def sndrcv(pks, pkt, timeout = None, inter = 0, verbose=None, chainCC=0, retry=0
                                     if r.answers(hlst[i]):
                                         ans.append((hlst[i],r))
                                         if verbose > 1:
-                                            os.write(1, "*")
+                                            os.write(1, b"*")
                                         ok = 1                                
                                         if not multi:
                                             del(hlst[i])
