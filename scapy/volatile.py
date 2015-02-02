@@ -122,7 +122,7 @@ class RandEnum(RandNum):
     def __init__(self, min, max):
         self.seq = RandomEnumeration(min,max)
     def _fix(self):
-        return self.seq.next()
+        return next(self.seq)
 
 class RandByte(RandNum):
     def __init__(self):

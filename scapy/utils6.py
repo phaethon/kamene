@@ -514,7 +514,7 @@ def in6_isaddr6to4(x):
     x = inet_pton(socket.AF_INET6, x)
     return x[:2] == ' \x02'
 
-conf.teredoPrefix = b"2001::" # old one was 3ffe:831f (it is a /32)
+conf.teredoPrefix = "2001::" # old one was 3ffe:831f (it is a /32)
 conf.teredoServerPort = 3544
 
 def in6_isaddrTeredo(x):

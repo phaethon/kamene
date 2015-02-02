@@ -167,7 +167,7 @@ class PadField:
         return remain[padlen:], val
 
     def addfield(self, pkt, s, val):
-        sval = self._fld.addfield(pkt, "", val)
+        sval = self._fld.addfield(pkt, b"", val)
         return s+sval+struct.pack("%is" % (self.padlen(len(sval))), self._padwith)
     
     def __getattr__(self, attr):
@@ -184,7 +184,7 @@ class MACField(Field):
     def m2i(self, pkt, x):
         return str2mac(x)
     def any2i(self, pkt, x):
-        if type(x) is str and len(x) is 6:
+        if type(x) is bytes and len(x) is 6:
             x = self.m2i(pkt, x)
         return x
     def i2repr(self, pkt, x):
@@ -455,7 +455,7 @@ class StrFixedLenField(StrField):
         if length is not None:
             self.length_from = lambda pkt,length=length: length
     def i2repr(self, pkt, v):
-        if type(v) is str:
+        if type(v) is bytes:
             v = v.rstrip(b"\0")
         return repr(v)
     def getfield(self, pkt, s):
@@ -488,7 +488,7 @@ class NetBIOSNameField(StrFixedLenField):
     def __init__(self, name, default, length=31):
         StrFixedLenField.__init__(self, name, default, length)
     def i2m(self, pkt, x):
-        l = self.length_from(pkt)/2
+        l = self.length_from(pkt)//2
         if x is None:
             x = b""
         x += b" "*(l)
@@ -657,7 +657,7 @@ class BitField(Field):
         else:
             bn = 0
         # we don't want to process all the string
-        nb_bytes = (self.size+bn-1)/8 + 1
+        nb_bytes = (self.size+bn-1)//8 + 1
         w = s[:nb_bytes]
 
         # split the substring byte by byte
@@ -665,7 +665,7 @@ class BitField(Field):
 
         b = 0
         for c in range(nb_bytes):
-            b |= long(bytes[c]) << (nb_bytes-c-1)*8
+            b |= int(bytes[c]) << (nb_bytes-c-1)*8
 
         # get rid of high order bits
         b &= (1 << (nb_bytes*8-bn)) - 1
@@ -677,7 +677,7 @@ class BitField(Field):
             b = self.reverse(b)
 
         bn += self.size
-        s = s[bn/8:]
+        s = s[bn//8:]
         bn = bn%8
         b = self.m2i(pkt, b)
         if bn:
@@ -844,7 +844,8 @@ class FlagsField(BitField):
     def __init__(self, name, default, size, names):
         self.multi = type(names) is list
         if self.multi:
-            self.names = map(lambda x:[x], names)
+            #self.names = map(lambda x:[x], names)
+            self.names = [ [x] for x in names ]
         else:
             self.names = names
         BitField.__init__(self, name, default, size)

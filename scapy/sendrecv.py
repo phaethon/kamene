@@ -472,7 +472,7 @@ def sndrcvflood(pks, pkt, prn=lambda a:a[1].summary(), chainCC=0, store=1, uniqu
         while 1:
             readyr,readys,_ = select([rsock],[ssock],[])
             if ssock in readys:
-                pks.send(packets_to_send.next())
+                pks.send(next(packets_to_send))
                 
             if rsock in readyr:
                 p = pks.recv(MTU)

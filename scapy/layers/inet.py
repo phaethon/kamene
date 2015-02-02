@@ -365,7 +365,7 @@ class IP(Packet, IPTools):
     def route(self):
         dst = self.dst
         if isinstance(dst,Gen):
-            dst = iter(dst).next()
+            dst = next(iter(dst))
         return conf.route.route(dst)
     def hashret(self):
         if ( (self.proto == socket.IPPROTO_ICMP)
@@ -605,7 +605,7 @@ class ICMP(Packet):
         p += pay
         if self.chksum is None:
             ck = checksum(p)
-            p = p[:2]+chr(ck>>8)+chr(ck&0xff)+p[4:]
+            p = p[:2]+bytes([ck>>8, ck&0xff])+p[4:]
         return p
     
     def hashret(self):
@@ -1032,7 +1032,7 @@ class TracerouteResult(SndRcvList):
                             trlst[t-1] = s
         forecol = colgen(0.625, 0.4375, 0.25, 0.125)
         for trlst in tr3d.values():
-            col = forecol.next()
+            col = next(forecol)
             start = (0,0,0)
             for ip in trlst:
                 visual.cylinder(pos=start,axis=ip.pos-start,color=col,radius=0.2)
@@ -1173,7 +1173,7 @@ class TracerouteResult(SndRcvList):
             k = trace.keys()
             for n in range(min(k), max(k)):
                 if not trace.has_key(n):
-                    trace[n] = unknown_label.next()
+                    trace[n] = next(unknown_label)
             if not ports_done.has_key(rtk):
                 if rtk[2] == 1: #ICMP
                     bh = "%s %i/icmp" % (rtk[1],rtk[3])
@@ -1222,7 +1222,7 @@ class TracerouteResult(SndRcvList):
         s += "\n#ASN clustering\n"
         for asn in ASNs:
             s += '\tsubgraph cluster_%s {\n' % asn
-            col = backcolorlist.next()
+            col = next(backcolorlist)
             s += '\t\tcolor="#%s%s%s";' % col
             s += '\t\tnode [fillcolor="#%s%s%s",style=filled];' % col
             s += '\t\tfontsize = 10;'
@@ -1261,7 +1261,7 @@ class TracerouteResult(SndRcvList):
     
         for rtk in rt:
             s += "#---[%s\n" % repr(rtk)
-            s += '\t\tedge [color="#%s%s%s"];\n' % forecolorlist.next()
+            s += '\t\tedge [color="#%s%s%s"];\n' % next(forecolorlist)
             trace = rt[rtk]
             k = trace.keys()
             for n in range(min(k), max(k)):
@@ -1326,7 +1326,7 @@ traceroute(target, [maxttl=30,] [dport=80,] [sport=80,] [verbose=conf.verb]) -> 
 class TCP_client(Automaton):
     
     def parse_args(self, ip, port, *args, **kargs):
-        self.dst = iter(Net(ip)).next()
+        self.dst = next(iter(Net(ip)))
         self.dport = port
         self.sport = random.randrange(0,2**16)
         self.l4 = IP(dst=ip)/TCP(sport=self.sport, dport=self.dport, flags=0,

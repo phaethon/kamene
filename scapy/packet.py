@@ -300,7 +300,7 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
     def __nonzero__(self):
         return True
     def __len__(self):
-        return len(self.__str__())
+        return len(self.bytes())
     def self_build(self, field_pos_list=None):
         if self.raw_packet_cache is not None:
             return self.raw_packet_cache
@@ -501,7 +501,7 @@ Creates an EPS file describing a packet. If filename is not provided a temporary
 
         last_shift,last_y=0,0.0
         while t:
-            bkcol = backcolor.next()
+            bkcol = next(backcolor)
             proto,fields = t.pop()
             y += 0.5
             pt = pyx.text.text(XSTART, (YTXT-y)*YMUL, r"\font\cmssfont=cmss10\cmssfont{%s}" % proto.name, [ pyx.text.size.Large])
@@ -511,7 +511,7 @@ Creates an EPS file describing a packet. If filename is not provided a temporary
             canvas.stroke(ptbb.path(),[pyx.color.rgb.black, pyx.deco.filled([bkcol])])
             canvas.insert(pt)
             for fname, fval, fdump in fields:
-                col = forecolor.next()
+                col = next(forecolor)
                 ft = pyx.text.text(XSTART, (YTXT-y)*YMUL, r"\font\cmssfont=cmss10\cmssfont{%s}" % tex_escape(fname.name))
                 if isinstance(fval, str):
                     if len(fval) > 18:

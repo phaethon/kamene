@@ -242,6 +242,8 @@ def warning(x):
 
 def mac2str(mac):
     #return "".join(map(lambda x: chr(int(x,16)), mac.split(":")))
+    if type(mac) != str:
+      mac = mac.decode('ascii')
     return b''.join([ bytes([int(i, 16)]) for i in mac.split(":") ])
 
 def str2mac(s):

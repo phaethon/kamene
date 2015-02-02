@@ -49,7 +49,7 @@ conf.netcache.new_cache("arp_cache", 120) # cache entries expire after 120s
 def getmacbyip(ip, chainCC=0):
     """Return MAC address corresponding to a given IP address"""
     if isinstance(ip,Net):
-        ip = iter(ip).next()
+        ip = next(iter(ip))
     ip = inet_ntoa(inet_aton(ip))
     #tmp = map(ord, inet_aton(ip))
     tmp = inet_aton(ip)
@@ -340,7 +340,7 @@ class ARP(Packet):
     def route(self):
         dst = self.pdst
         if isinstance(dst,Gen):
-            dst = iter(dst).next()
+            dst = next(iter(dst))
         return conf.route.route(dst)
     def extract_padding(self, s):
         return "",s

@@ -541,7 +541,7 @@ class Automaton(metaclass = Automaton_metaclass):
                     elif c.type == _ATMT_Command.STOP:
                         break
                     while True:
-                        state = iterator.next()
+                        state = next(iterator)
                         if isinstance(state, self.CommandMessage):
                             break
                         elif isinstance(state, self.Breakpoint):
@@ -598,7 +598,7 @@ class Automaton(metaclass = Automaton_metaclass):
     
                 # Finally listen and pay attention to timeouts
                 expirations = iter(self.timeout[self.state.state])
-                next_timeout,timeout_func = expirations.next()
+                next_timeout,timeout_func = next(expirations)
                 t0 = time.time()
                 
                 fds = [self.cmdin]
@@ -611,7 +611,7 @@ class Automaton(metaclass = Automaton_metaclass):
                     if next_timeout is not None:
                         if next_timeout <= t:
                             self._run_condition(timeout_func, *state_output)
-                            next_timeout,timeout_func = expirations.next()
+                            next_timeout,timeout_func = next(expirations)
                     if next_timeout is None:
                         remain = None
                     else:

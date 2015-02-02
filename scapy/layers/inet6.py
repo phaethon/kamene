@@ -357,7 +357,7 @@ class IPv6(_IPv6GuessPayload, Packet, IPTools):
     def route(self):
         dst = self.dst
         if isinstance(dst,Gen):
-            dst = iter(dst).next()
+            dst = next(iter(dst))
         return conf.route6.route(dst)
 
     def mysummary(self):

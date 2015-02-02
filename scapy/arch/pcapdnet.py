@@ -53,7 +53,7 @@ if conf.use_pcap:
                 def __del__(self):
                     warning("__del__: don't know how to close the file descriptor. Bugs ahead ! Please report this bug.")
                 def next(self):
-                    c = self.pcap.next()
+                    c = next(self.pcap)
                     if c is None:
                         return
                     ts, pkt = c
@@ -67,7 +67,7 @@ if conf.use_pcap:
                 def setfilter(self, filter):
                     self.pcap.setfilter(filter, 0, 0)
                 def next(self):
-                    c = self.pcap.next()
+                    c = next(self.pcap)
                     if c is None:
                         return
                     l,pkt,ts = c 
@@ -84,7 +84,7 @@ if conf.use_pcap:
                     self.pcap = pcap.open_live(*args, **kargs)
                 def next(self):
                     try:
-                        c = self.pcap.next()
+                        c = next(self.pcap)
                     except pcap.PcapError:
                         return None
                     else:
@@ -142,7 +142,7 @@ if conf.use_pcap:
         
                 pkt = None
                 while pkt is None:
-                    pkt = self.ins.next()
+                    pkt = next(self.ins)
                     if pkt is not None:
                         ts,pkt = pkt
                     if scapy.arch.WINDOWS and pkt is None:
@@ -265,7 +265,7 @@ if conf.use_pcap and conf.use_dnet:
                 cls = conf.default_l2
                 warning("Unable to guess datalink type (interface=%s linktype=%i). Using %s" % (self.iface, ll, cls.name))
     
-            pkt = self.ins.next()
+            pkt = next(self.ins)
             if pkt is not None:
                 ts,pkt = pkt
             if pkt is None:
@@ -332,7 +332,7 @@ if conf.use_pcap and conf.use_dnet:
                 cls = conf.default_l2
                 warning("Unable to guess datalink type (interface=%s linktype=%i). Using %s" % (self.iface, ll, cls.name))
     
-            pkt = self.ins.next()
+            pkt = next(self.ins)
             if pkt is not None:
                 ts,pkt = pkt
             if pkt is None:
