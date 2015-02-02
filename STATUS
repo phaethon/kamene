@@ -1,6 +1,6 @@
 Working:
 Can be installed with 'python3 setup.py install'
-scapy prompt loads, layers load (not all tested), can create and send packet (e.g. pkt = Ether() / IP() )
+scapy prompt loads, layers load (just a few tested), can create and send packet
 
 Working commands (but much more testing needed):
 - conf
@@ -16,6 +16,7 @@ Working commands (but much more testing needed):
 
 Not working:
 - gnuplot (Unresolved import issue in plist.py affecting gnuplot, layers/inet.py issue with replacing new.instancemethod)
+- all that depends on crypto
 
 Implementad changes in all files:
 - updating print to function form

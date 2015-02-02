@@ -1,4 +1,5 @@
-This is a fork of scapy project to make it compatible with python3.
-Fork based on v2.3.1
-File STATUS contains the list of converted and not converted files.
-Using python 3.4 on Ubuntu linux for testing.
+This is a fork of scapy project to make it compatible with python3. Fork based on v2.3.1
+Basic functions (IPV4, Ether, TCP, UDP sending/receiving/sniffing, traceroute, etc.) work, but many exceptions expected. File STATUS contains more info on current status.
+Using python 3.4 on Ubuntu linux for testing. Windows, bsd, mac specific files not converted yet, but will be if there is popular demand.
+
+Please, test it out and submit all issues identified. Often they are more easy to fix than to identify.
