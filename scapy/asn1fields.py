@@ -7,6 +7,7 @@
 Classes that implement ASN.1 data structures.
 """
 
+import itertools
 from scapy.asn1.asn1 import *
 from scapy.asn1.ber import *
 from scapy.volatile import *
@@ -210,9 +211,13 @@ class ASN1F_SEQUENCE(ASN1F_field):
                 return False
         return True
     def get_fields_list(self):
-        return reduce(lambda x,y: x+y.get_fields_list(), self.seq, [])
+        #return reduce(lambda x,y: x+y.get_fields_list(), self.seq, [])
+        return itertools.chain(*[ i.get_fields_list() for i in self.seq ])
     def build(self, pkt):
-        s = reduce(lambda x,y: x+y.build(pkt), self.seq, "")
+        #s = reduce(lambda x,y: x+y.build(pkt), self.seq, "")
+        s = ""
+        for i in self.seq:
+          s += i.build(pkt)
         return self.i2m(pkt, s)
     def dissect(self, pkt, s):
         codec = self.ASN1_tag.get_codec(pkt.ASN1_codec)
