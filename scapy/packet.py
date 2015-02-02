@@ -848,7 +848,7 @@ Creates an EPS file describing a packet. If filename is not provided a temporary
         self.payload.show(indent=indent, lvl=lvl+(" "*indent*self.show_indent), label_lvl=label_lvl)
     def show2(self):
         """Prints a hierarchical view of an assembled version of the packet, so that automatic fields are calculated (checksums, etc.)"""
-        self.__class__(str(self)).show()
+        self.__class__(self.bytes()).show()
 
     def sprintf(self, fmt, relax=1):
         """sprintf(format, [relax=1]) -> str

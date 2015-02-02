@@ -36,11 +36,11 @@ def get_temp_file(keep=False, autoext=""):
 def sane_color(x):
     r=""
     for i in x:
-        j = ord(i)
+        j = i
         if (j < 32) or (j >= 127):
             r=r+conf.color_theme.not_printable(".")
         else:
-            r=r+i
+            r=r+chr(i)
     return r
 
 def sane(x):
@@ -65,14 +65,14 @@ def lhex(x):
 
 @conf.commands.register
 def hexdump(x):
-    x=str(x)
+    x=x.bytes()
     l = len(x)
     i = 0
     while i < l:
         print("%04x  " % i,end = " ")
         for j in range(16):
             if i+j < l:
-                print("%02X" % ord(x[i+j]), end = " ")
+                print("%02X" % x[i+j], end = " ")
             else:
                 print("  ", end = " ")
             if j%16 == 7:
@@ -83,11 +83,11 @@ def hexdump(x):
 
 @conf.commands.register
 def linehexdump(x, onlyasc=0, onlyhex=0):
-    x = str(x)
+    x = x.bytes()
     l = len(x)
     if not onlyasc:
         for i in range(l):
-            print("%02X" % ord(x[i]), end = " ")
+            print("%02X" % x[i], end = " ")
         print("", end = " ")
     if not onlyhex:
         print(sane_color(x))
@@ -245,7 +245,7 @@ def mac2str(mac):
     return b''.join([ str(i).encode('ascii') for i in mac ])
 
 def str2mac(s):
-    return ("%02x:"*6)[:-1] % tuple(map(ord, s)) 
+    return ("%02x:"*6)[:-1] % tuple(s) 
 
 def strxor(x,y):
     #return "".join(map(lambda i,j:chr(ord(i)^ord(j)),x,y))
@@ -492,9 +492,9 @@ class RawPcapReader:
         except IOError:
             self.f = open(filename,"rb")
             magic = self.f.read(4)
-        if magic == "\xa1\xb2\xc3\xd4": #big endian
+        if magic == b"\xa1\xb2\xc3\xd4": #big endian
             self.endian = ">"
-        elif  magic == "\xd4\xc3\xb2\xa1": #little endian
+        elif  magic == b"\xd4\xc3\xb2\xa1": #little endian
             self.endian = "<"
         else:
             raise Scapy_Exception("Not a pcap capture file (bad magic)")
@@ -597,8 +597,8 @@ class PcapReader(RawPcapReader):
         return p
     def read_all(self,count=-1):
         res = RawPcapReader.read_all(self, count)
-        import plist
-        return plist.PacketList(res,name = os.path.basename(self.filename))
+        import scapy.plist
+        return scapy.plist.PacketList(res,name = os.path.basename(self.filename))
     def recv(self, size=MTU):
         return self.read_packet(size)
         
@@ -707,7 +707,7 @@ class PcapWriter(RawPcapWriter):
     def _write_packet(self, packet):        
         sec = int(packet.time)
         usec = int(round((packet.time-sec)*1000000))
-        s = str(packet)
+        s = packet.bytes()
         caplen = len(s)
         RawPcapWriter._write_packet(self, s, sec, usec, caplen, caplen)
 
