@@ -30,3 +30,4 @@ Implementad changes in all files:
 - replaced iteritems,iterkeys,itervalues to items,keys,values
 - replaced __metaclass__ with (metaclass=)
 - replaced has_key to key in dict
+- replaced xxx.next() to next(xxx)

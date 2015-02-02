@@ -215,22 +215,22 @@ def in6_getifaddr():
     """
     ret = []
     try:
-        f = open("/proc/net/if_inet6","r")
+        f = open("/proc/net/if_inet6","rb")
     except IOError as err:
         return ret
     l = f.readlines()
     for i in l:
         # addr, index, plen, scope, flags, ifname
         tmp = i.split()
-        addr = struct.unpack('4s4s4s4s4s4s4s4s', bytes(tmp[0], 'utf-8'))
-        addr = scapy.utils6.in6_ptop(b':'.join(addr).decode('utf-8'))
-        ret.append((addr, int(tmp[3], 16), tmp[5])) # (addr, scope, iface)
+        addr = struct.unpack('4s4s4s4s4s4s4s4s', tmp[0])
+        addr = scapy.utils6.in6_ptop(b':'.join(addr).decode('ascii'))
+        ret.append((addr, int(tmp[3], 16), tmp[5].decode('ascii'))) # (addr, scope, iface)
     f.close()
     return ret
 
 def read_routes6():
     try:
-        f = open("/proc/net/ipv6_route","rb")
+        f = open("/proc/net/ipv6_route","r")
     except IOError as err:
         return []
     # 1. destination network
@@ -245,9 +245,9 @@ def read_routes6():
     # 10. device name
     routes = []
     def proc2r(p):
-        ret = struct.unpack('4s4s4s4s4s4s4s4s', p)
-        ret = b':'.join(ret).decode('utf-8')
-        return scapy.utils6.in6_ptop(ret)
+        ret = struct.unpack('4s4s4s4s4s4s4s4s', p.encode('ascii'))
+        ret = b':'.join(ret)
+        return scapy.utils6.in6_ptop(ret.decode('ascii'))
     
     lifaddr = in6_getifaddr() 
     for l in f.readlines():
@@ -265,11 +265,12 @@ def read_routes6():
 
         cset = [] # candidate set (possible source addresses)
         if dev == LOOPBACK_NAME:
-            if d == b'::':
+            if d == '::':
                 continue
-            cset = [b'::1']
+            cset = ['::1']
         else:
-            devaddrs = filter(lambda x: x[2] == dev, lifaddr)
+            #devaddrs = filter(lambda x: x[2] == dev, lifaddr)
+            devaddrs = [ x for x in lifaddr if x[2] == dev ]
             cset = scapy.utils6.construct_source_candidate_set(d, dp, devaddrs, LOOPBACK_NAME)
         
         if len(cset) != 0:

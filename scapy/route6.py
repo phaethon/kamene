@@ -65,7 +65,7 @@ class Route6:
     def make_route(self, dst, gw=None, dev=None):
         """Internal function : create a route for 'dst' via 'gw'.
         """
-        prefix, plen = (dst.split(b"/")+[b"128"])[:2]
+        prefix, plen = (dst.split("/")+["128"])[:2]
         plen = int(plen)
 
         if gw is None:
@@ -76,7 +76,8 @@ class Route6:
             # TODO: do better than that
             # replace that unique address by the list of all addresses
             lifaddr = in6_getifaddr()             
-            devaddrs = filter(lambda x: x[2] == dev, lifaddr)
+            #filter(lambda x: x[2] == dev, lifaddr)
+            devaddrs = [ i for i in lifaddr if i[2] == dev] 
             ifaddr = construct_source_candidate_set(prefix, plen, devaddrs, LOOPBACK_NAME)
 
         return (prefix, plen, gw, dev, ifaddr)
@@ -116,7 +117,7 @@ class Route6:
             del(self.routes[i])
         
     def ifchange(self, iff, addr):
-        the_addr, the_plen = (addr.split(b"/")+[b"128"])[:2]
+        the_addr, the_plen = (addr.split("/")+["128"])[:2]
         the_plen = int(the_plen)
 
         naddr = inet_pton(socket.AF_INET6, the_addr)
@@ -127,7 +128,7 @@ class Route6:
             net,plen,gw,iface,addr = self.routes[i]
             if iface != iff:
                 continue
-            if gw == b'::':
+            if gw == '::':
                 self.routes[i] = (the_net,the_plen,gw,iface,the_addr)
             else:
                 self.routes[i] = (net,the_plen,gw,iface,the_addr)
@@ -164,7 +165,7 @@ class Route6:
         nmask = in6_cidr2mask(plen)
         prefix = inet_ntop(socket.AF_INET6, in6_and(nmask,naddr))
         self.invalidate_cache()
-        self.routes.append((prefix,plen,b'::',iff,[addr]))
+        self.routes.append((prefix,plen,'::',iff,[addr]))
 
     def route(self, dst, dev=None):
         """
@@ -182,17 +183,17 @@ class Route6:
         is performed to limit search to route associated to that interface.
         """
         # Transform "2001:db8:cafe:*::1-5:0/120" to one IPv6 address of the set
-        dst = dst.split(b"/")[0]
+        dst = dst.split("/")[0]
         savedst = dst # In case following inet_pton() fails 
-        dst = dst.replace(b"*",b"0")
-        l = dst.find(b"-")
+        dst = dst.replace("*","0")
+        l = dst.find("-")
         while l >= 0:
-            m = (dst[l:]+b":").find(b":")
+            m = (dst[l:]+":").find(":")
             dst = dst[:l]+dst[l+m:]
-            l = dst.find(b"-")
+            l = dst.find("-")
             
         try:
-            inet_pton(socket.AF_INET6, dst.decode('utf-8'))
+            inet_pton(socket.AF_INET6, dst)
         except socket.error:
             dst = socket.getaddrinfo(savedst, None, socket.AF_INET6)[0][-1][0]
             # TODO : Check if name resolution went well
@@ -272,7 +273,7 @@ class Route6:
 
 conf.route6 = Route6()
 
-_res = conf.route6.route(b"::/0")
+_res = conf.route6.route("::/0")
 if _res:
     iff, gw, addr = _res
     conf.iface6 = iff

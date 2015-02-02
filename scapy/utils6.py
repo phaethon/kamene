@@ -246,14 +246,14 @@ def in6_mactoifaceid(mac, ulbit=None):
     to a specific value by using optional 'ulbit' parameter.
     """
     if len(mac) != 17: return None
-    m = b"".join(mac.split(b':'))
+    m = "".join(mac.split(':'))
     if len(m) != 12: return None
     first = int(m[0:2], 16)
     if ulbit is None or not (ulbit == 0 or ulbit == 1):
         ulbit = [1,'-',0][first & 0x02]
     ulbit *= 2
     first = b"%.02x" % ((first & 0xFD) | ulbit)
-    eui64 = first + m[2:4] + b":" + m[4:6] + b"FF:FE" + m[6:8] + b":" + m[8:12]
+    eui64 = first + m[2:4] + ":" + m[4:6] + "FF:FE" + m[6:8] + ":" + m[8:12]
     return eui64.upper()
 
 def in6_ifaceidtomac(ifaceid): # TODO: finish commenting function behavior
@@ -456,12 +456,12 @@ def in6_getRandomizedIfaceId(ifaceid, previous=None):
     return (s1, s2)
 
 
-_rfc1924map = [ b'0',b'1',b'2',b'3',b'4',b'5',b'6',b'7',b'8',b'9',b'A',b'B',b'C',b'D',b'E',
-                b'F',b'G',b'H',b'I',b'J',b'K',b'L',b'M',b'N',b'O',b'P',b'Q',b'R',b'S',b'T',
-                b'U',b'V',b'W',b'X',b'Y',b'Z',b'a',b'b',b'c',b'd',b'e',b'f',b'g',b'h',b'i',
-                b'j',b'k',b'l',b'm',b'n',b'o',b'p',b'q',b'r',b's',b't',b'u',b'v',b'w',b'x',
-                b'y',b'z',b'!',b'#',b'$',b'%',b'&',b'(',b')',b'*',b'+',b'-',b';',b'<',b'=',
-                b'>',b'?',b'@',b'^',b'_',b'`',b'{',b'|',b'}',b'~' ]
+_rfc1924map = [ '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E',
+                'F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T',
+                'U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i',
+                'j','k','l','m','n','o','p','q','r','s','t','u','v','w','x',
+                'y','z','!','#','$','%','&','(',')','*','+','-',';','<','=',
+                '>','?','@','^','_','`','{','|','}','~' ]
 
 def in6_ctop(addr):
     """
@@ -549,13 +549,13 @@ def in6_iseui64(x):
     Otherwise, False is returned. Address must be passed in printable
     format.
     """
-    eui64 = inet_pton(socket.AF_INET6, b'::ff:fe00:0')
+    eui64 = inet_pton(socket.AF_INET6, '::ff:fe00:0')
     x = in6_and(inet_pton(socket.AF_INET6, x), eui64)
     return x == eui64
 
 def in6_isanycast(x): # RFC 2526
     if in6_iseui64(x):
-        s = b'::fdff:ffff:ffff:ff80'
+        s = '::fdff:ffff:ffff:ff80'
         packed_x = inet_pton(socket.AF_INET6, x)
         packed_s = inet_pton(socket.AF_INET6, s)
         x_and_s = in6_and(packed_x, packed_s) 
@@ -629,8 +629,8 @@ def in6_getnsma(a):
     Returned value is also in network format.
     """
 
-    r = in6_and(a, inet_pton(socket.AF_INET6, b'::ff:ffff'))
-    r = in6_or(inet_pton(socket.AF_INET6, b'ff02::1:ff00:0'), r)
+    r = in6_and(a, inet_pton(socket.AF_INET6, '::ff:ffff'))
+    r = in6_or(inet_pton(socket.AF_INET6, 'ff02::1:ff00:0'), r)
     return r
 
 def in6_getnsmac(a): # return multicast Ethernet address associated with multicast v6 destination
@@ -736,7 +736,7 @@ def in6_ismgladdr(s):
 
 def in6_ismlladdr(s):
     """
-    Returns True if address balongs to link-local multicast address
+    Returns True if address belongs to link-local multicast address
     space (ff02::/16)
     """
     return in6_isincluded(s, 'ff02::', 16)
@@ -786,7 +786,7 @@ def in6_getscope(addr):
             scope = IPV6_ADDR_LOOPBACK
         else:
             scope = -1
-    elif addr == b'::1':
+    elif addr == '::1':
         scope = IPV6_ADDR_LOOPBACK
     else:
         scope = -1
