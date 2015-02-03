@@ -272,7 +272,8 @@ class EAPOL(Packet):
         l = self.len
         return s[:l],s[l:]
     def hashret(self):
-        return chr(self.type)+self.payload.hashret()
+        #return chr(self.type)+self.payload.hashret()
+        return bytes([self.type])+self.payload.hashret()
     def answers(self, other):
         if isinstance(other,EAPOL):
             if ( (self.type == self.EAP_PACKET) and
@@ -313,7 +314,7 @@ class EAP(Packet):
     def post_build(self, p, pay):
         if self.len is None:
             l = len(p)+len(pay)
-            p = p[:2]+chr((l>>8)&0xff)+chr(l&0xff)+p[4:]
+            p = p[:2]+bytes([((l>>8)&0xff),(l&0xff)])+p[4:]
         return p+pay
              
 
@@ -383,7 +384,7 @@ class GRE(Packet):
         p += pay
         if self.chksum_present and self.chksum is None:
             c = checksum(p)
-            p = p[:4]+chr((c>>8)&0xff)+chr(c&0xff)+p[6:]
+            p = p[:4]+bytes([((c>>8)&0xff),(c&0xff)])+p[6:]
         return p
 
 

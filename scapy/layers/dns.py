@@ -18,35 +18,37 @@ class DNSStrField(StrField):
 
     def h2i(self, pkt, x):
       if x == "":
-        return "."
+        return b"."
       return x
 
     def i2m(self, pkt, x):
-        if x == ".":
-          return "\x00"
+        if x == b".":
+          return b"\x00"
 
-        x = [k[:63] for k in x.split(".")] # Truncate chunks that cannot be encoded (more than 63 bytes..)
-        x = map(lambda y: chr(len(y))+y, x)
-        x = "".join(x)
-        if x[-1] != "\x00":
-            x += "\x00"
+        x = [k[:63] for k in x.split(b".")] # Truncate chunks that cannot be encoded (more than 63 bytes..)
+        x = map(lambda y: bytes([(len(y))])+y, x)
+        x = b"".join(x)
+        if x[-1] != b"\x00":
+            x += b"\x00"
         return x
 
     def getfield(self, pkt, s):
-        n = ""
+        n = b""
 
-        if ord(s[0]) == 0:
-          return s[1:], "."
+        #if ord(s[0]) == 0:
+        if (s[0]) == 0:
+          return s[1:], b"."
 
         while 1:
-            l = ord(s[0])
+            #l = ord(s[0])
+            l = (s[0])
             s = s[1:]
             if not l:
                 break
             if l & 0xc0:
                 raise Scapy_Exception("DNS message can't be compressed at this point!")
             else:
-                n += s[:l]+"."
+                n += s[:l]+b"."
                 s = s[l:]
         return s, n
 
@@ -114,13 +116,13 @@ class DNSRRField(StrField):
         self.passon = passon
     def i2m(self, pkt, x):
         if x is None:
-            return ""
+            return b""
         return str(x)
     def decodeRR(self, name, s, p):
         ret = s[p:p+10]
         type,cls,ttl,rdlen = struct.unpack("!HHIH", ret)
         p += 10
-        rr = DNSRR("\x00"+ret+s[p:p+rdlen])
+        rr = DNSRR(b"\x00"+ret+s[p:p+rdlen])
         if type in [2, 3, 4, 5]:
             rr.rdata = DNSgetstr(s,p)[0]
             del(rr.rdlen)

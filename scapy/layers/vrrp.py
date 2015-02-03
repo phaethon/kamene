@@ -33,7 +33,7 @@ class VRRP(Packet):
     def post_build(self, p, pay):
         if self.chksum is None:
             ck = checksum(p)
-            p = p[:6]+chr(ck>>8)+chr(ck&0xff)+p[8:]
+            p = p[:6]+bytes([(ck>>8),(ck&0xff)])+p[8:]
         return p
 
 bind_layers( IP,            VRRP,          proto=IPPROTO_VRRP)

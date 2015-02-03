@@ -32,7 +32,8 @@ class HCI_ACL_Hdr(Packet):
         p += pay
         if self.len is None:
             l = len(p)-4
-            p = p[:2]+chr(l&0xff)+chr((l>>8)&0xff)+p[4:]
+            #p = p[:2]+chr(l&0xff)+chr((l>>8)&0xff)+p[4:]
+            p = p[:2]+bytes([(l&0xff),((l>>8)&0xff)])+p[4:]
         return p
                     
 
@@ -45,7 +46,8 @@ class L2CAP_Hdr(Packet):
         p += pay
         if self.len is None:
             l = len(p)-4
-            p = p[:2]+chr(l&0xff)+chr((l>>8)&0xff)+p[4:]
+            #p = p[:2]+chr(l&0xff)+chr((l>>8)&0xff)+p[4:]
+            p = p[:2]+bytes([(l&0xff),((l>>8)&0xff)])+p[4:]
         return p
                     
                 
@@ -63,7 +65,8 @@ class L2CAP_CmdHdr(Packet):
         p += pay
         if self.len is None:
             l = len(p)-4
-            p = p[:2]+chr(l&0xff)+chr((l>>8)&0xff)+p[4:]
+            #p = p[:2]+chr(l&0xff)+chr((l>>8)&0xff)+p[4:]
+            p = p[:2]+bytes([(l&0xff),((l>>8)&0xff)])+p[4:]
         return p
     def answers(self, other):
         if other.id == self.id:

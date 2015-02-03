@@ -103,13 +103,13 @@ class ISAKMPTransformSetField(StrLenField):
     def type2num(self, typval):
         type_val,enc_dict,tlv = ISAKMPTransformTypes.get(typval[0], (typval[0],{},0))
         typval[1] = enc_dict.get(typval[1], typval[1])
-        s = ""
+        s = b""
         if (typval[1] & ~0xffff):
             if not tlv:
                 warning("%r should not be TLV but is too big => using TLV encoding" % typval[0])
             n = 0
             while typval[1]:
-                s = chr(typval[1]&0xff)+s
+                s = bytes([(typval[1]&0xff)])+s
                 typval[1] >>= 8
                 n += 1
             typval[1] = n
@@ -122,9 +122,9 @@ class ISAKMPTransformSetField(StrLenField):
         return (val[0],enc)
     def i2m(self, pkt, i):
         if i is None:
-            return ""
+            return b""
         i = map(self.type2num, i)
-        return "".join(i)
+        return b"".join(i)
     def m2i(self, pkt, m):
         # I try to ensure that we don't read off the end of our packet based
         # on bad length fields we're provided in the packet. There are still
@@ -228,7 +228,7 @@ class ISAKMP_payload_Transform(ISAKMP_class):
     def post_build(self, p, pay):
         if self.length is None:
             l = len(p)
-            p = p[:2]+chr((l>>8)&0xff)+chr(l&0xff)+p[4:]
+            p = p[:2]+bytes([((l>>8)&0xff),(l&0xff)])+p[4:]
         p += pay
         return p
             

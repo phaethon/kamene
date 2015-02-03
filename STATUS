@@ -14,6 +14,16 @@ Working commands (but much more testing needed):
 - traceroute
 - wrpcap
 
+Tested layers (not fully tested):
+- ARP
+- Ether
+- ICMP
+- IP
+- IPv6
+- Raw
+- TCP
+- UDP
+
 Not working:
 - gnuplot (Unresolved import issue in plist.py affecting gnuplot, layers/inet.py issue with replacing new.instancemethod)
 - all that depends on crypto
