@@ -1153,7 +1153,7 @@ class Raw(Packet):
 class Padding(Raw):
     name = "Padding"
     def self_build(self):
-        return ""
+        return b""
     def build_padding(self):
         return (self.load if self.raw_packet_cache is None
                 else self.raw_packet_cache) + self.payload.build_padding()
