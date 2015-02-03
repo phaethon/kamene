@@ -332,14 +332,16 @@ class _IPv6GuessPayload:
     name = "Dummy class that implements guess_payload_class() for IPv6"
     def default_payload_class(self,p):
         if self.nh == 58: # ICMPv6
-            t = ord(p[0])
+            #t = ord(p[0])
+            t = p[0]
             if len(p) > 2 and t == 139 or t == 140: # Node Info Query 
                 return _niquery_guesser(p)
-            if len(p) >= icmp6typesminhdrlen.get(t, sys.maxint): # Other ICMPv6 messages
+            if len(p) >= icmp6typesminhdrlen.get(t, sys.maxsize): # Other ICMPv6 messages
                 return get_cls(icmp6typescls.get(t,"Raw"), "Raw")
             return Raw
         elif self.nh == 135 and len(p) > 3: # Mobile IPv6
-            return _mip6_mhtype2cls.get(ord(p[2]), MIP6MH_Generic)
+            #return _mip6_mhtype2cls.get(ord(p[2]), MIP6MH_Generic)
+            return _mip6_mhtype2cls.get(p[2], MIP6MH_Generic)
         else:
             return get_cls(ipv6nhcls.get(self.nh,"Raw"), "Raw")
 
@@ -773,7 +775,8 @@ class _HopByHopOptionsField(PacketListField):
                 if c <= 0:
                     break
                 c -= 1
-            o = ord(x[0]) # Option type
+            #o = ord(x[0]) # Option type
+            o = x[0] # Option type
             cls = self.cls
             if o in _hbhoptcls:
                 cls = _hbhoptcls[o]
@@ -1449,7 +1452,8 @@ class _ICMPv6NDGuessPayload:
     name = "Dummy ND class that implements guess_payload_class()"
     def guess_payload_class(self,p):
         if len(p) > 1:
-            return get_cls(icmp6ndoptscls.get(ord(p[0]),"Raw"), "Raw") # s/Raw/ICMPv6NDOptUnknown/g ?
+            #return get_cls(icmp6ndoptscls.get(ord(p[0]),"Raw"), "Raw") # s/Raw/ICMPv6NDOptUnknown/g ?
+            return get_cls(icmp6ndoptscls.get(p[0],"Raw"), "Raw") # s/Raw/ICMPv6NDOptUnknown/g ?
 
 
 # Beginning of ICMPv6 Neighbor Discovery Options.
@@ -1923,14 +1927,16 @@ def dnsrepr2names(x):
     res = []
     cur = ""
     while x:
-        l = ord(x[0])
+        #l = ord(x[0])
+        l = x[0]
         x = x[1:]
         if l == 0:
             if cur and cur[-1] == '.':
                 cur = cur[:-1]
             res.append(cur)
             cur = ""
-            if x and ord(x[0]) == 0: # single component
+            #if x and ord(x[0]) == 0: # single component
+            if x and x[0] == 0: # single component
                 x = x[1:]
             continue
         if l & 0xc0: # XXX TODO : work on that -- arno
@@ -1980,7 +1986,8 @@ class NIQueryDataField(StrField):
             res = []
             weird = None
             while val:
-                l = ord(val[0]) 
+                #l = ord(val[0]) 
+                l = val[0] 
                 val = val[1:]
                 if l == 0:
                     if (len(res) > 1 and val): # fqdn with data behind
@@ -2247,7 +2254,8 @@ class ICMPv6NIReplyUnknown(ICMPv6NIReplyNOOP):
 
 def _niquery_guesser(p):
     cls = conf.raw_layer
-    type = ord(p[0])
+    #type = ord(p[0])
+    type = p[0]
     if type == 139: # Node Info Query specific stuff
         if len(p) > 6:
             qtype, = struct.unpack("!H", p[4:6])
@@ -2256,7 +2264,8 @@ def _niquery_guesser(p):
                     3: ICMPv6NIQueryIPv6,
                     4: ICMPv6NIQueryIPv4 }.get(qtype, conf.raw_layer)
     elif type == 140: # Node Info Reply specific stuff
-        code = ord(p[1])
+        #code = ord(p[1])
+        code = p[1]
         if code == 0:
             if len(p) > 6:
                 qtype, = struct.unpack("!H", p[4:6])
@@ -2629,7 +2638,8 @@ class _MobilityOptionsField(PacketListField):
     def m2i(self, pkt, x):
         opt = []
         while x:
-            o = ord(x[0]) # Option type
+            #o = ord(x[0]) # Option type
+            o = x[0] # Option type
             cls = self.cls
             if o in moboptcls:
                 cls = moboptcls[o]

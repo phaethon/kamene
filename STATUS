@@ -32,3 +32,4 @@ Implementad changes in all files:
 - replaced __metaclass__ with (metaclass=)
 - replaced has_key to key in dict
 - replaced xxx.next() to next(xxx)
+- replaced sys.maxint with sys.maxsize
