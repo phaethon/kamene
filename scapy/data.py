@@ -152,7 +152,7 @@ class ManufDA(DADict):
 def load_manuf(filename):
     try:
         manufdb=ManufDA(_name=filename)
-        for l in open(filename):
+        for l in open(filename, "r", encoding = 'utf-8'):
             try:
                 l = l.strip()
                 if not l or l.startswith("#"):
