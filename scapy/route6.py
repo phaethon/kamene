@@ -103,10 +103,12 @@ class Route6:
         dst, plen = tmp.split(b'/')[:2]
         dst = in6_ptop(dst)
         plen = int(plen)
-        l = filter(lambda x: in6_ptop(x[0]) == dst and x[1] == plen, self.routes)
+        #l = filter(lambda x: in6_ptop(x[0]) == dst and x[1] == plen, self.routes)
+        l = [ x for x in self.routes if in6_ptop(x[0]) == dst and x[1] == plen ]
         if gw:
             gw = in6_ptop(gw)
-            l = filter(lambda x: in6_ptop(x[0]) == gw, self.routes)
+            #l = filter(lambda x: in6_ptop(x[0]) == gw, self.routes)
+            l = [ x for x in self.routes if in6_ptop(x[0]) == gw ]
         if len(l) == 0:
             warning("No matching route found")
         elif len(l) > 1:
@@ -235,7 +237,7 @@ class Route6:
             srcaddr = get_source_addr_from_candidate_set(dst, p[1][1])
             if srcaddr is not None:
                 res.append((p[0], (tmp[0], srcaddr, tmp[2])))
-
+ 
         if res == []:
             warning("Found a route for IPv6 destination '%s', but no possible source address." % dst)
             return (LOOPBACK_NAME, b"::", b"::") # XXX Linux specific
@@ -255,10 +257,12 @@ class Route6:
             if in6_isgladdr(dst) and in6_isaddr6to4(dst):
                 # TODO : see if taking the longest match between dst and
                 #        every source addresses would provide better results
-                tmp = filter(lambda x: in6_isaddr6to4(x[1][1]), res)
+                #tmp = filter(lambda x: in6_isaddr6to4(x[1][1]), res)
+                tmp = [ x for x in res if in6_isaddr6to4(x[1][1]) ]
             elif in6_ismaddr(dst) or in6_islladdr(dst):
                 # TODO : I'm sure we are not covering all addresses. Check that
-                tmp = filter(lambda x: x[1][0] == conf.iface6, res)
+                #tmp = filter(lambda x: x[1][0] == conf.iface6, res)
+                tmp = [ x for x in res if x[1][0] == conf.iface6 ]
 
             if tmp:
                 res = tmp

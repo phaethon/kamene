@@ -402,8 +402,9 @@ def RRlist2bitmap(lst):
     lst = list(set(lst))
     lst.sort()
     
-    lst = filter(lambda x: x <= 65535, lst)
-    lst = map(lambda x: abs(x), lst)
+    #lst = filter(lambda x: x <= 65535, lst)
+    #lst = map(lambda x: abs(x), lst)
+    lst = [ abs(x) for x in lst if x<= 65535 ]
 
     # number of window blocks
     max_window_blocks = int(math.ceil(lst[-1] / 256.))
@@ -414,7 +415,8 @@ def RRlist2bitmap(lst):
     for wb in range(min_window_blocks, max_window_blocks+1):
         # First, filter out RR not encoded in the current window block
         # i.e. keep everything between 256*wb <= 256*(wb+1)
-        rrlist = filter(lambda x: 256*wb <= x and x < 256*(wb+1), lst)
+        #rrlist = filter(lambda x: 256*wb <= x and x < 256*(wb+1), lst)
+        rrlist = [ x for x in lst if 256*wb <= x and x < 256*(wb+1) ]
         rrlist.sort()
         if rrlist == []:
             continue
@@ -435,14 +437,16 @@ def RRlist2bitmap(lst):
         for tmp in range(bytes):
             v = 0
             # Remove out of range Ressource Records
-            tmp_rrlist = filter(lambda x: 256*wb+8*tmp <= x and x < 256*wb+8*tmp+8, rrlist)
+            #tmp_rrlist = filter(lambda x: 256*wb+8*tmp <= x and x < 256*wb+8*tmp+8, rrlist)
+            tmp_rrlist = [ x for x in rrlist if 256*wb+8*tmp <= x and x < 256*wb+8*tmp+8 ]
             if not tmp_rrlist == []:
                 # 1. rescale to fit into 8 bits
                 tmp_rrlist = map(lambda x: (x-256*wb)-(tmp*8), tmp_rrlist)
                 # 2. x gives the bit position ; compute the corresponding value
                 tmp_rrlist = map(lambda x: 2**(7-x) , tmp_rrlist)
                 # 3. sum everything
-                v = reduce(lambda x,y: x+y, tmp_rrlist)
+                #v = reduce(lambda x,y: x+y, tmp_rrlist)
+                v = sum(tmp_rrlist)
             bitmap += struct.pack("B", v)
    
     return bitmap

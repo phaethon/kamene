@@ -80,7 +80,8 @@ class PacketList(BasePacketList):
         return getattr(self.res, attr)
     def __getitem__(self, item):
         if isinstance(item,type) and issubclass(item,BasePacket):
-            return self.__class__(filter(lambda x: item in self._elt2pkt(x),self.res),
+            #return self.__class__(filter(lambda x: item in self._elt2pkt(x),self.res),
+            return self.__class__([ x for x in self.res if item in self._elt2pkt(x) ],
                                   name="%s from %s"%(item.__name__,self.listname))
         if type(item) is slice:
             return self.__class__(self.res.__getitem__(item),

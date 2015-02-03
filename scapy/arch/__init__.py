@@ -89,7 +89,8 @@ def get_if_raw_addr6(iff):
     interface, in network format. If no global address is found, None 
     is returned. 
     """
-    r = filter(lambda x: x[2] == iff and x[1] == IPV6_ADDR_GLOBAL, in6_getifaddr())
+    #r = filter(lambda x: x[2] == iff and x[1] == IPV6_ADDR_GLOBAL, in6_getifaddr())
+    r = [ x for x in in6_getifaddr() if x[2] == iff and x[1] == IPV6_ADDR_GLOBAL]
     if len(r) == 0:
         return None
     else:

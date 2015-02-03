@@ -17,7 +17,7 @@ class RandASN1Object(RandField):
     def __init__(self, objlist=None):
         if objlist is None:
             objlist = map(lambda x:x._asn1_obj,
-                          filter(lambda x:hasattr(x,"_asn1_obj"), ASN1_Class_UNIVERSAL.__rdict__.values()))
+                          [ x for x in ASN1_Class_UNIVERSAL.__rdict__.values() if hasattr(x,"_asn1_obj") ])
         self.objlist = objlist
         self.chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
     def _fix(self, n=0):

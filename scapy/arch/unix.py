@@ -165,7 +165,7 @@ def read_routes6():
             dev = lspl[5+mtu_present+prio_present]
         else:       # FREEBSD or DARWIN 
             d,nh,fl,dev = l.split()[:4]
-        if filter(lambda x: x[2] == dev, lifaddr) == []:
+        if [ x for x in lifaddr if x[2] == dev] == []:
             continue
         if 'L' in fl: # drop MAC addresses
             continue
@@ -189,7 +189,7 @@ def read_routes6():
             cset = ['::1']
             nh = '::'
         else:
-            devaddrs = filter(lambda x: x[2] == dev, lifaddr)
+            devaddrs = [ x for x in lifaddr if x[2] == dev ]
             cset = scapy.utils6.construct_source_candidate_set(d, dp, devaddrs, scapy.arch.LOOPBACK_NAME)
 
         if len(cset) != 0:

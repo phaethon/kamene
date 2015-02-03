@@ -35,14 +35,16 @@ class DADict:
     def __setitem__(self, attr, val):        
         return setattr(self, self.fixname(attr), val)
     def __iter__(self):
-        return iter(map(lambda a:a[1],filter(lambda a:a[0] and a[0][0]!="_", self.__dict__.items())))
         #return iter(map(lambda (x,y):y,filter(lambda (x,y):x and x[0]!="_", self.__dict__.items())))
+        #return iter(map(lambda a:a[1],filter(lambda a:a[0] and a[0][0]!="_", self.__dict__.items())))
+        return iter([a[1] for a in self.__dict__.items() if a[0] and a[0][0]!=" "])
     def _show(self):
         for k in self.__dict__.keys():
             if k and k[0] != "_":
                 print("%10s = %r" % (k,getattr(self,k)))
     def __repr__(self):
-        return "<%s/ %s>" % (self._name," ".join(filter(lambda x:x and x[0]!="_",self.__dict__.keys())))
+        #return "<%s/ %s>" % (self._name," ".join(filter(lambda x:x and x[0]!="_",self.__dict__.keys())))
+        return "<%s/ %s>" % (self._name," ".join([ x for x in self.__dict__.keys() if x and x[0]!="_"]))
 
     def _branch(self, br, uniq=0):
         if uniq and br._name in self:
@@ -84,5 +86,6 @@ class DADict:
                 r += p
         return r
     def keys(self):
-        return filter(lambda x:x and x[0]!="_", self.__dict__.keys())
+        #return filter(lambda x:x and x[0]!="_", self.__dict__.keys())
+        return [ x for x in self.__dict__.keys() if x and x[0]!="_" ]
         

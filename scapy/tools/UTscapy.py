@@ -259,8 +259,10 @@ def compute_campaign_digests(test_campaign):
 def filter_tests_on_numbers(test_campaign, num):
     if num:
         for ts in test_campaign:
-            ts.set = filter(lambda t: t.num in num, ts.set)
-        test_campaign.campaign = filter(lambda ts: len(ts.set) > 0, test_campaign.campaign)
+            #ts.set = filter(lambda t: t.num in num, ts.set)
+            ts.set = [ t for t in ts.set if t.num in num ]
+        #test_campaign.campaign = filter(lambda ts: len(ts.set) > 0, test_campaign.campaign)
+        test_campaign.campaign = [ ts for ts in test_campaign.campaign if len(ts.set) > 0 ]
 
 def filter_tests_keep_on_keywords(test_campaign, kw):
     def kw_match(lst, kw):
@@ -271,7 +273,8 @@ def filter_tests_keep_on_keywords(test_campaign, kw):
     
     if kw:
         for ts in test_campaign:
-            ts.set = filter(lambda t: kw_match(t.keywords, kw), ts.set)
+            #ts.set = filter(lambda t: kw_match(t.keywords, kw), ts.set)
+            ts.set = [ t for t in ts.set if kw_match(t.keywords, kw) ]
 
 def filter_tests_remove_on_keywords(test_campaign, kw):
     def kw_match(lst, kw):
@@ -282,11 +285,13 @@ def filter_tests_remove_on_keywords(test_campaign, kw):
     
     if kw:
         for ts in test_campaign:
-            ts.set = filter(lambda t: not kw_match(t.keywords, kw), ts.set)
+            #ts.set = filter(lambda t: not kw_match(t.keywords, kw), ts.set)
+            ts.set = [ t for t in ts.set if not kw_match(t.keywords, kw) ]
 
 
 def remove_empty_testsets(test_campaign):
-    test_campaign.campaign = filter(lambda ts: len(ts.set) > 0, test_campaign.campaign)
+    #test_campaign.campaign = filter(lambda ts: len(ts.set) > 0, test_campaign.campaign)
+    test_campaign.campaign = [ ts for ts in test_campaign.campaign if len(ts.set) > 0 ]
 
 
 #### RUN CAMPAIGN #####

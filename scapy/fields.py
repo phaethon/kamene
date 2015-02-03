@@ -714,7 +714,7 @@ class EnumField(Field):
             keys = range(len(enum))
         else:
             keys = enum.keys()
-        if filter(lambda x: type(x) is str, keys):
+        if list(filter(lambda x: type(x) is str, keys)):
             i2s,s2i = s2i,i2s
         for k in keys:
             i2s[k] = enum[k]

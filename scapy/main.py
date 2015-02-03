@@ -220,7 +220,8 @@ def interact(mydict=None,argv=None,mybanner=None,loglevel=20):
                 except:
                     object = eval(expr, session)
                 if isinstance(object, Packet) or isinstance(object, Packet_metaclass):
-                    words = filter(lambda x: x[0]!="_",dir(object))
+                    #words = filter(lambda x: x[0]!="_",dir(object))
+                    words = [ x for x in dir(object) if x[0]!="_" ]
                     words += [x.name for x in object.fields_desc]
                 else:
                     words = dir(object)

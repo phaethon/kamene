@@ -1354,8 +1354,8 @@ dhcp6d( dns="2001:500::1035", domain="localdomain, local", duid=None)
 
         ####
         # Find the source address we will use
-        l = filter(lambda x: x[2] == iface and in6_islladdr(x[0]), 
-                   in6_getifaddr())
+        #l = filter(lambda x: x[2] == iface and in6_islladdr(x[0]), in6_getifaddr())
+        l = [ x for x in in6_getifaddr() if x[2] == iface and in6_islladdr(x[0]) ]
         if not l:
             warning("Unable to get a Link-Local address")
             return 
@@ -1454,7 +1454,8 @@ dhcp6d( dns="2001:500::1035", domain="localdomain, local", duid=None)
                 elif isinstance(it, DHCP6OptIA_TA):
                     l = it.iataopts
 
-                opsaddr = filter(lambda x: isinstance(x, DHCP6OptIAAddress),l)
+                #opsaddr = filter(lambda x: isinstance(x, DHCP6OptIAAddress),l)
+                opsaddr = [ x for x in l if isinstance(x, DHCP6OptIAAddress) ]
                 a=map(lambda x: x.addr,  opsaddr)
                 addrs += a
                 it = it.payload

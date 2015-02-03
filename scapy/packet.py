@@ -1200,7 +1200,7 @@ def split_bottom_up(lower, upper, __fval=None, **fval):
             if k not in s[0] or s[0][k] != fval[k]:
                 return True
         return False
-    lower.payload_guess = filter(do_filter, lower.payload_guess)
+    lower.payload_guess = list(filter(do_filter, lower.payload_guess))
         
 def split_top_down(lower, upper, __fval=None, **fval):
     if __fval is not None:
