@@ -90,7 +90,6 @@ class IPOption(Packet):
     @classmethod
     def dispatch_hook(cls, pkt=None, *args, **kargs):
         if pkt:
-            #opt = ord(pkt[0])&0x1f
             opt = pkt[0]&0x1f
             if opt in cls.registered_ip_options:
                 return cls.registered_ip_options[opt]
@@ -236,8 +235,7 @@ class TCPOptionsField(StrField):
     def m2i(self, pkt, x):
         opt = []
         while x:
-            #onum = ord(x[0])
-            onum = (x[0])
+            onum = x[0]
             if onum == 0:
                 opt.append(("EOL",None))
                 x=x[1:]
@@ -246,16 +244,15 @@ class TCPOptionsField(StrField):
                 opt.append(("NOP",None))
                 x=x[1:]
                 continue
-            #olen = ord(x[1])
-            olen = (x[1])
+            olen = x[1]
             if olen < 2:
                 warning("Malformed TCP option (announced length is %i)" % olen)
                 olen = 2
             oval = x[2:olen]
-            if TCPOptions[0].has_key(onum):
+            if onum in TCPOptions[0]:
                 oname, ofmt = TCPOptions[0][onum]
                 if onum == 5: #SAck
-                    ofmt += "%iI" % (len(oval)/4)
+                    ofmt += "%iI" % (len(oval)//4)
                 if ofmt and struct.calcsize(ofmt) == len(oval):
                     oval = struct.unpack(ofmt, oval)
                     if len(oval) == 1:
@@ -276,7 +273,7 @@ class TCPOptionsField(StrField):
                 elif oname == "EOL":
                     opt += b"\x00"
                     continue
-                elif TCPOptions[1].has_key(oname):
+                elif oname in TCPOptions[1]:
                     onum = TCPOptions[1][oname]
                     ofmt = TCPOptions[0][onum][1]
                     if onum == 5: #SAck
@@ -1094,7 +1091,7 @@ class TracerouteResult(SndRcvList):
                 trace_id = (s.src,s.dst,s.proto,0)
             trace = rt.get(trace_id,{})
             if not r.haslayer(ICMP) or r.type != 11:
-                if ports_done.has_key(trace_id):
+                if trace_id in ports_done:
                     continue
                 ports_done[trace_id] = None
             trace[s.ttl] = r.src
@@ -1175,9 +1172,9 @@ class TracerouteResult(SndRcvList):
             trace = rt[rtk]
             k = trace.keys()
             for n in range(min(k), max(k)):
-                if not trace.has_key(n):
+                if not n in trace:
                     trace[n] = next(unknown_label)
-            if not ports_done.has_key(rtk):
+            if not rtk in ports_done:
                 if rtk[2] == 1: #ICMP
                     bh = "%s %i/icmp" % (rtk[1],rtk[3])
                 elif rtk[2] == 6: #TCP

@@ -775,7 +775,7 @@ class _HopByHopOptionsField(PacketListField):
                 c -= 1
             o = ord(x[0]) # Option type
             cls = self.cls
-            if _hbhoptcls.has_key(o):
+            if o in _hbhoptcls:
                 cls = _hbhoptcls[o]
             try:
                 op = cls(x)
@@ -2631,7 +2631,7 @@ class _MobilityOptionsField(PacketListField):
         while x:
             o = ord(x[0]) # Option type
             cls = self.cls
-            if moboptcls.has_key(o):
+            if o in moboptcls:
                 cls = moboptcls[o]
             try:
                 op = cls(x)

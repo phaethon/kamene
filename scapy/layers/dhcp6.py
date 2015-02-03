@@ -368,7 +368,7 @@ class _OptReqListField(StrLenField):
     def i2repr(self, pkt, x):
         s = []
         for y in self.i2h(pkt, x):
-            if dhcp6opts.has_key(y):
+            if y in dhcp6opts:
                 s.append(dhcp6opts[y])
             else:
                 s.append("%d" % y)
