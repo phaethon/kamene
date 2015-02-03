@@ -7,8 +7,8 @@
 Aggregate top level objects from all Scapy modules.
 """
 
-from .base_classes import *
 from .config import *
+from .base_classes import *
 from .dadict import *
 from .data import *
 from .error import *
