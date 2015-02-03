@@ -269,7 +269,7 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
     #def __str__(self):
     #TODO3 FIX
     def __str__(self):
-        raise
+        raise Exception("Temporary disabled for debugging. Use .bytes() method to get bytes")
     def bytes(self):
         return self.build()
     def __div__(self, other):

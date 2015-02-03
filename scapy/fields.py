@@ -274,7 +274,7 @@ class X3BytesField(XByteField):
     def addfield(self, pkt, s, val):
         return s+struct.pack(self.fmt, self.i2m(pkt,val))[1:4]
     def getfield(self, pkt, s):
-        return  s[3:], self.m2i(pkt, struct.unpack(self.fmt, "\x00"+s[:3])[0])
+        return  s[3:], self.m2i(pkt, struct.unpack(self.fmt, b"\x00"+s[:3])[0])
 
 
 class ShortField(Field):
@@ -342,7 +342,7 @@ class StrField(Field):
         if x is None:
             x = b""
         elif type(x) is not bytes:
-            x=str(x).decode('utf-8')
+            x=str(x).encode('ascii')
         return x
     def addfield(self, pkt, s, val):
         return s+self.i2m(pkt, val)
