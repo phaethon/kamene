@@ -1138,7 +1138,7 @@ class NoPayload(Packet):
             
 class Raw(Packet):
     name = "Raw"
-    fields_desc = [ StrField("load", "") ]
+    fields_desc = [ StrField("load", b"") ]
     def answers(self, other):
         return 1
 #        s = str(other)
