@@ -274,11 +274,11 @@ class DNS(Packet):
         if self.qr:
             type = "Ans"
             if self.ancount > 0 and isinstance(self.an, DNSRR):
-                name = ' "%s"' % self.an.rdata
+                name = ' "%s"' % self.an.getfieldval("rdata").decode('ascii')
         else:
             type = "Qry"
             if self.qdcount > 0 and isinstance(self.qd, DNSQR):
-                name = ' "%s"' % self.qd.qname
+                name = ' "%s"' % self.qd.getfieldval("qname").decode('ascii')
         return 'DNS %s%s ' % (type, name)
 
 dnstypes = { 0:"ANY", 255:"ALL",
