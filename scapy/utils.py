@@ -429,14 +429,14 @@ def export_object(obj):
 def import_object(obj=None):
     if obj is None:
         obj = sys.stdin.read()
-    return cPickle.loads(gzip.zlib.decompress(obj.strip().decode("base64")))
+    return pickle.loads(gzip.zlib.decompress(obj.strip().decode("base64")))
 
 
 def save_object(fname, obj):
     cPickle.dump(obj,gzip.open(fname,"wb"))
 
 def load_object(fname):
-    return cPickle.load(gzip.open(fname,"rb"))
+    return pickle.load(gzip.open(fname,"rb"))
 
 @conf.commands.register
 def corrupt_bytes(s, p=0.01, n=None):

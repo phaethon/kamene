@@ -46,6 +46,8 @@ class Field:
         Always 1 except for list fields"""
         return 1
     def h2i(self, pkt, x):
+        if type(x) is str:
+          x = bytes([ ord(i) for i in x ])
         """Convert human value to internal value"""
         return x
     def i2h(self, pkt, x):
@@ -336,15 +338,16 @@ class StrField(Field):
     def __init__(self, name, default, fmt="H", remain=0):
         Field.__init__(self,name,default,fmt)
         self.remain = remain        
-    def i2h(self, pkt, x):
+    #def i2h(self, pkt, x):
+    def i2repr(self, pkt, x):
         try:
           if type(x) is bytes:
             x = x.decode('ascii')
         except UnicodeDecodeError:
           pass
-        return x
-    def i2repr(self, pkt, x):
-        return repr(self.i2h(pkt,x))
+        return repr(x)
+    #def i2repr(self, pkt, x):
+    #    return repr(self.i2h(pkt,x))
     def i2len(self, pkt, i):
         return len(i)
     def i2m(self, pkt, x):

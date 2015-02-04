@@ -132,7 +132,8 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
                     if t in payload.overload_fields:
                         self.overloaded_fields = payload.overload_fields[t]
                         break
-            elif type(payload) is str:
+            #elif type(payload) is str:
+            elif type(payload) is bytes:
                 self.__dict__["payload"] = conf.raw_layer(load=payload)
             else:
                 raise TypeError("payload must be either 'Packet' or 'str', not [%s]" % repr(payload))
@@ -281,12 +282,16 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
             cloneA.add_payload(cloneB)
             return cloneA
         elif type(other) is str:
+            return self/conf.raw_layer(load=other.encode('ascii'))
+        elif type(other) is bytes:
             return self/conf.raw_layer(load=other)
         else:
             return other.__rdiv__(self)
     __truediv__ = __div__
     def __rdiv__(self, other):
         if type(other) is str:
+            return conf.raw_layer(load=other.encode('ascii'))/self
+        if type(other) is bytes:
             return conf.raw_layer(load=other)/self
         else:
             raise TypeError
@@ -1159,6 +1164,8 @@ class Padding(Raw):
     def self_build(self):
         return b""
     def build_padding(self):
+        #return (bytes([ ord(x) for x in self.load]) if self.raw_packet_cache is None
+        #        else self.raw_packet_cache) + self.payload.build_padding()
         return (self.load if self.raw_packet_cache is None
                 else self.raw_packet_cache) + self.payload.build_padding()
 

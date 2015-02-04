@@ -1729,7 +1729,7 @@ class ICMPv6ND_NS(_ICMPv6NDGuessPayload, _ICMPv6, Packet):
                     ByteField("code",0),
                     XShortField("cksum", None),
                     IntField("res", 0),
-                    IP6Field("tgt","::") ]
+                    IP6Field("tgt",b"::") ]
     overload_fields = {IPv6: { "nh": 58, "dst": "ff02::1", "hlim": 255 }}
 
     def mysummary(self):

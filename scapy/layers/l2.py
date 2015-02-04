@@ -344,7 +344,7 @@ class ARP(Packet):
             dst = next(iter(dst))
         return conf.route.route(dst)
     def extract_padding(self, s):
-        return "",s
+        return b"",s
     def mysummary(self):
         if self.op == self.is_at:
             return self.sprintf("ARP is at %hwsrc% says %psrc%")
