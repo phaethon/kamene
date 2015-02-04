@@ -1,5 +1,5 @@
 This is a fork of scapy project to make it compatible with python3. Fork based on v2.3.1
 Basic functions (IPV4, Ether, TCP, UDP sending/receiving/sniffing, traceroute, etc.) work, but many exceptions expected. File STATUS contains more info on current status.
-Using python 3.4 on Ubuntu linux for testing. Seems that other OS will require more work as used pcap and dnet libraries are not available for python3. 
+Using python 3.4 on Ubuntu linux for testing. Seems that other OS will require more work as used pcap and dnet libraries are not available for python3 (possibly using smth like https://code.google.com/p/winpcapy/). 
 
 Please, test it out and submit all issues identified. Often they are more easy to fix than to identify.

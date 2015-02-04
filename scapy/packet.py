@@ -8,13 +8,14 @@ Packet class. Binding mechanism. fuzz() method.
 """
 
 import time,itertools,os
+import sys,traceback
 import copy
 from .fields import StrField,ConditionalField,Emph,PacketListField
 from .config import conf
 from .base_classes import BasePacket,Gen,SetGen,Packet_metaclass,NewDefaultValues
 from .volatile import VolatileValue
 from .utils import import_hexcap,tex_escape,colgen,get_temp_file
-from .error import Scapy_Exception,log_runtime
+from .error import Scapy_Exception,log_runtime, warning
 import subprocess
 
 try:
@@ -269,7 +270,8 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
     #def __str__(self):
     #TODO3 FIX
     def __str__(self):
-        raise Exception("Temporary disabled for debugging. Use .bytes() method to get bytes")
+        warning("Unless called manually, this could indicate deprecated use. Should be changed to self.bytes()")
+        return repr(self.bytes()) 
     def bytes(self):
         return self.build()
     def __div__(self, other):
@@ -567,7 +569,9 @@ Creates an EPS file describing a packet. If filename is not provided a temporary
         raw = s
         while s and flist:
             f = flist.pop()
+            #print(f, end = " = ")
             s,fval = f.getfield(self, s)
+            #print('fval')
             self.fields[f.name] = fval
         assert(raw.endswith(s))
         if s:

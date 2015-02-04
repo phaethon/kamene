@@ -22,11 +22,13 @@ class DNSStrField(StrField):
       return x
 
     def i2m(self, pkt, x):
+        if type(x) == str:
+          x = x.encode('ascii')
         if x == b".":
           return b"\x00"
 
         x = [k[:63] for k in x.split(b".")] # Truncate chunks that cannot be encoded (more than 63 bytes..)
-        x = map(lambda y: bytes([(len(y))])+y, x)
+        x = map(lambda y: bytes([len(y)]) + y, x)
         x = b"".join(x)
         if x[-1] != b"\x00":
             x += b"\x00"
@@ -77,14 +79,15 @@ class DNSRRCountField(ShortField):
     
 
 def DNSgetstr(s,p):
-    name = ""
+    name = b""
     q = 0
     jpath = [p]
     while 1:
         if p >= len(s):
             warning("DNS RR prematured end (ofs=%i, len=%i)"%(p,len(s)))
             break
-        l = ord(s[p])
+        #l = ord(s[p])
+        l = s[p]
         p += 1
         if l & 0xc0:
             if not q:
@@ -92,14 +95,14 @@ def DNSgetstr(s,p):
             if p >= len(s):
                 warning("DNS incomplete jump token at (ofs=%i)" % p)
                 break
-            p = ((l & 0x3f) << 8) + ord(s[p]) - 12
+            p = ((l & 0x3f) << 8) + s[p] - 12
             if p in jpath:
                 warning("DNS decompression loop detected")
                 break
             jpath.append(p)
             continue
         elif l > 0:
-            name += s[p:p+l]+"."
+            name += s[p:p+l]+b"."
             p += l
             continue
         break
@@ -117,7 +120,7 @@ class DNSRRField(StrField):
     def i2m(self, pkt, x):
         if x is None:
             return b""
-        return str(x)
+        return x.bytes()
     def decodeRR(self, name, s, p):
         ret = s[p:p+10]
         type,cls,ttl,rdlen = struct.unpack("!HHIH", ret)
@@ -127,7 +130,7 @@ class DNSRRField(StrField):
             rr.rdata = DNSgetstr(s,p)[0]
             del(rr.rdlen)
         elif type in dnsRRdispatcher.keys():
-            rr = dnsRRdispatcher[type]("\x00"+ret+s[p:p+rdlen])
+            rr = dnsRRdispatcher[type](b"\x00"+ret+s[p:p+rdlen])
         else:
           del(rr.rdlen)
         
@@ -144,7 +147,7 @@ class DNSRRField(StrField):
         c = getattr(pkt, self.countfld)
         if c > len(s):
             warning("wrong value: DNS.%s=%i" % (self.countfld,c))
-            return s,""
+            return s,b""
         while c:
             c -= 1
             name,p = DNSgetstr(s,p)
@@ -164,7 +167,7 @@ class DNSQRField(DNSRRField):
     def decodeRR(self, name, s, p):
         ret = s[p:p+4]
         p += 4
-        rr = DNSQR("\x00"+ret)
+        rr = DNSQR(b"\x00"+ret)
         rr.qname = name
         return rr,p
         
@@ -199,16 +202,17 @@ class RDataField(StrLenField):
             if s:
                 s = inet_aton(s)
         elif pkt.type in [2,3,4,5]: # NS, MD, MF, CNAME
-            s = "".join(map(lambda x: chr(len(x))+x, s.split(".")))
-            if ord(s[-1]):
-                s += "\x00"
+            s = b"".join(map(lambda x: chr(len(x))+x, s.split(".")))
+            #if ord(s[-1]):
+            if s[-1]:
+                s += b"\x00"
         elif pkt.type == 16: # TXT
             if s:
-                ret_s = ""
+                ret_s = b""
                 # The initial string must be splitted into a list of strings
                 # prepended with theirs sizes.
                 while len(s) >= 255:
-                    ret_s += "\xff" + s[:255]
+                    ret_s += b"\xff" + s[:255]
                     s = s[255:]
                 # The remaining string is less than 255 bytes long    
                 if len(s):
@@ -290,7 +294,7 @@ dnsclasses =  {1: 'IN',  2: 'CS',  3: 'CH',  4: 'HS',  255: 'ANY'}
 class DNSQR(Packet):
     name = "DNS Question Record"
     show_indent=0
-    fields_desc = [ DNSStrField("qname",""),
+    fields_desc = [ DNSStrField("qname",b""),
                     ShortEnumField("qtype", 1, dnsqtypes),
                     ShortEnumField("qclass", 1, dnsclasses) ]
                     
