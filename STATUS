@@ -17,11 +17,11 @@ Working commands (but much more testing needed):
 
 Tested layers (not fully):
 - ARP
+- DNS
 - Dot3
 - Ether
 - ICMP
 - ICMPv6
-- ICMPv6ND_NS
 - IP
 - IPv6
 - LLC
@@ -34,7 +34,6 @@ Tested layers (not fully):
 Not working:
 - gnuplot (Unresolved import issue in plist.py affecting gnuplot, layers/inet.py issue with replacing new.instancemethod)
 - all that depends on crypto
-- DNS - this will be fixed shortly
 
 Implementad changes in all files:
 - updating print to function form

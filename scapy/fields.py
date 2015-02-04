@@ -336,6 +336,15 @@ class StrField(Field):
     def __init__(self, name, default, fmt="H", remain=0):
         Field.__init__(self,name,default,fmt)
         self.remain = remain        
+    def i2h(self, pkt, x):
+        try:
+          if type(x) is bytes:
+            x = x.decode('ascii')
+        except UnicodeDecodeError:
+          pass
+        return x
+    def i2repr(self, pkt, x):
+        return repr(self.i2h(pkt,x))
     def i2len(self, pkt, i):
         return len(i)
     def i2m(self, pkt, x):
