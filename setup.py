@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 """
 Distutils setup file for Scapy.
@@ -13,7 +13,7 @@ import os
 
 
 EZIP_HEADER="""#! /bin/sh
-PYTHONPATH=$0/%s exec python -m scapy.__init__
+PYTHONPATH=$0/%s exec python3 -m scapy.__init__
 """
 
 def make_ezipfile(base_name, base_dir, verbose=0, dry_run=0, **kwargs):
@@ -45,18 +45,23 @@ if os.name == "nt":
   SCRIPTS += ['bin/scapy.bat','bin/UTscapy.bat']
 
 setup(
-    name = 'scapy',
-    version = '2.3.1',
+    name = 'scapy3k',
+    version = '0.2',
     packages=['scapy','scapy/arch', 'scapy/arch/windows', 'scapy/layers','scapy/asn1','scapy/tools','scapy/modules', 'scapy/crypto', 'scapy/contrib'],
     scripts = SCRIPTS,
     data_files = [('share/man/man1', ["doc/scapy.1.gz"])],
 
     # Metadata
-    author = 'Philippe BIONDI',
-    author_email = 'phil(at)secdev.org',
-    description = 'Scapy: interactive packet manipulation tool',
+    maintainer = 'Eriks Dobelis',
+    maintainer_email = 'phaethon@users.noreply.github.com',
+    description = 'Scapy packet manipulation tool (see www.secdev.org for original) py3k compatibility fork',
     license = 'GPLv2',
-    url = 'http://www.secdev.org/projects/scapy'
-    # keywords = '',
-    # url = '',
+    url = 'https://github.com/phaethon/scapy',
+    keywords = 'network security monitoring packet',
+    classifiers = [
+      'Development Status :: 3 - Alpha',
+      'Environment :: Console',
+      'Operating System :: POSIX :: Linux',
+      'Programming Language :: Python :: 3 :: Only'
+    ]
 )

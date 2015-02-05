@@ -1,4 +1,6 @@
 include MANIFEST.in
+include README
+include STATUS
 include run_scapy
 recursive-include bin *
 recursive-include doc *
