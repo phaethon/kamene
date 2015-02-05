@@ -45,10 +45,15 @@ class Field:
         """Convert internal value to a number of elements usable by a FieldLenField.
         Always 1 except for list fields"""
         return 1
-    def h2i(self, pkt, x):
+    def i2b(self, pkt, x):
+        """Convert internal value to internal value"""
         if type(x) is str:
           x = bytes([ ord(i) for i in x ])
+        return x
+    def h2i(self, pkt, x):
         """Convert human value to internal value"""
+        if type(x) is str:
+          x = bytes([ ord(i) for i in x ])
         return x
     def i2h(self, pkt, x):
         """Convert internal value to human value"""

@@ -136,7 +136,7 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
             elif type(payload) is bytes:
                 self.__dict__["payload"] = conf.raw_layer(load=payload)
             else:
-                raise TypeError("payload must be either 'Packet' or 'str', not [%s]" % repr(payload))
+                raise TypeError("payload must be either 'Packet' or 'bytes', not [%s]" % repr(payload))
     def remove_payload(self):
         self.payload.remove_underlayer(self)
         self.__dict__["payload"] = NoPayload()
@@ -170,7 +170,15 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
         if attr in self.default_fields:
             return self.default_fields[attr]
         return self.payload.getfieldval(attr)
+
+    def getbyteval(self, attr):
+        fld,v = self.getfield_and_val(attr)
+        return fld.i2b(self, v)
     
+    def getstrval(self, attr):
+        fld,v = self.getfield_and_val(attr)
+        return fld.i2repr(self, v)
+
     def getfield_and_val(self, attr):
         if attr in self.fields:
             return self.get_field(attr),self.fields[attr]
@@ -1164,9 +1172,7 @@ class Padding(Raw):
     def self_build(self):
         return b""
     def build_padding(self):
-        #return (bytes([ ord(x) for x in self.load]) if self.raw_packet_cache is None
-        #        else self.raw_packet_cache) + self.payload.build_padding()
-        return (self.load if self.raw_packet_cache is None
+        return (self.getbyteval("load") if self.raw_packet_cache is None
                 else self.raw_packet_cache) + self.payload.build_padding()
 
 conf.raw_layer = Raw

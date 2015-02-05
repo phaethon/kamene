@@ -36,21 +36,46 @@ def get_temp_file(keep=False, autoext=""):
 def sane_color(x):
     r=""
     for i in x:
-        j = i
+        j = orb(i)
         if (j < 32) or (j >= 127):
             r=r+conf.color_theme.not_printable(".")
         else:
-            r=r+chr(i)
+            r=r+chb(i)
     return r
+
+def chb(x):
+  if type(x) is str:
+    return x
+  else:
+    return chr(x)
+
+def orb(x):
+  if type(x) is str:
+    return ord(x)
+  else:
+    return x
+
+def any2b(x):
+  if type(x) is not str and type(x) is not bytes:
+    try:
+      x=x.bytes()
+    except:
+      x = str(x)
+  if type(x) is str:
+    x = bytes([ ord(i) for i in x ])
+  return x
 
 def sane(x):
     r=""
     for i in x:
-        j = ord(i)
+        if type(x) is str:
+          j = ord(i)
+        else:
+          j = i
         if (j < 32) or (j >= 127):
             r=r+"."
         else:
-            r=r+i
+            r=r+chb(i)
     return r
 
 def lhex(x):
@@ -65,14 +90,18 @@ def lhex(x):
 
 @conf.commands.register
 def hexdump(x):
-    x=x.bytes()
+    if type(x) is not str and type(x) is not bytes:
+      try:
+        x=x.bytes()
+      except:
+        x = str(x)
     l = len(x)
     i = 0
     while i < l:
         print("%04x  " % i,end = " ")
         for j in range(16):
             if i+j < l:
-                print("%02X" % x[i+j], end = " ")
+                print("%02X" % orb(x[i+j]), end = " ")
             else:
                 print("  ", end = " ")
             if j%16 == 7:
@@ -83,23 +112,31 @@ def hexdump(x):
 
 @conf.commands.register
 def linehexdump(x, onlyasc=0, onlyhex=0):
-    x = x.bytes()
+    if type(x) is not str and type(x) is not bytes:
+      try:
+        x=x.bytes()
+      except:
+        x = str(x)
     l = len(x)
     if not onlyasc:
         for i in range(l):
-            print("%02X" % x[i], end = " ")
+            print("%02X" % orb(x[i]), end = " ")
         print("", end = " ")
     if not onlyhex:
         print(sane_color(x))
 
 def chexdump(x):
-    x=str(x)
-    print(", ".join(map(lambda x: "%#04x"%ord(x), x)))
+    if type(x) is not str and type(x) is not bytes:
+      try:
+        x=x.bytes()
+      except:
+        x = str(x)
+    print(", ".join(map(lambda x: "%#04x"%orb(x), x)))
     
 def hexstr(x, onlyasc=0, onlyhex=0):
     s = []
     if not onlyasc:
-        s.append(" ".join(map(lambda x:"%02x"%ord(x), x)))
+        s.append(" ".join(map(lambda x:"%02x"%orb(x), x)))
     if not onlyhex:
         s.append(sane(x)) 
     return "  ".join(s)
@@ -108,8 +145,8 @@ def hexstr(x, onlyasc=0, onlyhex=0):
 @conf.commands.register
 def hexdiff(x,y):
     """Show differences between 2 binary strings"""
-    x=str(x)[::-1]
-    y=str(y)[::-1]
+    x=any2b(x)[::-1]
+    y=any2b(y)[::-1]
     SUBST=1
     INSERT=1
     d={}
@@ -188,7 +225,7 @@ def hexdiff(x,y):
             if i+j < l:
                 if line[j]:
                     col = colorize[(linex[j]!=liney[j])*(doy-dox)]
-                    print(col("%02X" % ord(line[j])), end = " ")
+                    print(col("%02X" % line[j][0]), end = " ")
                     if linex[j]==liney[j]:
                         cl += sane_color(line[j])
                     else:
