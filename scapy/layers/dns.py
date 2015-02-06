@@ -13,6 +13,7 @@ from scapy.packet import *
 from scapy.fields import *
 from scapy.ansmachine import *
 from scapy.layers.inet import IP, UDP
+from scapy.utils import str2bytes
 
 class DNSStrField(StrField):
 
@@ -202,7 +203,7 @@ class RDataField(StrLenField):
     def i2m(self, pkt, s):
         if pkt.type == 1: # A
             if s:
-                s = inet_aton(s)
+                s = inet_aton(s.decode('ascii'))
         elif pkt.type in [2,3,4,5]: # NS, MD, MF, CNAME
             s = b"".join(map(lambda x: bytes([len(x)]) + x, s.split(b".")))
             #if ord(s[-1]):
