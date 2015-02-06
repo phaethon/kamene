@@ -361,7 +361,7 @@ extensions_paths: path or list of paths where extensions are to be looked for
     noenum = Resolve()
     emph = Emphasize()
     use_pcap = False
-    use_dnet = False
+    use_netifaces = False
     ipv6_enabled = socket.has_ipv6
     ethertypes = ETHER_TYPES
     protocols = IP_PROTOS

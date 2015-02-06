@@ -37,11 +37,8 @@ def get_if_addr(iff):
     return socket.inet_ntoa(get_if_raw_addr(iff))
     
 def get_if_hwaddr(iff):
-    addrfamily, mac = get_if_raw_hwaddr(iff)
-    if addrfamily in [ARPHDR_ETHER,ARPHDR_LOOPBACK]:
-        return str2mac(mac)
-    else:
-        raise Scapy_Exception("Unsupported address family (%i) for interface [%s]" % (addrfamily,iff))
+    mac = get_if_raw_hwaddr(iff)
+    return str2mac(mac)
 
 
 LINUX=sys.platform.startswith("linux")

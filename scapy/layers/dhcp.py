@@ -288,7 +288,7 @@ def dhcp_request(iface=None,**kargs):
         warning("conf.checkIPaddr is not 0, I may not be able to match the answer")
     if iface is None:
         iface = conf.iface
-    fam,hw = get_if_raw_hwaddr(iface)
+    hw = get_if_raw_hwaddr(iface)
     return srp1(Ether(dst="ff:ff:ff:ff:ff:ff")/IP(src="0.0.0.0",dst="255.255.255.255")/UDP(sport=68,dport=67)
                  /BOOTP(chaddr=hw)/DHCP(options=[("message-type","discover"),"end"]),iface=iface,**kargs)
 

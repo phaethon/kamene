@@ -415,7 +415,7 @@ def in6_getLocalUniquePrefix():
     j = int((tod - i)*(2**32))
     tod = struct.pack("!II", i,j)
     # TODO: Add some check regarding system address gathering
-    rawmac = get_if_raw_hwaddr(conf.iface6)[1]
+    rawmac = get_if_raw_hwaddr(conf.iface6)
     mac = b":".join(map(lambda x: b"%.02x" % ord(x), list(rawmac)))
     # construct modified EUI-64 ID
     eui64 = inet_pton(socket.AF_INET6, '::' + in6_mactoifaceid(mac))[8:] 

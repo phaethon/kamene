@@ -16,11 +16,10 @@ import scapy.utils6
 import scapy.arch
 
 scapy.config.conf.use_pcap = 1
-scapy.config.conf.use_dnet = 1
-from .pcapdnet import *
+scapy.config.conf.use_netifaces = True
+#from .pcapdnet import *
 
-
-    
+import netifaces
 
 
 ##################
@@ -123,22 +122,15 @@ def in6_getifaddr():
     """
 
     ret = []
-    i = dnet.intf()
-    for int in i:
-        ifname = int['name']
-        v6 = []
-        if 'alias_addrs' in int:
-            v6 = int['alias_addrs']
-        for a in v6:
-            if a.type != dnet.ADDR_TYPE_IP6:
-                continue
-
-            xx = str(a).split('/')[0]
-            addr = scapy.utils6.in6_ptop(xx)
-
-            scope = scapy.utils6.in6_getscope(addr)
-
-            ret.append((xx, scope, ifname))
+    interfaces = get_if_list()
+    for i in interfaces:
+      addrs = netifaces.ifaddresses(i)
+      if netifaces.AF_INET6 not in addrs:
+        continue
+      for a in addrs[netifaces.AF_INET6]:
+        addr = a['addr'].split('%')[0]
+        scope = scapy.utils6.in6_getscope(addr)
+        ret.append((addr, scope, i))
     return ret
 
 def read_routes6():
@@ -163,6 +155,7 @@ def read_routes6():
             lspl = l.split()
             d,nh,fl = lspl[:3]
             dev = lspl[5+mtu_present+prio_present]
+            expire = None
         else:       # FREEBSD or DARWIN 
             d,nh,fl,dev = l.split()[:4]
         if [ x for x in lifaddr if x[2] == dev] == []:
@@ -186,6 +179,8 @@ def read_routes6():
         if '%' in nh:
             nh,dev = nh.split('%')
         if scapy.arch.LOOPBACK_NAME in dev:
+            if d == '::' and dp == 96:
+              continue
             cset = ['::1']
             nh = '::'
         else:
@@ -198,8 +193,41 @@ def read_routes6():
     f.close()
     return routes
 
+if scapy.config.conf.use_netifaces:
+    try:
+        import netifaces
+        def get_if_raw_hwaddr(iff):
+            if iff == scapy.arch.LOOPBACK_NAME:
+                return (772, '\x00'*6)
+            try:
+                s = netifaces.ifaddresses(iff)[netifaces.AF_LINK][0]['addr']
+                return struct.pack('BBBBBB', *[ int(i, 16) for i in s.split(':') ])
+            except:
+                raise Scapy_Exception("Error in attempting to get hw address for interface [%s]" % iff)
+            return l
+        def get_if_raw_addr(ifname):
+            try:
+              s = netifaces.ifaddresses(ifname)[netifaces.AF_INET][0]['addr']
+              return socket.inet_aton(s)
+            except:
+              return None
+        def get_if_list():
+            #return [ i[1] for i in socket.if_nameindex() ]
+            return netifaces.interfaces()
 
-            
-
-
+    except ImportError as e:
+        if conf.interactive:
+            log_loading.error("Unable to import netifaces module: %s" % e)
+            conf.use_netifaces = False
+            def get_if_raw_hwaddr(iff):
+                "dummy"
+                return (0,"\0\0\0\0\0\0")
+            def get_if_raw_addr(iff):
+                "dummy"
+                return "\0\0\0\0"
+            def get_if_list():
+                "dummy"
+                return []
+        else:
+            raise
 
