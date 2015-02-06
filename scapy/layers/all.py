@@ -13,6 +13,9 @@ from scapy.error import log_loading
 import logging
 log = logging.getLogger("scapy.loading")
 
+log.warning("Only layers dns, inet, inet6, l2 tested in scapy3k")
+log.warning("Please, report issues to https://github.com/phaethon/scapy")
+
 def _import_star(m):
     #mod = __import__("." + m, globals(), locals())
     mod = importlib.import_module("scapy.layers." + m)

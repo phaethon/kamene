@@ -72,7 +72,7 @@ if not LINUX and not FREEBSD:
 
 if LINUX:
     from .linux import *
-    if scapy.config.conf.use_pcap or scapy.config.conf.use_dnet:
+    if scapy.config.conf.use_pcap or scapy.config.conf.use_netifaces:
         from pcapdnet import *
 elif OPENBSD or FREEBSD or NETBSD or DARWIN:
     from .bsd import *

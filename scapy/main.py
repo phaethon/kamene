@@ -7,7 +7,7 @@
 Main module for interactive startup.
 """
 
-import os,sys
+import os,sys,socket
 import glob
 import builtins
 from .error import *
@@ -101,7 +101,7 @@ def list_contrib(name=None):
 ##############################
 
 
-def save_session(fname=None, session=None, pickleProto=-1):
+def save_session(fname=None, session=None, pickleProto=3):
     if fname is None:
         fname = conf.session
         if not fname:
@@ -115,8 +115,8 @@ def save_session(fname=None, session=None, pickleProto=-1):
     if "__builtins__" in to_be_saved:
         del(to_be_saved["__builtins__"])
 
-    for k in to_be_saved.keys():
-        if type(to_be_saved[k]) in [types.TypeType, types.ClassType, types.ModuleType]:
+    for k in list(to_be_saved.keys()):
+        if type(to_be_saved[k]) in [type, types.ModuleType]:
              log_interactive.error("[%s] (%s) can't be saved." % (k, type(to_be_saved[k])))
              del(to_be_saved[k])
 
