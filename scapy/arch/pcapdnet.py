@@ -18,7 +18,6 @@ from scapy.error import Scapy_Exception
 import scapy.arch
 
 
-
 if conf.use_pcap:    
 
 
@@ -168,13 +167,32 @@ if conf.use_pcap:
         
     
 
-if conf.use_dnet:
+if conf.use_netifaces:
     try:
-        import dnet
+        import netifaces
+        def get_if_raw_hwaddr(iff):
+            if iff == scapy.arch.LOOPBACK_NAME:
+                return (772, '\x00'*6)
+            try:
+                s = netifaces.ifaddresses(iff)[netifaces.AF_LINK][0]['addr']
+                return struct.pack('BBBBBB', *[ int(i, 16) for i in s.split(':') ])
+            except:
+                raise Scapy_Exception("Error in attempting to get hw address for interface [%s]" % iff)
+            return l
+        def get_if_raw_addr(ifname):
+            try:
+              s = netifaces.ifaddresses(ifname)[netifaces.AF_INET][0]['addr']
+              return socket.inet_aton(s)
+            except:
+              return None
+        def get_if_list():
+            #return [ i[1] for i in socket.if_nameindex() ]
+            return netifaces.interfaces()
+
     except ImportError as e:
         if conf.interactive:
-            log_loading.error("Unable to import dnet module: %s" % e)
-            conf.use_dnet = False
+            log_loading.error("Unable to import netifaces module: %s" % e)
+            conf.use_netifaces = False
             def get_if_raw_hwaddr(iff):
                 "dummy"
                 return (0,"\0\0\0\0\0\0")
@@ -186,22 +204,6 @@ if conf.use_dnet:
                 return []
         else:
             raise
-    else:
-        def get_if_raw_hwaddr(iff):
-            if iff == scapy.arch.LOOPBACK_NAME:
-                return (772, '\x00'*6)
-            try:
-                l = dnet.intf().get(iff)
-                l = l["link_addr"]
-            except:
-                raise Scapy_Exception("Error in attempting to get hw address for interface [%s]" % iff)
-            return l.type,l.data
-        def get_if_raw_addr(ifname):
-            i = dnet.intf()
-            return i.get(ifname)["addr"].data
-        def get_if_list():
-            return [i.get("name", None) for i in dnet.intf()]
-    
     
 if conf.use_pcap and conf.use_dnet:
     class L3dnetSocket(SuperSocket):

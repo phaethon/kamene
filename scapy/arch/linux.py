@@ -81,7 +81,7 @@ del(_f)
 
 
 def get_if_raw_hwaddr(iff):
-    return struct.unpack("16xh6s8x",get_if(iff,SIOCGIFHWADDR))
+    return struct.unpack("16xh6s8x",get_if(iff,SIOCGIFHWADDR))[1]
 
 def get_if_raw_addr(iff):
     try:

@@ -69,7 +69,7 @@ class Route6:
         plen = int(plen)
 
         if gw is None:
-            gw = b"::"
+            gw = "::"
         if dev is None:
             dev, ifaddr, x = self.route(gw)
         else:

@@ -1343,7 +1343,7 @@ dhcp6d( dns="2001:500::1035", domain="localdomain, local", duid=None)
             timeval = time.time() - delta
 
             # Mac Address
-            rawmac = get_if_raw_hwaddr(iface)[1]
+            rawmac = get_if_raw_hwaddr(iface)
             mac = ":".join(map(lambda x: "%.02x" % ord(x), list(rawmac)))
 
             self.duid = DUID_LLT(timeval = timeval, lladdr = mac)
