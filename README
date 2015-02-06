@@ -1,7 +1,23 @@
 This is a fork of scapy (http://www.secdev.org) to make it compatible with python3. Fork based on scapy v2.3.1
+I could go through whole tutorial series Building Network Tools with Scapy by @thepacketgeek (http://thepacketgeek.com/series/building-network-tools-with-scapy/) using scapy3k. File STATUS inside distribution contains more info on current status.
 
-Basic functions work (sending/receiving/sniffing, traceroute, IPV4, IPV6, Ether, TCP, UDP, DNS). I could go through whole tutorial series Building Network Tools with Scapy by @thepacketgeek (http://thepacketgeek.com/series/building-network-tools-with-scapy/) using scapy3k. File STATUS inside distribution contains more info on current status.
+All commands listed by lsc() should work. Tested layers are:
+- ARP
+- DNS
+- Dot3
+- Ether
+- ICMP
+- ICMPv6
+- IP
+- IPv6
+- LLC
+- Padding
+- Raw
+- SNAP
+- STP
+- TCP
+- UDP
 
-Currently works only on Linux. Using python 3.4 on Ubuntu linux for testing. Other operating systems to be added, but the original scapy implementation uses libraries, which are not available for python3k yet.
+Currently works only on Linux. Using python 3.4 on Ubuntu linux for testing. Other OS support in progress.
 
-Please, test it out and submit all issues on github (https://github.com/phaethon/scapy) preferrably with .pcap files for tests. Often bugs are more easy to fix than to identify.
+Please, submit all issues https://github.com/phaethon/scapy preferrably with .pcap files for tests. Bugs for individual layers are usually easy to fix.

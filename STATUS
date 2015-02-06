@@ -1,19 +1,12 @@
 Working:
-Can be installed with 'python3 setup.py install'
-scapy prompt loads, layers load (just a few tested), can create and send packet
+Can be installed with 'python3 setup.py install' from source or with 'pip3 install scapy3k'
+All commands listed by lsc() should work.
+Currently, only works on Linux. Work on other OS support is in progress.
 
-Working commands (but much more testing needed):
-- conf
-- hexdump
-- linehexdump
-- ls
-- lsc
-- pkg.show(), pkg.show2()
-- rdpcap
-- sr1,sr, srp1, srp
-- sniff
-- traceroute
-- wrpcap
+Not working:
+- gnuplot (Unresolved import issue in plist.py affecting gnuplot, layers/inet.py issue with replacing new.instancemethod)
+- all that depends on crypto
+- session saving
 
 Tested layers (not fully):
 - ARP
@@ -25,28 +18,11 @@ Tested layers (not fully):
 - IP
 - IPv6
 - LLC
+- Padding
 - Raw
 - SNAP
 - STP
 - TCP
 - UDP
 
-Not working:
-- gnuplot (Unresolved import issue in plist.py affecting gnuplot, layers/inet.py issue with replacing new.instancemethod)
-- all that depends on crypto
-
-Implementad changes in all files:
-- updating print to function form
-- replaced raise e, v -> raise e(v) (PEP3109)
-- replaced except e, v -> except e as v (PEP3110)
-- fixed nested function definition parameter with sublist (parameter unpacking)
-- ditto for lambda
-- removed L from long integers
-- changed backticks to repr()
-- changed xrange to range
-- converted tabs to spaces, some files had mix of them
-- replaced iteritems,iterkeys,itervalues to items,keys,values
-- replaced __metaclass__ with (metaclass=)
-- replaced has_key to key in dict
-- replaced xxx.next() to next(xxx)
-- replaced sys.maxint with sys.maxsize
+Please, report any issues to https://github.com/phaethon/scapy if possible with sample .pcap files.
