@@ -87,7 +87,7 @@ def get_if_raw_addr(iff):
     try:
         return get_if(iff, SIOCGIFADDR)[20:24]
     except IOError:
-        return "\0\0\0\0"
+        return b"\0\0\0\0"
 
 
 def get_if_list():
