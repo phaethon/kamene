@@ -26,7 +26,7 @@ def _probe_config_file(cf):
 def _read_config_file(cf):
     log_loading.debug("Loading config file [%s]" % cf)
     try:
-        execfile(cf)
+        exec(open(cf).read())
     except IOError as e:
         log_loading.warning("Cannot read config file [%s] [%s]" % (cf,e))
     except Exception as e:
