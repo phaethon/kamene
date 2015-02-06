@@ -401,7 +401,7 @@ class IP(Packet, IPTools):
                  
     def fragment(self, fragsize=1480):
         """Fragment IP datagrams"""
-        fragsize = (fragsize+7)/8*8
+        fragsize = (fragsize+7)//8*8
         lst = []
         fnb = 0
         fl = self
@@ -411,7 +411,7 @@ class IP(Packet, IPTools):
         
         for p in fl:
             s = (p[fnb].payload).bytes()
-            nb = (len(s)+fragsize-1)/fragsize
+            nb = (len(s)+fragsize-1)//fragsize
             for i in range(nb):            
                 q = p.copy()
                 del(q[fnb].payload)
@@ -421,7 +421,7 @@ class IP(Packet, IPTools):
                     q[IP].flags &= ~1
                 else:
                     q[IP].flags |= 1 
-                q[IP].frag = i*fragsize/8
+                q[IP].frag = i*fragsize//8
                 r = conf.raw_layer(load=s[i*fragsize:(i+1)*fragsize])
                 r.overload_fields = p[IP].payload.overload_fields.copy()
                 q.add_payload(r)
@@ -740,11 +740,11 @@ conf.neighbor.register_l3(Dot3, IP, lambda l2,l3: getmacbyip(l3.dst))
 @conf.commands.register
 def fragment(pkt, fragsize=1480):
     """Fragment a big IP datagram"""
-    fragsize = (fragsize+7)/8*8
+    fragsize = (fragsize+7)//8*8
     lst = []
     for p in pkt:
         s = (p[IP].payload).bytes()
-        nb = (len(s)+fragsize-1)/fragsize
+        nb = (len(s)+fragsize-1)//fragsize
         for i in range(nb):            
             q = p.copy()
             del(q[IP].payload)
@@ -754,7 +754,7 @@ def fragment(pkt, fragsize=1480):
                 q[IP].flags &= ~1
             else:
                 q[IP].flags |= 1 
-            q[IP].frag = i*fragsize/8
+            q[IP].frag = i*fragsize//8
             r = conf.raw_layer(load=s[i*fragsize:(i+1)*fragsize])
             r.overload_fields = p[IP].payload.overload_fields.copy()
             q.add_payload(r)
