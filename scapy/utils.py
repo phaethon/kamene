@@ -33,15 +33,13 @@ def get_temp_file(keep=False, autoext=""):
         conf.temp_files.append(f+autoext)
     return f
 
-def sane_color(x):
-    r=""
-    for i in x:
-        j = orb(i)
-        if (j < 32) or (j >= 127):
-            r=r+conf.color_theme.not_printable(".")
-        else:
-            r=r+chb(i)
-    return r
+def str2bytes(x):
+  if type(x) is bytes:
+    return x
+  elif type(x) is str:
+    return bytes([ ord(i) for i in x ])
+  else:
+    return str2bytes(str(x))
 
 def chb(x):
   if type(x) is str:
@@ -64,6 +62,16 @@ def any2b(x):
   if type(x) is str:
     x = bytes([ ord(i) for i in x ])
   return x
+
+def sane_color(x):
+    r=""
+    for i in x:
+        j = orb(i)
+        if (j < 32) or (j >= 127):
+            r=r+conf.color_theme.not_printable(".")
+        else:
+            r=r+chb(i)
+    return r
 
 def sane(x):
     r=""
@@ -478,26 +486,26 @@ def load_object(fname):
 @conf.commands.register
 def corrupt_bytes(s, p=0.01, n=None):
     """Corrupt a given percentage or number of bytes from a string"""
-    s = array.array("B",str(s))
+    s = str2bytes(s)
+    s = array.array("B",s)
     l = len(s)
     if n is None:
         n = max(1,int(l*p))
     for i in random.sample(range(l), n):
         s[i] = (s[i]+random.randint(1,255))%256
-    return s.tostring()
+    return s.tobytes()
 
 @conf.commands.register
 def corrupt_bits(s, p=0.01, n=None):
     """Flip a given percentage or number of bits from a string"""
-    s = array.array("B",str(s))
+    s = str2bytes(s)
+    s = array.array("B",s)
     l = len(s)*8
     if n is None:
         n = max(1,int(l*p))
     for i in random.sample(range(l), n):
-        s[i/8] ^= 1 << (i%8)
-    return s.tostring()
-
-    
+        s[i//8] ^= 1 << (i%8)
+    return s.tobytes()
 
 
 #############################
