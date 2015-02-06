@@ -54,6 +54,11 @@ WINDOWS=sys.platform.startswith("win32")
 
 X86_64 = not WINDOWS and (os.uname()[4] == 'x86_64')
 
+if not LINUX:
+	log_loading.error("scapy3k currently works only on Linux platform. More to come soon.")
+if not LINUX and not FREEBSD:
+	exit()
+
 
 # Next step is to import following architecture specific functions:
 # def get_if_raw_hwaddr(iff)

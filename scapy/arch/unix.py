@@ -17,7 +17,7 @@ import scapy.arch
 
 scapy.config.conf.use_pcap = 1
 scapy.config.conf.use_dnet = 1
-from pcapdnet import *
+from .pcapdnet import *
 
 
     

@@ -9,4 +9,4 @@ Support for BSD-like operating systems such as FreeBSD, OpenBSD and Mac OS X.
 
 LOOPBACK_NAME="lo0"
 
-from unix import *
+from .unix import *
