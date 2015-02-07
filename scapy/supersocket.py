@@ -96,7 +96,8 @@ class L3RawSocket(SuperSocket):
         return pkt
     def send(self, x):
         try:
-            sx = str(x)
+            #sx = str(x)
+            sx = x
             x.sent_time = time.time()
             self.outs.sendto(sx,(x.dst,0))
         except socket.error as msg:

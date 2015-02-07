@@ -52,7 +52,7 @@ WINDOWS=sys.platform.startswith("win32")
 X86_64 = not WINDOWS and (os.uname()[4] == 'x86_64')
 
 if not LINUX:
-	log_loading.error("scapy3k currently works only on Linux platform. Create an issue for your platform request at https://github.com/phaethon/scapy3k")
+  log_loading.error("scapy3k currently works only on Linux platform. Create an issue for your platform request at https://github.com/phaethon/scapy3k")
   if WINDOWS:
     log_loading.error("On Windows packet sending and sniffing, .pcap reading and writing does not work")
   else:

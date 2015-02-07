@@ -360,7 +360,7 @@ extensions_paths: path or list of paths where extensions are to be looked for
     resolve = Resolve()
     noenum = Resolve()
     emph = Emphasize()
-    use_pcap = False
+    use_dnet = False
     use_winpcapy = False
     use_netifaces = False
     ipv6_enabled = socket.has_ipv6
