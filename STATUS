@@ -25,4 +25,4 @@ Tested layers (not fully):
 - TCP
 - UDP
 
-Please, report any issues to https://github.com/phaethon/scapy if possible with sample .pcap files.
+Please, report any issues to https://github.com/phaethon/scapy3k if possible with sample .pcap files.

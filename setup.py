@@ -56,7 +56,7 @@ setup(
     maintainer_email = 'phaethon@users.noreply.github.com',
     description = 'Scapy packet manipulation tool (see www.secdev.org for original) py3k compatibility fork',
     license = 'GPLv2',
-    url = 'https://github.com/phaethon/scapy',
+    url = 'https://github.com/phaethon/scapy3k',
     keywords = 'network security monitoring packet',
     classifiers = [
       'Development Status :: 3 - Alpha',

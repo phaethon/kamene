@@ -20,4 +20,4 @@ All commands listed by lsc() should work. Tested layers are:
 
 Currently works only on Linux. Using python 3.4 on Ubuntu linux for testing. Other OS support in progress.
 
-Please, submit all issues https://github.com/phaethon/scapy preferrably with .pcap files for tests. Bugs for individual layers are usually easy to fix.
+Please, submit all issues https://github.com/phaethon/scapy3k preferrably with .pcap files for tests. Bugs for individual layers are usually easy to fix.

@@ -14,7 +14,7 @@ import logging
 log = logging.getLogger("scapy.loading")
 
 log.warning("Only layers dns, inet, inet6, l2 tested in scapy3k")
-log.warning("Please, report issues to https://github.com/phaethon/scapy")
+log.warning("Please, report issues to https://github.com/phaethon/scapy3k")
 
 def _import_star(m):
     #mod = __import__("." + m, globals(), locals())
