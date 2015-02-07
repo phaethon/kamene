@@ -375,6 +375,7 @@ if conf.use_winpcapy:
           self.pcap = pcap_open_live(self.iface, snaplen, promisc, to_ms, self.errbuf)
           self.header = POINTER(pcap_pkthdr)()
           self.pkt_data = POINTER(c_ubyte)()
+          self.bpf_program = bpf_program()
       def next(self):
           c = pcap_next_ex(self.pcap, byref(self.header), byref(self.pkt_data))
           if not c > 0:
@@ -387,6 +388,16 @@ if conf.use_winpcapy:
           return pcap_datalink(self.pcap)
       def fileno(self):
           return pcap_get_selectable_fd(self.pcap) 
+      def setfilter(self, f):
+          filter_exp = create_string_buffer(f.encode('ascii'))
+          if pcap_compile(self.pcap, byref(self.bpf_program), filter_exp, 0, -1) == -1:
+            error("Could not compile filter expression %s" % f)
+            return False
+          else:
+            if pcap_setfilter(self.pcap, byref(self.bpf_program)) == -1:
+              error("Could not install filter %s" % f)
+              return False
+          return True
       def close(self):
           pcap_close(self.pcap)
   open_pcap = lambda *args,**kargs: _PcapWrapper_pypcap(*args,**kargs)
@@ -405,10 +416,10 @@ if conf.use_winpcapy:
               promisc = conf.sniff_promisc
           self.promisc = promisc
           self.ins = open_pcap(iface, 1600, self.promisc, 100)
-          #try:
-          #    ioctl(self.ins.fileno(),BIOCIMMEDIATE,struct.pack("I",1))
-          #except:
-          #    pass
+          try:
+              ioctl(self.ins.fileno(),BIOCIMMEDIATE,struct.pack("I",1))
+          except:
+              pass
           if type == ETH_P_ALL: # Do not apply any filter if Ethernet type is given
               if conf.except_filter:
                   if filter:

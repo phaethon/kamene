@@ -1,7 +1,7 @@
 Working:
 Can be installed with 'python3 setup.py install' from source or with 'pip3 install scapy3k'
 All commands listed by lsc() should work.
-Currently, only works on Linux. Work on other OS support is in progress.
+Currently, fully works on Linux. On Unix and Darwin packet sending and sr type commands do not work yet. On Windows neither sending nor receiving works.
 
 Not working:
 - gnuplot (Unresolved import issue in plist.py affecting gnuplot, layers/inet.py issue with replacing new.instancemethod)
