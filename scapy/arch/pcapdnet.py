@@ -20,8 +20,6 @@ import scapy.arch
 
 if conf.use_pcap:    
 
-
-
     try:
         import pcap
     except ImportError as e:

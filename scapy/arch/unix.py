@@ -15,9 +15,9 @@ import scapy.utils
 import scapy.utils6
 import scapy.arch
 
-scapy.config.conf.use_pcap = 1
+scapy.config.conf.use_winpcapy = True
 scapy.config.conf.use_netifaces = True
-#from .pcapdnet import *
+from .pcapdnet import *
 
 import netifaces
 
