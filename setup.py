@@ -46,7 +46,7 @@ if os.name == "nt":
 
 setup(
     name = 'scapy3k',
-    version = '0.4',
+    version = '0.5',
     packages=['scapy','scapy/arch', 'scapy/arch/windows', 'scapy/layers','scapy/asn1','scapy/tools','scapy/modules', 'scapy/crypto', 'scapy/contrib'],
     scripts = SCRIPTS,
     data_files = [('share/man/man1', ["doc/scapy.1.gz"])],
@@ -61,7 +61,7 @@ setup(
     classifiers = [
       'Development Status :: 3 - Alpha',
       'Environment :: Console',
-      'Operating System :: POSIX :: Linux',
+      'Operating System :: POSIX',
       'Programming Language :: Python :: 3 :: Only'
     ]
 )

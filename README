@@ -18,9 +18,9 @@ All commands listed by lsc() should work. Tested layers are:
 - TCP
 - UDP
 
-Currently, fully works only on Linux. Using python 3.4 on Ubuntu linux for testing. 
+Currently, works on Linux, Darwin, Unix and co. Using python 3.4 on Ubuntu and FreeBSD for testing. Windows support in progress.
 
-netifaces module required for all OS except Linux. On Unix and Darwin packet sniffing should work, but sending and sr type commands not. Other OS support development in progress.
+On all OS except Linux libpcap and libdnet should be installed for sending and receiving packets (not python modules - just C libraries). Without libdnet packets can be sniffed, but not sent. Also, netifaces module can be used for alternative and possibly cleaner way to determine local addresses.
 
 Please, submit all issues https://github.com/phaethon/scapy3k preferrably with .pcap files for tests. Bugs for individual layers are usually easy to fix.
 

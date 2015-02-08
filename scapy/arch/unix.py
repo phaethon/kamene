@@ -20,8 +20,6 @@ scapy.config.conf.use_netifaces = True
 scapy.config.conf.use_dnet = True
 from .pcapdnet import *
 
-import netifaces
-
 
 ##################
 ## Routes stuff ##
@@ -193,42 +191,3 @@ def read_routes6():
 
     f.close()
     return routes
-
-if scapy.config.conf.use_netifaces:
-    try:
-        import netifaces
-        def get_if_raw_hwaddr(iff):
-            if iff == scapy.arch.LOOPBACK_NAME:
-                return (772, '\x00'*6)
-            try:
-                s = netifaces.ifaddresses(iff)[netifaces.AF_LINK][0]['addr']
-                return struct.pack('BBBBBB', *[ int(i, 16) for i in s.split(':') ])
-            except:
-                raise Scapy_Exception("Error in attempting to get hw address for interface [%s]" % iff)
-            return l
-        def get_if_raw_addr(ifname):
-            try:
-              s = netifaces.ifaddresses(ifname)[netifaces.AF_INET][0]['addr']
-              return socket.inet_aton(s)
-            except:
-              return None
-        def get_if_list():
-            #return [ i[1] for i in socket.if_nameindex() ]
-            return netifaces.interfaces()
-
-    except ImportError as e:
-        if conf.interactive:
-            log_loading.error("Unable to import netifaces module: %s" % e)
-            conf.use_netifaces = False
-            def get_if_raw_hwaddr(iff):
-                "dummy"
-                return (0,"\0\0\0\0\0\0")
-            def get_if_raw_addr(iff):
-                "dummy"
-                return "\0\0\0\0"
-            def get_if_list():
-                "dummy"
-                return []
-        else:
-            raise
-

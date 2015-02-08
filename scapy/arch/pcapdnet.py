@@ -18,71 +18,81 @@ from scapy.error import Scapy_Exception
 import scapy.arch
 
 if conf.use_dnet:
-  from .cdnet import *
-
-#if conf.use_pcap:    
-#
-#    try:
-#        import pcap
-#    except ImportError as e:
-#        try:
-#            import pcapy as pcap
-#        except ImportError as e2:
-#            if conf.interactive:
-#                log_loading.error("Unable to import pcap module: %s/%s" % (e,e2))
-#                conf.use_pcap = False
-#            else:
-#                raise
+  try:
+    from .cdnet import *
+  except OSError as e:
+    if conf.interactive:
+      log_loading.error("Unable to import libdnet library: %s" % e)
+      conf.use_dnet = False
+    else:
+      raise
 
 if conf.use_winpcapy:
-    
-    # From BSD net/bpf.h
-    #BIOCIMMEDIATE=0x80044270
-    BIOCIMMEDIATE=-2147204496
+  try:
+    from .winpcapy import *
+  except OSError as e:
+    if conf.interactive:
+      log_loading.error("Unable to import libpcap library: %s" % e)
+      conf.use_winpcapy = False
+    else:
+      raise
 
-    class PcapTimeoutElapsed(Scapy_Exception):
-        pass
+  # From BSD net/bpf.h
+  #BIOCIMMEDIATE=0x80044270
+  BIOCIMMEDIATE=-2147204496
+
+  class PcapTimeoutElapsed(Scapy_Exception):
+      pass
     
 if conf.use_netifaces:
-    try:
-        import netifaces
-        def get_if_raw_hwaddr(iff):
-            if iff == scapy.arch.LOOPBACK_NAME:
-                return (772, '\x00'*6)
-            try:
-                s = netifaces.ifaddresses(iff)[netifaces.AF_LINK][0]['addr']
-                return struct.pack('BBBBBB', *[ int(i, 16) for i in s.split(':') ])
-            except:
-                raise Scapy_Exception("Error in attempting to get hw address for interface [%s]" % iff)
-            return l
-        def get_if_raw_addr(ifname):
-            try:
-              s = netifaces.ifaddresses(ifname)[netifaces.AF_INET][0]['addr']
-              return socket.inet_aton(s)
-            except:
-              return None
-        def get_if_list():
-            #return [ i[1] for i in socket.if_nameindex() ]
-            return netifaces.interfaces()
+  try:
+    import netifaces
+  except ImportError as e:
+    log_loading.warning("Could not load module netifaces: %s" % e)
+    conf.use_netifaces = False
 
-    except ImportError as e:
-        if conf.interactive:
-            log_loading.error("Unable to import netifaces module: %s" % e)
-            conf.use_netifaces = False
-            def get_if_raw_hwaddr(iff):
-                "dummy"
-                return (0,"\0\0\0\0\0\0")
-            def get_if_raw_addr(iff):
-                "dummy"
-                return "\0\0\0\0"
-            def get_if_list():
-                "dummy"
-                return []
-        else:
-            raise
+if conf.use_netifaces:
+  def get_if_raw_hwaddr(iff):
+      if iff == scapy.arch.LOOPBACK_NAME:
+          return (772, '\x00'*6)
+      try:
+          s = netifaces.ifaddresses(iff)[netifaces.AF_LINK][0]['addr']
+          return struct.pack('BBBBBB', *[ int(i, 16) for i in s.split(':') ])
+      except:
+          raise Scapy_Exception("Error in attempting to get hw address for interface [%s]" % iff)
+      return l
+  def get_if_raw_addr(ifname):
+      try:
+        s = netifaces.ifaddresses(ifname)[netifaces.AF_INET][0]['addr']
+        return socket.inet_aton(s)
+      except:
+        return None
+  def get_if_list():
+      #return [ i[1] for i in socket.if_nameindex() ]
+      return netifaces.interfaces()
+
+elif conf.use_dnet:
+  intf = dnet_intf()
+  def get_if_raw_hwaddr(iff):
+      return bytes(intf.get(iff)['link_addr'])
+  def get_if_raw_addr(iff):
+      return bytes(intf.get(iff)['addr'])
+  def get_if_list():
+      return intf.names
+
+else:
+  log_loading.warning("No known method to get ip and hw address for interfaces")
+  def get_if_raw_hwaddr(iff):
+      "dummy"
+      return b"\0\0\0\0\0\0"
+  def get_if_raw_addr(iff):
+      "dummy"
+      return b"\0\0\0\0"
+  def get_if_list():
+      "dummy"
+      return []
 
 if conf.use_winpcapy:
-  from .winpcapy import *
   from ctypes import POINTER, byref, create_string_buffer
   class _PcapWrapper_pypcap:
       def __init__(self, device, snaplen, promisc, to_ms):
@@ -224,16 +234,15 @@ if conf.use_winpcapy and conf.use_dnet:
                 iff = conf.iface
             ifs,cls = self.iflist.get(iff,(None,None))
             if ifs is None:
-                #iftype = self.intf.get(iff)["type"]
-                #if iftype == INTF_TYPE_ETH:
-                #    try:
-                #        cls = conf.l2types[1]
-                #    except KeyError:
-                #        warning("Unable to find Ethernet class. Using nothing")
-                #    ifs = dnet_eth(iff)
-                #else:
-                #    ifs = dnet_ip()
-                ifs = dnet_ip()
+                iftype = self.intf.get(iff)["type"]
+                if iftype == INTF_TYPE_ETH:
+                    try:
+                        cls = conf.l2types[1]
+                    except KeyError:
+                        warning("Unable to find Ethernet class. Using nothing")
+                    ifs = dnet_eth(iff)
+                else:
+                    ifs = dnet_ip()
                 self.iflist[iff] = ifs,cls
             if cls is None:
                 #sx = str(x)
