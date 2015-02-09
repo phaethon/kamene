@@ -1,6 +1,8 @@
 This is a fork of scapy (http://www.secdev.org) to make it compatible with python3. Fork based on scapy v2.3.1
 I could go through whole tutorial series Building Network Tools with Scapy by @thepacketgeek (http://thepacketgeek.com/series/building-network-tools-with-scapy/) using scapy3k. File STATUS inside distribution contains more info on current status.
 
+Install with 'python3 setup.py install' from source tree or 'pip3 install scapy3k' for latest published version.
+
 All commands listed by lsc() should work. Tested layers are:
 - ARP
 - DNS
@@ -25,4 +27,3 @@ On all OS except Linux libpcap and libdnet should be installed for sending and r
 Please, submit all issues https://github.com/phaethon/scapy3k preferrably with .pcap files for tests. Bugs for individual layers are usually easy to fix.
 
 winpcapy.py by Massimo Ciani https://code.google.com/p/winpcapy/ integrated inside code
-

@@ -91,7 +91,8 @@ if conf.use_netifaces:
           scope = scapy.utils6.in6_getscope(addr)
           ret.append((addr, scope, i))
       return ret
-
+elif conf.use_winpcapy:
+  pass
 elif conf.use_dnet:
   intf = dnet_intf()
   def get_if_raw_hwaddr(iff):
