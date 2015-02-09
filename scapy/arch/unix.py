@@ -21,6 +21,7 @@ scapy.config.conf.use_dnet = True
 from .pcapdnet import *
 
 
+
 ##################
 ## Routes stuff ##
 ##################
@@ -110,28 +111,6 @@ def read_routes():
 ### IPv6 ###
 ############
 
-def in6_getifaddr():
-    """
-    Returns a list of 3-tuples of the form (addr, scope, iface) where
-    'addr' is the address of scope 'scope' associated to the interface
-    'ifcace'.
-
-    This is the list of all addresses of all interfaces available on
-    the system.
-    """
-
-    ret = []
-    interfaces = get_if_list()
-    for i in interfaces:
-      addrs = netifaces.ifaddresses(i)
-      if netifaces.AF_INET6 not in addrs:
-        continue
-      for a in addrs[netifaces.AF_INET6]:
-        addr = a['addr'].split('%')[0]
-        scope = scapy.utils6.in6_getscope(addr)
-        ret.append((addr, scope, i))
-    return ret
-
 def read_routes6():
     f = os.popen("netstat -rn -f inet6")
     ok = False
@@ -178,7 +157,7 @@ def read_routes6():
         if '%' in nh:
             nh,dev = nh.split('%')
         if scapy.arch.LOOPBACK_NAME in dev:
-            if d == '::' and dp == 96:
+            if d == '::' and dp == 96:  #Do not use ::/96 deprecated IPV4 mapping address
               continue
             cset = ['::1']
             nh = '::'

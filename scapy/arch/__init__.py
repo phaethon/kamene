@@ -51,13 +51,8 @@ WINDOWS=sys.platform.startswith("win32")
 
 X86_64 = not WINDOWS and (os.uname()[4] == 'x86_64')
 
-if not LINUX:
-  log_loading.error("scapy3k currently works only on Linux platform. Create an issue for your platform request at https://github.com/phaethon/scapy3k")
-  if WINDOWS:
-    log_loading.error("On Windows packet sending and sniffing, .pcap reading and writing does not work")
-  else:
-    log_loading.error("On Unix and Darwin sniffing works, but sending and sr type commands do not work")
-
+if WINDOWS:
+  log_loading.error("Windows support for scapy3k is currently in development. Sending and receiving packets is not supported yet. Create an issue for your platform request at https://github.com/phaethon/scapy3k")
 
 # Next step is to import following architecture specific functions:
 # def get_if_raw_hwaddr(iff)
@@ -85,7 +80,6 @@ elif WINDOWS:
 
 if scapy.config.conf.iface is None:
     scapy.config.conf.iface = LOOPBACK_NAME
-
 
 def get_if_raw_addr6(iff):
     """

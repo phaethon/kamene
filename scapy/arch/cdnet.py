@@ -24,6 +24,7 @@ except OSError as e:
 ETH_ADDR_LEN = 6
 INTF_NAME_LEN = 16
 INTF_NAME_COUNT = 20
+INTF_ALIAS_COUNT = 20
 IP6_ADDR_LEN = 16
 
 ADDR_TYPE_NONE =  0
@@ -96,7 +97,7 @@ dnet_intf_entry._fields_ = [ ('intf_len', c_uint),
                              ('intf_dst_addr', dnet_addr),
                              ('intf_link_addr', dnet_addr),
                              ('intf_alias_num', c_uint),
-                             ('intf_alias_addrs', dnet_addr * 1) ]
+                             ('intf_alias_addrs', dnet_addr * INTF_ALIAS_COUNT) ]
 
 
 eth_t = c_void_p
@@ -217,11 +218,16 @@ class dnet_intf:
     ret = {}
     entry = dnet_intf_entry()
     entry.intf_name = iface.encode('ascii')
+    entry.intf_len = sizeof(entry)
     r = dnet_intf_get(self.intf, byref(entry))
     if r < 0:
       return {}
+    ret['addr6'] = []
+    for i in range(entry.intf_alias_num):
+      if entry.intf_alias_addrs[i].addr_type == ADDR_TYPE_IP6:
+        ret['addr6'].append(bytes(entry.intf_alias_addrs[i].data8[:16]))
     ret['type'] = entry.intf_type
-    ret['addr'] = entry.intf_addr.data8[:4]
-    ret['link_addr'] = entry.intf_link_addr.data8[:6]
+    ret['addr'] = bytes(entry.intf_addr.data8[:4])
+    ret['link_addr'] = bytes(entry.intf_link_addr.data8[:6])
     return ret
 

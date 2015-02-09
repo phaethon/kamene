@@ -7,7 +7,7 @@
 Packet sending and receiving with libdnet and libpcap/WinPcap.
 """
 
-import time,struct,sys
+import time,struct,sys,socket
 if not sys.platform.startswith("win"):
     from fcntl import ioctl
 from scapy.data import *
@@ -65,20 +65,49 @@ if conf.use_netifaces:
       try:
         s = netifaces.ifaddresses(ifname)[netifaces.AF_INET][0]['addr']
         return socket.inet_aton(s)
-      except:
+      except Exception as e:
         return None
   def get_if_list():
       #return [ i[1] for i in socket.if_nameindex() ]
       return netifaces.interfaces()
+  def in6_getifaddr():
+      """
+      Returns a list of 3-tuples of the form (addr, scope, iface) where
+      'addr' is the address of scope 'scope' associated to the interface
+      'ifcace'.
+
+      This is the list of all addresses of all interfaces available on
+      the system.
+      """
+
+      ret = []
+      interfaces = get_if_list()
+      for i in interfaces:
+        addrs = netifaces.ifaddresses(i)
+        if netifaces.AF_INET6 not in addrs:
+          continue
+        for a in addrs[netifaces.AF_INET6]:
+          addr = a['addr'].split('%')[0]
+          scope = scapy.utils6.in6_getscope(addr)
+          ret.append((addr, scope, i))
+      return ret
 
 elif conf.use_dnet:
   intf = dnet_intf()
   def get_if_raw_hwaddr(iff):
-      return bytes(intf.get(iff)['link_addr'])
+      return intf.get(iff)['link_addr']
   def get_if_raw_addr(iff):
-      return bytes(intf.get(iff)['addr'])
+      return intf.get(iff)['addr']
   def get_if_list():
       return intf.names
+  def in6_getifaddr():
+      ret = []
+      for i in get_if_list():
+        for a in intf.get(i)['addr6']:
+          addr = socket.inet_ntop(socket.AF_INET6, a)
+          scope = scapy.utils6.in6_getscope(addr)
+          ret.append((addr, scope, i))
+      return ret
 
 else:
   log_loading.warning("No known method to get ip and hw address for interfaces")
@@ -90,6 +119,8 @@ else:
       return b"\0\0\0\0"
   def get_if_list():
       "dummy"
+      return []
+  def in6_getifaddr():
       return []
 
 if conf.use_winpcapy:
@@ -357,6 +388,3 @@ if conf.use_winpcapy and conf.use_dnet:
 
     conf.L3socket=L3dnetSocket
     conf.L2socket=L2dnetSocket
-
-        
-

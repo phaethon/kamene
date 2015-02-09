@@ -291,6 +291,7 @@ def _prompt_changer(attr,val):
         pass
     sys.ps1 = prompt
 
+
 class Conf(ConfClass):
     """This object contains the configuration of scapy.
 session  : filename where the session will be saved
