@@ -45,8 +45,8 @@ if os.name == "nt":
   SCRIPTS += ['bin/scapy.bat','bin/UTscapy.bat']
 
 setup(
-    name = 'scapy3k',
-    version = '0.7',
+    name = 'scapy-python3',
+    version = '0.8',
     packages=['scapy','scapy/arch', 'scapy/arch/windows', 'scapy/layers','scapy/asn1','scapy/tools','scapy/modules', 'scapy/crypto', 'scapy/contrib'],
     scripts = SCRIPTS,
     data_files = [('share/man/man1', ["doc/scapy.1.gz"])],
@@ -56,7 +56,7 @@ setup(
     maintainer_email = 'phaethon@users.noreply.github.com',
     description = 'Scapy packet manipulation tool (see www.secdev.org for original) py3k compatibility fork',
     license = 'GPLv2',
-    url = 'https://github.com/phaethon/scapy3k',
+    url = 'https://github.com/phaethon/scapy',
     keywords = 'network security monitoring packet',
     classifiers = [
       'Development Status :: 3 - Alpha',
