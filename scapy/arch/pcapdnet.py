@@ -242,6 +242,8 @@ if conf.use_winpcapy:
           return True
       def setnonblock(self, i):
           pcap_setnonblock(self.pcap, i, self.errbuf)
+      def send(self, x):
+          pcap_sendpacket(self.pcap, x, len(x))
       def close(self):
           pcap_close(self.pcap)
   open_pcap = lambda *args,**kargs: _PcapWrapper_pypcap(*args,**kargs)
@@ -308,6 +310,92 @@ if conf.use_winpcapy:
   
 
   conf.L2listen = L2pcapListenSocket
+  class L2pcapSocket(SuperSocket):
+      desc = "read/write packets at layer 2 using only libpcap"
+      def __init__(self, iface = None, type = ETH_P_ALL, filter=None, nofilter=0):
+          if iface is None:
+              iface = conf.iface
+          self.iface = iface
+          self.ins = open_pcap(iface, 1600, 0, 100)
+          try:
+              ioctl(self.ins.fileno(),BIOCIMMEDIATE,struct.pack("I",1))
+          except:
+              pass
+          if nofilter:
+              if type != ETH_P_ALL:  # PF_PACKET stuff. Need to emulate this for pcap
+                  filter = "ether proto %i" % type
+              else:
+                  filter = None
+          else:
+              if conf.except_filter:
+                  if filter:
+                      filter = "(%s) and not (%s)" % (filter, conf.except_filter)
+                  else:
+                      filter = "not (%s)" % conf.except_filter
+              if type != ETH_P_ALL:  # PF_PACKET stuff. Need to emulate this for pcap
+                  if filter:
+                      filter = "(ether proto %i) and (%s)" % (type,filter)
+                  else:
+                      filter = "ether proto %i" % type
+          if filter:
+              self.ins.setfilter(filter)
+      def send(self, x):
+          sx = x.bytes()
+          if hasattr(x, "sent_time"):
+              x.sent_time = time.time()
+          return self.ins.send(sx)
+
+      def recv(self,x=MTU):
+          ll = self.ins.datalink()
+          if ll in conf.l2types:
+              cls = conf.l2types[ll]
+          else:
+              cls = conf.default_l2
+              warning("Unable to guess datalink type (interface=%s linktype=%i). Using %s" % (self.iface, ll, cls.name))
+  
+          pkt = self.ins.next()
+          if pkt is not None:
+              ts,pkt = pkt
+          if pkt is None:
+              return
+          
+          try:
+              pkt = cls(pkt)
+          except KeyboardInterrupt:
+              raise
+          except:
+              if conf.debug_dissector:
+                  raise
+              pkt = conf.raw_layer(pkt)
+          pkt.time = ts
+          return pkt
+  
+      def nonblock_recv(self):
+          self.ins.setnonblock(1)
+          p = self.recv(MTU)
+          self.ins.setnonblock(0)
+          return p
+  
+      def close(self):
+          if hasattr(self, "ins"):
+              self.ins.close()
+          if hasattr(self, "outs"):
+              self.outs.close()
+
+  class L3pcapSocket(L2pcapSocket):
+      #def __init__(self, iface = None, type = ETH_P_ALL, filter=None, nofilter=0):
+      #    L2pcapSocket.__init__(self, iface, type, filter, nofilter)
+      def recv(self, x = MTU):
+          r = L2pcapSocket.recv(self, x) 
+          return r.payload
+      def send(self, x):
+          cls = conf.l2types[1]
+          sx = (cls()/x).bytes()
+          if hasattr(x, "sent_time"):
+              x.sent_time = time.time()
+          return self.ins.send(sx)
+  conf.L2socket=L2pcapSocket
+  conf.L3socket=L3pcapSocket
     
 if conf.use_winpcapy and conf.use_dnet:
     class L3dnetSocket(SuperSocket):

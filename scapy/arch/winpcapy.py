@@ -328,7 +328,8 @@ pcap_breakloop.argtypes = [POINTER(pcap_t)]
 #   Send a raw packet.
 pcap_sendpacket = _lib.pcap_sendpacket
 pcap_sendpacket.restype = c_int
-pcap_sendpacket.argtypes = [POINTER(pcap_t), POINTER(u_char), c_int]
+#pcap_sendpacket.argtypes = [POINTER(pcap_t), POINTER(u_char), c_int]
+pcap_sendpacket.argtypes = [POINTER(pcap_t), c_void_p, c_int]
 
 #void pcap_dump (u_char *user, const struct pcap_pkthdr *h, const u_char *sp)
 #   Save a packet to disk.
@@ -719,5 +720,3 @@ if WIN32:
     pcap_remoteact_list = _lib.pcap_remoteact_list
     pcap_remoteact_list.restype = c_int
     pcap_remoteact_list.argtypes = [STRING, c_char, c_int, STRING]
-    
-
