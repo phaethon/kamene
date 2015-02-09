@@ -7,19 +7,15 @@ WIN=False
 if sys.platform.startswith('win'):
     WIN=True
 
-try:
-  if WIN:
-      SOCKET = c_uint
-      _lib=CDLL('dnet')
-  else:
-      SOCKET = c_int
-      _lib=CDLL(find_library('dnet'))
-except OSError as e:
-  if conf.interactive:
-      log_loading.error("Unable to import dnet library: %s" % (e))
-      conf.use_dnet = False
-  else:
-    raise
+if WIN:
+    SOCKET = c_uint
+    _lib=CDLL('dnet')
+else:
+    SOCKET = c_int
+    _lib_name = find_library('dnet')
+    if not _lib_name:
+      raise OSError("Cannot find libdnet.so")
+    _lib=CDLL(_lib_name)
 
 ETH_ADDR_LEN = 6
 INTF_NAME_LEN = 16

@@ -26,7 +26,10 @@ if WIN32:
     _lib=CDLL('wpcap.dll')
 else:
     SOCKET = c_int
-    _lib=CDLL(find_library('pcap'))
+    _lib_name = find_library('pcap')
+    if not _lib_name:
+      raise OSError("Cannot fine libpcap.so library")
+    _lib=CDLL(_lib_name)
 
 
 
@@ -68,8 +71,34 @@ timeval._fields_ = [('tv_sec', c_long),
 ## For exapmle if sa_family==socket.AF_INET then we need cast
 ## with sockaddr_in 
 class sockaddr(Structure):
-    _fields_ = [("sa_family",c_ushort),
-                ("sa_data",c_char * 14)]
+    _fields_ = [("sa_len", c_ubyte),
+                ("sa_family",c_ubyte),
+                ("sa_data",c_ubyte * 14)]
+
+class sockaddr_in(Structure):
+    _fields_ = [("sin_len", c_ubyte),
+                ("sin_family", c_ubyte),
+                ("sin_port", c_uint16),
+                ("sin_addr", 4 * c_ubyte),
+                ("sin_zero", 8 * c_char)]
+
+class sockaddr_in6(Structure):
+    _fields_ = [("sin6_len", c_ubyte),
+                ("sin6_family", c_ubyte),
+                ("sin6_port", c_uint16),
+                ("sin6_flowinfo", c_uint32),
+                ("sin6_addr", 16 * c_ubyte),
+                ("sin6_scope", c_uint32)]
+
+class sockaddr_dl(Structure):
+    _fields_ = [("sdl_len", c_ubyte),
+                ("sdl_family", c_ubyte),
+                ("sdl_index", c_ushort),
+                ("sdl_type", c_ubyte),
+                ("sdl_nlen", c_ubyte),
+                ("sdl_alen", c_ubyte),
+                ("sdl_slen", c_ubyte),
+                ("sdl_data", 46 * c_ubyte)]
 ##
 ## END misc
 ##

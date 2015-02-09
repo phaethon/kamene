@@ -92,7 +92,88 @@ if conf.use_netifaces:
           ret.append((addr, scope, i))
       return ret
 elif conf.use_winpcapy:
-  pass
+  def get_if_raw_hwaddr(iff):
+    err = create_string_buffer(PCAP_ERRBUF_SIZE)
+    devs = POINTER(pcap_if_t)()
+    ret = b"\0\0\0\0\0\0"
+    if pcap_findalldevs(byref(devs), err) < 0:
+      return ret
+    try:
+      p = devs
+      while p:
+        if p.contents.name == iff.encode('ascii'):
+          a = p.contents.addresses
+          while a:
+            if a.contents.addr.contents.sa_family == socket.AF_LINK:
+              ap = a.contents.addr
+              val = cast(ap, POINTER(sockaddr_dl))
+              ret = bytes(val.contents.sdl_data[ val.contents.sdl_nlen : val.contents.sdl_nlen + val.contents.sdl_alen ])
+            a = a.contents.next
+          break
+        p = p.contents.next
+      return ret
+    finally:
+      pcap_freealldevs(devs)
+  def get_if_raw_addr(iff):
+    err = create_string_buffer(PCAP_ERRBUF_SIZE)
+    devs = POINTER(pcap_if_t)()
+    ret = b"\0\0\0\0"
+    if pcap_findalldevs(byref(devs), err) < 0:
+      return ret
+    try:
+      p = devs
+      while p:
+        if p.contents.name == iff.encode('ascii'):
+          a = p.contents.addresses
+          while a:
+            if a.contents.addr.contents.sa_family == socket.AF_INET:
+              ap = a.contents.addr
+              val = cast(ap, POINTER(sockaddr_in))
+              ret = bytes(val.contents.sin_addr[:4])
+            a = a.contents.next
+          break
+        p = p.contents.next
+      return ret
+    finally:
+      pcap_freealldevs(devs)
+  def get_if_list():
+    err = create_string_buffer(PCAP_ERRBUF_SIZE)
+    devs = POINTER(pcap_if_t)()
+    ret = []
+    if pcap_findalldevs(byref(devs), err) < 0:
+      return ret
+    try:
+      p = devs
+      while p:
+        ret.append(p.contents.name.decode('ascii'))
+        p = p.contents.next
+      return ret
+    finally:
+      pcap_freealldevs(devs)
+  def in6_getifaddr():
+    err = create_string_buffer(PCAP_ERRBUF_SIZE)
+    devs = POINTER(pcap_if_t)()
+    ret = []
+    if pcap_findalldevs(byref(devs), err) < 0:
+      return ret
+    try:
+      p = devs
+      ret = []
+      while p:
+        a = p.contents.addresses
+        while a:
+          if a.contents.addr.contents.sa_family == socket.AF_INET6:
+            ap = a.contents.addr
+            val = cast(ap, POINTER(sockaddr_in6))
+            addr = socket.inet_ntop(socket.AF_INET6, bytes(val.contents.sin6_addr[:]))
+            scope = scapy.utils6.in6_getscope(addr)
+            ret.append((addr, scope, p.contents.name.decode('ascii')))
+          a = a.contents.next
+        p = p.contents.next
+      return ret
+    finally:
+      pcap_freealldevs(devs)
+    
 elif conf.use_dnet:
   intf = dnet_intf()
   def get_if_raw_hwaddr(iff):
