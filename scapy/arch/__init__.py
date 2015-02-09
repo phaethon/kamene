@@ -52,7 +52,7 @@ WINDOWS=sys.platform.startswith("win32")
 X86_64 = not WINDOWS and (os.uname()[4] == 'x86_64')
 
 if WINDOWS:
-  log_loading.error("Windows support for scapy3k is currently in development. Sending and receiving packets is not supported yet. Create an issue for your platform request at https://github.com/phaethon/scapy3k")
+  log_loading.error("Windows support for scapy on python3 is currently in development. Sending and receiving packets is not supported yet. Create an issue for your platform request at https://github.com/phaethon/scapy")
 
 # Next step is to import following architecture specific functions:
 # def get_if_raw_hwaddr(iff)
