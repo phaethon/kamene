@@ -137,8 +137,9 @@ class Route:
         pathes=[]
         for d,m,gw,i,a in self.routes:
             aa = atol(a)
-            if aa == dst:
-                pathes.append((0xffffffff,(LOOPBACK_NAME,a,"0.0.0.0")))
+            #Commented out after issue with virtual network with local address 0.0.0.0
+            #if aa == dst:
+            #    pathes.append((0xffffffff,(LOOPBACK_NAME,a,"0.0.0.0")))
             if (dst & m) == (d & m):
                 pathes.append((m,(i,a,gw)))
         if not pathes:
