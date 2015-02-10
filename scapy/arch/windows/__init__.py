@@ -18,8 +18,8 @@ from scapy.sendrecv import debug, srp1
 from scapy.layers.l2 import Ether, ARP
 from scapy.data import MTU, ETHER_BROADCAST, ETH_P_ARP
 
-conf.use_pcap = 1
-conf.use_dnet = 1
+conf.use_winpcapy = 1
+conf.use_netifaces = 1
 from scapy.arch import pcapdnet
 from scapy.arch.pcapdnet import *
 
@@ -71,10 +71,8 @@ conf.prog = WinProgPath()
 
 
 
-import _winreg
+import winreg
 
-
-    
 class PcapNameNotFoundError(Scapy_Exception):
     pass    
 
@@ -121,16 +119,16 @@ class NetworkInterface(object):
                     uuid = win_name[win_name.index("{"):win_name.index("}")+1]
                     keyname = r"SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\%s" % uuid
                     try:
-                        key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyname)
+                        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, keyname)
                     except WindowsError:
                         log_loading.debug("Couldn't open 'HKEY_LOCAL_MACHINE\\%s' (for guessed pcap iface name '%s')." % (keyname, guess))
                         continue
                     try:    
-                        fixed_ip = _winreg.QueryValueEx(key, "IPAddress")[0][0].encode("utf-8")
+                        fixed_ip = winreg.QueryValueEx(key, "IPAddress")[0][0].encode("utf-8")
                     except (WindowsError, UnicodeDecodeError, IndexError):
                         fixed_ip = None
                     try:
-                        dhcp_ip = _winreg.QueryValueEx(key, "DhcpIPAddress")[0].encode("utf-8")
+                        dhcp_ip = winreg.QueryValueEx(key, "DhcpIPAddress")[0].encode("utf-8")
                     except (WindowsError, UnicodeDecodeError, IndexError):
                         dhcp_ip = None
                     # "0.0.0.0" or None means the value is not set (at least not correctly).
@@ -156,27 +154,29 @@ class NetworkInterface(object):
         return "<%s: %s %s %s pcap_name=%s win_name=%s>" % (self.__class__.__name__,
                      self.name, self.ip, self.mac, self.pcap_name, self.win_name)
 
-from UserDict import IterableUserDict
+#from UserDict import IterableUserDict
+from collections import UserDict
 
-class NetworkInterfaceDict(IterableUserDict):
+class NetworkInterfaceDict(UserDict):
     """Store information about network interfaces and convert between names""" 
-    
     def load_from_dnet(self):
-        """Populate interface table via dnet"""
-        for i in pcapdnet.dnet.intf():
-            try:
-                # XXX: Only Ethernet for the moment: localhost is not supported by dnet and pcap
-                # We only take interfaces that have an IP address, because the IP
-                # is used for the mapping between dnet and pcap interface names
-                # and this significantly improves Scapy's startup performance
-                if i["name"].startswith("eth") and "addr" in i:
-                    self.data[i["name"]] = NetworkInterface(i)
-            except (KeyError, PcapNameNotFoundError):
-                pass
-        if len(self.data) == 0:
-            log_loading.warning("No match between your pcap and dnet network interfaces found. "
-                                "You probably won't be able to send packets. "
-                                "Deactivating unneeded interfaces and restarting Scapy might help.")
+        pass
+    # def load_from_dnet(self):
+    #     """Populate interface table via dnet"""
+    #     for i in pcapdnet.dnet.intf():
+    #         try:
+    #             # XXX: Only Ethernet for the moment: localhost is not supported by dnet and pcap
+    #             # We only take interfaces that have an IP address, because the IP
+    #             # is used for the mapping between dnet and pcap interface names
+    #             # and this significantly improves Scapy's startup performance
+    #             if i["name"].startswith("eth") and "addr" in i:
+    #                 self.data[i["name"]] = NetworkInterface(i)
+    #         except (KeyError, PcapNameNotFoundError):
+    #             pass
+    #     if len(self.data) == 0:
+    #         log_loading.warning("No match between your pcap and dnet network interfaces found. "
+    #                             "You probably won't be able to send packets. "
+    #                             "Deactivating unneeded interfaces and restarting Scapy might help.")
     
     def pcap_name(self, devname):
         """Return pypcap device name for given libdnet/Scapy device name
@@ -253,25 +253,25 @@ def read_routes():
             gw     = match.group(3)
             netif  = match.group(4)
             metric = match.group(5)
-            try:
-                intf = pcapdnet.dnet.intf().get_dst(pcapdnet.dnet.addr(type=2, addrtxt=dest))
-            except OSError:
-                log_loading.warning("Building Scapy's routing table: Couldn't get outgoing interface for destination %s" % dest)
-                continue               
-            if not "addr" in intf:
-                break
-            addr = str(intf["addr"])
-            addr = addr.split("/")[0]
+            # try:
+            #     intf = pcapdnet.dnet.intf().get_dst(pcapdnet.dnet.addr(type=2, addrtxt=dest))
+            # except OSError:
+            #     log_loading.warning("Building Scapy's routing table: Couldn't get outgoing interface for destination %s" % dest)
+            #     continue               
+            # if not "addr" in intf:
+            #     break
+            # addr = str(intf["addr"])
+            # addr = addr.split("/")[0]
             
-            dest = atol(dest)
-            mask = atol(mask)
-            # If the gateway is no IP we assume it's on-link
-            gw_ipmatch = re.search('\d+\.\d+\.\d+\.\d+', gw)
-            if gw_ipmatch:
-                gw = gw_ipmatch.group(0)
-            else:
-                gw = netif
-            routes.append((dest,mask,gw, str(intf["name"]), addr))
+            # dest = atol(dest)
+            # mask = atol(mask)
+            # # If the gateway is no IP we assume it's on-link
+            # gw_ipmatch = re.search('\d+\.\d+\.\d+\.\d+', gw)
+            # if gw_ipmatch:
+            #     gw = gw_ipmatch.group(0)
+            # else:
+            #     gw = netif
+            # routes.append((dest,mask,gw, str(intf["name"]), addr))
     f.close()
     return routes
 
@@ -289,7 +289,7 @@ def getmacbyip(ip, chainCC=0):
     if ( (iff == LOOPBACK_NAME) or (ip == conf.route.get_if_bcast(iff)) ):
         return "ff:ff:ff:ff:ff:ff"
     # Windows uses local IP instead of 0.0.0.0 to represent locally reachable addresses
-    ifip = str(pcapdnet.dnet.intf().get(iff)['addr'])
+    # ifip = str(pcapdnet.dnet.intf().get(iff)['addr'])
     if gw != ifip.split('/')[0]:
         ip = gw
 
