@@ -40,7 +40,7 @@ class ASN1F_optionnal(ASN1F_element):
             return s
     def build(self, pkt):
         if self._field.is_empty(pkt):
-            return ""
+            return b""
         return self._field.build(pkt)
 
 class ASN1F_field(ASN1F_element):
@@ -215,8 +215,8 @@ class ASN1F_SEQUENCE(ASN1F_field):
         #return reduce(lambda x,y: x+y.get_fields_list(), self.seq, [])
         return itertools.chain(*[ i.get_fields_list() for i in self.seq ])
     def build(self, pkt):
-        #s = reduce(lambda x,y: x+y.build(pkt), self.seq, "")
-        s = ""
+        #s = reduce(lambda x,y: x+y.build(pkt), self.seq, b"")
+        s = b""
         for i in self.seq:
           s += i.build(pkt)
         return self.i2m(pkt, s)
@@ -240,7 +240,7 @@ class ASN1F_SEQUENCE_OF(ASN1F_SEQUENCE):
     islist = 1
     def __init__(self, name, default, asn1pkt, ASN1_tag=0x30):
         self.asn1pkt = asn1pkt
-        self.tag = chr(ASN1_tag)
+        self.tag = bytes([ASN1_tag])
         self.name = name
         self.default = default
     def i2repr(self, pkt, i):
@@ -258,9 +258,9 @@ class ASN1F_SEQUENCE_OF(ASN1F_SEQUENCE):
         if isinstance(val, ASN1_Object) and val.tag == ASN1_Class_UNIVERSAL.RAW:
             s = val
         elif val is None:
-            s = ""
+            s = b""
         else:
-            s = "".join(map(str, val ))
+            s = b"".join(map(str, val ))
         return self.i2m(pkt, s)
     def dissect(self, pkt, s):
         codec = self.ASN1_tag.get_codec(pkt.ASN1_codec)
@@ -292,7 +292,7 @@ class ASN1F_PACKET(ASN1F_field):
         self.cls = cls
     def i2m(self, pkt, x):
         if x is None:
-            x = ""
+            x = b""
         return str(x)
     def extract_packet(self, cls, x):
         try:
@@ -300,7 +300,7 @@ class ASN1F_PACKET(ASN1F_field):
         except ASN1F_badsequence:
             c = conf.raw_layer(x)
         cpad = c.getlayer(conf.padding_layer)
-        x = ""
+        x = b""
         if cpad is not None:
             x = cpad.load
             del(cpad.underlayer.payload)
@@ -320,13 +320,16 @@ class ASN1F_CHOICE(ASN1F_PACKET):
         self.default=default
     def m2i(self, pkt, x):
         if len(x) == 0:
-            return conf.raw_layer(),""
+            return conf.raw_layer(),b""
             raise ASN1_Error("ASN1F_CHOICE: got empty string")
-        if ord(x[0]) not in self.choice:
-            return conf.raw_layer(x),"" # XXX return RawASN1 packet ? Raise error 
-            raise ASN1_Error("Decoding Error: choice [%i] not found in %r" % (ord(x[0]), self.choice.keys()))
+        #if ord(x[0]) not in self.choice:
+        if (x[0]) not in self.choice:
+            return conf.raw_layer(x),b"" # XXX return RawASN1 packet ? Raise error 
+            #raise ASN1_Error("Decoding Error: choice [%i] not found in %r" % (ord(x[0]), self.choice.keys()))
+            raise ASN1_Error("Decoding Error: choice [%i] not found in %r" % ((x[0]), self.choice.keys()))
 
-        z = ASN1F_PACKET.extract_packet(self, self.choice[ord(x[0])], x)
+        #z = ASN1F_PACKET.extract_packet(self, self.choice[ord(x[0])], x)
+        z = ASN1F_PACKET.extract_packet(self, self.choice[(x[0])], x)
         return z
     def randval(self):
         return RandChoice(*map(lambda x:fuzz(x()), self.choice.values()))

@@ -436,7 +436,8 @@ class EnumElement:
     def __str__(self):
         return self._key
     def __eq__(self, other):
-        return self._value == int(other)
+        #return self._value == int(other)
+        return self._value == hash(other)
     def __hash__(self):
         return self._value
 

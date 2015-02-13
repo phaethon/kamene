@@ -19,7 +19,7 @@ class RandASN1Object(RandField):
             objlist = map(lambda x:x._asn1_obj,
                           [ x for x in ASN1_Class_UNIVERSAL.__rdict__.values() if hasattr(x,"_asn1_obj") ])
         self.objlist = objlist
-        self.chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+        self.chars = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
     def _fix(self, n=0):
         o = random.choice(self.objlist)
         if issubclass(o, ASN1_INTEGER):
@@ -29,7 +29,7 @@ class RandASN1Object(RandField):
             return o(z)
         elif issubclass(o, ASN1_STRING):
             z = int(random.expovariate(0.05)+1)
-            return o("".join([random.choice(self.chars) for i in range(z)]))
+            return o(b"".join([random.choice(self.chars) for i in range(z)]))
         elif issubclass(o, ASN1_SEQUENCE) and (n < 10):
             z = int(random.expovariate(0.08)+1)
             return o(map(lambda x:x._fix(n+1), [self.__class__(objlist=self.objlist)]*z))
@@ -129,8 +129,8 @@ class ASN1_Class_metaclass(Enum_metaclass):
         return cls
             
 
-class ASN1_Class:
-    __metaclass__ = ASN1_Class_metaclass
+class ASN1_Class(metaclass = ASN1_Class_metaclass):
+    pass 
 
 class ASN1_Class_UNIVERSAL(ASN1_Class):
     name = "UNIVERSAL"
@@ -182,8 +182,7 @@ class ASN1_Object_metaclass(type):
         return c
 
 
-class ASN1_Object:
-    __metaclass__ = ASN1_Object_metaclass
+class ASN1_Object(metaclass = ASN1_Object_metaclass):
     tag = ASN1_Class_UNIVERSAL.ANY
     def __init__(self, val):
         self.val = val

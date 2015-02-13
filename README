@@ -5,19 +5,24 @@ Install with 'python3 setup.py install' from source tree or 'pip3 install scapy-
 
 All commands listed by lsc() should work. Tested layers are:
 - ARP
+- DHCP
 - DNS
 - Dot3
+- Dot11
 - Ether
 - ICMP
 - ICMPv6
 - IP
 - IPv6
 - LLC
+- NTP
 - Padding
 - Raw
+- SCTP
 - SNAP
 - STP
 - TCP
+- TFTP
 - UDP
 
 Currently, works on Linux, Darwin, Unix and co. Using python 3.4 on Ubuntu and FreeBSD for testing. Windows support in progress.

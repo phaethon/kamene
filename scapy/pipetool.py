@@ -211,7 +211,7 @@ class _ConnectorLogic(object):
 
 
 class Pipe(_ConnectorLogic):
-    #TODO3 why this?
+    #TODO3 Move to new metaclass syntax
     class __metaclass__(type):
         def __new__(cls, name, bases, dct):
             c = type.__new__(cls, name, bases, dct)

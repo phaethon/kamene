@@ -582,9 +582,9 @@ Creates an EPS file describing a packet. If filename is not provided a temporary
         raw = s
         while s and flist:
             f = flist.pop()
-            print(f, end = " = ")
+            #print(f, end = " = ")
             s,fval = f.getfield(self, s)
-            print('fval')
+            #print('fval')
             self.fields[f.name] = fval
         assert(raw.endswith(s))
         if s:
