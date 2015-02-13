@@ -189,7 +189,7 @@ class RDataField(StrLenField):
             # RDATA contains a list of strings, each are prepended with
             # a byte containing the size of the following string.
             while tmp_s:
-                tmp_len = struct.unpack("!B", tmp_s[0])[0] + 1
+                tmp_len = struct.unpack("!B", bytes([tmp_s[0]]))[0] + 1
                 if tmp_len > len(tmp_s):
                   warning("DNS RR TXT prematured end of character-string (size=%i, remaining bytes=%i)" % (tmp_len, len(tmp_s)))
                 ret_s += tmp_s[1:tmp_len]

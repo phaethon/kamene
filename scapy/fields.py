@@ -518,7 +518,8 @@ class NetBIOSNameField(StrFixedLenField):
         return x
     def m2i(self, pkt, x):
         x = x.strip(b"\x00").strip(b" ")
-        return b"".join(map(lambda x,y: chr((((ord(x)-1)&0xf)<<4)+((ord(y)-1)&0xf)), x[::2],x[1::2]))
+        #return b"".join(map(lambda x,y: chr((((ord(x)-1)&0xf)<<4)+((ord(y)-1)&0xf)), x[::2],x[1::2]))
+        return b"".join(map(lambda x,y: bytes([(((x-1)&0xf)<<4)+((y-1)&0xf)]), x[::2],x[1::2]))
 
 class StrLenField(StrField):
     def __init__(self, name, default, fld=None, length_from=None):

@@ -469,7 +469,7 @@ class Enum_metaclass(type):
 
 
 def export_object(obj):
-    print(gzip.zlib.compress(cPickle.dumps(obj,2),9).encode("base64"))
+    print(gzip.zlib.compress(pickle.dumps(obj,2),9).encode("base64"))
 
 def import_object(obj=None):
     if obj is None:

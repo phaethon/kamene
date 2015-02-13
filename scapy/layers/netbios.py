@@ -194,10 +194,10 @@ class NBTDatagram(Packet):
                   ShortField("SourcePort", 138),
                   ShortField("Length", 272),
                   ShortField("Offset", 0),
-                  NetBIOSNameField("SourceName","windows"),
+                  NetBIOSNameField("SourceName",b"windows"),
                   ShortEnumField("SUFFIX1",0x4141,{0x4141:"workstation",0x4141+0x03:"messenger service",0x4141+0x200:"file server service",0x4141+0x10b:"domain master browser",0x4141+0x10c:"domain controller", 0x4141+0x10e:"browser election service"}),
                   ByteField("NULL",0),
-                  NetBIOSNameField("DestinationName","windows"),
+                  NetBIOSNameField("DestinationName",b"windows"),
                   ShortEnumField("SUFFIX2",0x4141,{0x4141:"workstation",0x4141+0x03:"messenger service",0x4141+0x200:"file server service",0x4141+0x10b:"domain master browser",0x4141+0x10c:"domain controller", 0x4141+0x10e:"browser election service"}),
                   ByteField("NULL",0)]
     
