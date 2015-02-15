@@ -56,7 +56,7 @@ def orb(x):
 def any2b(x):
   if type(x) is not str and type(x) is not bytes:
     try:
-      x=x.bytes()
+      x=bytes(x)
     except:
       x = str(x)
   if type(x) is str:
@@ -100,7 +100,7 @@ def lhex(x):
 def hexdump(x):
     if type(x) is not str and type(x) is not bytes:
       try:
-        x=x.bytes()
+        x=bytes(x)
       except:
         x = str(x)
     l = len(x)
@@ -122,7 +122,7 @@ def hexdump(x):
 def linehexdump(x, onlyasc=0, onlyhex=0):
     if type(x) is not str and type(x) is not bytes:
       try:
-        x=x.bytes()
+        x=bytes(x)
       except:
         x = str(x)
     l = len(x)
@@ -136,7 +136,7 @@ def linehexdump(x, onlyasc=0, onlyhex=0):
 def chexdump(x):
     if type(x) is not str and type(x) is not bytes:
       try:
-        x=x.bytes()
+        x=bytes(x)
       except:
         x = str(x)
     print(", ".join(map(lambda x: "%#04x"%orb(x), x)))
@@ -755,7 +755,7 @@ class PcapWriter(RawPcapWriter):
     def _write_packet(self, packet):        
         sec = int(packet.time)
         usec = int(round((packet.time-sec)*1000000))
-        s = packet.bytes()
+        s = bytes(packet)
         caplen = len(s)
         RawPcapWriter._write_packet(self, s, sec, usec, caplen, caplen)
 

@@ -191,6 +191,9 @@ class ASN1_Object(metaclass = ASN1_Object_metaclass):
     def __repr__(self):
         return "<%s[%r]>" % (self.__dict__.get("name", self.__class__.__name__), self.val)
     def __str__(self):
+        raise Exception("Should not get here")
+        #return self.enc(conf.ASN1_default_codec)
+    def __bytes__(self):
         return self.enc(conf.ASN1_default_codec)
     def strshow(self, lvl=0):
         return ("  "*lvl)+repr(self)+"\n"
@@ -229,6 +232,13 @@ class ASN1_INTEGER(ASN1_Object):
 
 class ASN1_STRING(ASN1_Object):
     tag = ASN1_Class_UNIVERSAL.STRING
+    def __init__(self, val):
+      if type(val) is str:
+        self.val = val.encode('ascii')
+      elif type(val) is bytes:
+        self.val = val
+      else:
+        raise Exception("Unknown value type for ASN1_STRING")
 
 class ASN1_BIT_STRING(ASN1_STRING):
     tag = ASN1_Class_UNIVERSAL.BIT_STRING
@@ -292,6 +302,8 @@ class ASN1_SET(ASN1_SEQUENCE):
 class ASN1_OID(ASN1_Object):
     tag = ASN1_Class_UNIVERSAL.OID
     def __init__(self, val):
+        if type(val) is bytes:
+          val = val.decode('ascii')
         val = conf.mib._oid(val)
         ASN1_Object.__init__(self, val)
     def __repr__(self):

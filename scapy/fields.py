@@ -464,7 +464,7 @@ class PacketListField(PacketField):
             lst.append(p)
         return remain+ret,lst
     def addfield(self, pkt, s, val):
-        return s+b"".join([ i.bytes() for i in val ])
+        return s+b"".join([ bytes(i) for i in val ])
 
 
 class StrFixedLenField(StrField):

@@ -28,7 +28,7 @@ class SuperSocket(metaclass = _SuperSocket_metaclass):
         self.outs = self.ins
         self.promisc=None
     def send(self, x):
-        sx = x.bytes()
+        sx = bytes(x)
         if hasattr(x, "sent_time"):
             x.sent_time = time.time()
         return self.outs.send(sx)

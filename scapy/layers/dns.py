@@ -123,7 +123,7 @@ class DNSRRField(StrField):
     def i2m(self, pkt, x):
         if x is None:
             return b""
-        return x.bytes()
+        return bytes(x)
     def decodeRR(self, name, s, p):
         ret = s[p:p+10]
         type,cls,ttl,rdlen = struct.unpack("!HHIH", ret)

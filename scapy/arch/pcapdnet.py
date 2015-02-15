@@ -340,7 +340,7 @@ if conf.use_winpcapy:
           if filter:
               self.ins.setfilter(filter)
       def send(self, x):
-          sx = x.bytes()
+          sx = bytes(x)
           if hasattr(x, "sent_time"):
               x.sent_time = time.time()
           return self.ins.send(sx)
@@ -390,7 +390,7 @@ if conf.use_winpcapy:
           return r.payload
       def send(self, x):
           cls = conf.l2types[1]
-          sx = (cls()/x).bytes()
+          sx = bytes(cls()/x)
           if hasattr(x, "sent_time"):
               x.sent_time = time.time()
           return self.ins.send(sx)
@@ -447,9 +447,9 @@ if conf.use_winpcapy and conf.use_dnet:
                 self.iflist[iff] = ifs,cls
             if cls is None:
                 #sx = str(x)
-                sx = x.bytes()
+                sx = bytes(x)
             else:
-                sx = (cls()/x).bytes()
+                sx = bytes(cls()/x)
             x.sent_time = time.time()
             ifs.send(sx)
         def recv(self,x=MTU):

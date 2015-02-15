@@ -260,7 +260,9 @@ class ASN1F_SEQUENCE_OF(ASN1F_SEQUENCE):
         elif val is None:
             s = b""
         else:
-            s = b"".join(map(str, val ))
+            print(val)
+            #s = b"".join(map(str, val ))
+            s = b"".join([ bytes(i) for i in val ])
         return self.i2m(pkt, s)
     def dissect(self, pkt, s):
         codec = self.ASN1_tag.get_codec(pkt.ASN1_codec)

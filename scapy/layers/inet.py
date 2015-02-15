@@ -357,7 +357,7 @@ class IP(Packet, IPTools):
     def send(self, s, slp=0):
         for p in self:
             try:
-                s.sendto(p.bytes(), (p.dst,0))
+                s.sendto(bytes(p), (p.dst,0))
             except socket.error as msg:
                 log_runtime.error(msg)
             if slp:
@@ -410,7 +410,7 @@ class IP(Packet, IPTools):
             fl = fl.underlayer
         
         for p in fl:
-            s = (p[fnb].payload).bytes()
+            s = bytes(p[fnb].payload)
             nb = (len(s)+fragsize-1)//fragsize
             for i in range(nb):            
                 q = p.copy()
@@ -743,7 +743,7 @@ def fragment(pkt, fragsize=1480):
     fragsize = (fragsize+7)//8*8
     lst = []
     for p in pkt:
-        s = (p[IP].payload).bytes()
+        s = bytes(p[IP].payload)
         nb = (len(s)+fragsize-1)//fragsize
         for i in range(nb):            
             q = p.copy()
@@ -827,7 +827,7 @@ def defrag(plist):
             defrag.append(p)
     defrag2=PacketList()
     for p in defrag:
-        defrag2.append(p.__class__(p.bytes()))
+        defrag2.append(p.__class__(bytes(p)))
     return nofrag,defrag2,missfrag
             
 @conf.commands.register
@@ -889,7 +889,7 @@ def defragment(plist):
             defrag.append(p)
     defrag2=[]
     for p in defrag:
-        q = p.__class__(p.bytes())
+        q = p.__class__(bytes(p))
         q._defrag_pos = p._defrag_pos
         defrag2.append(q)
     final += defrag2
@@ -1402,7 +1402,7 @@ class TCP_client(Automaton):
             raise self.ESTABLISHED().action_parameters(pkt)
     @ATMT.action(incoming_data_received)
     def receive_data(self,pkt):
-        data = (pkt[TCP].payload.bytes())
+        data = (bytes(pkt[TCP].payload))
         if data and self.l4[TCP].ack == pkt[TCP].seq:
             self.l4[TCP].ack += len(data)
             self.l4[TCP].flags = "A"

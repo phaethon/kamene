@@ -280,8 +280,8 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
     #TODO3 FIX
     def __str__(self):
         warning("Unless called manually, this could indicate deprecated use. Should be changed to self.bytes()")
-        return repr(self.bytes()) 
-    def bytes(self):
+        return repr(bytes(self)) 
+    def __bytes__(self):
         return self.build()
     def __div__(self, other):
         if isinstance(other, Packet):
@@ -315,7 +315,7 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
     def __nonzero__(self):
         return True
     def __len__(self):
-        return len(self.bytes())
+        return len(bytes(self))
     def self_build(self, field_pos_list=None):
         if self.raw_packet_cache is not None:
             return self.raw_packet_cache
@@ -324,7 +324,7 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
             val = self.getfieldval(f.name)
             if isinstance(val, RawVal):
                 #sval = str(val)
-                sval = val.bytes()
+                sval = bytes(val)
                 p += sval
                 if field_pos_list is not None:
                     field_pos_list.append( (f.name, sval.encode("string_escape"), len(p), len(sval) ) )
@@ -582,9 +582,9 @@ Creates an EPS file describing a packet. If filename is not provided a temporary
         raw = s
         while s and flist:
             f = flist.pop()
-            #print(f, end = " = ")
+            print(f, end = " = ")
             s,fval = f.getfield(self, s)
-            #print('fval')
+            print('fval')
             self.fields[f.name] = fval
         assert(raw.endswith(s))
         if s:
@@ -869,7 +869,7 @@ Creates an EPS file describing a packet. If filename is not provided a temporary
         self.payload.show(indent=indent, lvl=lvl+(" "*indent*self.show_indent), label_lvl=label_lvl)
     def show2(self):
         """Prints a hierarchical view of an assembled version of the packet, so that automatic fields are calculated (checksums, etc.)"""
-        self.__class__(self.bytes()).show()
+        self.__class__(bytes(self)).show()
 
     def sprintf(self, fmt, relax=1):
         """sprintf(format, [relax=1]) -> str
