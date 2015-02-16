@@ -238,20 +238,20 @@ def crc32(x):
     return "%08X" % (0xffffffff & zlib.crc32(x))
 
 def sha1(x):
-    return sha.sha(x).hexdigest().upper()
+    return hashlib.sha1(x).hexdigest().upper()
 
 def compute_campaign_digests(test_campaign):
     dc = b""
     for ts in test_campaign:
         dts = b""
         for t in ts:
-            dt = t.test.strip()
+            dt = t.test.strip().encode('ascii')
             t.crc = crc32(dt)
             dts += b"\0"+dt
         ts.crc = crc32(dts)
         dc += b"\0\x01"+dts
     test_campaign.crc = crc32(dc)
-    test_campaign.sha = sha1(open(test_campaign.filename).read())
+    test_campaign.sha = sha1(open(test_campaign.filename, 'rb').read())
 
 
 #### FILTER CAMPAIGN #####
