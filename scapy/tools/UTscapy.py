@@ -241,15 +241,15 @@ def sha1(x):
     return sha.sha(x).hexdigest().upper()
 
 def compute_campaign_digests(test_campaign):
-    dc = ""
+    dc = b""
     for ts in test_campaign:
-        dts = ""
+        dts = b""
         for t in ts:
             dt = t.test.strip()
             t.crc = crc32(dt)
-            dts += "\0"+dt
+            dts += b"\0"+dt
         ts.crc = crc32(dts)
-        dc += "\0\x01"+dts
+        dc += b"\0\x01"+dts
     test_campaign.crc = crc32(dc)
     test_campaign.sha = sha1(open(test_campaign.filename).read())
 

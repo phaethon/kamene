@@ -216,7 +216,8 @@ def in6_getAddrType(addr):
     addrType = 0
     # _Assignable_ Global Unicast Address space
     # is defined in RFC 3513 as those in 2000::/3
-    if ((struct.unpack("B", naddr[0])[0] & 0xE0) == 0x20):
+    #if ((struct.unpack("B", naddr[0])[0] & 0xE0) == 0x20):
+    if (((naddr[0]) & 0xE0) == 0x20):
         addrType = (IPV6_ADDR_UNICAST | IPV6_ADDR_GLOBAL)
         if naddr[:2] == b' \x02': # Mark 6to4 @
             addrType |= IPV6_ADDR_6TO4
