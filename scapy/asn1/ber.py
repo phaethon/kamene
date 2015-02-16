@@ -127,7 +127,7 @@ class BERcodec_Object( metaclass = BERcodec_metaclass):
     @classmethod
     def check_type(cls, s):
         cls.check_string(s)
-        if cls.tag != (s[0]):
+        if hash(cls.tag) != (s[0]):
             raise BER_BadTag_Decoding_Error("%s: Got tag [%i/%#x] while expecting %r" %
                                             (cls.__name__, (s[0]), (s[0]),cls.tag), remaining=s)
         return s[1:]
@@ -346,7 +346,7 @@ class BERcodec_OID(BERcodec_Object):
 
     @classmethod
     def enc(cls, oid):
-        lst = [int(x) for x in oid.strip(".").split(".")]
+        lst = [int(x) for x in oid.strip(b".").split(b".")]
         if len(lst) >= 2:
             lst[1] += 40*lst[0]
             del(lst[0])
@@ -360,8 +360,8 @@ class BERcodec_OID(BERcodec_Object):
             l,s = BER_num_dec(s)
             lst.append(l)
         if (len(lst) > 0):
-            lst.insert(0,lst[0]/40)
+            lst.insert(0,lst[0]//40)
             lst[1] %= 40
-        return cls.asn1_object(".".join([str(k) for k in lst])), t
+        return cls.asn1_object(b".".join([str(k).encode('ascii') for k in lst])), t
 
 

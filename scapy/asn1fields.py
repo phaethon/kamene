@@ -213,7 +213,7 @@ class ASN1F_SEQUENCE(ASN1F_field):
         return True
     def get_fields_list(self):
         #return reduce(lambda x,y: x+y.get_fields_list(), self.seq, [])
-        return itertools.chain(*[ i.get_fields_list() for i in self.seq ])
+        return list(itertools.chain(*[ i.get_fields_list() for i in self.seq ]))
     def build(self, pkt):
         #s = reduce(lambda x,y: x+y.build(pkt), self.seq, b"")
         s = b""
@@ -295,7 +295,7 @@ class ASN1F_PACKET(ASN1F_field):
     def i2m(self, pkt, x):
         if x is None:
             x = b""
-        return str(x)
+        return bytes(x)
     def extract_packet(self, cls, x):
         try:
             c = cls(x)

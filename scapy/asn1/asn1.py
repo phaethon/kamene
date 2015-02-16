@@ -201,6 +201,8 @@ class ASN1_Object(metaclass = ASN1_Object_metaclass):
         print(self.strshow(lvl))
     def __eq__(self, other):
         return self.val == other
+    def __hash__(self):
+        return self.val
     def __cmp__(self, other):
         return cmp(self.val, other)
 
@@ -302,8 +304,8 @@ class ASN1_SET(ASN1_SEQUENCE):
 class ASN1_OID(ASN1_Object):
     tag = ASN1_Class_UNIVERSAL.OID
     def __init__(self, val):
-        if type(val) is bytes:
-          val = val.decode('ascii')
+        if type(val) is str:
+          val = val.encode('ascii')
         val = conf.mib._oid(val)
         ASN1_Object.__init__(self, val)
     def __repr__(self):
