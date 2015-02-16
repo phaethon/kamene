@@ -496,11 +496,11 @@ _.res2 == 12345
 
 = TFTP Options
 x=IP()/UDP(sport=12345)/TFTP()/TFTP_RRQ(filename="fname")/TFTP_Options(options=[TFTP_Option(oname="blksize", value="8192"),TFTP_Option(oname="other", value="othervalue")])
-assert( str(x) == 'E\x00\x00H\x00\x01\x00\x00@\x11|\xa2\x7f\x00\x00\x01\x7f\x00\x00\x0109\x00E\x004B6\x00\x01fname\x00octet\x00blksize\x008192\x00other\x00othervalue\x00' )
-y=IP(str(x))
+assert( bytes(x) == b'E\x00\x00H\x00\x01\x00\x00@\x11|\xa2\x7f\x00\x00\x01\x7f\x00\x00\x0109\x00E\x004B6\x00\x01fname\x00octet\x00blksize\x008192\x00other\x00othervalue\x00' )
+y=IP(bytes(x))
 y[TFTP_Option].oname
 y[TFTP_Option:2].oname
-assert(len(y[TFTP_Options].options) == 2 and y[TFTP_Option].oname == "blksize")
+assert(len(y[TFTP_Options].options) == 2 and y[TFTP_Option].oname == b"blksize")
 
 
 ############
@@ -523,8 +523,8 @@ assert(TCP in _ and _[TCP].seq == 12345678)
 
 = SNMP assembling
 ~ SNMP ASN1
-str(SNMP())
-assert(_ == '0\x18\x02\x01\x01\x04\x06public\xa0\x0b\x02\x01\x00\x02\x01\x00\x02\x01\x000\x00')
+bytes(SNMP())
+assert(_ == b'0\x18\x02\x01\x01\x04\x06public\xa0\x0b\x02\x01\x00\x02\x01\x00\x02\x01\x000\x00')
 SNMP(version="v2c", community="ABC", PDU=SNMPbulk(id=4,varbindlist=[SNMPvarbind(oid="1.2.3.4",value=ASN1_INTEGER(7)),SNMPvarbind(oid="4.3.2.1.2.3",value=ASN1_IA5_STRING("testing123"))]))
 bytes(_)
 assert(_ == b'05\x02\x01\x01\x04\x03ABC\xa5+\x02\x01\x04\x02\x01\x00\x02\x01\x000 0\x08\x06\x03*\x03\x04\x02\x01\x070\x14\x06\x06\x81#\x02\x01\x02\x03\x16\ntesting123')
