@@ -805,7 +805,7 @@ def __make_table(yfmtfunc, fmtfunc, endline, li, fxyz, sortx=None, sorty=None, s
     vyf = {}
     l = 0
     for e in li:
-        xx,yy,zz = map(str, fxyz(e))
+        xx,yy,zz = map(str, fxyz(e[0], e[1]))
         l = max(len(yy),l)
         vx[xx] = max(vx.get(xx,0), len(xx), len(zz))
         vy[yy] = None

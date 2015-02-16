@@ -2883,9 +2883,9 @@ class  AS_resolver6(AS_resolver_riswhois):
 class TracerouteResult6(TracerouteResult):
     def show(self):
         #return self.make_table(lambda (s,r): (s.sprintf("%-42s,IPv6.dst%:{TCP:tcp%TCP.dport%}{UDP:udp%UDP.dport%}{ICMPv6EchoRequest:IER}"), # TODO: ICMPv6 !
-        return self.make_table(lambda a: (a[0].sprintf("%-42s,IPv6.dst%:{TCP:tcp%TCP.dport%}{UDP:udp%UDP.dport%}{ICMPv6EchoRequest:IER}"), # TODO: ICMPv6 !
-                                              a[0].hlim,
-                                              a[1].sprintf("%-42s,IPv6.src% {TCP:%TCP.flags%}"+
+        return self.make_table(lambda s,r: (s.sprintf("%-42s,IPv6.dst%:{TCP:tcp%TCP.dport%}{UDP:udp%UDP.dport%}{ICMPv6EchoRequest:IER}"), # TODO: ICMPv6 !
+                                              s.hlim,
+                                              r.sprintf("%-42s,IPv6.src% {TCP:%TCP.flags%}"+
                                                         "{ICMPv6DestUnreach:%ir,type%}{ICMPv6PacketTooBig:%ir,type%}"+
                                                         "{ICMPv6TimeExceeded:%ir,type%}{ICMPv6ParamProblem:%ir,type%}"+
                                                         "{ICMPv6EchoReply:%ir,type%}")))

@@ -203,7 +203,9 @@ class RDataField(StrLenField):
     def i2m(self, pkt, s):
         if pkt.type == 1: # A
             if s:
-                s = inet_aton(s.decode('ascii'))
+                if type(s) is bytes:
+                  s = s.decode('ascii')
+                s = inet_aton(s)
         elif pkt.type in [2,3,4,5]: # NS, MD, MF, CNAME
             s = b"".join(map(lambda x: bytes([len(x)]) + x, s.split(b".")))
             #if ord(s[-1]):

@@ -248,6 +248,8 @@ class BERcodec_STRING(BERcodec_Object):
     tag = ASN1_Class_UNIVERSAL.STRING
     @classmethod
     def enc(cls,s):
+        if type(s) is str:
+          s = s.encode('ascii')
         return bytes([hash(cls.tag)])+BER_len_enc(len(s))+s
     @classmethod
     def do_dec(cls, s, context=None, safe=False):
@@ -313,7 +315,6 @@ class BERcodec_SEQUENCE(BERcodec_Object):
     def enc(cls, l):
         #if type(l) is not str:
         if type(l) is not bytes:
-            print(type(l))
             l = b"".join(map(lambda x: x.enc(cls.codec), l))
         return bytes([hash(cls.tag)])+BER_len_enc(len(l))+l
     @classmethod
@@ -346,6 +347,8 @@ class BERcodec_OID(BERcodec_Object):
 
     @classmethod
     def enc(cls, oid):
+        if type(oid) is str:
+          oid = oid.encode('ascii')
         lst = [int(x) for x in oid.strip(b".").split(b".")]
         if len(lst) >= 2:
             lst[1] += 40*lst[0]

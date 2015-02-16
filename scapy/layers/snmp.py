@@ -220,7 +220,7 @@ class SNMP(ASN1_Packet):
     ASN1_codec = ASN1_Codecs.BER
     ASN1_root = ASN1F_SEQUENCE(
         ASN1F_enum_INTEGER("version", 1, {0:"v1", 1:"v2c", 2:"v2", 3:"v3"}),
-        ASN1F_STRING("community","public"),
+        ASN1F_STRING("community",b"public"),
         ASN1F_CHOICE("PDU", SNMPget(),
                      SNMPget, SNMPnext, SNMPresponse, SNMPset,
                      SNMPtrapv1, SNMPbulk, SNMPinform, SNMPtrapv2)
@@ -237,7 +237,7 @@ bind_layers( UDP,           SNMP,          dport=161)
 bind_layers( UDP,           SNMP,          sport=162) 
 bind_layers( UDP,           SNMP,          dport=162) 
 
-def snmpwalk(dst, oid="1", community="public"):
+def snmpwalk(dst, oid="1", community=b"public"):
     try:
         while 1:
             r = sr1(IP(dst=dst)/UDP(sport=RandShort())/SNMP(community=community, PDU=SNMPnext(varbindlist=[SNMPvarbind(oid=oid)])),timeout=2, chainCC=1, verbose=0, retry=2)
