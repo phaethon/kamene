@@ -279,7 +279,7 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
     #def __str__(self):
     #TODO3 FIX
     def __str__(self):
-        warning("Unless called manually, this could indicate deprecated use. Should be changed to self.bytes()")
+        warning("Unless called manually, this could indicate deprecated use. Should be changed to bytes(self)")
         return repr(bytes(self)) 
     def __bytes__(self):
         return self.build()

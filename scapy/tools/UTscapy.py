@@ -251,7 +251,13 @@ def compute_campaign_digests(test_campaign):
         ts.crc = crc32(dts)
         dc += b"\0\x01"+dts
     test_campaign.crc = crc32(dc)
-    test_campaign.sha = sha1(open(test_campaign.filename, 'rb').read())
+    if type(test_campaign.filename) is str and test_campaign.filename != '<stdin>':
+      test = open(test_campaign.filename, 'rb').read()
+    elif test_campaign.filename == '<stdin>':
+      test = sys.stdin.read().encode('ascii')
+    else:
+      raise Exception("Unknown test source %s" % test_campaign.filename)
+    test_campaign.sha = sha1(test)
 
 
 #### FILTER CAMPAIGN #####

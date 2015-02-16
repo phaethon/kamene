@@ -377,7 +377,7 @@ class PacketField(StrField):
         StrField.__init__(self, name, default, remain=remain)
         self.cls = cls
     def i2m(self, pkt, i):
-        return str(i)
+        return bytes(i)
     def m2i(self, pkt, m):
         return self.cls(m)
     def getfield(self, pkt, s):
@@ -611,7 +611,7 @@ class StrNullField(StrField):
             return "",s
         return s[l+1:],self.m2i(pkt, s[:l])
     def randval(self):
-        return RandTermString(RandNum(0,1200),"\x00")
+        return RandTermString(RandNum(0,1200),b"\x00")
 
 class StrStopField(StrField):
     def __init__(self, name, default, stop, additionnal=0):
@@ -682,11 +682,11 @@ class BitField(Field):
         w = s[:nb_bytes]
 
         # split the substring byte by byte
-        bytes = struct.unpack('!%dB' % nb_bytes , w)
+        bs = struct.unpack('!%dB' % nb_bytes , w)
 
         b = 0
         for c in range(nb_bytes):
-            b |= int(bytes[c]) << (nb_bytes-c-1)*8
+            b |= int(bs[c]) << (nb_bytes-c-1)*8
 
         # get rid of high order bits
         b &= (1 << (nb_bytes*8-bn)) - 1
@@ -716,7 +716,8 @@ class BitFieldLenField(BitField):
         self.count_of=count_of
         self.adjust=adjust
     def i2m(self, pkt, x):
-        return FieldLenField.i2m.im_func(self, pkt, x)
+        #return FieldLenField.i2m.im_func(self, pkt, x)
+        return FieldLenField.i2m(self, pkt, x)
 
 
 class XBitField(BitField):
@@ -749,12 +750,12 @@ class EnumField(Field):
     
     def any2i(self, pkt, x):
         if type(x) is list:
-            return map(lambda z,pkt=pkt:self.any2i_one(pkt,z), x)
+            return list(map(lambda z,pkt=pkt:self.any2i_one(pkt,z), x))
         else:
             return self.any2i_one(pkt,x)        
     def i2repr(self, pkt, x):
         if type(x) is list:
-            return map(lambda z,pkt=pkt:self.i2repr_one(pkt,z), x)
+            return list(map(lambda z,pkt=pkt:self.i2repr_one(pkt,z), x))
         else:
             return self.i2repr_one(pkt,x)
 
