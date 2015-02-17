@@ -27,7 +27,7 @@ class ObjectPipe:
         return self.rd
     def send(self, obj):
         self.queue.append(obj)
-        os.write(self.wr,"X")
+        os.write(self.wr,b"X")
     def recv(self, n=0):
         os.read(self.rd,1)
         return self.queue.popleft()
@@ -43,9 +43,9 @@ class Message:
 
 class _instance_state:
     def __init__(self, instance):
-        self.im_self = instance.im_self
-        self.im_func = instance.im_func
-        self.im_class = instance.im_class
+        self.im_self = instance.__self__
+        self.im_func = instance.__func__
+        self.im_class = instance.__self__.__class__
     def __getattr__(self, attr):
         return getattr(self.im_func, attr)
 
@@ -458,11 +458,15 @@ class Automaton(metaclass = Automaton_metaclass):
             ioin,ioout = extfd                
             if ioin is None:
                 ioin = ObjectPipe()
-            elif type(ioin) is not types.InstanceType:
+            #elif type(ioin) is not types.InstanceType:
+            else:
+                #print(type(ioin))
                 ioin = self._IO_fdwrapper(ioin,None)
             if ioout is None:
                 ioout = ObjectPipe()
-            elif type(ioout) is not types.InstanceType:
+            #elif type(ioout) is not types.InstanceType:
+            else:
+                #print(type(ioout))
                 ioout = self._IO_fdwrapper(None,ioout)
 
             self.ioin[n] = ioin

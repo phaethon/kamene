@@ -130,7 +130,7 @@ class IPOption_LSRR(IPOption):
                                    length_from=lambda pkt:pkt.length-3)
                     ]
     def get_current_router(self):
-        return self.routers[self.pointer/4-1]
+        return self.routers[self.pointer//4-1]
 
 class IPOption_RR(IPOption_LSRR):
     name = "IP Option Record Route"

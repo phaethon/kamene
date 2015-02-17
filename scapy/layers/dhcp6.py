@@ -224,7 +224,7 @@ class DUID_EN(Packet):  # sect 9.3 RFC 3315
     name = "DUID - Assigned by Vendor Based on Enterprise Number"
     fields_desc = [ ShortEnumField("type", 2, duidtypes),
                     IntEnumField("enterprisenum", 311, iana_enterprise_num),
-                    StrField("id","") ] 
+                    StrField("id",b"") ] 
 
 class DUID_LL(Packet):  # sect 9.4 RFC 3315
     name = "DUID - Based on Link-layer Address"
@@ -252,7 +252,7 @@ class DHCP6OptUnknown(_DHCP6OptGuessPayload): # A generic DHCPv6 Option
     name = "Unknown DHCPv6 OPtion"
     fields_desc = [ ShortEnumField("optcode", 0, dhcp6opts), 
                     FieldLenField("optlen", None, length_of="data", fmt="!H"),
-                    StrLenField("data", "",
+                    StrLenField("data", b"",
                                 length_from = lambda pkt: pkt.optlen)]
 
 class _DUIDField(PacketField):
@@ -262,7 +262,7 @@ class _DUIDField(PacketField):
         self.length_from = length_from
 
     def i2m(self, pkt, i):
-        return str(i)
+        return bytes(i)
 
     def m2i(self, pkt, x):
         cls = conf.raw_layer
@@ -300,7 +300,7 @@ class DHCP6OptIAAddress(_DHCP6OptGuessPayload):    # RFC sect 22.6
                     IntField("preflft", 0),
                     IntField("validlft", 0),
                     XIntField("iaid", None),
-                    StrLenField("iaaddropts", "",
+                    StrLenField("iaaddropts", b"",
                                 length_from  = lambda pkt: pkt.optlen - 24) ]
     def guess_payload_class(self, payload):
         return conf.padding_layer
@@ -309,7 +309,7 @@ class _IANAOptField(PacketListField):
     def i2len(self, pkt, z):
         if z is None or z == []:
             return 0
-        return sum(map(lambda x: len(str(x)) ,z))
+        return sum(map(lambda x: len(bytes(x)) ,z))
 
     def getfield(self, pkt, s):
         l = self.length_from(pkt)
@@ -385,7 +385,7 @@ class _OptReqListField(StrLenField):
         return r
     
     def i2m(self, pkt, x):
-        return "".join(map(lambda y: struct.pack("!H", y), x))
+        return b"".join(map(lambda y: struct.pack("!H", y), x))
 
 # A client may include an ORO in a solicit, Request, Renew, Rebind,
 # Confirm or Information-request
@@ -481,8 +481,8 @@ class DHCP6OptAuth(_DHCP6OptGuessPayload):    # RFC sect 22.11
                     ByteField("proto", 3), # TODO : XXX
                     ByteField("alg", 1), # TODO : XXX
                     ByteField("rdm", 0), # TODO : XXX
-                    StrFixedLenField("replay", "A"*8, 8), # TODO: XXX
-                    StrLenField("authinfo", "",
+                    StrFixedLenField("replay", b"A"*8, 8), # TODO: XXX
+                    StrLenField("authinfo", b"",
                                 length_from = lambda pkt: pkt.optlen - 11) ]
 
 #### DHCPv6 Server Unicast Option ###################################
@@ -519,7 +519,7 @@ class DHCP6OptStatusCode(_DHCP6OptGuessPayload):# RFC sect 22.13
                     FieldLenField("optlen", None, length_of="statusmsg",
                                   fmt="!H", adjust = lambda pkt,x:x+2),
                     ShortEnumField("statuscode",None,dhcp6statuscodes),
-                    StrLenField("statusmsg", "",
+                    StrLenField("statusmsg", b"",
                                 length_from = lambda pkt: pkt.optlen-2) ]
 
 
@@ -537,7 +537,7 @@ class _UserClassDataField(PacketListField):
     def i2len(self, pkt, z):
         if z is None or z == []:
             return 0
-        return sum(map(lambda x: len(str(x)) ,z))
+        return sum(map(lambda x: len(bytes(x)) ,z))
 
     def getfield(self, pkt, s):
         l = self.length_from(pkt)
@@ -550,7 +550,7 @@ class _UserClassDataField(PacketListField):
                 remain = pad.load
                 del(pad.underlayer.payload)
             else:
-                remain = ""
+                remain = b""
             lst.append(p)
         return payl,lst
 
@@ -558,7 +558,7 @@ class _UserClassDataField(PacketListField):
 class USER_CLASS_DATA(Packet):
     name = "user class data"
     fields_desc = [ FieldLenField("len", None, length_of="data"),
-                    StrLenField("data", "",
+                    StrLenField("data", b"",
                                 length_from = lambda pkt: pkt.len) ]
     def guess_payload_class(self, payload):
         return conf.padding_layer
@@ -595,7 +595,7 @@ class VENDOR_SPECIFIC_OPTION(_DHCP6OptGuessPayload):
     name = "vendor specific option data"
     fields_desc = [ ShortField("optcode", None),
                     FieldLenField("optlen", None, length_of="optdata"),
-                    StrLenField("optdata", "",
+                    StrLenField("optdata", b"",
                                 length_from = lambda pkt: pkt.optlen) ]
     def guess_payload_class(self, payload):
         return conf.padding_layer
@@ -619,7 +619,7 @@ class DHCP6OptIfaceId(_DHCP6OptGuessPayload):# RFC sect 22.18
     fields_desc = [ ShortEnumField("optcode", 18, dhcp6opts),
                     FieldLenField("optlen", None, fmt="!H",
                                   length_of="ifaceid"),
-                    StrLenField("ifaceid", "",
+                    StrLenField("ifaceid", b"",
                                 length_from = lambda pkt: pkt.optlen) ]
 
 
@@ -664,23 +664,25 @@ class DomainNameListField(StrLenField):
         res = []
         while x:
             cur = []
-            while x and x[0] != '\x00':
-                l = ord(x[0])
+            #while x and x[0] != b'\x00':
+            while x and x[0] != 0:
+                l = (x[0])
                 cur.append(x[1:l+1])
                 x = x[l+1:]
-            res.append(".".join(cur))
-            if x and x[0] == '\x00':
+            res.append(b".".join(cur))
+            if x and x[0] == 0:
                 x = x[1:]
         return res
 
     def i2m(self, pkt, x):
         def conditionalTrailingDot(z):
-            if z and z[-1] == '\x00':
+            if z and z[-1] == 0:
                 return z
-            return z+'\x00'
-        res = ""
-        tmp = map(lambda y: map((lambda z: chr(len(z))+z), y.split('.')), x)
-        return "".join(map(lambda x: conditionalTrailingDot("".join(x)), tmp))
+            return z+b'\x00'
+        res = b""
+        x = [ i.encode('ascii') for i in x if type(i) is str ]
+        tmp = map(lambda y: map((lambda z: chr(len(z)).encode('ascii')+z), y.split(b'.')), x)
+        return b"".join(map(lambda x: conditionalTrailingDot(b"".join(x)), tmp))
 
 class DHCP6OptSIPDomains(_DHCP6OptGuessPayload):       #RFC3319
     name = "DHCP6 Option - SIP Servers Domain Name List"
@@ -721,7 +723,7 @@ class DHCP6OptIAPrefix(_DHCP6OptGuessPayload):                    #RFC3633
                     IntField("validlft", 0),
                     ByteField("plen", 48),  # TODO: Challenge that default value
                     IP6Field("prefix", "2001:db8::"), # At least, global and won't hurt
-                    StrLenField("iaprefopts", "",
+                    StrLenField("iaprefopts", b"",
                                 length_from = lambda pkt: pkt.optlen-26) ]
 
 class DHCP6OptIA_PD(_DHCP6OptGuessPayload):                       #RFC3633
@@ -760,16 +762,16 @@ class DomainNameField(StrLenField):
     def m2i(self, pkt, x):
         cur = []
         while x:
-            l = ord(x[0])
+            l = (x[0])
             cur.append(x[1:1+l])
             x = x[l+1:]
-        ret_str = ".".join(cur)
+        ret_str = b".".join(cur)
         return ret_str
 
     def i2m(self, pkt, x):
         if not x:
-            return ""
-        tmp = "".join(map(lambda z: chr(len(z))+z, x.split('.')))
+            return b""
+        tmp = b"".join(map(lambda z: chr(len(z)).encode('ascii')+z, x.split(b'.')))
         return tmp
 
 class DHCP6OptNISDomain(_DHCP6OptGuessPayload):             #RFC3898
@@ -830,7 +832,7 @@ class DHCP6OptRemoteID(_DHCP6OptGuessPayload):                   #RFC4649
                     FieldLenField("optlen", None, length_of="remoteid",
                                   adjust = lambda pkt,x: x+4),
                     IntEnumField("enterprisenum", None, iana_enterprise_num),
-                    StrLenField("remoteid", "",
+                    StrLenField("remoteid", b"",
                                 length_from = lambda pkt: pkt.optlen-4) ]
 
 # TODO : 'subscriberid' default value should be at least 1 byte long
@@ -838,7 +840,7 @@ class DHCP6OptSubscriberID(_DHCP6OptGuessPayload):               #RFC4580
     name = "DHCP6 Option - Subscriber ID"
     fields_desc = [ ShortEnumField("optcode", 38, dhcp6opts),
                     FieldLenField("optlen", None, length_of="subscriberid"),
-                    StrLenField("subscriberid", "",
+                    StrLenField("subscriberid", b"",
                                 length_from = lambda pkt: pkt.optlen) ]
 
 # TODO :  "The data in the Domain Name field MUST be encoded
@@ -891,7 +893,7 @@ DHCP6PrefVal="" # la valeur de preference a utiliser dans
 class _DHCP6GuessPayload(Packet):
     def guess_payload_class(self, payload):
         if len(payload) > 1 :
-            print(ord(payload[0]))
+            print((payload[0]))
             return get_cls(dhcp6opts.get(ord(payload[0]),"DHCP6OptUnknown"), conf.raw_layer)
         return conf.raw_layer
 
@@ -1187,7 +1189,7 @@ dhcp6_cls_by_type = {  1: "DHCP6_Solicit",
 def _dhcp6_dispatcher(x, *args, **kargs):
     cls = conf.raw_layer
     if len(x) >= 2:
-        cls = get_cls(dhcp6_cls_by_type.get(ord(x[0]), "Raw"), conf.raw_layer)
+        cls = get_cls(dhcp6_cls_by_type.get((x[0]), "Raw"), conf.raw_layer)
     return cls(x, *args, **kargs)
 
 bind_bottom_up(UDP, _dhcp6_dispatcher, { "dport": 547 } )
@@ -1418,7 +1420,7 @@ dhcp6d( dns="2001:500::1035", domain="localdomain, local", duid=None)
             duid = p[DHCP6OptServerId].duid
             if (type(duid) != type(self.duid)):
                 return False
-            if str(duid) != str(self.duid):
+            if bytes(duid) != bytes(self.duid):
                 return False
 
             if (p.msgtype == 5 or # Renew
@@ -1486,7 +1488,7 @@ dhcp6d( dns="2001:500::1035", domain="localdomain, local", duid=None)
                 duid = p[DHCP6OptServerId].duid
                 if (type(duid) != type(self.duid)):
                     return False
-                if str(duid) != str(self.duid):
+                if bytes(duid) != bytes(self.duid):
                     return False
             if ((DHCP6OptIA_NA in p) or 
                 (DHCP6OptIA_TA in p) or

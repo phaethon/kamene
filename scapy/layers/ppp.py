@@ -199,7 +199,7 @@ class PPP(Packet):
     fields_desc = [ ShortEnumField("proto", 0x0021, _PPP_proto) ]
     @classmethod
     def dispatch_hook(cls, _pkt=None, *args, **kargs):
-        if _pkt and _pkt[0] == '\xff':
+        if _pkt and _pkt[0] == 0xff:
             cls = HDLC
         return cls
 
@@ -236,9 +236,9 @@ class PPP_IPCP_Option(Packet):
     name = "PPP IPCP Option"
     fields_desc = [ ByteEnumField("type" , None , _PPP_ipcpopttypes),
                     FieldLenField("len", None, length_of="data", fmt="B", adjust=lambda p,x:x+2),
-                    StrLenField("data", "", length_from=lambda p:max(0,p.len-2)) ]
+                    StrLenField("data", b"", length_from=lambda p:max(0,p.len-2)) ]
     def extract_padding(self, pay):
-        return "",pay
+        return b"",pay
 
     registered_options = {}
     @classmethod
@@ -247,7 +247,8 @@ class PPP_IPCP_Option(Packet):
     @classmethod
     def dispatch_hook(cls, _pkt=None, *args, **kargs):
         if _pkt:
-            o = ord(_pkt[0])
+            #o = ord(_pkt[0])
+            o = (_pkt[0])
             return cls.registered_options.get(o, cls)
         return cls
 
@@ -306,7 +307,7 @@ class PPP_ECP_Option(Packet):
                     FieldLenField("len", None, length_of="data", fmt="B", adjust=lambda p,x:x+2),
                     StrLenField("data", "", length_from=lambda p:max(0,p.len-2)) ]
     def extract_padding(self, pay):
-        return "",pay
+        return b"",pay
 
     registered_options = {}
     @classmethod
@@ -315,7 +316,8 @@ class PPP_ECP_Option(Packet):
     @classmethod
     def dispatch_hook(cls, _pkt=None, *args, **kargs):
         if _pkt:
-            o = ord(_pkt[0])
+            #o = ord(_pkt[0])
+            o = (_pkt[0])
             return cls.registered_options.get(o, cls)
         return cls
 

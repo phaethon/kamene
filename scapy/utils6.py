@@ -221,15 +221,15 @@ def in6_getAddrType(addr):
         addrType = (IPV6_ADDR_UNICAST | IPV6_ADDR_GLOBAL)
         if naddr[:2] == b' \x02': # Mark 6to4 @
             addrType |= IPV6_ADDR_6TO4
-    elif naddr[0] == b'\xff': # multicast
+    elif naddr[0] == 0xff: # multicast
         addrScope = paddr[3]
-        if addrScope == b'2':
+        if addrScope == '2':
             addrType = (IPV6_ADDR_LINKLOCAL | IPV6_ADDR_MULTICAST)
-        elif addrScope == b'e':
+        elif addrScope == 'e':
             addrType = (IPV6_ADDR_GLOBAL | IPV6_ADDR_MULTICAST)
         else:
             addrType = (IPV6_ADDR_GLOBAL | IPV6_ADDR_MULTICAST)
-    elif ((naddr[0] == b'\xfe') and ((int(paddr[2], 16) & 0xC) == 0x8)):
+    elif ((naddr[0] == 0xfe) and ((int(paddr[2], 16) & 0xC) == 0x8)):
         addrType = (IPV6_ADDR_UNICAST | IPV6_ADDR_LINKLOCAL)
     elif paddr == "::1":
         addrType = IPV6_ADDR_LOOPBACK
@@ -257,7 +257,7 @@ def in6_mactoifaceid(mac, ulbit=None):
     if ulbit is None or not (ulbit == 0 or ulbit == 1):
         ulbit = [1,'-',0][first & 0x02]
     ulbit *= 2
-    first = b"%.02x" % ((first & 0xFD) | ulbit)
+    first = "%.02x" % ((first & 0xFD) | ulbit)
     eui64 = first + m[2:4] + ":" + m[4:6] + "FF:FE" + m[6:8] + ":" + m[8:12]
     return eui64.upper()
 
@@ -278,8 +278,9 @@ def in6_ifaceidtomac(ifaceid): # TODO: finish commenting function behavior
     first = struct.pack("B", ((first & 0xFD) | ulbit))
     oui = first + ifaceid[1:3]
     end = ifaceid[5:]
-    l = map(lambda x: b"%.02x" % struct.unpack("B", x)[0], list(oui+end))
-    return b":".join(l)
+    #l = map(lambda x: "%.02x" % struct.unpack("B", x)[0], list(oui+end))
+    l = map(lambda x: "%.02x" % x, list(oui+end))
+    return ":".join(l)
 
 def in6_addrtomac(addr):
     """
@@ -346,6 +347,8 @@ def in6_getLinkScopedMcastAddr(addr, grpid=None, scope=2):
         grpid = b'\x00\x00\x00\x00'
     else:
         if type(grpid) is str:
+          grpid = grpid.encode('ascii')
+        if type(grpid) is bytes:
             if len(grpid) == 8:
                 try:
                     grpid = int(grpid, 16) & 0xffffffff
@@ -445,17 +448,19 @@ def in6_getRandomizedIfaceId(ifaceid, previous=None):
     ('fe97:46fe:9871:bd38', 'eeed:d79c:2e3f:62e')
     """
 
-    s = ""
+    s = []
     if previous is None:
-        d = "".join(map(chr, range(256)))
+        #d = b"".join(map(chr, range(256)))
+        d = list(range(256))
         for i in range(8):
-            s += random.choice(d)
+            s.append(random.choice(d))
+        s = bytes(s)
         previous = s
     s = inet_pton(socket.AF_INET6, "::"+ifaceid)[8:] + previous
-    import md5
-    s = md5.new(s).digest()
+    import hashlib
+    s = hashlib.md5(s).digest()
     s1,s2 = s[:8],s[8:]
-    s1 = chr(ord(s1[0]) | 0x04) + s1[1:]  
+    s1 = bytes([(s1[0]) | 0x04]) + s1[1:]  
     s1 = inet_ntop(socket.AF_INET6, b"\xff"*8 + s1)[20:]
     s2 = inet_ntop(socket.AF_INET6, b"\xff"*8 + s2)[20:]    
     return (s1, s2)
@@ -474,8 +479,8 @@ def in6_ctop(addr):
     (RFC 1924) to printable representation ;-)
     Returns None on error.
     """
-    if len(addr) != 20 or not reduce(lambda x,y: x and y, 
-                                     map(lambda x: x in _rfc1924map, addr)):
+    #if len(addr) != 20 or not reduce(lambda x,y: x and y, map(lambda x: x in _rfc1924map, addr)):
+    if len(addr) != 20 or not all(map(lambda x: x in _rfc1924map, addr)):
         return None
     i = 0
     for c in addr:
@@ -484,7 +489,7 @@ def in6_ctop(addr):
     res = []
     for j in range(4):
         res.append(struct.pack("!I", i%2**32))
-        i = i/(2**32)
+        i = i//(2**32)
     res.reverse()
     return inet_ntop(socket.AF_INET6, b"".join(res))
 
@@ -506,7 +511,7 @@ def in6_ptoc(addr):
     res = []
     while rem:
         res.append(_rfc1924map[rem%85])
-        rem = rem/85
+        rem = rem//85
     res.reverse()
     return "".join(res)
 
@@ -646,7 +651,7 @@ def in6_getnsmac(a): # return multicast Ethernet address associated with multica
 
     a = struct.unpack('16B', a)[-4:]
     mac = '33:33:'
-    mac += (b':'.join(map(lambda x: b'%.2x' %x, a))).decode('utf-8')
+    mac += (':'.join(map(lambda x: '%.2x' %x, a)))
     return mac
 
 def in6_getha(prefix): 
@@ -811,7 +816,8 @@ def in6_get_common_plen(a, b):
     tmpA = inet_pton(socket.AF_INET6, a)
     tmpB = inet_pton(socket.AF_INET6, b)
     for i in range(16):
-        mbits = matching_bits(ord(tmpA[i]), ord(tmpB[i]))
+        #mbits = matching_bits(ord(tmpA[i]), ord(tmpB[i]))
+        mbits = matching_bits((tmpA[i]), (tmpB[i]))
         if mbits != 8:
             return 8*i + mbits
     return 128

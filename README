@@ -1,30 +1,34 @@
 This is a fork of scapy (http://www.secdev.org) to make it compatible with python3. Fork based on scapy v2.3.1
-I could go through whole tutorial series Building Network Tools with Scapy by @thepacketgeek (http://thepacketgeek.com/series/building-network-tools-with-scapy/) using scapy-python3. File STATUS inside distribution contains more info on current status.
+All tests from regression test suite pass except WEP (Crypto is not migrated yet). I could go through whole tutorial series Building Network Tools with Scapy by @thepacketgeek (http://thepacketgeek.com/series/building-network-tools-with-scapy/) using scapy-python3. File STATUS inside distribution contains more info on current status.
 
 Install with 'python3 setup.py install' from source tree or 'pip3 install scapy-python3' for latest published version.
 
+N.B.! As a difference from scapy for python2, use bytes() instead of str() for most cases. Also, most arguments expect bytes value instead of str value.
+
 All commands listed by lsc() should work. Tested layers are:
-- ARP
-- DHCP
-- DNS
-- Dot3
-- Dot11
-- Ether
-- ICMP
-- ICMPv6
-- IP
-- IPv6
-- LLC
-- NTP
-- Padding
-- Raw
-- SCTP
-- SNAP
-- SNMP
-- STP
-- TCP
-- TFTP
-- UDP
+  - ARP
+  - DHCP
+  - DHCPv6
+  - DNS
+  - Dot3
+  - Dot11
+  - Ether
+  - ICMP
+  - ICMPv6
+  - IP
+  - IPv6
+  - LLC
+  - NTP
+  - Padding
+  - PPP
+  - Raw
+  - SCTP
+  - SNAP
+  - SNMP
+  - STP
+  - TCP
+  - TFTP
+  - UDP
 
 Currently, works on Linux, Darwin, Unix and co. Using python 3.4 on Ubuntu and FreeBSD for testing. Windows support in progress.
 

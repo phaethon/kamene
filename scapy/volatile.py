@@ -203,10 +203,10 @@ class RandString(RandField):
         self.size = size
         self.chars = chars
     def _fix(self):
-        s = b""
+        s = [] 
         for i in range(self.size):
-            s += random.choice(self.chars)
-        return s
+            s.append(random.choice(self.chars))
+        return bytes(s)
 
 class RandBin(RandString):
     def __init__(self, size=None):
