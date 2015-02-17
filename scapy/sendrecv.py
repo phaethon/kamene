@@ -277,7 +277,7 @@ def sendpfast(x, pps=None, mbps=None, realtime=None, loop=0, file_cache=False, i
     if pps is not None:
         argv.append("--pps=%i" % pps)
     elif mbps is not None:
-        argv.append("--mbps=%i" % mbps)
+        argv.append("--mbps=%f" % mbps)
     elif realtime is not None:
         argv.append("--multiplier=%i" % realtime)
     else:
