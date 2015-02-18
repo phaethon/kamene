@@ -375,9 +375,11 @@ def bitmap2RRlist(bitmap):
             warning("bitmap too short (%i)" % len(bitmap))
             return
    
-        window_block = ord(bitmap[0]) # window number
+        #window_block = ord(bitmap[0]) # window number
+        window_block = (bitmap[0]) # window number
         offset = 256*window_block # offset of the Ressource Record
-        bitmap_len = ord(bitmap[0]) # length of the bitmap in bytes
+        #bitmap_len = ord(bitmap[0]) # length of the bitmap in bytes
+        bitmap_len = (bitmap[1]) # length of the bitmap in bytes
         
         if bitmap_len <= 0 or bitmap_len > 32:
             warning("bitmap length is no valid (%i)" % bitmap_len)
@@ -389,7 +391,8 @@ def bitmap2RRlist(bitmap):
         for b in range(len(tmp_bitmap)):
             v = 128
             for i in range(8):
-                if ord(tmp_bitmap[b]) & v:
+                #if ord(tmp_bitmap[b]) & v:
+                if (tmp_bitmap[b]) & v:
                     # each of the RR is encoded as a bit
                     RRlist += [ offset + b*8 + i ] 
                 v = v >> 1
@@ -434,18 +437,19 @@ def RRlist2bitmap(lst):
      
         # Compute the number of bytes used to store the bitmap
         if rrlist[-1] == 0: # only one element in the list
-            bytes = 1
+            bs = 1
         else:
             max = rrlist[-1] - 256*wb
-            bytes = int(math.ceil(max / 8)) + 1  # use at least 1 byte
-        if bytes > 32: # Don't encode more than 256 bits / values
-            bytes = 32
+            #bs = int(math.ceil(max / 8)) + 1  # use at least 1 byte
+            bs = int(max // 8) + 1  # use at least 1 byte
+        if bs > 32: # Don't encode more than 256 bits / values
+            bs = 32
 
         bitmap += struct.pack("B", wb)
-        bitmap += struct.pack("B", bytes)
+        bitmap += struct.pack("B", bs)
 
         # Generate the bitmap
-        for tmp in range(bytes):
+        for tmp in range(bs):
             v = 0
             # Remove out of range Ressource Records
             #tmp_rrlist = filter(lambda x: 256*wb+8*tmp <= x and x < 256*wb+8*tmp+8, rrlist)
