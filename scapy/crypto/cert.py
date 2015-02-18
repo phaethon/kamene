@@ -1319,7 +1319,7 @@ class PubKey(OSSLHelper, _EncryptAndVerify):
         return self.derkey
 
 
-class Key(OSSLHelper, _DecryptAndSignMethods, _EncryptAndVerify):
+class Key(_DecryptAndSignMethods, _EncryptAndVerify):
     # Below are the fields we recognize in the -text output of openssl
     # and from which we extract information. We expect them in that
     # order. Number of spaces does matter.

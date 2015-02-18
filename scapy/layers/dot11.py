@@ -310,7 +310,7 @@ class Dot11Deauth(Packet):
 
 class Dot11WEP(Packet):
     name = "802.11 WEP packet"
-    fields_desc = [ StrFixedLenField("iv", "\0\0\0", 3),
+    fields_desc = [ StrFixedLenField("iv", b"\0\0\0", 3),
                     ByteField("keyid", 0),
                     StrField("wepdata",None,remain=4),
                     IntField("icv",None) ]
@@ -323,7 +323,7 @@ class Dot11WEP(Packet):
     def build_payload(self):
         if self.wepdata is None:
             return Packet.build_payload(self)
-        return ""
+        return b""
 
     def post_build(self, p, pay):
         if self.wepdata is None:
@@ -331,7 +331,7 @@ class Dot11WEP(Packet):
             if key:
                 if self.icv is None:
                     pay += struct.pack("<I",crc32(pay))
-                    icv = ""
+                    icv = b""
                 else:
                     icv = p[4:8]
                 c = ARC4.new(self.iv+key)

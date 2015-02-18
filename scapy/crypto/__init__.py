@@ -6,15 +6,12 @@
 """
 Tools for handling with digital certificates.
 """
-import logging
-log_loading = logging.getLogger("scapy.loading")
-log_loading.info("Crypto not migrated to python3 yet")
 
-#try:
-#    import Crypto
-#except ImportError:
-#    import logging
-#    log_loading = logging.getLogger("scapy.loading")
-#    log_loading.info("Can't import python Crypto lib. Disabled certificate manipulation tools")
-#else:
-#    from scapy.crypto.cert import *
+try:
+    import Crypto
+except ImportError:
+    import logging
+    log_loading = logging.getLogger("scapy.loading")
+    log_loading.info("Can't import python Crypto lib. Disabled certificate manipulation tools")
+else:
+    from scapy.crypto.cert import *
