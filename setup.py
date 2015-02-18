@@ -46,7 +46,7 @@ if os.name == "nt":
 
 setup(
     name = 'scapy-python3',
-    version = '0.10',
+    version = '0.11',
     packages=['scapy','scapy/arch', 'scapy/arch/windows', 'scapy/layers','scapy/asn1','scapy/tools','scapy/modules', 'scapy/crypto', 'scapy/contrib'],
     scripts = SCRIPTS,
     data_files = [('share/man/man1', ["doc/scapy.1.gz"])],
@@ -59,7 +59,7 @@ setup(
     url = 'https://github.com/phaethon/scapy',
     keywords = 'network security monitoring packet',
     classifiers = [
-      'Development Status :: 3 - Alpha',
+      'Development Status :: 4 - Beta',
       'Environment :: Console',
       'Operating System :: POSIX',
       'Programming Language :: Python :: 3 :: Only'
