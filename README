@@ -1,5 +1,5 @@
 This is a fork of scapy (http://www.secdev.org) to make it compatible with python3. Fork based on scapy v2.3.1
-All 758 tests from regression and ipsec test suites pass. I could go through whole tutorial series Building Network Tools with Scapy by @thepacketgeek (http://thepacketgeek.com/series/building-network-tools-with-scapy/) using scapy-python3.
+All tests from regression (758 tests), ipsec, and both other test suites pass. I could go through whole tutorial series Building Network Tools with Scapy by @thepacketgeek (http://thepacketgeek.com/series/building-network-tools-with-scapy/) using scapy-python3.
 
 Install with 'python3 setup.py install' from source tree or 'pip3 install scapy-python3' for latest published version.
 
