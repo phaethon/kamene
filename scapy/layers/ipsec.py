@@ -22,8 +22,8 @@ Example of use:
 ...                          crypt_key='sixteenbytes key')
 >>> p = IP(src='1.1.1.1', dst='2.2.2.2')
 >>> p /= TCP(sport=45012, dport=80)
->>> p /= Raw('testdata')
->>> p = IP(str(p))
+>>> p /= Raw(b'testdata')
+>>> p = IP(bytes(p))
 >>> p
 <IP  version=4L ihl=5L tos=0x0 len=48 id=1 flags= frag=0L ttl=64 proto=tcp chksum=0x74c2 src=1.1.1.1 dst=2.2.2.2 options=[] |<TCP  sport=45012 dport=http seq=0 ack=0 dataofs=5L reserved=0L flags=S window=8192 chksum=0x1914 urgptr=0 options=[] |<Raw  load='testdata' |>>>
 >>>
@@ -134,7 +134,7 @@ class _ESPPlain(Packet):
     ]
 
     def data_for_encryption(self):
-        return str(self.data) + self.padding + chr(self.padlen) + chr(self.nh)
+        return bytes(self.data) + self.padding + chr(self.padlen).encode('ascii') + chr(self.nh).encode('ascii')
 
 #------------------------------------------------------------------------------
 try:
@@ -231,6 +231,8 @@ class CryptAlgo(object):
         @param iv:     the initialization vector, a byte string
         @return:    an initialized cipher object for this algo
         """
+        if type(key) is str:
+            key = key.encode('ascii')
         if (hasattr(self.cipher, 'MODE_CTR') and self.mode == self.cipher.MODE_CTR
             or hasattr(self.cipher, 'MODE_GCM') and self.mode == self.cipher.MODE_GCM):
             # in counter mode, the "iv" must be incremented for each block
@@ -280,7 +282,7 @@ class CryptAlgo(object):
         # padding must be an array of bytes starting from 1 to padlen
         esp.padding = ''
         for b in range(1, esp.padlen + 1):
-            esp.padding += chr(b)
+            esp.padding += bytes([b])
 
         # If the following test fails, it means that this algo does not comply
         # with the RFC
@@ -329,8 +331,10 @@ class CryptAlgo(object):
             data = cipher.decrypt(data)
 
         # extract padlen and nh
-        padlen = ord(data[-2])
-        nh = ord(data[-1])
+        #padlen = ord(data[-2])
+        padlen = (data[-2])
+        #nh = ord(data[-1])
+        nh = (data[-1])
 
         # then use padlen to determine data and padding
         data = data[:len(data) - padlen - 2]
@@ -445,10 +449,13 @@ class AuthAlgo(object):
         @param key:    a byte string
         @return:       an initialized mac object for this algo
         """
+        if type(key) is str:
+            key = key.encode('ascii')
         if self.mac is XCBCMAC:
             # specific case here, ciphermod instead of digestmod
             return self.mac.new(key, ciphermod=self.digestmod)
         else:
+            print(self.mac)
             return self.mac.new(key, digestmod=self.digestmod)
 
     def sign(self, pkt, key):
@@ -468,12 +475,12 @@ class AuthAlgo(object):
         mac = self.new_mac(key)
 
         if pkt.haslayer(ESP):
-            mac.update(str(pkt[ESP]))
+            mac.update(bytes(pkt[ESP]))
             pkt[ESP].data += mac.digest()[:self.icv_size]
 
         elif pkt.haslayer(AH):
             clone = zero_mutable_fields(pkt.copy(), sending=True)
-            mac.update(str(clone))
+            mac.update(bytes(clone))
             pkt[AH].icv = mac.digest()[:self.icv_size]
 
         return pkt
@@ -502,14 +509,14 @@ class AuthAlgo(object):
 
             pkt = pkt.copy()
             pkt.data = pkt.data[:len(pkt.data) - self.icv_size]
-            mac.update(str(pkt))
+            mac.update(bytes(pkt))
             computed_icv = mac.digest()[:self.icv_size]
 
         elif pkt.haslayer(AH):
             pkt_icv = pkt[AH].icv[:self.icv_size]
 
             clone = zero_mutable_fields(pkt.copy(), sending=False)
-            mac.update(str(clone))
+            mac.update(bytes(clone))
             computed_icv = mac.digest()[:self.icv_size]
 
         if pkt_icv != computed_icv:
@@ -715,7 +722,7 @@ class SecurityAssociation(object):
 
         if proto not in (ESP, AH, ESP.name, AH.name):
             raise ValueError("proto must be either ESP or AH")
-        if isinstance(proto, basestring):
+        if isinstance(proto, str):
             self.proto = eval(proto)
         else:
             self.proto = proto
@@ -782,7 +789,7 @@ class SecurityAssociation(object):
                 del tunnel.nh
                 del tunnel.plen
 
-            pkt = tunnel.__class__(str(tunnel / pkt))
+            pkt = tunnel.__class__(bytes(tunnel / pkt))
 
         ip_header, nh, payload = split_for_transport(pkt, socket.IPPROTO_ESP)
         esp.data = payload
@@ -806,7 +813,7 @@ class SecurityAssociation(object):
         if ip_header.version == 4:
             ip_header.len = len(ip_header) + len(esp)
             del ip_header.chksum
-            ip_header = ip_header.__class__(str(ip_header))
+            ip_header = ip_header.__class__(bytes(ip_header))
         else:
             ip_header.plen = len(ip_header.payload) + len(esp)
 
@@ -832,7 +839,7 @@ class SecurityAssociation(object):
                 del tunnel.nh
                 del tunnel.plen
 
-            pkt = tunnel.__class__(str(tunnel / pkt))
+            pkt = tunnel.__class__(bytes(tunnel / pkt))
 
         ip_header, nh, payload = split_for_transport(pkt, socket.IPPROTO_AH)
         ah.nh = nh
@@ -849,12 +856,12 @@ class SecurityAssociation(object):
         # RFC 4302 - Section 2.2. Payload Length
         # This 8-bit field specifies the length of AH in 32-bit words (4-byte
         # units), minus "2".
-        ah.payloadlen = len(ah) / 4 - 2
+        ah.payloadlen = len(ah) // 4 - 2
 
         if ip_header.version == 4:
             ip_header.len = len(ip_header) + len(ah) + len(payload)
             del ip_header.chksum
-            ip_header = ip_header.__class__(str(ip_header))
+            ip_header = ip_header.__class__(bytes(ip_header))
         else:
             ip_header.plen = len(ip_header.payload) + len(ah) + len(payload)
 
@@ -918,7 +925,7 @@ class SecurityAssociation(object):
                 ip_header.remove_payload()
                 ip_header.len = len(ip_header) + len(esp.data)
                 # recompute checksum
-                ip_header = ip_header.__class__(str(ip_header))
+                ip_header = ip_header.__class__(bytes(ip_header))
             else:
                 encrypted.underlayer.nh = esp.nh
                 encrypted.underlayer.remove_payload()
@@ -950,7 +957,7 @@ class SecurityAssociation(object):
                 ip_header.remove_payload()
                 ip_header.len = len(ip_header) + len(payload)
                 # recompute checksum
-                ip_header = ip_header.__class__(str(ip_header))
+                ip_header = ip_header.__class__(bytes(ip_header))
             else:
                 ah.underlayer.nh = ah.nh
                 ah.underlayer.remove_payload()

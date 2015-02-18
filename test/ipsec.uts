@@ -10,8 +10,8 @@
 
 p = IP(src='1.1.1.1', dst='2.2.2.2')
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IP(str(p))
+p /= Raw(b'testdata')
+p = IP(bytes(p))
 p
 
 sa = SecurityAssociation(ESP, spi=0x222,
@@ -29,7 +29,7 @@ assert(e.haslayer(ESP))
 assert(not e.haslayer(TCP))
 assert(e[ESP].spi == sa.spi)
 * after encryption the original packet payload should NOT be readable
-assert('testdata' not in e[ESP].data)
+assert(b'testdata' not in e[ESP].data)
 
 d = sa.decrypt(e)
 d
@@ -42,8 +42,8 @@ assert(d[TCP] == p[TCP])
 
 p = IP(src='1.1.1.1', dst='2.2.2.2')
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IP(str(p))
+p /= Raw(b'testdata')
+p = IP(bytes(p))
 p
 
 sa = SecurityAssociation(ESP, spi=0x222,
@@ -60,7 +60,7 @@ assert(e.proto == socket.IPPROTO_ESP)
 assert(e.haslayer(ESP))
 assert(not e.haslayer(TCP))
 assert(e[ESP].spi == sa.spi)
-assert('testdata' in e[ESP].data)
+assert(b'testdata' in e[ESP].data)
 
 * integrity verification should pass
 d = sa.decrypt(e)
@@ -73,8 +73,8 @@ assert(d[TCP] == p[TCP])
 
 p = IP(src='1.1.1.1', dst='2.2.2.2')
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IP(str(p))
+p /= Raw(b'testdata')
+p = IP(bytes(p))
 p
 
 sa = SecurityAssociation(ESP, spi=0x222,
@@ -91,10 +91,10 @@ assert(e.proto == socket.IPPROTO_ESP)
 assert(e.haslayer(ESP))
 assert(not e.haslayer(TCP))
 assert(e[ESP].spi == sa.spi)
-assert('testdata' in e[ESP].data)
+assert(b'testdata' in e[ESP].data)
 
 * simulate the alteration of the packet before decryption
-e[ESP].data = e[ESP].data.replace('\x01', '\x21')
+e[ESP].data = e[ESP].data.replace(b'\x01', b'\x21')
 
 * integrity verification should fail
 try:
@@ -108,8 +108,8 @@ except IPSecIntegrityError as err:
 
 p = IP(src='1.1.1.1', dst='2.2.2.2')
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IP(str(p))
+p /= Raw(b'testdata')
+p = IP(bytes(p))
 p
 
 sa = SecurityAssociation(ESP, spi=0x222,
@@ -129,7 +129,7 @@ assert(e.haslayer(ESP))
 assert(not e.haslayer(TCP))
 assert(e[ESP].spi == sa.spi)
 * after encryption the original packet payload should NOT be readable
-assert('testdata' not in e[ESP].data)
+assert(b'testdata' not in e[ESP].data)
 
 d = sa.decrypt(e)
 d
@@ -142,8 +142,8 @@ assert(d == p)
 
 p = IP(src='1.1.1.1', dst='2.2.2.2')
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IP(str(p))
+p /= Raw(b'testdata')
+p = IP(bytes(p))
 p
 
 sa = SecurityAssociation(ESP, spi=0x222,
@@ -163,7 +163,7 @@ assert(e.haslayer(ESP))
 assert(not e.haslayer(TCP))
 assert(e[ESP].spi == sa.spi)
 * after encryption the original packet payload should be readable
-assert('testdata' in e[ESP].data)
+assert(b'testdata' in e[ESP].data)
 
 * integrity verification should pass
 d = sa.decrypt(e)
@@ -176,8 +176,8 @@ assert(d == p)
 
 p = IP(src='1.1.1.1', dst='2.2.2.2')
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IP(str(p))
+p /= Raw(b'testdata')
+p = IP(bytes(p))
 p
 
 sa = SecurityAssociation(ESP, spi=0x222,
@@ -197,10 +197,10 @@ assert(e.haslayer(ESP))
 assert(not e.haslayer(TCP))
 assert(e[ESP].spi == sa.spi)
 * after encryption the original packet payload should be readable
-assert('testdata' in e[ESP].data)
+assert(b'testdata' in e[ESP].data)
 
 * simulate the alteration of the packet before decryption
-e[ESP].data = e[ESP].data.replace('\x01', '\x21')
+e[ESP].data = e[ESP].data.replace(b'\x01', b'\x21')
 
 * integrity verification should fail
 try:
@@ -217,8 +217,8 @@ except IPSecIntegrityError as err:
 
 p = IPv6(src='11::22', dst='22::11')
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IPv6(str(p))
+p /= Raw(b'testdata')
+p = IPv6(bytes(p))
 p
 
 sa = SecurityAssociation(ESP, spi=0x222,
@@ -236,7 +236,7 @@ assert(e.haslayer(ESP))
 assert(not e.haslayer(TCP))
 assert(e[ESP].spi == sa.spi)
 * after encryption the original packet payload should NOT be readable
-assert('testdata' not in e[ESP].data)
+assert(b'testdata' not in e[ESP].data)
 
 d = sa.decrypt(e)
 d
@@ -249,8 +249,8 @@ assert(d[TCP] == p[TCP])
 
 p = IPv6(src='11::22', dst='22::11')
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IPv6(str(p))
+p /= Raw(b'testdata')
+p = IPv6(bytes(p))
 p
 
 sa = SecurityAssociation(ESP, spi=0x222,
@@ -268,7 +268,7 @@ assert(e.haslayer(ESP))
 assert(not e.haslayer(TCP))
 assert(e[ESP].spi == sa.spi)
 * after encryption the original packet payload should be readable
-assert('testdata' in e[ESP].data)
+assert(b'testdata' in e[ESP].data)
 
 * integrity verification should pass
 d = sa.decrypt(e)
@@ -281,8 +281,8 @@ assert(d[TCP] == p[TCP])
 
 p = IPv6(src='11::22', dst='22::11')
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IPv6(str(p))
+p /= Raw(b'testdata')
+p = IPv6(bytes(p))
 p
 
 sa = SecurityAssociation(ESP, spi=0x222,
@@ -300,10 +300,10 @@ assert(e.haslayer(ESP))
 assert(not e.haslayer(TCP))
 assert(e[ESP].spi == sa.spi)
 * after encryption the original packet payload should be readable
-assert('testdata' in e[ESP].data)
+assert(b'testdata' in e[ESP].data)
 
 * simulate the alteration of the packet before decryption
-e[ESP].data = e[ESP].data.replace('\x01', '\x21')
+e[ESP].data = e[ESP].data.replace(b'\x01', b'\x21')
 
 * integrity verification should fail
 try:
@@ -317,8 +317,8 @@ except IPSecIntegrityError as err:
 
 p = IPv6(src='11::22', dst='22::11')
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IPv6(str(p))
+p /= Raw(b'testdata')
+p = IPv6(bytes(p))
 p
 
 sa = SecurityAssociation(ESP, spi=0x222,
@@ -337,7 +337,7 @@ assert(e.haslayer(ESP))
 assert(not e.haslayer(TCP))
 assert(e[ESP].spi == sa.spi)
 * after encryption the original packet payload should NOT be readable
-assert('testdata' not in e[ESP].data)
+assert(b'testdata' not in e[ESP].data)
 
 d = sa.decrypt(e)
 d
@@ -350,8 +350,8 @@ assert(d == p)
 
 p = IPv6(src='11::22', dst='22::11')
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IPv6(str(p))
+p /= Raw(b'testdata')
+p = IPv6(bytes(p))
 p
 
 sa = SecurityAssociation(ESP, spi=0x222,
@@ -370,7 +370,7 @@ assert(e.haslayer(ESP))
 assert(not e.haslayer(TCP))
 assert(e[ESP].spi == sa.spi)
 * after encryption the original packet payload should be readable
-assert('testdata' in e[ESP].data)
+assert(b'testdata' in e[ESP].data)
 
 * integrity verification should pass
 d = sa.decrypt(e)
@@ -383,8 +383,8 @@ assert(d == p)
 
 p = IPv6(src='11::22', dst='22::11')
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IPv6(str(p))
+p /= Raw(b'testdata')
+p = IPv6(bytes(p))
 p
 
 sa = SecurityAssociation(ESP, spi=0x222,
@@ -403,10 +403,10 @@ assert(e.haslayer(ESP))
 assert(not e.haslayer(TCP))
 assert(e[ESP].spi == sa.spi)
 * after encryption the original packet payload should be readable
-assert('testdata' in e[ESP].data)
+assert(b'testdata' in e[ESP].data)
 
 * simulate the alteration of the packet before decryption
-e[ESP].data = e[ESP].data.replace('\x01', '\x21')
+e[ESP].data = e[ESP].data.replace(b'\x01', b'\x21')
 
 * integrity verification should fail
 try:
@@ -423,8 +423,8 @@ except IPSecIntegrityError as err:
 
 p = IP(src='1.1.1.1', dst='2.2.2.2')
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IP(str(p))
+p /= Raw(b'testdata')
+p = IP(bytes(p))
 p
 
 sa = SecurityAssociation(AH, spi=0x222,
@@ -457,8 +457,8 @@ assert(d[TCP] == p[TCP])
 
 p = IP(src='1.1.1.1', dst='2.2.2.2')
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IP(str(p))
+p /= Raw(b'testdata')
+p = IP(bytes(p))
 p
 
 sa = SecurityAssociation(AH, spi=0x222,
@@ -491,8 +491,8 @@ except IPSecIntegrityError as err:
 
 p = IP(src='1.1.1.1', dst='2.2.2.2')
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IP(str(p))
+p /= Raw(b'testdata')
+p = IP(bytes(p))
 p
 
 sa = SecurityAssociation(AH, spi=0x222,
@@ -525,8 +525,8 @@ assert(d == p)
 
 p = IP(src='1.1.1.1', dst='2.2.2.2')
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IP(str(p))
+p /= Raw(b'testdata')
+p = IP(bytes(p))
 p
 
 sa = SecurityAssociation(AH, spi=0x222,
@@ -562,8 +562,8 @@ except IPSecIntegrityError as err:
 
 p = IPv6(src='11::22', dst='22::11')
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IPv6(str(p))
+p /= Raw(b'testdata')
+p = IPv6(bytes(p))
 p
 
 sa = SecurityAssociation(AH, spi=0x222,
@@ -595,8 +595,8 @@ assert(d[TCP] == p[TCP])
 
 p = IPv6(src='11::22', dst='22::11')
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IPv6(str(p))
+p /= Raw(b'testdata')
+p = IPv6(bytes(p))
 p
 
 sa = SecurityAssociation(AH, spi=0x222,
@@ -628,8 +628,8 @@ except IPSecIntegrityError as err:
 
 p = IPv6(src='11::22', dst='22::11')
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IPv6(str(p))
+p /= Raw(b'testdata')
+p = IPv6(bytes(p))
 p
 
 sa = SecurityAssociation(AH, spi=0x222,
@@ -662,8 +662,8 @@ assert(d == p)
 
 p = IPv6(src='11::22', dst='22::11')
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IPv6(str(p))
+p /= Raw(b'testdata')
+p = IPv6(bytes(p))
 p
 
 sa = SecurityAssociation(AH, spi=0x222,
@@ -704,8 +704,8 @@ p /= IPv6ExtHdrRouting()
 p /= IPv6ExtHdrDestOpt()
 p /= IPv6ExtHdrFragment()
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IPv6(str(p))
+p /= Raw(b'testdata')
+p = IPv6(bytes(p))
 p
 
 sa = SecurityAssociation(AH, spi=0x222,
@@ -726,8 +726,8 @@ p = IPv6(src='11::22', dst='22::11')
 p /= IPv6ExtHdrHopByHop()
 p /= IPv6ExtHdrRouting(addresses=['aa::bb', 'cc::dd', 'ee::ff'])
 p /= TCP(sport=45012, dport=80)
-p /= Raw('testdata')
-p = IPv6(str(p))
+p /= Raw(b'testdata')
+p = IPv6(bytes(p))
 p
 
 sa = SecurityAssociation(AH, spi=0x222,
