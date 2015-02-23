@@ -10,7 +10,7 @@ General utility functions.
 import os,sys,socket,types
 import random,time
 import gzip,zlib,pickle
-import re,struct,array
+import re,struct,array,stat
 import subprocess
 
 import warnings
@@ -479,7 +479,7 @@ def import_object(obj=None):
 
 
 def save_object(fname, obj):
-    cPickle.dump(obj,gzip.open(fname,"wb"))
+    pickle.dump(obj,gzip.open(fname,"wb"))
 
 def load_object(fname):
     return pickle.load(gzip.open(fname,"rb"))
@@ -535,6 +535,8 @@ class RawPcapReader:
     def __init__(self, filename):
         self.filename = filename
         try:
+            if not stat.S_ISREG(os.stat(filename).st_mode):
+              raise IOError("GZIP detection works only for regular files")
             self.f = gzip.open(filename,"rb")
             magic = self.f.read(4)
         except IOError:
