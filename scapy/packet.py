@@ -761,8 +761,8 @@ Creates an EPS file describing a packet. If filename is not provided a temporary
         if type(cls) is int:
             nb = cls+1
             cls = None
-        if type(cls) is str and b"." in cls:
-            ccls,fld = cls.split(b".",1)
+        if type(cls) is str and "." in cls:
+            ccls,fld = cls.split(".",1)
         else:
             ccls,fld = cls,None
         if cls is None or self.__class__ == cls or self.__class__.name == ccls:
