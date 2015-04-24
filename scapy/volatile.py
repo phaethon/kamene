@@ -594,9 +594,9 @@ class RandSingString(RandSingularity):
                          b"LST:",
                          b"NUL:",
                          b"CON:",
-                         rb"C:\CON\CON",
-                         rb"C:\boot.ini",
-                         rb"\\myserver\share",
+                         b"C:\CON\CON",
+                         b"C:\boot.ini",
+                         b"\\myserver\share",
                          b"foo.exe:",
                          b"foo.exe\\", ]
                              
