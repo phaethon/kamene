@@ -290,7 +290,7 @@ class TCPOptionsField(StrField):
                 if type(oval) is not str:
                     warning("option [%i] is not string."%onum)
                     continue
-            opt += bytes([(onum), (2+len(oval)), oval])
+            opt += bytes([(onum), (2+len(oval))]) + oval
         return opt+b"\x00"*(3-((len(opt)+3)%4))
     def randval(self):
         return [] # XXX
