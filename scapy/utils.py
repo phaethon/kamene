@@ -560,8 +560,8 @@ class RawPcapReader:
     def __iter__(self):
         return self
 
-    def next(self):
-        """impliment the iterator protocol on a set of packets in a pcap file"""
+    def __next__(self):
+        """implement the iterator protocol on a set of packets in a pcap file"""
         pkt = self.read_packet()
         if pkt == None:
             raise StopIteration
@@ -570,7 +570,9 @@ class RawPcapReader:
 
     def read_packet(self, size=MTU):
         """return a single packet read from the file
-        
+        bytes, (sec, #timestamp seconds
+                usec, #timestamp microseconds
+                wirelen) #actual length of packet 
         returns None when no more packets are available
         """
         hdr = self.f.read(16)
