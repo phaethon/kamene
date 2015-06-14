@@ -10,7 +10,7 @@ Install with 'python3 setup.py install' from source tree (get it with `git clone
 
 ## Usage
 
-*N.B.! As a difference from scapy for python2, use bytes() instead of str() for most cases. Also, most arguments expect bytes value instead of str value.*
+*N.B.! As a difference from scapy for python2, use bytes() instead of str() when converting packet to bytes. Also, most arguments expect bytes value instead of str value except the ones, which are naturally suited for human input (e.g. domain name).*
 
 You can use scapy running scapy command or by importing scapy library from interactive python shell (python or preferrably ipython).
 Simple example that you can try from interactive shell:
