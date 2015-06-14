@@ -1,9 +1,9 @@
 # scapy for python3 (aka scapy3k) 
 This is a fork of scapy (http://www.secdev.org) to make it compatible with python3. Fork based on scapy v2.3.1
-All tests from regression (758 tests), ipsec, and both other test suites pass. Also, I tested full tutorial series Building Network Tools with Scapy by @thepacketgeek (http://thepacketgeek.com/series/building-network-tools-with-scapy/) using scapy-python3.
+All tests from regression (758 tests), ipsec, and both other test suites pass. Also, I tested full tutorial series [Building Network Tools with Scapy by @thepacketgeek] (http://thepacketgeek.com/series/building-network-tools-with-scapy/) using scapy-python3.
 Please, submit all issues https://github.com/phaethon/scapy preferrably with .pcap files for tests. Bugs for individual layers are usually easy to fix.
 
-winpcapy.py by Massimo Ciani https://code.google.com/p/winpcapy/ integrated inside code
+[winpcapy.py by Massimo Ciani] (https://code.google.com/p/winpcapy/) integrated inside code
 
 ## Installation
 Install with 'python3 setup.py install' from source tree (get it with `git clone https://github.com/phaethon/scapy.git`) or `pip3 install scapy-python3` for latest published version.
@@ -20,7 +20,7 @@ p = IP(dst = 'www.google.com') / TCP(dport = 80) / Raw(b'GET / HTTP/1.0')
 # to see packet content as bytes use bytes(p) not str(p)
 sr1(p)
 ```
-Notice `'www.google.com'` as a string, and `b'GET / HTTP/1.0' as bytes. Domain name is normal human input, thus it is string, raw packet content is byte data. Once you start using, it will seem more easy than in looks. Also, notice bytes are returned in the answer.
+Notice `'www.google.com'` as a string, and `b'GET / HTTP/1.0'` as bytes. Domain name is normal human input, thus it is string, raw packet content is byte data. Once you start using, it will seem more easy than in looks. Also, notice bytes are returned in the answer.
 
 Use ls() to list all supported layers. Use lsc() to list all commands.
 
