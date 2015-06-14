@@ -3,7 +3,7 @@ This is a fork of scapy (http://www.secdev.org) to make it compatible with pytho
 All tests from regression (758 tests), ipsec, and both other test suites pass. Also, I tested full tutorial series [Building Network Tools with Scapy by @thepacketgeek] (http://thepacketgeek.com/series/building-network-tools-with-scapy/) using scapy-python3.
 Please, submit all issues https://github.com/phaethon/scapy preferrably with .pcap files for tests. Bugs for individual layers are usually easy to fix.
 
-[winpcapy.py by Massimo Ciani] (https://code.google.com/p/winpcapy/) integrated inside code
+[winpcapy.py by Massimo Ciani] (https://code.google.com/p/winpcapy/) integrated inside code.
 
 ## Installation
 Install with 'python3 setup.py install' from source tree (get it with `git clone https://github.com/phaethon/scapy.git`) or `pip3 install scapy-python3` for latest published version.
