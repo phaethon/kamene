@@ -28,10 +28,12 @@ WINDOWS=sys.platform.startswith("win32")
 ###########
 
 def get_temp_file(keep=False, autoext=""):
-    f = os.tempnam("","scapy")
+    import tempfile
+    fd, fname  = tempfile.mkstemp(suffix = ".scapy")
+    os.close(fd)
     if not keep:
-        conf.temp_files.append(f+autoext)
-    return f
+        conf.temp_files.append(fname)
+    return fname
 
 def str2bytes(x):
   if type(x) is bytes:
@@ -785,20 +787,31 @@ def import_hexcap():
 
 
 @conf.commands.register
-def wireshark(pktlist):
+def wireshark(pktlist, *args):
     """Run wireshark on a list of packets"""
-    f = get_temp_file()
-    wrpcap(f, pktlist)
-    subprocess.Popen([conf.prog.wireshark, "-r", f])
+    fname = get_temp_file()
+    wrpcap(fname, pktlist)
+    subprocess.Popen([conf.prog.wireshark, "-r", fname] + list(args))
+
+@conf.commands.register
+def tdecode(pkt, *args):
+    """Run tshark to decode and display the packet. If no args defined uses -V"""
+    if not args:
+      args = [ "-V" ]
+    fname = get_temp_file()
+    wrpcap(fname,[pkt])
+    subprocess.call([conf.prog.wireshark, "-r", fname] + list(args))
 
 @conf.commands.register
 def hexedit(x):
-    x = str(x)
-    f = get_temp_file()
-    open(f,"w").write(x)
-    subprocess.call([conf.prog.hexedit, f])
-    x = open(f).read()
-    os.unlink(f)
+    """Run external hex editor on a packet or bytes. Set editor in conf.prog.hexedit"""
+    x = bytes(x)
+    fname = get_temp_file()
+    with open(fname,"wb") as f:
+      f.write(x)
+    subprocess.call([conf.prog.hexedit, fname])
+    with open(fname, "rb") as f:
+      x = f.read()
     return x
 
 def __make_table(yfmtfunc, fmtfunc, endline, li, fxyz, sortx=None, sorty=None, seplinefunc=None):
