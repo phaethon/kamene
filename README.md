@@ -22,6 +22,8 @@ sr1(p)
 ```
 Notice `'www.google.com'` as a string, and `b'GET / HTTP/1.0' as bytes. Domain name is normal human input, thus it is string, raw packet content is byte data. Once you start using, it will seem more easy than in looks. Also, notice bytes are returned in the answer.
 
+Use ls() to list all supported layers. Use lsc() to list all commands.
+
 ## Compatibility
 
 All commands listed by lsc() should work. Tested layers are:
