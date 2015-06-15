@@ -9,7 +9,7 @@ Implementation for of the configuration object.
 
 import os,time,socket,sys
 from .data import *
-import scapy.base_classes as base_classes
+import scapy.base_classes
 import scapy.themes
 from .error import log_scapy
 
@@ -62,7 +62,7 @@ class ProgPath(ConfClass):
     display = "display"
     tcpdump = "tcpdump"
     tcpreplay = "tcpreplay"
-    hexedit = "hexer"
+    hexedit = "hexedit"
     wireshark = "wireshark"
 
 
@@ -82,7 +82,7 @@ class ConfigFieldList:
         self.fields -= set(flds)
         self._recalc_layer_list()
     def __contains__(self, elt):
-        if isinstance(elt, base_classes.Packet_metaclass):
+        if isinstance(elt, scapy.base_classes.Packet_metaclass):
             return elt in self.layers
         return elt in self.fields
     def __repr__(self):
@@ -110,11 +110,11 @@ class Num2Layer:
         self.layer2num[layer] = num
 
     def __getitem__(self, item):
-        if isinstance(item, base_classes.Packet_metaclass):
+        if isinstance(item, scapy.base_classes.Packet_metaclass):
             return self.layer2num[item]
         return self.num2layer[item]
     def __contains__(self, item):
-        if isinstance(item, base_classes.Packet_metaclass):
+        if isinstance(item, scapy.base_classes.Packet_metaclass):
             return item in self.layer2num
         return item in self.num2layer
     def get(self, item, default=None):
