@@ -654,7 +654,13 @@ class IPerror(IP):
 
 
 class TCPerror(TCP):
+    fields_desc = [ ShortEnumField("sport", 20, TCP_SERVICES),
+                    ShortEnumField("dport", 80, TCP_SERVICES),
+                    IntField("seq", 0) ]
     name = "TCP in ICMP"
+    def post_build(self, p, pay):
+        p += pay
+        return p
     def answers(self, other):
         if not isinstance(other, TCP):
             return 0
