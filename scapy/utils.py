@@ -19,7 +19,7 @@ warnings.filterwarnings("ignore","tempnam",RuntimeWarning, __name__)
 from .config import conf
 from .data import MTU
 from .error import log_runtime,log_loading,log_interactive, Scapy_Exception
-from .base_classes import BasePacketList
+from .base_classes import BasePacketList,BasePacket
 
 WINDOWS=sys.platform.startswith("win32")
 
@@ -709,7 +709,7 @@ class RawPcapWriter:
         """
         if not self.header_present:
             self._write_header(pkt)
-        if type(pkt) is str:
+        if type(pkt) is bytes:
             self._write_packet(pkt)
         else:
             for p in pkt:
@@ -759,11 +759,25 @@ class PcapWriter(RawPcapWriter):
         RawPcapWriter._write_header(self, pkt)
 
     def _write_packet(self, packet):        
-        sec = int(packet.time)
-        usec = int(round((packet.time-sec)*1000000))
-        s = bytes(packet)
-        caplen = len(s)
-        RawPcapWriter._write_packet(self, s, sec, usec, caplen, caplen)
+        try:
+          sec = int(packet.time)
+          usec = int(round((packet.time-sec)*1000000))
+          s = bytes(packet)
+          caplen = len(s)
+          RawPcapWriter._write_packet(self, s, sec, usec, caplen, caplen)
+        except Exception as e:
+          log_interactive.error(e)
+    def write(self, pkt):
+        """accepts a either a single packet or a list of packets
+        to be written to the dumpfile
+        """
+        if not self.header_present:
+            self._write_header(pkt)
+        if isinstance(pkt, BasePacket):
+          self._write_packet(pkt)
+        else:
+            for p in pkt:
+                self._write_packet(p)
 
 
 re_extract_hexcap = re.compile("^((0x)?[0-9a-fA-F]{2,}[ :\t]{,3}|) *(([0-9a-fA-F]{2} {,2}){,16})")
