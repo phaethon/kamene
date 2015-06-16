@@ -601,21 +601,18 @@ def align32(n):
   return n + (4 - n % 4) % 4
 
 class _RawPcapNGReader:
-    NGMAGIC = b'\x0a\x0d\x0d\x0a'
-    NGMAGICBLOCK = 168627466
-
     def __init__(self, filep):
         self.filep = filep
         self.filep.seek(0, 0)
         self.endian = '<'
-        self.tsresol = None
+        self.tsresol = 6
         self.linktype = None
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        """implement the iterator protocol on a set of packets in a pcap file"""
+        """implement the iterator protocol on a set of packets in a pcapng file"""
         pkt = self.read_packet()
         if pkt == None:
             raise StopIteration
@@ -627,21 +624,22 @@ class _RawPcapNGReader:
             if len(buf) == 0:
                 return None
             elif len(buf) != 4:
-                raise IOError("Premature end of file")
+                raise IOError("PacketNGReader: Premature end of file")
             block_type, = struct.unpack(self.endian + 'i', buf)
-            if block_type == 168627466: #Section Header
+            if block_type == 168627466: #Section Header b'\x0a\x0d\x0d\x0a'
                 self.read_section_header()
             elif block_type == 1:
                 self.read_interface_description()
             elif block_type == 6:
                 return self.read_enhanced_packet(size)
             else:
+                warning("PacketNGReader: Unparsed block type %d/#%x" % (block_type, block_type))
                 self.read_generic_block()
 
     def _read_bytes(self, n, check = True):
         buf = self.filep.read(n)
         if check and len(buf) < n:
-            raise IOError("Premature end of file")
+            raise IOError("PacketNGReader: Premature end of file")
         return buf
 
     def read_generic_block(self):
@@ -656,9 +654,14 @@ class _RawPcapNGReader:
         elif buf[4:8] == b'\x4d\x3c\x2b\x1a':
             self.endian = '<'
         else:
-            raise Exception('Cannot read byte order value')  
+            raise Scapy_Exception('Cannot read byte order value')  
         block_length, _, major_version, minor_version, section_length = struct.unpack(self.endian + 'IIHHi', buf)
         options = self._read_bytes(block_length - 24)
+        if options:
+            opt = self.parse_options(options)
+            for i in opt.keys():
+                if not i & (0b1 << 15):
+                    warning("PcapNGReader: Unparsed option %d/#%x in section header" % (i, i))
         self._check_length(block_length)
 
     def read_interface_description(self):
@@ -667,8 +670,17 @@ class _RawPcapNGReader:
         options = self._read_bytes(block_length - 20)
         if options:
             opt = self.parse_options(options)
-            if 9 in opt:
-                self.tsresol = opt[9][0]
+            for i in opt.keys():
+                if 9 in opt:
+                    self.tsresol = opt[9][0]
+                elif not i & (0b1 << 15):
+                    warning("PcapNGReader: Unparsed option %d/#%x in enhanced packet block" % (i, i))
+        try:
+            self.LLcls = conf.l2types[self.linktype]
+        except KeyError:
+            warning("RawPcapReader: unknown LL type [%i]/[%#x]. Using Raw packets" % (self.linktype,self.linktype))
+            self.LLcls = conf.raw_layer
+
         self._check_length(block_length)
 
     def read_enhanced_packet(self, size = MTU):
@@ -678,24 +690,25 @@ class _RawPcapNGReader:
 
         pkt = self._read_bytes(align32(caplen))[:caplen]
         options = self._read_bytes(block_length - align32(caplen) - 32)
+        if options:
+            opt = self.parse_options(options)
+            for i in opt.keys():
+                if not i & (0b1 << 15):
+                    warning("PcapNGReader: Unparsed option %d/#%x in enhanced packet block" % (i, i))
         self._check_length(block_length)
-        return pkt[:MTU], (self.parse_sec(timestamp), self.parse_usec(timestamp), wirelen) # TODO: should be checking if_tsresol
+        return pkt[:MTU], (self.parse_sec(timestamp), self.parse_usec(timestamp), wirelen)
     
     def parse_sec(self, t):
         if self.tsresol & 0b10000000:
             return t >> self.tsresol
-        elif self.tsresol:
-            return t // pow(10, self.tsresol)
         else:
-            return t // 1000000
+            return t // pow(10, self.tsresol)
 
     def parse_usec(self, t):
         if self.tsresol & 0b10000000:
             return t & (1 << self.tsresol) - 1
-        elif self.tsresol:
-            return t % pow(10, self.tsresol)
         else:
-            return t % 1000000
+            return t % pow(10, self.tsresol)
 
     def parse_options(self, opt):
         buf = opt
@@ -711,7 +724,7 @@ class _RawPcapNGReader:
     def _check_length(self, block_length):
         check_length, = struct.unpack(self.endian + 'I', self._read_bytes(4))
         if check_length != block_length:
-            raise Exception('Block length values are not equal')
+            raise Scapy_Exception('Block length values are not equal')
 
 class _RawPcapOldReader:
     def __init__(self, filep, endianness):
@@ -723,6 +736,11 @@ class _RawPcapOldReader:
         vermaj,vermin,tz,sig,snaplen,linktype = struct.unpack(self.endian+"HHIIII",hdr)
 
         self.linktype = linktype
+        try:
+            self.LLcls = conf.l2types[self.linktype]
+        except KeyError:
+            warning("RawPcapReader: unknown LL type [%i]/[%#x]. Using Raw packets" % (self.linktype,self.linktype))
+            self.LLcls = conf.raw_layer
 
     def __iter__(self):
         return self
@@ -754,28 +772,6 @@ class PcapReader(RawPcapReader):
         RawPcapReader.__init__(self, filename)
     def __enter__(self):
         return self
-    def read_packet(self, size=MTU):
-        rp = RawPcapReader.read_packet(self,size)
-        if rp is None:
-            return None
-        s,(sec,usec,wirelen) = rp
-
-        try:
-            self.LLcls = conf.l2types[self.reader.linktype]
-        except KeyError:
-            warning("PcapReader: unknown LL type [%i]/[%#x]. Using Raw packets" % (self.reader.linktype,self.reader.linktype))
-            self.LLcls = conf.raw_layer
-        
-        try:
-            p = self.LLcls(s)
-        except KeyboardInterrupt:
-            raise
-        except:
-            if conf.debug_dissector:
-                raise
-            p = conf.raw_layer(s)
-        p.time = sec+0.000001*usec
-        return p
     def __iter__(self):
         return self
     def __next__(self):
@@ -784,13 +780,30 @@ class PcapReader(RawPcapReader):
         if pkt == None:
             raise StopIteration
         return pkt
+    def read_packet(self, size=MTU):
+        rp = RawPcapReader.read_packet(self,size)
+        if rp is None:
+            return None
+        s,(sec,usec,wirelen) = rp
+
+        
+        try:
+            p = self.reader.LLcls(s)
+        except KeyboardInterrupt:
+            raise
+        except:
+            if conf.debug_dissector:
+                raise
+            p = conf.raw_layer(s)
+        p.time = sec+0.000001*usec
+        return p
+
     def read_all(self,count=-1):
         res = RawPcapReader.read_all(self, count)
         import scapy.plist
         return scapy.plist.PacketList(res,name = os.path.basename(self.filename))
     def recv(self, size=MTU):
         return self.read_packet(size)
-        
 
 
 class RawPcapWriter:
