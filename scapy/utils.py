@@ -940,7 +940,7 @@ def tdecode(pkt, *args):
       args = [ "-V" ]
     fname = get_temp_file()
     wrpcap(fname,[pkt])
-    subprocess.call([conf.prog.wireshark, "-r", fname] + list(args))
+    subprocess.call(["tshark", "-r", fname] + list(args))
 
 @conf.commands.register
 def hexedit(x):
