@@ -752,6 +752,8 @@ class _RawPcapOldReader:
 class PcapReader(RawPcapReader):
     def __init__(self, filename):
         RawPcapReader.__init__(self, filename)
+    def __enter__(self):
+        return self
     def read_packet(self, size=MTU):
         rp = RawPcapReader.read_packet(self,size)
         if rp is None:
@@ -774,6 +776,14 @@ class PcapReader(RawPcapReader):
             p = conf.raw_layer(s)
         p.time = sec+0.000001*usec
         return p
+    def __iter__(self):
+        return self
+    def __next__(self):
+        """implement the iterator protocol on a set of packets in a pcap file"""
+        pkt = self.read_packet()
+        if pkt == None:
+            raise StopIteration
+        return pkt
     def read_all(self,count=-1):
         res = RawPcapReader.read_all(self, count)
         import scapy.plist
