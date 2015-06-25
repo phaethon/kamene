@@ -20,18 +20,19 @@ class Gen(object):
         return iter([])
     
 class SetGen(Gen):
-    def __init__(self, set, _iterpacket=1):
+    def __init__(self, col, _iterpacket=1):
         self._iterpacket=_iterpacket
-        if type(set) is list:
-            self.set = set
-        elif isinstance(set, BasePacketList):
-            self.set = list(set)
+        if type(col) is list:
+            self.col = col
+        elif isinstance(col, BasePacketList):
+            self.col = list(col)
         else:
-            self.set = [set]
-    def transf(self, element):
-        return element
+            self.col = [col]
+    # DEPRECATED
+    # def transf(self, element):
+    #     return element
     def __iter__(self):
-        for i in self.set:
+        for i in self.col:
             if (type(i) is tuple) and (len(i) == 2) and type(i[0]) is int and type(i[1]) is int:
                 if  (i[0] <= i[1]):
                     j=i[0]
@@ -44,7 +45,7 @@ class SetGen(Gen):
             else:
                 yield i
     def __repr__(self):
-        return "<SetGen %s>" % self.set.__repr__()
+        return "<SetGen %s>" % self.col.__repr__()
 
 class Net(Gen):
     """Generate a list of IPs from a network address or a name"""
@@ -77,8 +78,6 @@ class Net(Gen):
     def __init__(self, net):
         self.repr=net
         self.parsed,self.netmask = self._parse_net(net)
-
-
                                                                                                
     def __iter__(self):
         for d in range(*self.parsed[3]):
