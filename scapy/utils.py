@@ -473,12 +473,19 @@ class Enum_metaclass(type):
 
 
 def export_object(obj):
-    print(gzip.zlib.compress(pickle.dumps(obj,2),9).encode("base64"))
+    import dill as pickle
+    import base64
+    return base64.b64encode(gzip.zlib.compress(pickle.dumps(obj,4),9)).decode('utf-8')
 
-def import_object(obj=None):
-    if obj is None:
-        obj = sys.stdin.read()
-    return pickle.loads(gzip.zlib.decompress(obj.strip().decode("base64")))
+
+def import_object(obj):
+    import dill as pickle
+    import base64
+#    if obj is None:
+#        obj = sys.stdin.read().strip().encode('utf-8')
+    if obj is str:
+        obj = obj.strip().encode('utf-8')
+    return pickle.loads(gzip.zlib.decompress(base64.b64decode(obj)))
 
 
 def save_object(fname, obj):
