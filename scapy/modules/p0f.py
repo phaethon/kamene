@@ -15,7 +15,7 @@ from scapy.packet import NoPayload
 conf.p0f_base ="/etc/p0f/p0f.fp"
 conf.p0fa_base ="/etc/p0f/p0fa.fp"
 conf.p0fr_base ="/etc/p0f/p0fr.fp"
-conf.p0fo_base ="/etc/p0f/p0fo.fp"
+#conf.p0fo_base ="/etc/p0f/p0fo.fp"
 
 
 ###############
@@ -70,7 +70,7 @@ class p0fKnowledgeBase(KnowledgeBase):
 p0f_kdb = p0fKnowledgeBase(conf.p0f_base)
 p0fa_kdb = p0fKnowledgeBase(conf.p0fa_base)
 p0fr_kdb = p0fKnowledgeBase(conf.p0fr_base)
-p0fo_kdb = p0fKnowledgeBase(conf.p0fo_base)
+#p0fo_kdb = p0fKnowledgeBase(conf.p0fo_base)
 
 def p0f_selectdb(flags):
     # tested flags: S, R, A
@@ -83,9 +83,9 @@ def p0f_selectdb(flags):
     elif flags & 0x16 in [ 0x4, 0x14 ]:
         # RST RST/ACK
         return p0fr_kdb
-    elif flags & 0x16 == 0x10:
+#    elif flags & 0x16 == 0x10:
         # ACK
-        return p0fo_kdb
+#        return p0fo_kdb
     else:
         return None
 
@@ -122,9 +122,9 @@ def packet2p0f(pkt):
             ss = '*'
         else:
             ss = 0
-    if db == p0fo_kdb:
+#    if db == p0fo_kdb:
         # p0fo.fp: "Packet size MUST be wildcarded."
-        ss = '*'
+#        ss = '*'
     
     ooo = ""
     mss = -1
@@ -210,16 +210,17 @@ def packet2p0f(pkt):
         qq += "A"
     if qqT:
         qq += "T"
-    if db == p0fo_kdb:
-        if pkt.payload.flags & 0x20 != 0:
+#    if db == p0fo_kdb:
+#        if pkt.payload.flags & 0x20 != 0:
             # U
             # p0fo.fp: "PUSH flag is excluded from 'F' quirk checks"
-            qq += "F"
-    else:
-        if pkt.payload.flags & 0x28 != 0:
+#            qq += "F"
+#    else:
+#        if pkt.payload.flags & 0x28 != 0:
             # U or P
-            qq += "F"
-    if db != p0fo_kdb and not isinstance(pkt.payload.payload, NoPayload):
+    qq += "F"
+    #if db != p0fo_kdb and not isinstance(pkt.payload.payload, NoPayload):
+    if not isinstance(pkt.payload.payload, NoPayload):
         # p0fo.fp: "'D' quirk is not checked for."
         qq += "D"
     # FIXME : "!" - broken options segment: not handled yet
@@ -474,9 +475,9 @@ Some specifications of the p0f.fp file are not (yet) implemented."""
             elif qq == 'U': pkt.payload.urgptr = RandShort()
             elif qq == 'A': pkt.payload.ack = RandInt()
             elif qq == 'F':
-                if db == p0fo_kdb:
-                    pkt.payload.flags |= 0x20 # U
-                else:
+                #if db == p0fo_kdb:
+                #    pkt.payload.flags |= 0x20 # U
+                #else:
                     pkt.payload.flags |= RandChoice(8, 32, 40) #P / U / PU
             elif qq == 'D' and db != p0fo_kdb:
                 pkt /= conf.raw_layer(load=RandString(random.randint(1, 10))) # XXX p0fo.fp
