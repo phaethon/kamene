@@ -18,6 +18,20 @@ On all OS except Linux libpcap should be installed for sending and receiving pac
 
 ## Basic usage
 
+*N.B.! As a difference from scapy for python2, use bytes() instead of str() when converting packet to bytes. Also, most arguments expect bytes value instead of str value except the ones, which are naturally suited for human input (e.g. domain name).*
+
+You can use scapy running scapy command or by importing scapy library from interactive python shell (python or ipython).
+Simple example that you can try from interactive shell:
+{% highlight python %}
+from scapy.all import *
+p = IP(dst = 'www.somesite.ex') / TCP(dport = 80) / Raw(b'Some raw bytes')
+# to see packet content as bytes use bytes(p) not str(p)
+sr1(p)
+{% endhighlight %}
+Notice `'www.somesite.ex'` as a string, and `b'Some raw bytes'` as bytes. Domain name is normal human input, thus it is string, raw packet content is byte data. Once you start using, it will seem easier than in looks.
+
+Use ls() to list all supported layers. Use lsc() to list all commands.
+
 ## Compatibility
 
 All commands listed by lsc() should work. Tested layers are:

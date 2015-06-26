@@ -83,6 +83,20 @@ python3 setup.py install</code></pre></div>
 
 <h2 id="basic-usage">Basic usage</h2>
 
+<p><em>N.B.! As a difference from scapy for python2, use bytes() instead of str() when converting packet to bytes. Also, most arguments expect bytes value instead of str value except the ones, which are naturally suited for human input (e.g. domain name).</em></p>
+
+<p>You can use scapy running scapy command or by importing scapy library from interactive python shell (python or ipython).
+Simple example that you can try from interactive shell:</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">scapy.all</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">IP</span><span class="p">(</span><span class="n">dst</span> <span class="o">=</span> <span class="s">&#39;www.somesite.ex&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">TCP</span><span class="p">(</span><span class="n">dport</span> <span class="o">=</span> <span class="mi">80</span><span class="p">)</span> <span class="o">/</span> <span class="n">Raw</span><span class="p">(</span><span class="n">b</span><span class="s">&#39;Some raw bytes&#39;</span><span class="p">)</span>
+<span class="c"># to see packet content as bytes use bytes(p) not str(p)</span>
+<span class="n">sr1</span><span class="p">(</span><span class="n">p</span><span class="p">)</span></code></pre></div>
+
+<p>Notice <code>'www.somesite.ex'</code> as a string, and <code>b'Some raw bytes'</code> as bytes. Domain name is normal human input, thus it is string, raw packet content is byte data. Once you start using, it will seem easier than in looks.</p>
+
+<p>Use ls() to list all supported layers. Use lsc() to list all commands.</p>
+
 <h2 id="compatibility">Compatibility</h2>
 
 <p>All commands listed by lsc() should work. Tested layers are:</p>
