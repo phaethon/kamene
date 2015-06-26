@@ -91,7 +91,7 @@ def p0f_selectdb(flags):
 
 def packet2p0f(pkt):
     pkt = pkt.copy()
-    pkt = pkt.__class__(str(pkt))
+    pkt = pkt.__class__(bytes(pkt))
     while pkt.haslayer(IP) and pkt.haslayer(TCP):
         pkt = pkt.getlayer(IP)
         if isinstance(pkt.payload, TCP):
