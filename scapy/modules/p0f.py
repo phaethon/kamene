@@ -57,7 +57,7 @@ class p0fKnowledgeBase(KnowledgeBase):
                     if x.isdigit():
                         return int(x)
                     return x
-                li = map(a2i, l[1:4])
+                li = [ a2i(i) for i in l[1:4] ]
                 #if li[0] not in self.ttl_range:
                 #    self.ttl_range.append(li[0])
                 #    self.ttl_range.sort()
@@ -288,7 +288,7 @@ def prnp0f(pkt):
     except:
         return
     if r == []:
-        r = ("UNKNOWN", "[" + ":".join(map(str, packet2p0f(pkt)[1])) + ":?:?]", None)
+        r = ("UNKNOWN", "[" + ":".join([ str(i) for i in packet2p0f(pkt)[1]]) + ":?:?]", None)
     else:
         r = r[0]
     uptime = None
@@ -300,7 +300,7 @@ def prnp0f(pkt):
         uptime = None
     res = pkt.sprintf("%IP.src%:%TCP.sport% - " + r[0] + " " + r[1])
     if uptime is not None:
-        res += pkt.sprintf(" (up: " + str(uptime/3600) + " hrs)\n  -> %IP.dst%:%TCP.dport% (%TCP.flags%)")
+        res += pkt.sprintf(" (up: " + str(uptime//3600) + " hrs)\n  -> %IP.dst%:%TCP.dport% (%TCP.flags%)")
     else:
         res += pkt.sprintf("\n  -> %IP.dst%:%TCP.dport% (%TCP.flags%)")
     if r[2] is not None:
