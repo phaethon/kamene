@@ -1019,7 +1019,7 @@ A side effect is that, to obtain "{" and "}" characters, you must use
 
     def decode_payload_as(self,cls):
         """Reassembles the payload and decode it using another packet class"""
-        s = str(self.payload)
+        s = bytes(self.payload)
         self.payload = cls(s, _internal=1, _underlayer=self)
         pp = self
         while pp.underlayer is not None:
