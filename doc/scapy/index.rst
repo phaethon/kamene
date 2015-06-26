@@ -11,6 +11,8 @@ Welcome to Scapy's documentation!
 This document is under a `Creative Commons Attribution - Non-Commercial 
 - Share Alike 2.5 <http://creativecommons.org/licenses/by-nc-sa/2.5/>`_ license.
 
+The document is under review to update from scapy to scapy3k. Some code samples may not work directly with scapy3k - usually change of str() to bytes() or 'some string' to b'some string' fixes the problem.
+
 .. toctree::
    :maxdepth: 2
    
