@@ -14,7 +14,10 @@ There are several new features compared to classic scapy:
 * some bugs fixed, which are still present in original scapy
 
 ## Installation
+
 Install with 'python3 setup.py install' from source tree (get it with `git clone https://github.com/phaethon/scapy.git`) or `pip3 install scapy-python3` for latest published version.
+
+On all OS except Linux libpcap should be installed for sending and receiving packets (not python modules - just C libraries). libdnet is recommended for sending packets, without libdnet packets will be sent by libpcap, which is limited. Also, netifaces module can be used for alternative and possibly cleaner way to determine local addresses.
 
 ## Usage
 
@@ -61,7 +64,6 @@ All commands listed by lsc() should work. Tested layers are:
 
 Currently, works on Linux, Darwin, Unix and co. Using python 3.4 on Ubuntu and FreeBSD for testing. Windows support in progress.
 
-On all OS except Linux libpcap should be installed for sending and receiving packets (not python modules - just C libraries). libdnet is recommended for sending packets, without libdnet packets will be sent by libpcap, which is limited. Also, netifaces module can be used for alternative and possibly cleaner way to determine local addresses.
 
 ## Short cookbook
 
