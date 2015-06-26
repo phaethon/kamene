@@ -27,11 +27,11 @@ You can use scapy running scapy command or by importing scapy library from inter
 Simple example that you can try from interactive shell:
 ```python
 from scapy.all import *
-p = IP(dst = 'www.google.com') / TCP(dport = 80) / Raw(b'Some raw bytes')
+p = IP(dst = 'www.somesite.ex') / TCP(dport = 80) / Raw(b'Some raw bytes')
 # to see packet content as bytes use bytes(p) not str(p)
 sr1(p)
 ```
-Notice `'www.google.com'` as a string, and `b'Some raw bytes'` as bytes. Domain name is normal human input, thus it is string, raw packet content is byte data. Once you start using, it will seem easier than in looks.
+Notice `'www.somesite.ex'` as a string, and `b'Some raw bytes'` as bytes. Domain name is normal human input, thus it is string, raw packet content is byte data. Once you start using, it will seem easier than in looks.
 
 Use ls() to list all supported layers. Use lsc() to list all commands.
 
