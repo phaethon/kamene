@@ -36,6 +36,7 @@ def get_temp_file(keep=False, autoext=""):
     return fname
 
 def str2bytes(x):
+  """Convert input argument to bytes"""
   if type(x) is bytes:
     return x
   elif type(x) is str:
@@ -488,7 +489,7 @@ def load_object(fname):
 
 @conf.commands.register
 def corrupt_bytes(s, p=0.01, n=None):
-    """Corrupt a given percentage or number of bytes from a string"""
+    """Corrupt a given percentage or number of bytes from bytes"""
     s = str2bytes(s)
     s = array.array("B",s)
     l = len(s)
@@ -500,12 +501,12 @@ def corrupt_bytes(s, p=0.01, n=None):
 
 @conf.commands.register
 def corrupt_bits(s, p=0.01, n=None):
-    """Flip a given percentage or number of bits from a string"""
+    """Flip a given percentage or number of bits from bytes"""
     s = str2bytes(s)
     s = array.array("B",s)
     l = len(s)*8
     if n is None:
-        n = max(1,int(l*p))
+        n = max(1, int(l*p))
     for i in random.sample(range(l), n):
         s[i//8] ^= 1 << (i%8)
     return s.tobytes()

@@ -665,9 +665,9 @@ class CorruptedBytes(VolatileValue):
         self.p = p
         self.n = n
     def _fix(self):
-        return corrupt_bytes(self.s, self.p, self.n)
+        return corrupt_bytes(self.s, p = self.p, n = self.n)
 
 class CorruptedBits(CorruptedBytes):
     def _fix(self):
-        return corrupt_bits(self.s, self.p, self.n)
+        return corrupt_bits(self.s, p = self.p, n = self.n)
 
