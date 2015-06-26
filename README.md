@@ -6,7 +6,7 @@ Please, submit all issues https://github.com/phaethon/scapy preferrably with .pc
 [winpcapy.py by Massimo Ciani] (https://code.google.com/p/winpcapy/) integrated inside code.
 
 ## News
-[Follow @scapy3k](https://twitter.com/scapy3k) for recent news.
+[Follow @scapy3k](https://twitter.com/scapy3k) and/or see [scapy3k](https://phaethon.github.io/scapy) for recent news.
 
 There are several new features compared to classic scapy:
 * Reading PCAP Next Generation (PCAPNG) files (please, add issues on GitHub for block types and options, which need support. Currently, reading packets only from Enhanced Packet Block)
@@ -66,6 +66,8 @@ Currently, works on Linux, Darwin, Unix and co. Using python 3.4 on Ubuntu and F
 
 
 ## Short cookbook
+
+More examples will be posted at [scapy3k](https://phaethon.github.io/scapy)
 
 ### Reading huge pcap file
 rdpcap reads whole pcap file into memory. If you need to process huge file and perform some operation per packet or calculate some statistics, you can use PcapReader with iterator interface.
