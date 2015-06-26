@@ -320,10 +320,10 @@ noenum    : holds list of enum fields for which conversion to string should NOT 
 AS_resolver: choose the AS resolver class to use
 extensions_paths: path or list of paths where extensions are to be looked for
 """
-    version = "2.3.1"
+    version = "3.0.0"
     session = ""
     interactive = False
-    interactive_shell = ""
+    interactive_shell = "ipython"
     stealth = "not implemented"
     iface = None
     readfunc = None
