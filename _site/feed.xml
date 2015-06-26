@@ -6,13 +6,13 @@
 </description>
     <link>https://phaethon.github.io/scapy/</link>
     <atom:link href="https://phaethon.github.io/scapy/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Fri, 26 Jun 2015 16:26:49 +0300</pubDate>
-    <lastBuildDate>Fri, 26 Jun 2015 16:26:49 +0300</lastBuildDate>
+    <pubDate>Fri, 26 Jun 2015 16:59:13 +0300</pubDate>
+    <lastBuildDate>Fri, 26 Jun 2015 16:59:13 +0300</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
         <title>Decoding a packet using tshark</title>
-        <description>&lt;p&gt;Sometime you want to have tshark to decode the packet (e.g. to test and compare results or if a layer is not supported in scapy). There is a command &lt;code&gt;tdecode&lt;/code&gt; to do this.&lt;/p&gt;
+        <description>&lt;p&gt;Sometime you want to have tshark to decode the packet (e.g. to test and compare results or if a layer is not supported in scapy). There is a command &lt;code&gt;tdecode&lt;/code&gt; to do this. Try this from an interactive session.&lt;/p&gt;
 
 &lt;p&gt;Usage is very simple: &lt;code&gt;tdecode(pkt)&lt;/code&gt;&lt;/p&gt;
 </description>

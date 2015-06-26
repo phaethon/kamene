@@ -4,6 +4,6 @@ title:  "Decoding a packet using tshark"
 date:   2015-06-26 14:37:54
 categories: cookbook
 ---
-Sometime you want to have tshark to decode the packet (e.g. to test and compare results or if a layer is not supported in scapy). There is a command `tdecode` to do this.
+Sometime you want to have tshark to decode the packet (e.g. to test and compare results or if a layer is not supported in scapy). There is a command `tdecode` to do this. Try this from an interactive session.
 
 Usage is very simple: `tdecode(pkt)`
