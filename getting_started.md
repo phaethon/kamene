@@ -32,6 +32,8 @@ Notice `'www.somesite.ex'` as a string, and `b'Some raw bytes'` as bytes. Domain
 
 Use ls() to list all supported layers. Use lsc() to list all commands.
 
+Additional examples in [API documentation]({{ "/api/" | prepend: site.baseurl }})
+
 ## Compatibility
 
 All commands listed by lsc() should work. Tested layers are:
