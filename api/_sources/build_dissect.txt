@@ -2,6 +2,10 @@
 Adding new protocols
 ********************
 
+.. note::
+
+   This section has not been updated for scapy3k yet. Code examples may not work directly. Try bytes() instead of str() and b'string' instead of b'somestring'.
+
 Adding new protocol (or more correctly: a new *layer*) in Scapy is very easy. All the magic is in the fields. If the 
 fields you need are already there and the protocol is not too brain-damaged, 
 this should be a matter of minutes. 

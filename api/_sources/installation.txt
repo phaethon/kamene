@@ -91,6 +91,8 @@ Optional software for special features
       >>> dec=Dot11PacketList(enc).toEthernet()
       >>> dec.show()
       >>> dec[0]
+
+* ipython. For interactive sessions using ipython can be great advantage. Install using pip3
  
 Platform-specific instructions
 ==============================
@@ -110,13 +112,13 @@ Debian/Ubuntu
 
 Just use the standard packages::
 
-$ sudo apt-get install tcpdump python3-crypto 
+$ sudo apt-get install tcpdump python3-crypto ipython3
 
 
 Mac OS X
 --------
 
-This section needs updating...
+This section needs updating. In general installing python3, pip for python3, libpcap, libdnet, scapy3k using pip package scapy-python3 should do the job. Corrections are welcome...
 
 
 Windows

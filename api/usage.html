@@ -51,21 +51,16 @@
             
   <div class="section" id="usage">
 <h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This section has not been updated for scapy3k yet. Code examples may not work directly. Try bytes() instead of str() and b&#8217;string&#8217; instead of b&#8217;somestring&#8217;.</p>
+</div>
 <div class="section" id="starting-scapy">
 <h2>Starting Scapy<a class="headerlink" href="#starting-scapy" title="Permalink to this headline">¶</a></h2>
 <p>Scapy&#8217;s interactive shell is run in a terminal session. Root privileges are needed to
 send the packets, so we&#8217;re using <tt class="docutils literal"><span class="pre">sudo</span></tt> here:</p>
 <div class="highlight-python"><div class="highlight"><pre>$ sudo scapy
-Welcome to Scapy (2.0.1-dev)
-&gt;&gt;&gt;
-</pre></div>
-</div>
-<p>On Windows, please open a command prompt (<tt class="docutils literal"><span class="pre">cmd.exe</span></tt>) and make sure that you have
-administrator privileges:</p>
-<div class="highlight-python"><div class="highlight"><pre>C:\&gt;scapy
-INFO: No IPv6 support in kernel
-WARNING: No route found for IPv6 destination :: (no default route?)
-Welcome to Scapy (2.0.1-dev)
+Welcome to Scapy (3.0.0)
 &gt;&gt;&gt;
 </pre></div>
 </div>
@@ -111,7 +106,7 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 <span class="go">&lt;IP frag=0 proto=TCP |&lt;TCP |&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Ether</span><span class="p">()</span><span class="o">/</span><span class="n">IP</span><span class="p">()</span><span class="o">/</span><span class="n">TCP</span><span class="p">()</span>
 <span class="go">&lt;Ether type=0x800 |&lt;IP frag=0 proto=TCP |&lt;TCP |&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">IP</span><span class="p">()</span><span class="o">/</span><span class="n">TCP</span><span class="p">()</span><span class="o">/</span><span class="s">&quot;GET / HTTP/1.0</span><span class="se">\r\n\r\n</span><span class="s">&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">IP</span><span class="p">()</span><span class="o">/</span><span class="n">TCP</span><span class="p">()</span><span class="o">/</span><span class="n">b</span><span class="s">&quot;GET / HTTP/1.0</span><span class="se">\r\n\r\n</span><span class="s">&quot;</span>
 <span class="go">&lt;IP frag=0 proto=TCP |&lt;TCP |&lt;Raw load=&#39;GET / HTTP/1.0\r\n\r\n&#39; |&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Ether</span><span class="p">()</span><span class="o">/</span><span class="n">IP</span><span class="p">()</span><span class="o">/</span><span class="n">IP</span><span class="p">()</span><span class="o">/</span><span class="n">UDP</span><span class="p">()</span>
 <span class="go">&lt;Ether type=0x800 |&lt;IP frag=0 proto=IP |&lt;IP frag=0 proto=UDP |&lt;UDP |&gt;&gt;&gt;&gt;</span>
@@ -121,12 +116,12 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 </div>
 <a class="reference internal image-reference" href="_images/fieldsmanagement.png"><img alt="_images/fieldsmanagement.png" src="_images/fieldsmanagement.png" style="width: 779.4px; height: 181.8px;" /></a>
 <p>Each packet can be build or dissected (note: in Python <tt class="docutils literal"><span class="pre">_</span></tt> (underscore) is the latest result):</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">str</span><span class="p">(</span><span class="n">IP</span><span class="p">())</span>
-<span class="go">&#39;E\x00\x00\x14\x00\x01\x00\x00@\x00|\xe7\x7f\x00\x00\x01\x7f\x00\x00\x01&#39;</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">bytes</span><span class="p">(</span><span class="n">IP</span><span class="p">())</span>
+<span class="go">b&#39;E\x00\x00\x14\x00\x01\x00\x00@\x00|\xe7\x7f\x00\x00\x01\x7f\x00\x00\x01&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">IP</span><span class="p">(</span><span class="n">_</span><span class="p">)</span>
-<span class="go">&lt;IP version=4L ihl=5L tos=0x0 len=20 id=1 flags= frag=0L ttl=64 proto=IP</span>
+<span class="go">&lt;IP version=4 ihl=5 tos=0x0 len=20 id=1 flags= frag=0 ttl=64 proto=IP</span>
 <span class="go"> chksum=0x7ce7 src=127.0.0.1 dst=127.0.0.1 |&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span> <span class="n">a</span><span class="o">=</span><span class="n">Ether</span><span class="p">()</span><span class="o">/</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s">&quot;www.slashdot.org&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">()</span><span class="o">/</span><span class="s">&quot;GET /index.html HTTP/1.0 </span><span class="se">\n\n</span><span class="s">&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span> <span class="n">a</span><span class="o">=</span><span class="n">Ether</span><span class="p">()</span><span class="o">/</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s">&quot;www.slashdot.org&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">()</span><span class="o">/</span><span class="n">b</span><span class="s">&quot;GET /index.html HTTP/1.0 </span><span class="se">\n\n</span><span class="s">&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span> <span class="n">hexdump</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 <span class="go">00 02 15 37 A2 44 00 AE F3 52 AA D1 08 00 45 00  ...7.D...R....E.</span>
 <span class="go">00 43 00 01 00 00 40 06 78 3C C0 A8 05 15 42 23  .C....@.x&lt;....B#</span>
@@ -134,17 +129,17 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 <span class="go">20 00 BB 39 00 00 47 45 54 20 2F 69 6E 64 65 78   ..9..GET /index</span>
 <span class="go">2E 68 74 6D 6C 20 48 54 54 50 2F 31 2E 30 20 0A  .html HTTP/1.0 .</span>
 <span class="go">0A                                               .</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span>
-<span class="go">&#39;\x00\x02\x157\xa2D\x00\xae\xf3R\xaa\xd1\x08\x00E\x00\x00C\x00\x01\x00\x00@\x06x&lt;\xc0</span>
+<span class="go">b&#39;\x00\x02\x157\xa2D\x00\xae\xf3R\xaa\xd1\x08\x00E\x00\x00C\x00\x01\x00\x00@\x06x&lt;\xc0</span>
 <span class="go"> \xa8\x05\x15B#\xfa\x97\x00\x14\x00P\x00\x00\x00\x00\x00\x00\x00\x00P\x02 \x00</span>
 <span class="go"> \xbb9\x00\x00GET /index.html HTTP/1.0 \n\n&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">=</span><span class="n">Ether</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">c</span>
 <span class="go">&lt;Ether dst=00:02:15:37:a2:44 src=00:ae:f3:52:aa:d1 type=0x800 |&lt;IP version=4L</span>
-<span class="go"> ihl=5L tos=0x0 len=67 id=1 flags= frag=0L ttl=64 proto=TCP chksum=0x783c</span>
-<span class="go"> src=192.168.5.21 dst=66.35.250.151 options=&#39;&#39; |&lt;TCP sport=20 dport=80 seq=0L</span>
-<span class="go"> ack=0L dataofs=5L reserved=0L flags=S window=8192 chksum=0xbb39 urgptr=0</span>
+<span class="go"> ihl=5 tos=0x0 len=67 id=1 flags= frag=0 ttl=64 proto=TCP chksum=0x783c</span>
+<span class="go"> src=192.168.5.21 dst=66.35.250.151 options=&#39;&#39; |&lt;TCP sport=20 dport=80 seq=0</span>
+<span class="go"> ack=0 dataofs=5 reserved=0 flags=S window=8192 chksum=0xbb39 urgptr=0</span>
 <span class="go"> options=[] |&lt;Raw load=&#39;GET /index.html HTTP/1.0 \n\n&#39; |&gt;&gt;&gt;&gt;</span>
 </pre></div>
 </div>
@@ -168,11 +163,14 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 </div>
 <div class="section" id="graphical-dumps-pdf-ps">
 <h3>Graphical dumps (PDF, PS)<a class="headerlink" href="#graphical-dumps-pdf-ps" title="Permalink to this headline">¶</a></h3>
-<p id="index-1">If you have PyX installed, you can make a graphical PostScript/PDF dump of a packet or a list of packets (see the ugly PNG image below. PostScript/PDF are far better quality...):</p>
+<ul id="index-1">
+<li><p class="first">N.B.! Not tested on scapy3k * If you have PyX installed, you can make a graphical PostScript/PDF dump of a packet or a list of packets (see the ugly PNG image below. PostScript/PDF are far better quality...):</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">[</span><span class="mi">423</span><span class="p">]</span><span class="o">.</span><span class="n">pdfdump</span><span class="p">(</span><span class="n">layer_shift</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">[</span><span class="mi">423</span><span class="p">]</span><span class="o">.</span><span class="n">psdump</span><span class="p">(</span><span class="s">&quot;/tmp/isakmp_pkt.eps&quot;</span><span class="p">,</span><span class="n">layer_shift</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
+</li>
+</ul>
 <img alt="_images/isakmp_dump.png" src="_images/isakmp_dump.png" />
 <table border="1" class="docutils">
 <colgroup>
@@ -185,7 +183,7 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td>str(pkt)</td>
+<tr class="row-even"><td>bytes(pkt)</td>
 <td>assemble the packet</td>
 </tr>
 <tr class="row-odd"><td>hexdump(pkt)</td>
@@ -326,31 +324,30 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 <div class="section" id="send-and-receive-packets-sr">
 <h3>Send and receive packets (sr)<a class="headerlink" href="#send-and-receive-packets-sr" title="Permalink to this headline">¶</a></h3>
 <p id="index-4">Now, let&#8217;s try to do some fun things. The sr() function is for sending packets and receiving answers. The function returns a couple of packet and answers, and the unanswered packets. The function sr1() is a variant that only return one packet that answered the packet (or the packet set) sent. The packets must be layer 3 packets (IP, ARP, etc.). The function srp() do the same for layer 2 packets (Ethernet, 802.3, etc.).</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">=</span><span class="n">sr1</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s">&quot;www.slashdot.org&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">()</span><span class="o">/</span><span class="s">&quot;XXXXXXXXXXX&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">=</span><span class="n">sr1</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s">&quot;www.slashdot.org&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">()</span><span class="o">/</span><span class="n">b</span><span class="s">&quot;XXXXXXXXXXX&quot;</span><span class="p">)</span>
 <span class="go">Begin emission:</span>
 <span class="go">...Finished to send 1 packets.</span>
 <span class="go">.*</span>
 <span class="go">Received 5 packets, got 1 answers, remaining 0 packets</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">p</span>
-<span class="go">&lt;IP version=4L ihl=5L tos=0x0 len=39 id=15489 flags= frag=0L ttl=42 proto=ICMP</span>
+<span class="go">&lt;IP version=4 ihl=5 tos=0x0 len=39 id=15489 flags= frag=0 ttl=42 proto=ICMP</span>
 <span class="go"> chksum=0x51dd src=66.35.250.151 dst=192.168.5.21 options=&#39;&#39; |&lt;ICMP type=echo-reply</span>
-<span class="go"> code=0 chksum=0xee45 id=0x0 seq=0x0 |&lt;Raw load=&#39;XXXXXXXXXXX&#39;</span>
-<span class="go"> |&lt;Padding load=&#39;\x00\x00\x00\x00&#39; |&gt;&gt;&gt;&gt;</span>
+<span class="go"> code=0 chksum=0xee45 id=0x0 seq=0x0 |&lt;Raw load=&#39;XXXXXXXXXXX&#39;|&gt;&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="go">---[ IP ]---</span>
-<span class="go">version   = 4L</span>
-<span class="go">ihl       = 5L</span>
+<span class="go">version   = 4</span>
+<span class="go">ihl       = 5</span>
 <span class="go">tos       = 0x0</span>
 <span class="go">len       = 39</span>
 <span class="go">id        = 15489</span>
 <span class="go">flags     =</span>
-<span class="go">frag      = 0L</span>
+<span class="go">frag      = 0</span>
 <span class="go">ttl       = 42</span>
 <span class="go">proto     = ICMP</span>
 <span class="go">chksum    = 0x51dd</span>
 <span class="go">src       = 66.35.250.151</span>
 <span class="go">dst       = 192.168.5.21</span>
-<span class="go">options   = &#39;&#39;</span>
+<span class="go">\options\</span>
 <span class="go">---[ ICMP ]---</span>
 <span class="go">   type      = echo-reply</span>
 <span class="go">   code      = 0</span>
@@ -369,9 +366,9 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 <span class="go">Finished to send 1 packets.</span>
 <span class="go">..*</span>
 <span class="go">Received 3 packets, got 1 answers, remaining 0 packets</span>
-<span class="go">&lt;IP version=4L ihl=5L tos=0x0 len=78 id=0 flags=DF frag=0L ttl=64 proto=UDP chksum=0xaf38</span>
+<span class="go">&lt;IP version=4 ihl=5 tos=0x0 len=78 id=0 flags=DF frag=0 ttl=64 proto=UDP chksum=0xaf38</span>
 <span class="go"> src=192.168.5.1 dst=192.168.5.21 options=&#39;&#39; |&lt;UDP sport=53 dport=53 len=58 chksum=0xd55d</span>
-<span class="go"> |&lt;DNS id=0 qr=1L opcode=QUERY aa=0L tc=0L rd=1L ra=1L z=0L rcode=ok qdcount=1 ancount=1</span>
+<span class="go"> |&lt;DNS id=0 qr=1 opcode=QUERY aa=0L tc=0L rd=1 ra=1 z=0L rcode=ok qdcount=1 ancount=1</span>
 <span class="go"> nscount=0 arcount=0 qd=&lt;DNSQR qname=&#39;www.slashdot.org.&#39; qtype=A qclass=IN |&gt;</span>
 <span class="go"> an=&lt;DNSRR rrname=&#39;www.slashdot.org.&#39; type=A rclass=IN ttl=3560L rdata=&#39;66.35.250.151&#39; |&gt;</span>
 <span class="go"> ns=0 ar=0 |&lt;Padding load=&#39;\xc6\x94\xc7\xeb&#39; |&gt;&gt;&gt;&gt;</span>
@@ -413,9 +410,9 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 .Finished to send 1 packets.
 *
 Received 2 packets, got 1 answers, remaining 0 packets
-&lt;IP  version=4L ihl=5L tos=0x20 len=44 id=33529 flags= frag=0L ttl=244
+&lt;IP  version=4 ihl=5L tos=0x20 len=44 id=33529 flags= frag=0 ttl=244
 proto=TCP chksum=0x6a34 src=72.14.207.99 dst=192.168.1.100 options=// |
-&lt;TCP  sport=www dport=ftp-data seq=2487238601L ack=1 dataofs=6L reserved=0L
+&lt;TCP  sport=www dport=ftp-data seq=2487238601 ack=1 dataofs=6 reserved=0
 flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 &lt;Padding  load=&#39;V\xf7&#39; |&gt;&gt;&gt;
 </pre></div>
@@ -569,8 +566,8 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 <span class="go">0000 Ether / IP / ICMP 192.168.5.21 echo-request 0 / Raw</span>
 <span class="go">0001 Ether / IP / ICMP 192.168.5.21 echo-request 0 / Raw</span>
 <span class="gp">&gt;&gt;&gt; </span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-<span class="go">&lt;Ether dst=00:ae:f3:52:aa:d1 src=00:02:15:37:a2:44 type=0x800 |&lt;IP version=4L</span>
-<span class="go"> ihl=5L tos=0x0 len=84 id=0 flags=DF frag=0L ttl=64 proto=ICMP chksum=0x3831</span>
+<span class="go">&lt;Ether dst=00:ae:f3:52:aa:d1 src=00:02:15:37:a2:44 type=0x800 |&lt;IP version=4</span>
+<span class="go"> ihl=5 tos=0x0 len=84 id=0 flags=DF frag=0 ttl=64 proto=ICMP chksum=0x3831</span>
 <span class="go"> src=192.168.5.21 dst=66.35.250.151 options=&#39;&#39; |&lt;ICMP type=echo-request code=0</span>
 <span class="go"> chksum=0x6571 id=0x8745 seq=0x0 |&lt;Raw load=&#39;B\xf7g\xda\x00\x07um\x08\t\n\x0b</span>
 <span class="go"> \x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d</span>
@@ -598,13 +595,13 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 <span class="go">src       = 00:02:15:37:a2:44</span>
 <span class="go">type      = 0x800</span>
 <span class="go">---[ IP ]---</span>
-<span class="go">   version   = 4L</span>
-<span class="go">   ihl       = 5L</span>
+<span class="go">   version   = 4</span>
+<span class="go">   ihl       = 5</span>
 <span class="go">   tos       = 0x0</span>
 <span class="go">   len       = 84</span>
 <span class="go">   id        = 0</span>
 <span class="go">   flags     = DF</span>
-<span class="go">   frag      = 0L</span>
+<span class="go">   frag      = 0</span>
 <span class="go">   ttl       = 64</span>
 <span class="go">   proto     = ICMP</span>
 <span class="go">   chksum    = 0x3831</span>
@@ -669,11 +666,11 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 </div>
 <p>We can sniff and do passive OS fingerprinting:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span>
-<span class="go">&lt;Ether dst=00:10:4b:b3:7d:4e src=00:40:33:96:7b:60 type=0x800 |&lt;IP version=4L</span>
-<span class="go"> ihl=5L tos=0x0 len=60 id=61681 flags=DF frag=0L ttl=64 proto=TCP chksum=0xb85e</span>
+<span class="go">&lt;Ether dst=00:10:4b:b3:7d:4e src=00:40:33:96:7b:60 type=0x800 |&lt;IP version=4</span>
+<span class="go"> ihl=5 tos=0x0 len=60 id=61681 flags=DF frag=0 ttl=64 proto=TCP chksum=0xb85e</span>
 <span class="go"> src=192.168.8.10 dst=192.168.8.1 options=&#39;&#39; |&lt;TCP sport=46511 dport=80</span>
-<span class="go"> seq=2023566040L ack=0L dataofs=10L reserved=0L flags=SEC window=5840</span>
-<span class="go"> chksum=0x570c urgptr=0 options=[(&#39;Timestamp&#39;, (342940201L, 0L)), (&#39;MSS&#39;, 1460),</span>
+<span class="go"> seq=2023566040 ack=0 dataofs=10 reserved=0 flags=SEC window=5840</span>
+<span class="go"> chksum=0x570c urgptr=0 options=[(&#39;Timestamp&#39;, (342940201L, 0)), (&#39;MSS&#39;, 1460),</span>
 <span class="go"> (&#39;NOP&#39;, ()), (&#39;SAckOK&#39;, &#39;&#39;), (&#39;WScale&#39;, 0)] |&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">load_module</span><span class="p">(</span><span class="s">&quot;p0f&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">p0f</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
@@ -779,8 +776,8 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 <span class="go">0050   26 27 28 29 2A 2B 2C 2D  2E 2F 30 31 32 33 34 35   &amp;&#39;()*+,-./012345</span>
 <span class="go">0060   36 37                                              67</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pkt_hex</span>
-<span class="go">&lt;Ether  dst=00:50:56:fc:ce:50 src=00:0c:29:2b:53:19 type=0x800 |&lt;IP  version=4L</span>
-<span class="go">ihl=5L tos=0x0 len=84 id=0 flags=DF frag=0L ttl=64 proto=icmp chksum=0x5a7c</span>
+<span class="go">&lt;Ether  dst=00:50:56:fc:ce:50 src=00:0c:29:2b:53:19 type=0x800 |&lt;IP  version=4</span>
+<span class="go">ihl=5 tos=0x0 len=84 id=0 flags=DF frag=0 ttl=64 proto=icmp chksum=0x5a7c</span>
 <span class="go">src=192.168.25.130 dst=4.2.2.1 options=&#39;&#39; |&lt;ICMP  type=echo-request code=0</span>
 <span class="go">chksum=0x9c90 id=0x5a61 seq=0x1 |&lt;Raw  load=&#39;\xe6\xdapI\xb6\xe5\x08\x00\x08\t\n</span>
 <span class="go">\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e</span>
@@ -790,7 +787,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 </div>
 <div class="section" id="hex-string">
 <h4>Hex string<a class="headerlink" href="#hex-string" title="Permalink to this headline">¶</a></h4>
-<p>You can also convert entire packet into a hex string using the <tt class="docutils literal"><span class="pre">str()</span></tt> function:</p>
+<p>You can also convert entire packet into a hex string using the <tt class="docutils literal"><span class="pre">bytes()</span></tt> function:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">pkts</span> <span class="o">=</span> <span class="n">sniff</span><span class="p">(</span><span class="n">count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pkt</span> <span class="o">=</span> <span class="n">pkts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pkt</span>
@@ -800,9 +797,9 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 <span class="go">chksum=0x9c90 id=0x5a61 seq=0x1 |&lt;Raw  load=&#39;\xe6\xdapI\xb6\xe5\x08\x00\x08\t\n</span>
 <span class="go">\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e</span>
 <span class="go">\x1f !&quot;#$%&amp;\&#39;()*+,-./01234567&#39; |&gt;&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pkt_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pkt</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pkt_str</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">pkt</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pkt_str</span>
-<span class="go">&#39;\x00PV\xfc\xceP\x00\x0c)+S\x19\x08\x00E\x00\x00T\x00\x00@\x00@\x01Z|\xc0\xa8</span>
+<span class="go">b&#39;\x00PV\xfc\xceP\x00\x0c)+S\x19\x08\x00E\x00\x00T\x00\x00@\x00@\x01Z|\xc0\xa8</span>
 <span class="go">\x19\x82\x04\x02\x02\x01\x08\x00\x9c\x90Za\x00\x01\xe6\xdapI\xb6\xe5\x08\x00</span>
 <span class="go">\x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b</span>
 <span class="go">\x1c\x1d\x1e\x1f !&quot;#$%&amp;\&#39;()*+,-./01234567&#39;</span>
@@ -830,7 +827,8 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 <span class="go">chksum=0x9c90 id=0x5a61 seq=0x1 |&lt;Raw  load=&#39;\xe6\xdapI\xb6\xe5\x08\x00\x08\t\n</span>
 <span class="go">\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f</span>
 <span class="go">!&quot;#$%&amp;\&#39;()*+,-./01234567&#39; |&gt;&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">export_object</span><span class="p">(</span><span class="n">pkt</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">exported_string</span> <span class="o">=</span> <span class="n">export_object</span><span class="p">(</span><span class="n">pkt</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">exported_string</span><span class="p">)</span>
 <span class="go">eNplVwd4FNcRPt2dTqdTQ0JUUYwN+CgS0gkJONFEs5WxFDB+CdiI8+pupVl0d7uzRUiYtcEGG4ST</span>
 <span class="go">OD1OnB6nN6c4cXrvwQmk2U5xA9tgO70XMm+1rA78qdzbfTP/lDfzz7tD4WwmU1C0YiaT2Gqjaiao</span>
 <span class="go">bMlhCrsUSYrYoKbmcxZFXSpPiohlZikm6ltb063ZdGpNOjWQ7mhPt62hChHJWTbFvb0O/u1MD2bT</span>
@@ -839,12 +837,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 </pre></div>
 </div>
 <p>The output above can be reimported back into Scapy using <tt class="docutils literal"><span class="pre">import_object()</span></tt>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">new_pkt</span> <span class="o">=</span> <span class="n">import_object</span><span class="p">()</span>
-<span class="go">eNplVwd4FNcRPt2dTqdTQ0JUUYwN+CgS0gkJONFEs5WxFDB+CdiI8+pupVl0d7uzRUiYtcEGG4ST</span>
-<span class="go">OD1OnB6nN6c4cXrvwQmk2U5xA9tgO70XMm+1rA78qdzbfTP/lDfzz7tD4WwmU1C0YiaT2Gqjaiao</span>
-<span class="go">bMlhCrsUSYrYoKbmcxZFXSpPiohlZikm6ltb063ZdGpNOjWQ7mhPt62hChHJWTbFvb0O/u1MD2bT</span>
-<span class="go">WZXXVCmi9pihUqI3FHdEQslriiVfWFTVT9VYpog6Q7fsjG0qRWtQNwsW1fRTrUg4xZxq5pUx1aS6</span>
-<span class="gp">...</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">new_pkt</span> <span class="o">=</span> <span class="n">import_object</span><span class="p">(</span><span class="n">exported_string</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">new_pkt</span>
 <span class="go">&lt;Ether  dst=00:50:56:fc:ce:50 src=00:0c:29:2b:53:19 type=0x800 |&lt;IP  version=4L</span>
 <span class="go">ihl=5L tos=0x0 len=84 id=0 flags=DF frag=0L ttl=64 proto=icmp chksum=0x5a7c</span>
@@ -1637,7 +1630,7 @@ only his own NIC’s IP are reachable with this TTL:</p>
     </div>
     <div class="footer">
         &copy; Copyright 2008, 2009 Philippe Biondi and the Scapy community.
-      Last updated on Jun 26, 2015.
+      Last updated on Jun 27, 2015.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>

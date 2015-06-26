@@ -2,6 +2,10 @@
 Troubleshooting
 ***************
 
+.. note::
+
+   This section has not been updated for scapy3k yet. Code examples may not work directly. Try bytes() instead of str() and b'string' instead of b'somestring'.
+
 FAQ
 ===
 

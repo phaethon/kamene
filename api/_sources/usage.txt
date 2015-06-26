@@ -2,6 +2,10 @@
 Usage
 *****
 
+.. note::
+
+   This section has not been updated for scapy3k yet. Code examples may not work directly. Try bytes() instead of str() and b'string' instead of b'somestring'.
+
 Starting Scapy
 ==============
 
@@ -9,17 +13,8 @@ Scapy's interactive shell is run in a terminal session. Root privileges are need
 send the packets, so we're using ``sudo`` here::
   
     $ sudo scapy
-    Welcome to Scapy (2.0.1-dev)
+    Welcome to Scapy (3.0.0)
     >>> 
-
-On Windows, please open a command prompt (``cmd.exe``) and make sure that you have 
-administrator privileges::
-
-    C:\>scapy
-    INFO: No IPv6 support in kernel
-    WARNING: No route found for IPv6 destination :: (no default route?)
-    Welcome to Scapy (2.0.1-dev)
-    >>>
 
 If you do not have all optional packages installed, Scapy will inform you that 
 some features will not be available:: 
@@ -71,7 +66,7 @@ The ``/`` operator has been used as a composition operator between two layers. W
     <IP frag=0 proto=TCP |<TCP |>>
     >>> Ether()/IP()/TCP()
     <Ether type=0x800 |<IP frag=0 proto=TCP |<TCP |>>>
-    >>> IP()/TCP()/"GET / HTTP/1.0\r\n\r\n"
+    >>> IP()/TCP()/b"GET / HTTP/1.0\r\n\r\n"
     <IP frag=0 proto=TCP |<TCP |<Raw load='GET / HTTP/1.0\r\n\r\n' |>>>
     >>> Ether()/IP()/IP()/UDP()
     <Ether type=0x800 |<IP frag=0 proto=IP |<IP frag=0 proto=UDP |<UDP |>>>>
@@ -84,12 +79,12 @@ The ``/`` operator has been used as a composition operator between two layers. W
 
 Each packet can be build or dissected (note: in Python ``_`` (underscore) is the latest result)::
 
-    >>> str(IP())
-    'E\x00\x00\x14\x00\x01\x00\x00@\x00|\xe7\x7f\x00\x00\x01\x7f\x00\x00\x01'
+    >>> bytes(IP())
+    b'E\x00\x00\x14\x00\x01\x00\x00@\x00|\xe7\x7f\x00\x00\x01\x7f\x00\x00\x01'
     >>> IP(_)
-    <IP version=4L ihl=5L tos=0x0 len=20 id=1 flags= frag=0L ttl=64 proto=IP
+    <IP version=4 ihl=5 tos=0x0 len=20 id=1 flags= frag=0 ttl=64 proto=IP
      chksum=0x7ce7 src=127.0.0.1 dst=127.0.0.1 |>
-    >>>  a=Ether()/IP(dst="www.slashdot.org")/TCP()/"GET /index.html HTTP/1.0 \n\n"
+    >>>  a=Ether()/IP(dst="www.slashdot.org")/TCP()/b"GET /index.html HTTP/1.0 \n\n"
     >>>  hexdump(a)   
     00 02 15 37 A2 44 00 AE F3 52 AA D1 08 00 45 00  ...7.D...R....E.
     00 43 00 01 00 00 40 06 78 3C C0 A8 05 15 42 23  .C....@.x<....B#
@@ -97,17 +92,17 @@ Each packet can be build or dissected (note: in Python ``_`` (underscore) is the
     20 00 BB 39 00 00 47 45 54 20 2F 69 6E 64 65 78   ..9..GET /index
     2E 68 74 6D 6C 20 48 54 54 50 2F 31 2E 30 20 0A  .html HTTP/1.0 .
     0A                                               .
-    >>> b=str(a)
+    >>> b=bytes(a)
     >>> b
-    '\x00\x02\x157\xa2D\x00\xae\xf3R\xaa\xd1\x08\x00E\x00\x00C\x00\x01\x00\x00@\x06x<\xc0
+    b'\x00\x02\x157\xa2D\x00\xae\xf3R\xaa\xd1\x08\x00E\x00\x00C\x00\x01\x00\x00@\x06x<\xc0
      \xa8\x05\x15B#\xfa\x97\x00\x14\x00P\x00\x00\x00\x00\x00\x00\x00\x00P\x02 \x00
      \xbb9\x00\x00GET /index.html HTTP/1.0 \n\n'
     >>> c=Ether(b)
     >>> c
     <Ether dst=00:02:15:37:a2:44 src=00:ae:f3:52:aa:d1 type=0x800 |<IP version=4L
-     ihl=5L tos=0x0 len=67 id=1 flags= frag=0L ttl=64 proto=TCP chksum=0x783c
-     src=192.168.5.21 dst=66.35.250.151 options='' |<TCP sport=20 dport=80 seq=0L
-     ack=0L dataofs=5L reserved=0L flags=S window=8192 chksum=0xbb39 urgptr=0
+     ihl=5 tos=0x0 len=67 id=1 flags= frag=0 ttl=64 proto=TCP chksum=0x783c
+     src=192.168.5.21 dst=66.35.250.151 options='' |<TCP sport=20 dport=80 seq=0
+     ack=0 dataofs=5 reserved=0 flags=S window=8192 chksum=0xbb39 urgptr=0
      options=[] |<Raw load='GET /index.html HTTP/1.0 \n\n' |>>>>
 
 We see that a dissected packet has all its fields filled. That's because I consider that each field has its value imposed by the original string. If this is too verbose, the method hide_defaults() will delete every field that has the same value as the default::
@@ -136,7 +131,7 @@ Graphical dumps (PDF, PS)
 .. index::
    single: pdfdump(), psdump()
 
-If you have PyX installed, you can make a graphical PostScript/PDF dump of a packet or a list of packets (see the ugly PNG image below. PostScript/PDF are far better quality...)::
+* N.B.! Not tested on scapy3k * If you have PyX installed, you can make a graphical PostScript/PDF dump of a packet or a list of packets (see the ugly PNG image below. PostScript/PDF are far better quality...)::
 
     >>> a[423].pdfdump(layer_shift=1)
     >>> a[423].psdump("/tmp/isakmp_pkt.eps",layer_shift=1)
@@ -148,7 +143,7 @@ If you have PyX installed, you can make a graphical PostScript/PDF dump of a pac
 =======================   ====================================================
 Command                   Effect
 =======================   ====================================================
-str(pkt)                  assemble the packet 
+bytes(pkt)                  assemble the packet 
 hexdump(pkt)              have an hexadecimal dump 
 ls(pkt)                   have the list of fields values 
 pkt.summary()             for a one-line summary 
@@ -260,31 +255,30 @@ Now, let's try to do some fun things. The sr() function is for sending packets a
 
 ::
 
-    >>> p=sr1(IP(dst="www.slashdot.org")/ICMP()/"XXXXXXXXXXX")
+    >>> p=sr1(IP(dst="www.slashdot.org")/ICMP()/b"XXXXXXXXXXX")
     Begin emission:
     ...Finished to send 1 packets.
     .*
     Received 5 packets, got 1 answers, remaining 0 packets
     >>> p
-    <IP version=4L ihl=5L tos=0x0 len=39 id=15489 flags= frag=0L ttl=42 proto=ICMP
+    <IP version=4 ihl=5 tos=0x0 len=39 id=15489 flags= frag=0 ttl=42 proto=ICMP
      chksum=0x51dd src=66.35.250.151 dst=192.168.5.21 options='' |<ICMP type=echo-reply
-     code=0 chksum=0xee45 id=0x0 seq=0x0 |<Raw load='XXXXXXXXXXX'
-     |<Padding load='\x00\x00\x00\x00' |>>>>
+     code=0 chksum=0xee45 id=0x0 seq=0x0 |<Raw load='XXXXXXXXXXX'|>>>>
     >>> p.show()
     ---[ IP ]---
-    version   = 4L
-    ihl       = 5L
+    version   = 4
+    ihl       = 5
     tos       = 0x0
     len       = 39
     id        = 15489
     flags     = 
-    frag      = 0L
+    frag      = 0
     ttl       = 42
     proto     = ICMP
     chksum    = 0x51dd
     src       = 66.35.250.151
     dst       = 192.168.5.21
-    options   = ''
+    \options\
     ---[ ICMP ]---
        type      = echo-reply
        code      = 0
@@ -307,9 +301,9 @@ A DNS query (``rd`` = recursion desired). The host 192.168.5.1 is my DNS server.
     Finished to send 1 packets.
     ..*
     Received 3 packets, got 1 answers, remaining 0 packets
-    <IP version=4L ihl=5L tos=0x0 len=78 id=0 flags=DF frag=0L ttl=64 proto=UDP chksum=0xaf38
+    <IP version=4 ihl=5 tos=0x0 len=78 id=0 flags=DF frag=0 ttl=64 proto=UDP chksum=0xaf38
      src=192.168.5.1 dst=192.168.5.21 options='' |<UDP sport=53 dport=53 len=58 chksum=0xd55d
-     |<DNS id=0 qr=1L opcode=QUERY aa=0L tc=0L rd=1L ra=1L z=0L rcode=ok qdcount=1 ancount=1
+     |<DNS id=0 qr=1 opcode=QUERY aa=0L tc=0L rd=1 ra=1 z=0L rcode=ok qdcount=1 ancount=1
      nscount=0 arcount=0 qd=<DNSQR qname='www.slashdot.org.' qtype=A qclass=IN |> 
      an=<DNSRR rrname='www.slashdot.org.' type=A rclass=IN ttl=3560L rdata='66.35.250.151' |>
      ns=0 ar=0 |<Padding load='\xc6\x94\xc7\xeb' |>>>>
@@ -355,9 +349,9 @@ The above will send a single SYN packet to Google's port 80 and will quit after 
     .Finished to send 1 packets.
     *
     Received 2 packets, got 1 answers, remaining 0 packets
-    <IP  version=4L ihl=5L tos=0x20 len=44 id=33529 flags= frag=0L ttl=244
+    <IP  version=4 ihl=5L tos=0x20 len=44 id=33529 flags= frag=0 ttl=244
     proto=TCP chksum=0x6a34 src=72.14.207.99 dst=192.168.1.100 options=// |
-    <TCP  sport=www dport=ftp-data seq=2487238601L ack=1 dataofs=6L reserved=0L
+    <TCP  sport=www dport=ftp-data seq=2487238601 ack=1 dataofs=6 reserved=0
     flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[('MSS', 536)] |
     <Padding  load='V\xf7' |>>>
 
@@ -523,8 +517,8 @@ We can easily capture some packets or even clone tcpdump or tethereal. If no int
     0000 Ether / IP / ICMP 192.168.5.21 echo-request 0 / Raw
     0001 Ether / IP / ICMP 192.168.5.21 echo-request 0 / Raw
     >>>  a[1]
-    <Ether dst=00:ae:f3:52:aa:d1 src=00:02:15:37:a2:44 type=0x800 |<IP version=4L
-     ihl=5L tos=0x0 len=84 id=0 flags=DF frag=0L ttl=64 proto=ICMP chksum=0x3831
+    <Ether dst=00:ae:f3:52:aa:d1 src=00:02:15:37:a2:44 type=0x800 |<IP version=4
+     ihl=5 tos=0x0 len=84 id=0 flags=DF frag=0 ttl=64 proto=ICMP chksum=0x3831
      src=192.168.5.21 dst=66.35.250.151 options='' |<ICMP type=echo-request code=0
      chksum=0x6571 id=0x8745 seq=0x0 |<Raw load='B\xf7g\xda\x00\x07um\x08\t\n\x0b
      \x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d
@@ -552,13 +546,13 @@ We can easily capture some packets or even clone tcpdump or tethereal. If no int
     src       = 00:02:15:37:a2:44
     type      = 0x800
     ---[ IP ]---
-       version   = 4L
-       ihl       = 5L
+       version   = 4
+       ihl       = 5
        tos       = 0x0
        len       = 84
        id        = 0
        flags     = DF
-       frag      = 0L
+       frag      = 0
        ttl       = 64
        proto     = ICMP
        chksum    = 0x3831
@@ -623,11 +617,11 @@ For even more control over displayed information we can use the ``sprintf()`` fu
 We can sniff and do passive OS fingerprinting::
 
     >>> p
-    <Ether dst=00:10:4b:b3:7d:4e src=00:40:33:96:7b:60 type=0x800 |<IP version=4L
-     ihl=5L tos=0x0 len=60 id=61681 flags=DF frag=0L ttl=64 proto=TCP chksum=0xb85e
+    <Ether dst=00:10:4b:b3:7d:4e src=00:40:33:96:7b:60 type=0x800 |<IP version=4
+     ihl=5 tos=0x0 len=60 id=61681 flags=DF frag=0 ttl=64 proto=TCP chksum=0xb85e
      src=192.168.8.10 dst=192.168.8.1 options='' |<TCP sport=46511 dport=80
-     seq=2023566040L ack=0L dataofs=10L reserved=0L flags=SEC window=5840
-     chksum=0x570c urgptr=0 options=[('Timestamp', (342940201L, 0L)), ('MSS', 1460),
+     seq=2023566040 ack=0 dataofs=10 reserved=0 flags=SEC window=5840
+     chksum=0x570c urgptr=0 options=[('Timestamp', (342940201L, 0)), ('MSS', 1460),
      ('NOP', ()), ('SAckOK', ''), ('WScale', 0)] |>>>
     >>> load_module("p0f")
     >>> p0f(p)
@@ -742,8 +736,8 @@ Hexdump above can be reimported back into Scapy using ``import_hexcap()``::
     0050   26 27 28 29 2A 2B 2C 2D  2E 2F 30 31 32 33 34 35   &'()*+,-./012345
     0060   36 37                                              67
     >>> pkt_hex
-    <Ether  dst=00:50:56:fc:ce:50 src=00:0c:29:2b:53:19 type=0x800 |<IP  version=4L 
-    ihl=5L tos=0x0 len=84 id=0 flags=DF frag=0L ttl=64 proto=icmp chksum=0x5a7c 
+    <Ether  dst=00:50:56:fc:ce:50 src=00:0c:29:2b:53:19 type=0x800 |<IP  version=4 
+    ihl=5 tos=0x0 len=84 id=0 flags=DF frag=0 ttl=64 proto=icmp chksum=0x5a7c 
     src=192.168.25.130 dst=4.2.2.1 options='' |<ICMP  type=echo-request code=0 
     chksum=0x9c90 id=0x5a61 seq=0x1 |<Raw  load='\xe6\xdapI\xb6\xe5\x08\x00\x08\t\n
     \x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e
@@ -752,7 +746,7 @@ Hexdump above can be reimported back into Scapy using ``import_hexcap()``::
 Hex string
 ^^^^^^^^^^
 
-You can also convert entire packet into a hex string using the ``str()`` function::
+You can also convert entire packet into a hex string using the ``bytes()`` function::
 
     >>> pkts = sniff(count = 1)
     >>> pkt = pkts[0]
@@ -763,9 +757,9 @@ You can also convert entire packet into a hex string using the ``str()`` functio
     chksum=0x9c90 id=0x5a61 seq=0x1 |<Raw  load='\xe6\xdapI\xb6\xe5\x08\x00\x08\t\n
     \x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e
     \x1f !"#$%&\'()*+,-./01234567' |>>>>
-    >>> pkt_str = str(pkt)
+    >>> pkt_str = bytes(pkt)
     >>> pkt_str
-    '\x00PV\xfc\xceP\x00\x0c)+S\x19\x08\x00E\x00\x00T\x00\x00@\x00@\x01Z|\xc0\xa8
+    b'\x00PV\xfc\xceP\x00\x0c)+S\x19\x08\x00E\x00\x00T\x00\x00@\x00@\x01Z|\xc0\xa8
     \x19\x82\x04\x02\x02\x01\x08\x00\x9c\x90Za\x00\x01\xe6\xdapI\xb6\xe5\x08\x00
     \x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b
     \x1c\x1d\x1e\x1f !"#$%&\'()*+,-./01234567'
@@ -793,7 +787,8 @@ Using the ``export_object()`` function, Scapy can export a base64 encoded Python
     chksum=0x9c90 id=0x5a61 seq=0x1 |<Raw  load='\xe6\xdapI\xb6\xe5\x08\x00\x08\t\n
     \x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f 
     !"#$%&\'()*+,-./01234567' |>>>>
-    >>> export_object(pkt)
+    >>> exported_string = export_object(pkt)
+    >>> print(exported_string)
     eNplVwd4FNcRPt2dTqdTQ0JUUYwN+CgS0gkJONFEs5WxFDB+CdiI8+pupVl0d7uzRUiYtcEGG4ST
     OD1OnB6nN6c4cXrvwQmk2U5xA9tgO70XMm+1rA78qdzbfTP/lDfzz7tD4WwmU1C0YiaT2Gqjaiao
     bMlhCrsUSYrYoKbmcxZFXSpPiohlZikm6ltb063ZdGpNOjWQ7mhPt62hChHJWTbFvb0O/u1MD2bT
@@ -802,12 +797,7 @@ Using the ``export_object()`` function, Scapy can export a base64 encoded Python
 
 The output above can be reimported back into Scapy using ``import_object()``::
 
-    >>> new_pkt = import_object()
-    eNplVwd4FNcRPt2dTqdTQ0JUUYwN+CgS0gkJONFEs5WxFDB+CdiI8+pupVl0d7uzRUiYtcEGG4ST
-    OD1OnB6nN6c4cXrvwQmk2U5xA9tgO70XMm+1rA78qdzbfTP/lDfzz7tD4WwmU1C0YiaT2Gqjaiao
-    bMlhCrsUSYrYoKbmcxZFXSpPiohlZikm6ltb063ZdGpNOjWQ7mhPt62hChHJWTbFvb0O/u1MD2bT
-    WZXXVCmi9pihUqI3FHdEQslriiVfWFTVT9VYpog6Q7fsjG0qRWtQNwsW1fRTrUg4xZxq5pUx1aS6
-    ...
+    >>> new_pkt = import_object(exported_string)
     >>> new_pkt
     <Ether  dst=00:50:56:fc:ce:50 src=00:0c:29:2b:53:19 type=0x800 |<IP  version=4L 
     ihl=5L tos=0x0 len=84 id=0 flags=DF frag=0L ttl=64 proto=icmp chksum=0x5a7c 

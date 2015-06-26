@@ -2,6 +2,10 @@
 Build your own tools
 ********************
 
+.. note::
+
+   This section has not been updated for scapy3k yet. Code examples may not work directly. Try bytes() instead of str() and b'string' instead of b'somestring'.
+
 You can use Scapy to make your own automated tools. You can also extend Scapy without having to edit its source file.
 
 If you have built some interesting tools, please contribute back to the mailing-list!
