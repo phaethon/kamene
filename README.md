@@ -6,7 +6,9 @@ Please, submit all issues https://github.com/phaethon/scapy preferrably with .pc
 [winpcapy.py by Massimo Ciani] (https://code.google.com/p/winpcapy/) integrated inside code.
 
 ## News
-There are several new features compared to scapy:
+[Follow @scapy3k](https://twitter.com/scapy3k) for recent news.
+
+There are several new features compared to classic scapy:
 * Reading PCAP Next Generation (PCAPNG) files (please, add issues on GitHub for block types and options, which need support. Currently, reading packets only from Enhanced Packet Block)
 * new command tdecode to call tshark decoding on one packet and display results, this is handy for interactive work and debugging
 * some bugs fixed, which are still present in original scapy
