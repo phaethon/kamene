@@ -1,52 +1,23 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Scapy by phaethon</title>
+---
+layout: default
+---
 
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/github-light.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-  </head>
-  <body>
-    <div class="wrapper">
-      <header>
-        <h1>Scapy</h1>
-        <p>Fork of scapy with python3 compatibility</p>
+<div class="home">
 
-        <p class="view"><a href="https://github.com/phaethon/scapy">View the Project on GitHub <small>phaethon/scapy</small></a></p>
+  <h1 class="page-heading">Recent posts</h1>
 
+  <ul class="post-list">
+    {% for post in site.posts %}
+      <li>
+        <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
 
-        <ul>
-          <li><a href="https://github.com/phaethon/scapy/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/phaethon/scapy/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/phaethon/scapy">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h3>
-<a id="this-is-webpage-for-scapy3k-or-scapy-for-python3" class="anchor" href="#this-is-webpage-for-scapy3k-or-scapy-for-python3" aria-hidden="true"><span class="octicon octicon-link"></span></a>This is webpage for scapy3k or scapy for python3.</h3>
-      </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/phaethon">phaethon</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
-      </footer>
-    </div>
-    <script src="javascripts/scale.fix.js"></script>
-              <script type="text/javascript">
-            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-          </script>
-          <script type="text/javascript">
-            try {
-              var pageTracker = _gat._getTracker("UA-34654510-3");
-            pageTracker._trackPageview();
-            } catch(err) {}
-          </script>
+        <h2>
+          <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
+        </h2>
+      </li>
+    {% endfor %}
+  </ul>
 
-  </body>
-</html>
+  <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | prepend: site.baseurl }}">via RSS</a></p>
+
+</div>

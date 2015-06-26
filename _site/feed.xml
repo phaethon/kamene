@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>scapy3k</title>
+    <description>This is a fork of scapy (packet dissection and manipulation tool) with added functionality, some bug fixes, and python3 compatibility.
+</description>
+    <link>https://phaethon.github.io/scapy/</link>
+    <atom:link href="https://phaethon.github.io/scapy/feed.xml" rel="self" type="application/rss+xml" />
+    <pubDate>Fri, 26 Jun 2015 16:26:49 +0300</pubDate>
+    <lastBuildDate>Fri, 26 Jun 2015 16:26:49 +0300</lastBuildDate>
+    <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>Decoding a packet using tshark</title>
+        <description>&lt;p&gt;Sometime you want to have tshark to decode the packet (e.g. to test and compare results or if a layer is not supported in scapy). There is a command &lt;code&gt;tdecode&lt;/code&gt; to do this.&lt;/p&gt;
+
+&lt;p&gt;Usage is very simple: &lt;code&gt;tdecode(pkt)&lt;/code&gt;&lt;/p&gt;
+</description>
+        <pubDate>Fri, 26 Jun 2015 17:37:54 +0300</pubDate>
+        <link>https://phaethon.github.io/scapy/cookbook/2015/06/26/tdecode.html</link>
+        <guid isPermaLink="true">https://phaethon.github.io/scapy/cookbook/2015/06/26/tdecode.html</guid>
+        
+        
+        <category>cookbook</category>
+        
+      </item>
+    
+      <item>
+        <title>Reading a huge PCAP or PCAPNG file</title>
+        <description>&lt;p&gt;When you read PCAP file with rdpcap, the full list of decoded packets is saved in memory.   If you need to do some processing per packet and do not need the full list then it is much more memory efficient to use RawPcapReader packet generator like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;with&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PcapReader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;filename.pcapng&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pcap_reader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pkt&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pcap_reader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;#do something with the packet&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+</description>
+        <pubDate>Fri, 26 Jun 2015 17:37:54 +0300</pubDate>
+        <link>https://phaethon.github.io/scapy/cookbook/2015/06/26/rawpcapreader.html</link>
+        <guid isPermaLink="true">https://phaethon.github.io/scapy/cookbook/2015/06/26/rawpcapreader.html</guid>
+        
+        
+        <category>cookbook</category>
+        
+      </item>
+    
+  </channel>
+</rss>

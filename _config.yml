@@ -1,0 +1,13 @@
+# Site settings
+title: scapy3k
+email: phaethon@users.noreply.github.com
+description: > # this means to ignore newlines until "baseurl:"
+  This is a fork of scapy (packet dissection and manipulation tool)
+  with added functionality, some bug fixes, and python3 compatibility.
+baseurl: "/scapy" # the subpath of your site, e.g. /blog/
+url: "https://phaethon.github.io" # the base hostname & protocol for your site
+twitter_username: scapy3k
+github_username:  phaethon/scapy
+
+# Build settings
+markdown: kramdown
