@@ -91,6 +91,8 @@ Optional software for special features
       >>> dec=Dot11PacketList(enc).toEthernet()
       >>> dec.show()
       >>> dec[0]
+
+* ipython. For interactive sessions using ipython can be great advantage. Install using pip3
  
 Platform-specific instructions
 ==============================
