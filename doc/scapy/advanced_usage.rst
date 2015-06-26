@@ -2,6 +2,10 @@
 Advanced usage
 **************
 
+.. note::
+
+   This section has not been updated for scapy3k yet. Code examples may not work directly. Try bytes() instead of str() and b'string' instead of b'somestring'.
+
 ASN.1 and SNMP
 ==============
 

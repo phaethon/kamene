@@ -2,6 +2,10 @@
 Scapy development
 *****************
 
+.. note::
+
+   This section has not been updated for scapy3k yet. Code examples may not work directly.
+
 Project organization
 ====================
 
