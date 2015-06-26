@@ -11,3 +11,5 @@ github_username:  phaethon/scapy
 
 # Build settings
 markdown: kramdown
+
+include: [ _sources, _static, _images ]

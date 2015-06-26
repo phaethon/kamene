@@ -1,0 +1,373 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Scapy development &mdash; Scapy 2.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Scapy 2.3.1 documentation" href="index.html" />
+    <link rel="next" title="Credits" href="backmatter.html" />
+    <link rel="prev" title="Troubleshooting" href="troubleshooting.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="backmatter.html" title="Credits"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="troubleshooting.html" title="Troubleshooting"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Scapy 2.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="scapy-development">
+<h1>Scapy development<a class="headerlink" href="#scapy-development" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="project-organization">
+<h2>Project organization<a class="headerlink" href="#project-organization" title="Permalink to this headline">¶</a></h2>
+<p>Scapy development uses the Mercurial version control system.
+Scapy&#8217;s reference repository is at <a class="reference external" href="http://hg.secdev.org/scapy/">http://hg.secdev.org/scapy/</a>.</p>
+<p>Project management is done with <a class="reference external" href="http://trac.secdev.org/scapy">Trac</a>. Trac works on Scapy&#8217;s reference repository.
+It provides a freely editable <a class="reference external" href="http://trac.secdev.org/scapy/wiki/">Wiki</a> (please contribute!) that can
+reference tickets, changesets, files from the project. It also provides
+a ticket management service that is used to avoid forgetting patches or bugs.</p>
+<p>Mercurial&#8217;s distributed way of working enables Philippe to provide two repositories
+where anybody can commit stuff:
+the Scapy <a class="reference external" href="http://hg.secdev.org/scapy-com">community repository</a> and the Scapy <a class="reference external" href="http://hg.secdev.org/scapy-com">Windows port repository</a>.</p>
+</div>
+<div class="section" id="how-to-contribute">
+<h2>How to contribute<a class="headerlink" href="#how-to-contribute" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Found a bug in Scapy? <a class="reference external" href="http://trac.secdev.org/scapy/newticket">Add a ticket</a>.</li>
+<li>Improve this documentation.</li>
+<li>Program a new layer and share it on the mailing list. Or add it as an enhancement on the bugtracker.</li>
+<li>Contribute new <a class="reference external" href="http://trac.secdev.org/scapy/wiki/RegressionTests">regression tests</a>.</li>
+<li>Upload packet samples for new protocols on the <a class="reference external" href="http://trac.secdev.org/scapy/wiki/PacketsSamples">packet samples page</a>.</li>
+</ul>
+</div>
+<div class="section" id="testing-with-utscapy">
+<h2>Testing with UTScapy<a class="headerlink" href="#testing-with-utscapy" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="what-is-utscapy">
+<h3>What is UTScapy?<a class="headerlink" href="#what-is-utscapy" title="Permalink to this headline">¶</a></h3>
+<p>UTScapy is a small Python program that reads a campaign of tests, runs the campaign with Scapy and generates a report indicating test status. The report may be in one of four formats, text, ansi, HTML or LaTeX.</p>
+<p>Three basic test containers exist with UTScapy, a unit test, a test set and a test campaign. A unit test is a list of Scapy commands that will be run by Scapy or a derived work of Scapy. Evaluation of the last command in the unit test will determine the end result of the individual unit test. A test set is a group of unit tests with some association. A test campaign consists of one or more test sets. Test sets and unit tests can be given keywords to form logical groupings. When running a campaign, tests may be selected by keyword. This allows the user to run tests within a desired grouping.</p>
+<p>For each unit test, test set and campaign, a CRC32 of the test is calculated and displayed as a signature of that test. This test signature is sufficient to determine that the actual test run was the one expected and not one that has been modified. In case your dealing with evil people that try to modify or corrupt the file without changing the CRC32, a global SHA1 is computed on the whole file.</p>
+</div>
+<div class="section" id="syntax-of-a-test-campaign">
+<h3>Syntax of a Test Campaign<a class="headerlink" href="#syntax-of-a-test-campaign" title="Permalink to this headline">¶</a></h3>
+<p>Table 1 shows the syntax indicators that UTScapy is looking for. The syntax specifier must appear as the first character of each line of the text file that defines the test. Text descriptions that follow the syntax specifier are arguments interpreted by UTScapy. Lines that appear without a leading syntax specifier will be treated as Python commands, provided they appear in the context of a unit test. Lines without a syntax specifier that appear outside the correct context will be rejected by UTScapy and a warning will be issued.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="21%" />
+<col width="79%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Syntax Specifier</th>
+<th class="head">Definition</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>‘%’</td>
+<td>Give the test campaign&#8217;s name.</td>
+</tr>
+<tr class="row-odd"><td>‘+’</td>
+<td>Announce a new test set.</td>
+</tr>
+<tr class="row-even"><td>‘=’</td>
+<td>Announce a new unit test.</td>
+</tr>
+<tr class="row-odd"><td>‘~’</td>
+<td>Announce keywords for the current unit test.</td>
+</tr>
+<tr class="row-even"><td>‘*’</td>
+<td>Denotes a comment that will be included in the report.</td>
+</tr>
+<tr class="row-odd"><td>‘#’</td>
+<td>Testcase annotations that are discarded by the interpreter.</td>
+</tr>
+</tbody>
+</table>
+<p>Table 1 - UTScapy Syntax Specifiers</p>
+<p>Comments placed in the test report have a context. Each comment will be associated to the last defined test container - be it a individual unit test, a test set or a test campaign. Multiple comments associated with a particular container will be concatenated together and will appear in the report directly after the test container announcement. General comments for a test file should appear before announcing a test campaign. For comments to be associated with a test campaign, they must appear after declaration of the test campaign but before any test set or unit test. Comments for a test set should appear before definition of the set’s first unit test.</p>
+<p>The generic format for a test campaign is shown in the following table:</p>
+<div class="highlight-python"><div class="highlight"><pre>% Test Campaign Name
+* Comment describing this campaign
+
+
++ Test Set 1
+* comments for test set 1
+
+= Unit Test 1
+~ keywords
+* Comments for unit test 1
+# Python statements follow
+a = 1
+print(a)
+a == 1
+</pre></div>
+</div>
+<p>Python statements are identified by the lack of a defined UTScapy syntax specifier. The Python statements are fed directly to the Python interpreter as if one is operating within the interactive Scapy shell (<tt class="docutils literal"><span class="pre">interact</span></tt>). Looping, iteration and conditionals are permissible but must be terminated by a blank line. A test set may be comprised of multiple unit tests and multiple test sets may be defined for each campaign. It is even possible to have multiple test campaigns in a particular test definition file. The use of keywords allows testing of subsets of the entire campaign. For example, during development of a test campaign, the user may wish to mark new tests under development with the keyword “debug”. Once the tests run successfully to their desired conclusion, the keyword “debug” could be removed. Keywords such as “regression” or “limited” could be used as well.</p>
+<p>It is important to note that UTScapy uses the truth value from the last Python statement as the indicator as to whether a test passed or failed. Multiple logical tests may appear on the last line. If the result is 0 or False, the test fails. Otherwise, the test passes. Use of an assert() statement can force evaluation of intermediate values if needed.</p>
+<p>The syntax for UTScapy is shown in Table 3 - UTScapy command line syntax:</p>
+<div class="highlight-python"><div class="highlight"><pre>[root@localhost scapy]# ./UTscapy.py –h
+Usage: UTscapy [-m module] [-f {text|ansi|HTML|LaTeX}] [-o output_file]
+               [-t testfile] [-k keywords [-k ...]] [-K keywords [-K ...]]
+               [-l] [-d|-D] [-F] [-q[q]]
+-l              : generate local files
+-F              : expand only failed tests
+-d              : dump campaign
+-D              : dump campaign and stop
+-C              : don&#39;t calculate CRC and SHA
+-q              : quiet mode
+-qq             : [silent mode]
+-n &lt;testnum&gt;    : only tests whose numbers are given (eg. 1,3-7,12)
+-m &lt;module&gt;     : additional module to put in the namespace
+-k &lt;kw1&gt;,&lt;kw2&gt;,...      : include only tests with one of those keywords (can be used many times)
+-K &lt;kw1&gt;,&lt;kw2&gt;,...      : remove tests with one of those keywords (can be used many times)
+</pre></div>
+</div>
+<p>Table 3 - UTScapy command line syntax</p>
+<p>All arguments are optional. Arguments that have no associated argument value may be strung together (i.e. <tt class="docutils literal"><span class="pre">–lqF</span></tt>). If no testfile is specified, the test definition comes from &lt;STDIN&gt;. Similarly, if no output file is specified it is directed to &lt;STDOUT&gt;. The default output format is “ansi”. Table 4 lists the arguments, the associated argument value and their meaning to UTScapy.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="10%" />
+<col width="14%" />
+<col width="76%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Argument</th>
+<th class="head">Argument Value</th>
+<th class="head">Meaning to UTScapy</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>-t</td>
+<td>testfile</td>
+<td>Input test file defining test campaign (default = &lt;STDIN&gt;)</td>
+</tr>
+<tr class="row-odd"><td>-o</td>
+<td>output_file</td>
+<td>File for output of test campaign results (default = &lt;STDOUT&gt;)</td>
+</tr>
+<tr class="row-even"><td>-f</td>
+<td>test</td>
+<td>ansi, HTML, LaTeX, Format out output report (default = ansi)</td>
+</tr>
+<tr class="row-odd"><td>-l</td>
+<td>&nbsp;</td>
+<td>Generate report associated files locally. For HTML, generates JavaScript
+and the style sheet</td>
+</tr>
+<tr class="row-even"><td>-F</td>
+<td>&nbsp;</td>
+<td>Failed test cases will be initially expanded by default in HTML output</td>
+</tr>
+<tr class="row-odd"><td>-d</td>
+<td>&nbsp;</td>
+<td>Print a terse listing of the campaign before executing the campaign</td>
+</tr>
+<tr class="row-even"><td>-D</td>
+<td>&nbsp;</td>
+<td>Print a terse listing of the campaign and stop. Do not execute campaign</td>
+</tr>
+<tr class="row-odd"><td>-C</td>
+<td>&nbsp;</td>
+<td>Do not calculate test signatures</td>
+</tr>
+<tr class="row-even"><td>-q</td>
+<td>&nbsp;</td>
+<td>Do not update test progress to the screen as tests are executed</td>
+</tr>
+<tr class="row-odd"><td>-qq</td>
+<td>&nbsp;</td>
+<td>Silent mode</td>
+</tr>
+<tr class="row-even"><td>-n</td>
+<td>testnum</td>
+<td>Execute only those tests listed by number. Test numbers may be
+retrieved using –d or –D. Tests may be listed as a comma
+separated list and may include ranges (e.g. 1, 3-7, 12)</td>
+</tr>
+<tr class="row-odd"><td>-m</td>
+<td>module</td>
+<td>Load module before executing tests. Useful in testing derived works of Scapy.
+Note: Derived works that are intended to execute as &#8220;__main__&#8221; will not be
+invoked by UTScapy as “__main__”.</td>
+</tr>
+<tr class="row-even"><td>-k</td>
+<td>kw1, kw2, ...</td>
+<td>Include only tests with keyword “kw1”. Multiple keywords may be specified.</td>
+</tr>
+<tr class="row-odd"><td>-K</td>
+<td>kw1, kw2, ...</td>
+<td>Exclude tests with keyword “kw1”. Multiple keywords may be specified.</td>
+</tr>
+</tbody>
+</table>
+<p>Table 4 - UTScapy parameters</p>
+<p>Table 5 shows a simple test campaign with multiple test set definitions. Additionally, keywords are specified that allow a limited number of test cases to be executed. Notice the use of the <tt class="docutils literal"><span class="pre">assert()</span></tt> statement in test 3 and 5 used to check intermediate results. Tests 2 and 5 will fail by design.</p>
+<div class="highlight-python"><div class="highlight"><pre>% Example Test Campaign
+
+# Comment describing this campaign
+#
+# To run this campaign, try:
+#   ./UTscapy.py -t example_campaign.txt -f html -o example_campaign.html -F
+#
+
+* This comment is associated with the test campaign and will appear
+* in the produced output.
+
++ Test Set 1
+
+= Unit Test 1
+~ test_set_1 simple
+a = 1
+print(a)
+
+= Unit test 2
+~ test_set_1 simple
+* this test will fail
+b = 2
+a == b
+
+= Unit test 3
+~ test_set_1 harder
+a = 1
+b = 2
+c = &quot;hello&quot;
+assert (a != b)
+c == &quot;hello&quot;
+
++ Test Set 2
+
+= Unit Test 4
+~ test_set_2 harder
+b = 2
+d = b
+d is b
+
+= Unit Test 5
+~ test_set_2 harder hardest
+a = 2
+b = 3
+d = 4
+e = (a * b)**d
+# The following statement evaluates to False but is not last; continue
+e == 6
+# assert evaluates to False; stop test and fail
+assert (e == 7)
+e == 1296
+
+= Unit Test 6
+~ test_set_2 hardest
+print(e)
+e == 1296
+</pre></div>
+</div>
+<p>To see an example that is targeted to Scapy, go to <a class="reference external" href="http://www.secdev.org/projects/UTscapy">http://www.secdev.org/projects/UTscapy</a>. Cut and paste the example at the bottom of the page to the file <tt class="docutils literal"><span class="pre">demo_campaign.txt</span></tt> and run UTScapy against it:</p>
+<div class="highlight-python"><div class="highlight"><pre>./UTscapy.py -t demo_campaign.txt -f html -o demo_campaign.html –F -l
+</pre></div>
+</div>
+<p>Examine the output generated in file <tt class="docutils literal"><span class="pre">demo_campaign.html</span></tt>.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Scapy development</a><ul>
+<li><a class="reference internal" href="#project-organization">Project organization</a></li>
+<li><a class="reference internal" href="#how-to-contribute">How to contribute</a></li>
+<li><a class="reference internal" href="#testing-with-utscapy">Testing with UTScapy</a><ul>
+<li><a class="reference internal" href="#what-is-utscapy">What is UTScapy?</a></li>
+<li><a class="reference internal" href="#syntax-of-a-test-campaign">Syntax of a Test Campaign</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="troubleshooting.html"
+                        title="previous chapter">Troubleshooting</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="backmatter.html"
+                        title="next chapter">Credits</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/development.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="backmatter.html" title="Credits"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="troubleshooting.html" title="Troubleshooting"
+             >previous</a> |</li>
+        <li><a href="index.html">Scapy 2.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, 2009 Philippe Biondi and the Scapy community.
+      Last updated on Jun 26, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

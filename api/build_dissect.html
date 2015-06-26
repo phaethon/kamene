@@ -1,0 +1,1176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Adding new protocols &mdash; Scapy 2.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Scapy 2.3.1 documentation" href="index.html" />
+    <link rel="next" title="Troubleshooting" href="troubleshooting.html" />
+    <link rel="prev" title="Build your own tools" href="extending.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="troubleshooting.html" title="Troubleshooting"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="extending.html" title="Build your own tools"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Scapy 2.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="adding-new-protocols">
+<h1>Adding new protocols<a class="headerlink" href="#adding-new-protocols" title="Permalink to this headline">¶</a></h1>
+<p>Adding new protocol (or more correctly: a new <em>layer</em>) in Scapy is very easy. All the magic is in the fields. If the
+fields you need are already there and the protocol is not too brain-damaged,
+this should be a matter of minutes.</p>
+<div class="section" id="simple-example">
+<h2>Simple example<a class="headerlink" href="#simple-example" title="Permalink to this headline">¶</a></h2>
+<p>A layer is a subclass of the <tt class="docutils literal"><span class="pre">Packet</span></tt> class. All the logic behind layer manipulation
+is hold by the <tt class="docutils literal"><span class="pre">Packet</span></tt> class and will be inherited.
+A simple layer is compounded by a list of fields that will be either concatenated
+when assembling the layer or dissected one by one when disassembling a string.
+The list of fields is held in an attribute named <tt class="docutils literal"><span class="pre">fields_desc</span></tt>. Each field is an instance
+of a field class:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Disney</span><span class="p">(</span><span class="n">Packet</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;DisneyPacket &quot;</span>
+    <span class="n">fields_desc</span><span class="o">=</span><span class="p">[</span> <span class="n">ShortField</span><span class="p">(</span><span class="s">&quot;mickey&quot;</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span>
+                 <span class="n">XByteField</span><span class="p">(</span><span class="s">&quot;minnie&quot;</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span> <span class="p">,</span>
+                 <span class="n">IntEnumField</span><span class="p">(</span><span class="s">&quot;donald&quot;</span> <span class="p">,</span> <span class="mi">1</span> <span class="p">,</span>
+                      <span class="p">{</span> <span class="mi">1</span><span class="p">:</span> <span class="s">&quot;happy&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s">&quot;cool&quot;</span> <span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="s">&quot;angry&quot;</span> <span class="p">}</span> <span class="p">)</span> <span class="p">]</span>
+</pre></div>
+</div>
+<p>In this example, our layer has three fields. The first one is an 2 byte integer
+field named <tt class="docutils literal"><span class="pre">mickey</span></tt> and whose default value is 5. The second one is a 1 byte
+integer field named <tt class="docutils literal"><span class="pre">minnie</span></tt> and whose default value is 3. The difference between
+a vanilla <tt class="docutils literal"><span class="pre">ByteField</span></tt> and a <tt class="docutils literal"><span class="pre">XByteField</span></tt> is only the fact that the prefered human
+representation of the field’s value is in hexadecimal. The last field is a 4 byte
+integer field named <tt class="docutils literal"><span class="pre">donald</span></tt>. It is different from a vanilla <tt class="docutils literal"><span class="pre">IntField</span></tt> by the fact
+that some of the possible values of the field have litterate representations. For
+example, if it is worth 3, the value will be displayed as angry. Moreover, if the
+&#8220;cool&#8221; value is assigned to this field, it will understand that it has to take the
+value 2.</p>
+<p>If your protocol is as simple as this, it is ready to use:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">=</span><span class="n">Disney</span><span class="p">(</span><span class="n">mickey</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+<span class="go">mickey : ShortField = 1 (5)</span>
+<span class="go">minnie : XByteField = 3 (3)</span>
+<span class="go">donald : IntEnumField = 1 (1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">###[ Disney Packet ]###</span>
+<span class="go">mickey= 1</span>
+<span class="go">minnie= 0x3</span>
+<span class="go">donald= happy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">donald</span><span class="o">=</span><span class="s">&quot;cool&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+<span class="go">’\x00\x01\x03\x00\x00\x00\x02’</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Disney</span><span class="p">(</span> <span class="p">)</span>
+<span class="go">&lt;Disney mickey=1 minnie=0x3 donald=cool |&gt;</span>
+</pre></div>
+</div>
+<p>This chapter explains how to build a new protocol within Scapy. There are two main objectives:</p>
+<ul class="simple">
+<li>Dissecting: this is done when a packet is received (from the network or a file) and should be converted to Scapy’s internals.</li>
+<li>Building: When one wants to send such a new packet, some stuff needs to be adjusted automatically in it.</li>
+</ul>
+</div>
+<div class="section" id="layers">
+<h2>Layers<a class="headerlink" href="#layers" title="Permalink to this headline">¶</a></h2>
+<p>Before digging into dissection itself, let us look at how packets are
+organized.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">IP</span><span class="p">()</span><span class="o">/</span><span class="n">TCP</span><span class="p">()</span><span class="o">/</span><span class="s">&quot;AAAA&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span>
+<span class="go">&lt;IP  frag=0 proto=TCP |&lt;TCP  |&lt;Raw  load=&#39;AAAA&#39; |&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+<span class="go">&#39;IP / TCP 127.0.0.1:ftp-data &gt; 127.0.0.1:www S / Raw&#39;</span>
+</pre></div>
+</div>
+<p>We are interested in 2 &#8220;inside&#8221; fields of the class <tt class="docutils literal"><span class="pre">Packet</span></tt>:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">p.underlayer</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">p.payload</span></tt></li>
+</ul>
+<p>And here  is the  main &#8220;trick&#8221;.  You do not  care about  packets, only
+about layers, stacked one after the other.</p>
+<p>One can easily  access a layer by its name: <tt class="docutils literal"><span class="pre">p[TCP]</span></tt> returns the <tt class="docutils literal"><span class="pre">TCP</span></tt>
+and followings layers. This is a shortcut for <tt class="docutils literal"><span class="pre">p.getlayer(TCP)</span></tt>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">There is  an optional argument (<tt class="docutils literal"><span class="pre">nb</span></tt>) which returns  the <tt class="docutils literal"><span class="pre">nb</span></tt> th  layer of required protocol.</p>
+</div>
+<p>Let&#8217;s put everything together now, playing with the <tt class="docutils literal"><span class="pre">TCP</span></tt> layer:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">tcp</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="n">TCP</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tcp</span><span class="o">.</span><span class="n">underlayer</span>
+<span class="go">&lt;IP  frag=0 proto=TCP |&lt;TCP  |&lt;Raw  load=&#39;AAAA&#39; |&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tcp</span><span class="o">.</span><span class="n">payload</span>
+<span class="go">&lt;Raw  load=&#39;AAAA&#39; |&gt;</span>
+</pre></div>
+</div>
+<p>As expected, <tt class="docutils literal"><span class="pre">tcp.underlayer</span></tt> points to the beginning of our IP packet,
+and <tt class="docutils literal"><span class="pre">tcp.payload</span></tt> to its payload.</p>
+<div class="section" id="building-a-new-layer">
+<h3>Building a new layer<a class="headerlink" href="#building-a-new-layer" title="Permalink to this headline">¶</a></h3>
+<p id="index-0">VERY EASY! A layer is mainly a list of fields. Let&#8217;s look at <tt class="docutils literal"><span class="pre">UDP</span></tt> definition:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">UDP</span><span class="p">(</span><span class="n">Packet</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;UDP&quot;</span>
+    <span class="n">fields_desc</span> <span class="o">=</span> <span class="p">[</span> <span class="n">ShortEnumField</span><span class="p">(</span><span class="s">&quot;sport&quot;</span><span class="p">,</span> <span class="mi">53</span><span class="p">,</span> <span class="n">UDP_SERVICES</span><span class="p">),</span>
+                    <span class="n">ShortEnumField</span><span class="p">(</span><span class="s">&quot;dport&quot;</span><span class="p">,</span> <span class="mi">53</span><span class="p">,</span> <span class="n">UDP_SERVICES</span><span class="p">),</span>
+                    <span class="n">ShortField</span><span class="p">(</span><span class="s">&quot;len&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                    <span class="n">XShortField</span><span class="p">(</span><span class="s">&quot;chksum&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">]</span>
+</pre></div>
+</div>
+<p>And you are done! There are many fields already defined for
+convenience, look at the doc``^W`` sources as Phil would say.</p>
+<p>So, defining a layer is simply gathering fields in a list. The goal is
+here to  provide the  efficient default values  for each field  so the
+user does not have to give them when he builds a packet.</p>
+<p>The main  mechanism  is based on  the <tt class="docutils literal"><span class="pre">Field</span></tt> structure.  Always keep in
+mind that a layer is just a little more than a list of fields, but not
+much more.</p>
+<p>So, to understanding how layers are working, one needs to look quickly
+at how the fields are handled.</p>
+</div>
+<div class="section" id="manipulating-packets-manipulating-its-fields">
+<h3>Manipulating packets == manipulating its fields<a class="headerlink" href="#manipulating-packets-manipulating-its-fields" title="Permalink to this headline">¶</a></h3>
+<p id="index-1">A field should be considered in different states:</p>
+<ul>
+<li><p class="first"><tt class="docutils literal"><span class="pre">i</span></tt> (nternal) : this is the way Scapy manipulates it.</p>
+</li>
+<li><dl class="first docutils">
+<dt><tt class="docutils literal"><span class="pre">m</span></tt> (achine) <span class="classifier-delimiter">:</span> <span class="classifier">this is where the truth is, that is the layer as it is</span></dt>
+<dd><p class="first last">on the network.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">h</span></tt> (uman) : how the packet is displayed to our human eyes.</p>
+</li>
+</ul>
+<p>This explains  the mysterious  methods <tt class="docutils literal"><span class="pre">i2h()</span></tt>, <tt class="docutils literal"><span class="pre">i2m()</span></tt>,  <tt class="docutils literal"><span class="pre">m2i()</span></tt> and  so on
+available  in  each field:  they are conversion  from one  state  to
+another, adapted to a specific use.</p>
+<p>Other special functions:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">any2i()</span></tt> guess the input representation and returns the internal one.</li>
+<li><tt class="docutils literal"><span class="pre">i2repr()</span></tt> a nicer <tt class="docutils literal"><span class="pre">i2h()</span></tt></li>
+</ul>
+<p>However, all these are &#8220;low level&#8221; functions. The functions adding or
+extracting a field to the current layer are:</p>
+<ul>
+<li><p class="first"><tt class="docutils literal"><span class="pre">addfield(self,</span> <span class="pre">pkt,</span> <span class="pre">s,</span> <span class="pre">val)</span></tt>:  copy the network  representation of
+field <tt class="docutils literal"><span class="pre">val</span></tt> (belonging to layer <tt class="docutils literal"><span class="pre">pkt</span></tt>) to the raw string packet <tt class="docutils literal"><span class="pre">s</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">StrFixedLenField</span><span class="p">(</span><span class="n">StrField</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">addfield</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkt</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">s</span><span class="o">+</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%i</span><span class="s">s&quot;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">i2m</span><span class="p">(</span><span class="n">pkt</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">getfield(self,</span> <span class="pre">pkt,</span> <span class="pre">s)</span></tt>: extract from the raw packet <tt class="docutils literal"><span class="pre">s</span></tt> the field
+value belonging to layer <tt class="docutils literal"><span class="pre">pkt</span></tt>. It returns a list, the 1st element
+is the raw packet string after having removed the extracted field,
+the second one is the extracted field itself in internal
+representation:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">StrFixedLenField</span><span class="p">(</span><span class="n">StrField</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">getfield</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkt</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">s</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">m2i</span><span class="p">(</span><span class="n">pkt</span><span class="p">,</span><span class="n">s</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">])</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>When defining your own layer, you usually just need to define some
+<tt class="docutils literal"><span class="pre">*2*()</span></tt> methods, and sometimes also the <tt class="docutils literal"><span class="pre">addfield()</span></tt> and <tt class="docutils literal"><span class="pre">getfield()</span></tt>.</p>
+</div>
+<div class="section" id="example-variable-length-quantities">
+<h3>Example: variable length quantities<a class="headerlink" href="#example-variable-length-quantities" title="Permalink to this headline">¶</a></h3>
+<p>There is way to represent integers on a variable length quantity often
+used in  protocols, for instance  when dealing with  signal processing
+(e.g. MIDI).</p>
+<p>Each byte  of the number is  coded with the  MSB set to 1,  except the
+last byte. For instance, 0x123456 will be coded as 0xC8E856:</p>
+<div class="highlight-python"><div class="highlight"><pre>def vlenq2str(l):
+    s = []
+    s.append( hex(l &amp; 0x7F) )
+    l = l &gt;&gt; 7
+    while l&gt;0:
+        s.append( hex(0x80 | (l &amp; 0x7F) ) )
+        l = l &gt;&gt; 7
+    s.reverse()
+    return &quot;&quot;.join(map( lambda(x) : chr(int(x, 16)) , s))
+
+def str2vlenq(s=&quot;&quot;):
+    i = l = 0
+    while i&lt;len(s) and ord(s[i]) &amp; 0x80:
+        l = l &lt;&lt; 7
+        l = l + (ord(s[i]) &amp; 0x7F)
+        i = i + 1
+    if i == len(s):
+        warning(&quot;Broken vlenq: no ending byte&quot;)
+    l = l &lt;&lt; 7
+    l = l + (ord(s[i]) &amp; 0x7F)
+
+    return s[i+1:], l
+</pre></div>
+</div>
+<p>We will  define a field which  computes automatically the  length of a
+associated string, but used that encoding format:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">VarLenQField</span><span class="p">(</span><span class="n">Field</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; variable length quantities &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">fld</span><span class="p">):</span>
+        <span class="n">Field</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fld</span> <span class="o">=</span> <span class="n">fld</span>
+
+    <span class="k">def</span> <span class="nf">i2m</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkt</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fld</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">i2len</span><span class="p">(</span><span class="n">pkt</span><span class="p">,</span> <span class="n">pkt</span><span class="o">.</span><span class="n">getfieldval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fld</span><span class="p">))</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">vlenq2str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">m2i</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkt</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">str2vlenq</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">addfield</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkt</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">s</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">i2m</span><span class="p">(</span><span class="n">pkt</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">getfield</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkt</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">str2vlenq</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And now, define a layer using this kind of field:</p>
+<div class="highlight-python"><div class="highlight"><pre>class FOO(Packet):
+    name = &quot;FOO&quot;
+    fields_desc = [ VarLenQField(&quot;len&quot;, None, &quot;data&quot;),
+                    StrLenField(&quot;data&quot;, &quot;&quot;, &quot;len&quot;) ]
+
+    &gt;&gt;&gt; f = FOO(data=&quot;A&quot;*129)
+    &gt;&gt;&gt; f.show()
+    ###[ FOO ]###
+      len= 0
+      data=    &#39;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&#39;
+</pre></div>
+</div>
+<p>Here, <tt class="docutils literal"><span class="pre">len</span></tt>  is  not  yet  computed  and only  the  default  value  are
+displayed.  This  is  the   current  internal  representation  of  our
+layer. Let&#8217;s force the computation now:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">show2</span><span class="p">()</span>
+<span class="go">###[ FOO ]###</span>
+<span class="go">  len= 129</span>
+<span class="go">  data= &#39;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&#39;</span>
+</pre></div>
+</div>
+<p>The method <tt class="docutils literal"><span class="pre">show2()</span></tt> displays the  fields with their values as they will
+be sent to the network, but in a human readable way, so we see <tt class="docutils literal"><span class="pre">len=129</span></tt>.
+Last but not least, let us look now at the machine representation:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="go">&#39;\x81\x01AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&#39;</span>
+</pre></div>
+</div>
+<p>The first 2 bytes are <tt class="docutils literal"><span class="pre">\x81\x01</span></tt>, which is 129 in this encoding.</p>
+</div>
+</div>
+<div class="section" id="dissecting">
+<h2>Dissecting<a class="headerlink" href="#dissecting" title="Permalink to this headline">¶</a></h2>
+<p id="index-2">Layers are  only list  of fields,  but what is  the glue  between each
+field, and after, between each  layer. These are the mysteries explain
+in this section.</p>
+<div class="section" id="the-basic-stuff">
+<h3>The basic stuff<a class="headerlink" href="#the-basic-stuff" title="Permalink to this headline">¶</a></h3>
+<p>The core function for dissection is <tt class="docutils literal"><span class="pre">Packet.dissect()</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">dissect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_dissect</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_dissect</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_dissect</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="n">payl</span><span class="p">,</span><span class="n">pad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_padding</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">do_dissect_payload</span><span class="p">(</span><span class="n">payl</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">pad</span> <span class="ow">and</span> <span class="n">conf</span><span class="o">.</span><span class="n">padding</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_payload</span><span class="p">(</span><span class="n">Padding</span><span class="p">(</span><span class="n">pad</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>When called, <tt class="docutils literal"><span class="pre">s</span></tt> is a string containing what is going to be
+dissected. <tt class="docutils literal"><span class="pre">self</span></tt> points to the current layer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">=</span><span class="n">IP</span><span class="p">(</span><span class="s">&quot;A&quot;</span><span class="o">*</span><span class="mi">20</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="s">&quot;B&quot;</span><span class="o">*</span><span class="mi">32</span><span class="p">)</span>
+<span class="go">WARNING: bad dataofs (4). Assuming dataofs=5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span>
+<span class="go">&lt;IP  version=4L ihl=1L tos=0x41 len=16705 id=16705 flags=DF frag=321L ttl=65 proto=65 chksum=0x4141</span>
+<span class="go">src=65.65.65.65 dst=65.65.65.65 |&lt;TCP  sport=16962 dport=16962 seq=1111638594L ack=1111638594L dataofs=4L</span>
+<span class="go">reserved=2L flags=SE window=16962 chksum=0x4242 urgptr=16962 options=[] |&lt;Raw  load=&#39;BBBBBBBBBBBB&#39; |&gt;&gt;&gt;</span>
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">Packet.dissect()</span></tt> is called 3 times:</p>
+<ol class="arabic simple">
+<li>to dissect the <tt class="docutils literal"><span class="pre">&quot;A&quot;*20</span></tt> as an IPv4 header</li>
+<li>to dissect the <tt class="docutils literal"><span class="pre">&quot;B&quot;*32</span></tt> as a TCP header</li>
+<li>and  since  there  are still  12  bytes  in  the packet,  they  are
+dissected as &#8220;<tt class="docutils literal"><span class="pre">Raw</span></tt>&#8221; data (which is some kind of default layer type)</li>
+</ol>
+<p>For a given layer, everything is quite straightforward:</p>
+<ul>
+<li><p class="first"><tt class="docutils literal"><span class="pre">pre_dissect()</span></tt> is called to prepare the layer.</p>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">do_dissect()</span></tt> perform the real dissection of the layer.</p>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">post_dissection()</span></tt> is  called when some  updates are needed  on the
+dissected inputs (e.g. deciphering, uncompressing, ... )</p>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">extract_padding()</span></tt> is an important  function which should be called
+by every  layer containing  its own size, so that it can tell apart
+in  the payload what is really related to this layer and what will
+be considered as additional padding bytes.</p>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">do_dissect_payload()</span></tt>  is the  function in  charge of  dissecting the
+payload  (if  any).  It   is  based  on  <tt class="docutils literal"><span class="pre">guess_payload_class()</span></tt>  (see
+below). Once the type of the  payload is known, the payload is bound
+to the current layer with this new type:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">do_dissect_payload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+    <span class="n">cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">guess_payload_class</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">cls</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">_internal</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">_underlayer</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">add_payload</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>At the  end, all  the layers  in the packet  are dissected,  and glued
+together with their known types.</p>
+</div>
+<div class="section" id="dissecting-fields">
+<h3>Dissecting fields<a class="headerlink" href="#dissecting-fields" title="Permalink to this headline">¶</a></h3>
+<p>The  method with  all the  magic  between a  layer and  its fields  is
+<tt class="docutils literal"><span class="pre">do_dissect()</span></tt>. If you have  understood the different representations of
+a layer, you  should understand that &#8220;dissecting&#8221; a  layer is building
+each of its fields from the machine to the internal representation.</p>
+<p>Guess what? That is exactly what <tt class="docutils literal"><span class="pre">do_dissect()</span></tt> does:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">do_dissect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+    <span class="n">flist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields_desc</span><span class="p">[:]</span>
+    <span class="n">flist</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+    <span class="k">while</span> <span class="n">s</span> <span class="ow">and</span> <span class="n">flist</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">flist</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">s</span><span class="p">,</span><span class="n">fval</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">getfield</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">fval</span>
+    <span class="k">return</span> <span class="n">s</span>
+</pre></div>
+</div>
+<p>So, it  takes the raw string packet,  and feed each field  with it, as
+long as there are data or fields remaining:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">FOO</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\xff\xff</span><span class="s">&quot;</span><span class="o">+</span><span class="s">&quot;B&quot;</span><span class="o">*</span><span class="mi">8</span><span class="p">)</span>
+<span class="go">&lt;FOO  len=2097090 data=&#39;BBBBBBB&#39; |&gt;</span>
+</pre></div>
+</div>
+<p>When writing <tt class="docutils literal"><span class="pre">FOO(&quot;\xff\xff&quot;+&quot;B&quot;*8)</span></tt>, it calls <tt class="docutils literal"><span class="pre">do_dissect()</span></tt>. The first
+field is VarLenQField.  Thus, it takes bytes as long as their MSB is
+set, thus until (and including) the first &#8216;<tt class="docutils literal"><span class="pre">B</span></tt>&#8216;. This mapping is done
+thanks to <tt class="docutils literal"><span class="pre">VarLenQField.getfield()</span></tt> and can be cross-checked:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">vlenq2str</span><span class="p">(</span><span class="mi">2097090</span><span class="p">)</span>
+<span class="go">&#39;\xff\xffB&#39;</span>
+</pre></div>
+</div>
+<p>Then, the  next field is extracted  the same way, until 2097090 bytes
+are put in <tt class="docutils literal"><span class="pre">FOO.data</span></tt> (or less  if 2097090 bytes are  not available, as
+here).</p>
+<p>If  there are  some bytes  left after  the dissection  of  the current
+layer, it is mapped  in the same way to the what  the next is expected
+to be (<tt class="docutils literal"><span class="pre">Raw</span></tt> by default):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">FOO</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\x05</span><span class="s">&quot;</span><span class="o">+</span><span class="s">&quot;B&quot;</span><span class="o">*</span><span class="mi">8</span><span class="p">)</span>
+<span class="go">&lt;FOO  len=5 data=&#39;BBBBB&#39; |&lt;Raw  load=&#39;BBB&#39; |&gt;&gt;</span>
+</pre></div>
+</div>
+<p>Hence, we need now to understand how layers are bound together.</p>
+</div>
+<div class="section" id="binding-layers">
+<h3>Binding layers<a class="headerlink" href="#binding-layers" title="Permalink to this headline">¶</a></h3>
+<p>One of the cool features with  Scapy when dissecting layers is that is
+try to guess for us what the next layer is. The official way to link 2
+layers is using <tt class="docutils literal"><span class="pre">bind_layers()</span></tt>:</p>
+<p>For instance,  if you have a class <tt class="docutils literal"><span class="pre">HTTP</span></tt>, you may expect  that all the
+packets coming from or going to  port 80 will be decoded as such. This
+is simply done that way:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">bind_layers</span><span class="p">(</span> <span class="n">TCP</span><span class="p">,</span> <span class="n">HTTP</span><span class="p">,</span> <span class="n">sport</span><span class="o">=</span><span class="mi">80</span> <span class="p">)</span>
+<span class="n">bind_layers</span><span class="p">(</span> <span class="n">TCP</span><span class="p">,</span> <span class="n">HTTP</span><span class="p">,</span> <span class="n">dport</span><span class="o">=</span><span class="mi">80</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>That&#8217;s  all folks!  Now every  packet  related to  port  80 will  be
+associated to the  layer <tt class="docutils literal"><span class="pre">HTTP</span></tt>, whether it is read from  a pcap file or
+received from the network.</p>
+<div class="section" id="the-guess-payload-class-way">
+<h4>The <tt class="docutils literal"><span class="pre">guess_payload_class()</span></tt> way<a class="headerlink" href="#the-guess-payload-class-way" title="Permalink to this headline">¶</a></h4>
+<p>Sometimes,  guessing the payload  class is  not as  straightforward as
+defining a single  port. For instance, it can depends on  a value of a
+given byte in the current layer. The 2 needed methods are:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">guess_payload_class()</span></tt> which must return  the guessed class for the
+payload (next layer). By default, it uses links between classes
+that have been put in place by <tt class="docutils literal"><span class="pre">bind_layers()</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">default_payload_class()</span></tt>  which returns  the  default value.   This
+method  defined in the  class <tt class="docutils literal"><span class="pre">Packet</span></tt>  returns <tt class="docutils literal"><span class="pre">Raw</span></tt>,  but it  can be
+overloaded.</li>
+</ul>
+<p>For  instance, decoding  802.11  changes depending  on  whether it  is
+ciphered or not:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Dot11</span><span class="p">(</span><span class="n">Packet</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">guess_payload_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">FCfield</span> <span class="o">&amp;</span> <span class="mh">0x40</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Dot11WEP</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Packet</span><span class="o">.</span><span class="n">guess_payload_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Several comments are needed here:</p>
+<ul class="simple">
+<li>this  cannot be  done  using  <tt class="docutils literal"><span class="pre">bind_layers()</span></tt>  because the  tests  are
+supposed to be &#8220;<tt class="docutils literal"><span class="pre">field==value</span></tt>&#8221;, but it is more complicated here as we
+test a single bit in the value of a field.</li>
+<li>if the  test fails, no assumption is  made, and we plug  back to the
+default guessing mechanisms calling <tt class="docutils literal"><span class="pre">Packet.guess_payload_class()</span></tt></li>
+</ul>
+<p>Most of  the time,  defining a method  <tt class="docutils literal"><span class="pre">guess_payload_class()</span></tt> is  not a
+necessity as the same result can be obtained from <tt class="docutils literal"><span class="pre">bind_layers()</span></tt>.</p>
+</div>
+<div class="section" id="changing-the-default-behavior">
+<h4>Changing the default behavior<a class="headerlink" href="#changing-the-default-behavior" title="Permalink to this headline">¶</a></h4>
+<p>If you do not like Scapy&#8217;s  behavior for a given layer, you can either
+change or disable it through  the call to <tt class="docutils literal"><span class="pre">split_layer()</span></tt>. For instance,
+if you do not want UDP/53 to be bound with <tt class="docutils literal"><span class="pre">DNS</span></tt>, just add in your code:
+``
+split_layers(UDP, DNS, sport=53)
+``
+Now every packet  with source port 53 will not be  handled as DNS, but
+whatever you specify instead.</p>
+</div>
+</div>
+<div class="section" id="under-the-hood-putting-everything-together">
+<h3>Under the hood: putting everything together<a class="headerlink" href="#under-the-hood-putting-everything-together" title="Permalink to this headline">¶</a></h3>
+<p>In  fact, each  layer  has a  field  payload_guess. When  you use  the
+bind_layers() way, it adds the defined next layers to that list.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">=</span><span class="n">TCP</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">payload_guess</span>
+<span class="go">[({&#39;dport&#39;: 2000}, &lt;class &#39;scapy.Skinny&#39;&gt;), ({&#39;sport&#39;: 2000}, &lt;class &#39;scapy.Skinny&#39;&gt;), ... )]</span>
+</pre></div>
+</div>
+<p>Then,  when it  needs to  guess  the next  layer class,  it calls  the
+default method <tt class="docutils literal"><span class="pre">Packet.guess_payload_class()</span></tt>.  This method runs through
+each  element  of  the   list  payload_guess,  each  element  being  a
+tuple:</p>
+<ul class="simple">
+<li>the 1st value is a field to test (<tt class="docutils literal"><span class="pre">'dport':</span> <span class="pre">2000</span></tt>)</li>
+<li>the 2nd value is the guessed class if it matches (<tt class="docutils literal"><span class="pre">Skinny</span></tt>)</li>
+</ul>
+<p>So, the  default <tt class="docutils literal"><span class="pre">guess_payload_class()</span></tt> tries all element  in the list,
+until  one   matches.  If  no   element  are  found,  it   then  calls
+<tt class="docutils literal"><span class="pre">default_payload_class()</span></tt>. If you have redefined this method, then yours
+is  called, otherwise,  the default  one is  called, and  <tt class="docutils literal"><span class="pre">Raw</span></tt>  type is
+returned.</p>
+<p><tt class="docutils literal"><span class="pre">Packet.guess_payload_class()</span></tt></p>
+<ul class="simple">
+<li>test what is in field <tt class="docutils literal"><span class="pre">guess_payload</span></tt></li>
+<li>call overloaded <tt class="docutils literal"><span class="pre">guess_payload_class()</span></tt></li>
+</ul>
+</div>
+</div>
+<div class="section" id="building">
+<h2>Building<a class="headerlink" href="#building" title="Permalink to this headline">¶</a></h2>
+<p>Building a packet is as simple as building each layer. Then, some
+magic happens to glue everything. Let&#8217;s do magic then.</p>
+<div class="section" id="id1">
+<h3>The basic stuff<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>First thing to  establish: what does &#8220;build&#8221; mean? As  we have seen, a
+layer  can   be  represented  in  different   ways  (human,  internal,
+machine). Building means going to the machine format.</p>
+<p>Second thing to  understand is &#8216;&#8217;when&#8217;&#8217; a layer is  built. Answer is not
+that obvious, but as soon  as you need the machine representation, the
+layers are built: when the packet is dropped on the network or written
+to a  file, when it  is converted as  a string, ...  In  fact, machine
+representation  should be  regarded as  a big  string with  the layers
+appended altogether.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">IP</span><span class="p">()</span><span class="o">/</span><span class="n">TCP</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hexdump</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+<span class="go">0000 45 00 00 28 00 01 00 00 40 06 7C CD 7F 00 00 01 E..(....@.|.....</span>
+<span class="go">0010 7F 00 00 01 00 14 00 50 00 00 00 00 00 00 00 00 .......P........</span>
+<span class="go">0020 50 02 20 00 91 7C 00 00 P. ..|..</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Calling <tt class="docutils literal"><span class="pre">str()</span></tt> builds the packet:</dt>
+<dd><ul class="first last simple">
+<li>non instanced fields are set to their default value</li>
+<li>lengths are updated automatically</li>
+<li>checksums are computed</li>
+<li>and so on.</li>
+</ul>
+</dd>
+</dl>
+<p>In fact, using <tt class="docutils literal"><span class="pre">str()</span></tt> rather than  <tt class="docutils literal"><span class="pre">show2()</span></tt> or any other method is not a
+random  choice  as  all   the  functions  building  the  packet  calls
+<tt class="docutils literal"><span class="pre">Packet.__str__()</span></tt>. However, <tt class="docutils literal"><span class="pre">__str__()</span></tt> calls another method: <tt class="docutils literal"><span class="pre">build()</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__iter__</span><span class="p">()</span><span class="o">.</span><span class="n">next</span><span class="p">()</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>What is important also to understand  is that usually, you do not care
+about the machine  representation, that is why the  human and internal
+representations are here.</p>
+<p>So, the  core method is <tt class="docutils literal"><span class="pre">build()</span></tt>  (the code has been  shortened to keep
+only the relevant parts):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">internal</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="n">pkt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_build</span><span class="p">()</span>
+    <span class="n">pay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_payload</span><span class="p">()</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_build</span><span class="p">(</span><span class="n">pkt</span><span class="p">,</span><span class="n">pay</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">internal</span><span class="p">:</span>
+        <span class="n">pkt</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">while</span> <span class="n">pkt</span><span class="o">.</span><span class="n">haslayer</span><span class="p">(</span><span class="n">Padding</span><span class="p">):</span>
+            <span class="n">pkt</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">getlayer</span><span class="p">(</span><span class="n">Padding</span><span class="p">)</span>
+            <span class="n">p</span> <span class="o">+=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">load</span>
+            <span class="n">pkt</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">payload</span>
+    <span class="k">return</span> <span class="n">p</span>
+</pre></div>
+</div>
+<p>So, it  starts by  building the current  layer, then the  payload, and
+<tt class="docutils literal"><span class="pre">post_build()</span></tt>  is called  to update  some late  evaluated  fields (like
+checksums). Last, the padding is added to the end of the packet.</p>
+<p>Of  course, building  a layer  is  the same  as building  each of  its
+fields, and that is exactly what <tt class="docutils literal"><span class="pre">do_build()</span></tt> does.</p>
+</div>
+<div class="section" id="building-fields">
+<h3>Building fields<a class="headerlink" href="#building-fields" title="Permalink to this headline">¶</a></h3>
+<p>The building of each field of a layer is called in <tt class="docutils literal"><span class="pre">Packet.do_build()</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">do_build</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">p</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields_desc</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">addfield</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getfieldval</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">p</span>
+</pre></div>
+</div>
+<p>The  core function  to  build a  field  is <tt class="docutils literal"><span class="pre">addfield()</span></tt>.   It takes  the
+internal view of the  field and put it at the end  of <tt class="docutils literal"><span class="pre">p</span></tt>. Usually, this
+method calls  <tt class="docutils literal"><span class="pre">i2m()</span></tt> and returns something  like <tt class="docutils literal"><span class="pre">p.self.i2m(val)</span></tt> (where
+<tt class="docutils literal"><span class="pre">val=self.getfieldval(f)</span></tt>).</p>
+<p>If <tt class="docutils literal"><span class="pre">val</span></tt> is set, then <tt class="docutils literal"><span class="pre">i2m()</span></tt> is just a matter of formatting the value the
+way it must  be. For instance, if a  byte is expected, <tt class="docutils literal"><span class="pre">struct.pack(&quot;B&quot;,</span> <span class="pre">val)</span></tt>
+is the right way to convert it.</p>
+<p>However, things  are more complicated if  <tt class="docutils literal"><span class="pre">val</span></tt> is not set,  it means no
+default  value was  provided  earlier,  and thus  the  field needs  to
+compute some &#8220;stuff&#8221; right now or later.</p>
+<p>&#8220;Right now&#8221;  means thanks  to <tt class="docutils literal"><span class="pre">i2m()</span></tt>, if  all pieces of  information is
+available.  For instance,  if  you have  to  handle a  length until  a
+certain delimiter.</p>
+<p>Ex: counting the length until a delimiter</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">XNumberField</span><span class="p">(</span><span class="n">FieldLenField</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&quot;</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">):</span>
+        <span class="n">FieldLenField</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">fld</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sep</span> <span class="o">=</span> <span class="n">sep</span>
+
+    <span class="k">def</span> <span class="nf">i2m</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkt</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">FieldLenField</span><span class="o">.</span><span class="n">i2m</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkt</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="si">%02x</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">x</span>
+
+    <span class="k">def</span> <span class="nf">m2i</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkt</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">addfield</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkt</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">s</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">i2m</span><span class="p">(</span><span class="n">pkt</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">getfield</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkt</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="n">sep</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">s</span><span class="p">[</span><span class="n">sep</span><span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">m2i</span><span class="p">(</span><span class="n">pkt</span><span class="p">,</span> <span class="n">s</span><span class="p">[:</span><span class="n">sep</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>In this example,  in <tt class="docutils literal"><span class="pre">i2m()</span></tt>, if <tt class="docutils literal"><span class="pre">x</span></tt> has already a  value, it is converted
+to its hexadecimal value. If no value is given, a length of &#8220;0&#8221; is
+returned.</p>
+<p>The glue is provided by <tt class="docutils literal"><span class="pre">Packet.do_build()</span></tt> which calls <tt class="docutils literal"><span class="pre">Field.addfield()</span></tt>
+for  each field in  the layer,  which in  turn calls  <tt class="docutils literal"><span class="pre">Field.i2m()</span></tt>: the
+layer is built IF a value was available.</p>
+</div>
+<div class="section" id="handling-default-values-post-build">
+<h3>Handling default values: <tt class="docutils literal"><span class="pre">post_build</span></tt><a class="headerlink" href="#handling-default-values-post-build" title="Permalink to this headline">¶</a></h3>
+<p>A default  value for a  given field is  sometimes either not  known or
+impossible to compute when the  fields are put together. For instance,
+if we used a <tt class="docutils literal"><span class="pre">XNumberField</span></tt> as  defined previously in a layer, we expect
+it  to be set  to a  given value  when the  packet is  built. However,
+nothing is returned by <tt class="docutils literal"><span class="pre">i2m()</span></tt> if it is not set.</p>
+<p>The answer to this problem is <tt class="docutils literal"><span class="pre">Packet.post_build()</span></tt>.</p>
+<p>When  this method is  called, the  packet is  already built,  but some
+fields still need  to be computed. This is  typically what is required
+to compute checksums or lengths. In fact, this is required each time a
+field&#8217;s value depends on something which is not in the current</p>
+<p>So, let  us assume we  have a packet  with a <tt class="docutils literal"><span class="pre">XNumberField</span></tt>, and  have a
+look to its building process:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Foo</span><span class="p">(</span><span class="n">Packet</span><span class="p">):</span>
+      <span class="n">fields_desc</span> <span class="o">=</span> <span class="p">[</span>
+          <span class="n">ByteField</span><span class="p">(</span><span class="s">&quot;type&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+          <span class="n">XNumberField</span><span class="p">(</span><span class="s">&quot;len&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&quot;</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">),</span>
+          <span class="n">StrFixedLenField</span><span class="p">(</span><span class="s">&quot;sep&quot;</span><span class="p">,</span> <span class="s">&quot;</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+          <span class="p">]</span>
+
+      <span class="k">def</span> <span class="nf">post_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">pay</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">len</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">pay</span><span class="p">:</span>
+            <span class="n">l</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pay</span><span class="p">)</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="nb">hex</span><span class="p">(</span><span class="n">l</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+        <span class="k">return</span> <span class="n">p</span><span class="o">+</span><span class="n">pay</span>
+</pre></div>
+</div>
+<p>When <tt class="docutils literal"><span class="pre">post_build()</span></tt> is called, <tt class="docutils literal"><span class="pre">p</span></tt>  is the current layer, <tt class="docutils literal"><span class="pre">pay</span></tt> the payload,
+that is what has already been built. We want our length to be the full
+length of the data put after  the separator, so we add its computation
+in <tt class="docutils literal"><span class="pre">post_build()</span></tt>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Foo</span><span class="p">()</span><span class="o">/</span><span class="p">(</span><span class="s">&quot;X&quot;</span><span class="o">*</span><span class="mi">32</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">show2</span><span class="p">()</span>
+<span class="go">###[ Foo ]###</span>
+<span class="go">  type= 0</span>
+<span class="go">  len= 32</span>
+<span class="go">  sep= &#39;\r\n&#39;</span>
+<span class="go">###[ Raw ]###</span>
+<span class="go">     load= &#39;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX&#39;</span>
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">len</span></tt> is correctly computed now:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">hexdump</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+<span class="go">0000   00 32 30 0D 0A 58 58 58  58 58 58 58 58 58 58 58   .20..XXXXXXXXXXX</span>
+<span class="go">0010   58 58 58 58 58 58 58 58  58 58 58 58 58 58 58 58   XXXXXXXXXXXXXXXX</span>
+<span class="go">0020   58 58 58 58 58                                     XXXXX</span>
+</pre></div>
+</div>
+<p>And the machine representation is the expected one.</p>
+</div>
+<div class="section" id="handling-default-values-automatic-computation">
+<h3>Handling default values: automatic computation<a class="headerlink" href="#handling-default-values-automatic-computation" title="Permalink to this headline">¶</a></h3>
+<p>As we have previously seen, the dissection mechanism is built upon the
+links between  the layers created  by the programmer. However,  it can
+also be used during the building process.</p>
+<p>In the  layer <tt class="docutils literal"><span class="pre">Foo()</span></tt>, our  first byte is  the type, which  defines what
+comes next, e.g. if <tt class="docutils literal"><span class="pre">type=0</span></tt>, next layer is <tt class="docutils literal"><span class="pre">Bar0</span></tt>, if it is 1, next layer
+is  <tt class="docutils literal"><span class="pre">Bar1</span></tt>,  and  so on.  We  would  like  then  this  field to  be  set
+automatically according to what comes next.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Bar1</span><span class="p">(</span><span class="n">Packet</span><span class="p">):</span>
+    <span class="n">fields_desc</span> <span class="o">=</span> <span class="p">[</span>
+          <span class="n">IntField</span><span class="p">(</span><span class="s">&quot;val&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+          <span class="p">]</span>
+
+<span class="k">class</span> <span class="nc">Bar2</span><span class="p">(</span><span class="n">Packet</span><span class="p">):</span>
+    <span class="n">fields_desc</span> <span class="o">=</span> <span class="p">[</span>
+          <span class="n">IPField</span><span class="p">(</span><span class="s">&quot;addr&quot;</span><span class="p">,</span> <span class="s">&quot;127.0.0.1&quot;</span><span class="p">)</span>
+          <span class="p">]</span>
+</pre></div>
+</div>
+<p>If we use  these classes with nothing else, we  will have trouble when
+dissecting the  packets as nothing  binds Foo layer with  the multiple
+<tt class="docutils literal"><span class="pre">Bar*</span></tt> even when we explicitly build the packet through the call to
+<tt class="docutils literal"><span class="pre">show2()</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Foo</span><span class="p">()</span><span class="o">/</span><span class="n">Bar1</span><span class="p">(</span><span class="n">val</span><span class="o">=</span><span class="mi">1337</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span>
+<span class="go">&lt;Foo  |&lt;Bar1  val=1337 |&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">show2</span><span class="p">()</span>
+<span class="go">###[ Foo ]###</span>
+<span class="go">  type= 0</span>
+<span class="go">  len= 4</span>
+<span class="go">  sep= &#39;\r\n&#39;</span>
+<span class="go">###[ Raw ]###</span>
+<span class="go">    load= &#39;\x00\x00\x059&#39;</span>
+</pre></div>
+</div>
+<p>Problems:</p>
+<ol class="arabic simple">
+<li><tt class="docutils literal"><span class="pre">type</span></tt> is still  equal to 0 while we wanted  it to be automatically
+set to 1. We could of course have built <tt class="docutils literal"><span class="pre">p</span></tt> with <tt class="docutils literal"><span class="pre">p</span> <span class="pre">=</span> <span class="pre">Foo(type=1)/Bar0(val=1337)</span></tt>
+but this is not very convenient.</li>
+<li>the packet is badly dissected as <tt class="docutils literal"><span class="pre">Bar1</span></tt> is regarded as <tt class="docutils literal"><span class="pre">Raw</span></tt>. This
+is because no links have been set between <tt class="docutils literal"><span class="pre">Foo()</span></tt> and <tt class="docutils literal"><span class="pre">Bar*()</span></tt>.</li>
+</ol>
+<p>In order to  understand what we should have done  to obtain the proper
+behavior,  we must look  at how  the layers  are assembled.   When two
+independent packets instances <tt class="docutils literal"><span class="pre">Foo()</span></tt> and <tt class="docutils literal"><span class="pre">Bar1(val=1337)</span></tt> are
+compounded with the &#8216;/&#8217; operator, it results in a new packet where the
+two previous instances are cloned  (i.e.  are now two distinct objects
+structurally different, but holding the same values):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">__div__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Packet</span><span class="p">):</span>
+        <span class="n">cloneA</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">cloneB</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">cloneA</span><span class="o">.</span><span class="n">add_payload</span><span class="p">(</span><span class="n">cloneB</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cloneA</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">/</span><span class="n">Raw</span><span class="p">(</span><span class="n">load</span><span class="o">=</span><span class="n">other</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The right  hand side of the  operator becomes the payload  of the left
+hand    side.    This    is    performed   through    the   call    to
+<tt class="docutils literal"><span class="pre">add_payload()</span></tt>. Finally, the new packet is returned.</p>
+<p>Note: we can observe that if  other isn&#8217;t a <tt class="docutils literal"><span class="pre">Packet</span></tt> but a string,
+the <tt class="docutils literal"><span class="pre">Raw</span></tt>  class is instantiated to  form the payload.  Like in this
+example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">IP</span><span class="p">()</span><span class="o">/</span><span class="s">&quot;AAAA&quot;</span>
+<span class="go">&lt;IP  |&lt;Raw  load=&#39;AAAA&#39; |&gt;&gt;</span>
+</pre></div>
+</div>
+<p>Well, what  <tt class="docutils literal"><span class="pre">add_payload()</span></tt> should implement? Just  a link between
+two packets? Not only, in  our case this method will appropriately set
+the correct value to <tt class="docutils literal"><span class="pre">type</span></tt>.</p>
+<p>Instinctively  we feel that  the upper  layer (the  right of  &#8216;/&#8217;) can
+gather the  values to set the fields  to the lower layer  (the left of
+&#8216;/&#8217;).  Like  previously explained, there is a  convenient mechanism to
+specify  the  bindings in  both  directions  between two  neighbouring
+layers.</p>
+<p>Once again, these information must be provided to <tt class="docutils literal"><span class="pre">bind_layers()</span></tt>,
+which  will   internally  call  <tt class="docutils literal"><span class="pre">bind_top_down()</span></tt>   in  charge  to
+aggregate the fields to overload. In our case what we needs to specify
+is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">bind_layers</span><span class="p">(</span> <span class="n">Foo</span><span class="p">,</span> <span class="n">Bar1</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;type&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">}</span> <span class="p">)</span>
+<span class="n">bind_layers</span><span class="p">(</span> <span class="n">Foo</span><span class="p">,</span> <span class="n">Bar2</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;type&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">}</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Then, <tt class="docutils literal"><span class="pre">add_payload()</span></tt>  iterates over the  <tt class="docutils literal"><span class="pre">overload_fields</span></tt> of
+the upper packet (the payload), get the fields associated to the lower
+packet (by its type) and insert them in <tt class="docutils literal"><span class="pre">overloaded_fields</span></tt>.</p>
+<p>For  now,   when  the   value  of  this   field  will   be  requested,
+<tt class="docutils literal"><span class="pre">getfieldval()</span></tt>    will    return    the   value    inserted    in
+<tt class="docutils literal"><span class="pre">overloaded_fields</span></tt>.</p>
+<p>The fields are dispatched between three dictionaries:</p>
+<ul>
+<li><p class="first"><tt class="docutils literal"><span class="pre">fields</span></tt>: fields whose the value have been explicitly set, like
+<tt class="docutils literal"><span class="pre">pdst</span></tt> in TCP (<tt class="docutils literal"><span class="pre">pdst='42'</span></tt>)</p>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">overloaded_fields</span></tt>: overloaded fields</p>
+</li>
+<li><dl class="first docutils">
+<dt><tt class="docutils literal"><span class="pre">default_fields</span></tt>: all the fields with their default value (these fields</dt>
+<dd><p class="first last">are initialized according to <tt class="docutils literal"><span class="pre">fields_desc</span></tt> by the constructor
+by calling <tt class="docutils literal"><span class="pre">init_fields()</span></tt> ).</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>In the following code we can observe how a field is selected and its
+value returned:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">getfieldval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+   <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">overloaded_fields</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_fields</span><span class="p">:</span>
+       <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">attr</span><span class="p">):</span>
+           <span class="k">return</span> <span class="n">f</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span>
+   <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">payload</span><span class="o">.</span><span class="n">getfieldval</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Fields  inserted  in  <tt class="docutils literal"><span class="pre">fields</span></tt>  have  the  higher  priority,  then
+<tt class="docutils literal"><span class="pre">overloaded_fields</span></tt>, then finally <tt class="docutils literal"><span class="pre">default_fields</span></tt>.  Hence, if
+the field <tt class="docutils literal"><span class="pre">type</span></tt> is set in <tt class="docutils literal"><span class="pre">overloaded_fields</span></tt>, its value will
+be returned instead of the value contained in <tt class="docutils literal"><span class="pre">default_fields</span></tt>.</p>
+<p>We are now able to understand all the magic behind it!</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Foo</span><span class="p">()</span><span class="o">/</span><span class="n">Bar1</span><span class="p">(</span><span class="n">val</span><span class="o">=</span><span class="mh">0x1337</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span>
+<span class="go">&lt;Foo  type=1 |&lt;Bar1  val=4919 |&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">###[ Foo ]###</span>
+<span class="go">  type= 1</span>
+<span class="go">  len= 4</span>
+<span class="go">  sep= &#39;\r\n&#39;</span>
+<span class="go">###[ Bar1 ]###</span>
+<span class="go">    val= 4919</span>
+</pre></div>
+</div>
+<p>Our 2 problems have been solved without us doing much: so good to be
+lazy :)</p>
+</div>
+<div class="section" id="id2">
+<h3>Under the hood: putting everything together<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>Last but not least, it is very useful to understand when each function
+is called when a packet is built:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">hexdump</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+<span class="go">Packet.str=Foo</span>
+<span class="go">Packet.iter=Foo</span>
+<span class="go">Packet.iter=Bar1</span>
+<span class="go">Packet.build=Foo</span>
+<span class="go">Packet.build=Bar1</span>
+<span class="go">Packet.post_build=Bar1</span>
+<span class="go">Packet.post_build=Foo</span>
+</pre></div>
+</div>
+<p>As you can see, it first runs through the list of each field, and then
+build  them starting  from the  beginning. Once  all layers  have been
+built, it then calls <tt class="docutils literal"><span class="pre">post_build()</span></tt> starting from the end.</p>
+</div>
+</div>
+<div class="section" id="fields">
+<h2>Fields<a class="headerlink" href="#fields" title="Permalink to this headline">¶</a></h2>
+<p id="index-3">Here&#8217;s a list of fields that Scapy supports out of the box:</p>
+<div class="section" id="simple-datatypes">
+<h3>Simple datatypes<a class="headerlink" href="#simple-datatypes" title="Permalink to this headline">¶</a></h3>
+<p>Legend:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">X</span></tt> - hexadecimal representation</li>
+<li><tt class="docutils literal"><span class="pre">LE</span></tt> - little endian (default is big endian = network byte order)</li>
+<li><tt class="docutils literal"><span class="pre">Signed</span></tt> - signed (default is unsigned)</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">ByteField</span>
+<span class="n">XByteField</span>
+
+<span class="n">ShortField</span>
+<span class="n">LEShortField</span>
+<span class="n">XShortField</span>
+
+<span class="n">X3BytesField</span>        <span class="c"># three bytes (in hexad</span>
+
+<span class="n">IntField</span>
+<span class="n">SignedIntField</span>
+<span class="n">LEIntField</span>
+<span class="n">LESignedIntField</span>
+<span class="n">XIntField</span>
+
+<span class="n">LongField</span>
+<span class="n">XLongField</span>
+<span class="n">LELongField</span>
+
+<span class="n">IEEEFloatField</span>
+<span class="n">IEEEDoubleField</span>
+<span class="n">BCDFloatField</span>       <span class="c"># binary coded decimal</span>
+
+<span class="n">BitField</span>
+<span class="n">XBitField</span>
+
+<span class="n">BitFieldLenField</span>    <span class="c"># BitField specifying a length (used in RTP)</span>
+<span class="n">FlagsField</span>
+<span class="n">FloatField</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="enumerations">
+<h3>Enumerations<a class="headerlink" href="#enumerations" title="Permalink to this headline">¶</a></h3>
+<p>Possible field values are taken from a given enumeration (list, dictionary, ...)
+e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">ByteEnumField</span><span class="p">(</span><span class="s">&quot;code&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span><span class="s">&quot;REQUEST&quot;</span><span class="p">,</span><span class="mi">2</span><span class="p">:</span><span class="s">&quot;RESPONSE&quot;</span><span class="p">,</span><span class="mi">3</span><span class="p">:</span><span class="s">&quot;SUCCESS&quot;</span><span class="p">,</span><span class="mi">4</span><span class="p">:</span><span class="s">&quot;FAILURE&quot;</span><span class="p">})</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">EnumField</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">enum</span><span class="p">,</span> <span class="n">fmt</span> <span class="o">=</span> <span class="s">&quot;H&quot;</span><span class="p">)</span>
+<span class="n">CharEnumField</span>
+<span class="n">BitEnumField</span>
+<span class="n">ShortEnumField</span>
+<span class="n">LEShortEnumField</span>
+<span class="n">ByteEnumField</span>
+<span class="n">IntEnumField</span>
+<span class="n">SignedIntEnumField</span>
+<span class="n">LEIntEnumField</span>
+<span class="n">XShortEnumField</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="strings">
+<h3>Strings<a class="headerlink" href="#strings" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre>StrField(name, default, fmt=&quot;H&quot;, remain=0, shift=0)
+StrLenField(name, default, fld=None, length_from=None, shift=0):
+StrFixedLenField
+StrNullField
+StrStopField
+</pre></div>
+</div>
+</div>
+<div class="section" id="lists-and-lengths">
+<h3>Lists and lengths<a class="headerlink" href="#lists-and-lengths" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">FieldList</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">fld</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">length_from</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">count_from</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+  <span class="c"># A list assembled and dissected with many times the same field type</span>
+
+  <span class="c"># field: instance of the field that will be used to assemble and disassemble a list item</span>
+  <span class="c"># length_from: name of the FieldLenField holding the list length</span>
+
+<span class="n">FieldLenField</span>     <span class="c">#  holds the list length of a FieldList field</span>
+<span class="n">LEFieldLenField</span>
+
+<span class="n">LenField</span>          <span class="c"># contains len(pkt.payload)</span>
+
+<span class="n">PacketField</span>       <span class="c"># holds packets</span>
+<span class="n">PacketLenField</span>    <span class="c"># used e.g. in ISAKMP_payload_Proposal</span>
+<span class="n">PacketListField</span>
+</pre></div>
+</div>
+<div class="section" id="variable-length-fields">
+<h4>Variable length fields<a class="headerlink" href="#variable-length-fields" title="Permalink to this headline">¶</a></h4>
+<p>This is about how fields that have a variable length can be handled with Scapy. These fields usually know their length from another field. Let&#8217;s call them varfield and lenfield. The idea is to make each field reference the other so that when a packet is dissected, varfield can know its length from lenfield when a packet is assembled, you don&#8217;t have to fill lenfield, that will deduce its value directly from varfield value.</p>
+<p>Problems arise whe you realize that the relation between lenfield and varfield is not always straightforward. Sometimes, lenfield indicates a length in bytes, sometimes a number of objects. Sometimes the length includes the header part, so that you must substract the fixed header length to deduce the varfield length. Sometimes the length is not counted in bytes but in 16bits words. Sometimes the same lenfield is used by two different varfields. Sometimes the same varfield is referenced by two lenfields, one in bytes one in 16bits words.</p>
+<div class="section" id="the-length-field">
+<h5>The length field<a class="headerlink" href="#the-length-field" title="Permalink to this headline">¶</a></h5>
+<p>First, a lenfield is declared using <tt class="docutils literal"><span class="pre">FieldLenField</span></tt> (or a derivate). If its value is None when assembling a packet, its value will be deduced from the varfield that was referenced. The reference is done using either the <tt class="docutils literal"><span class="pre">length_of</span></tt> parameter or the <tt class="docutils literal"><span class="pre">count_of</span></tt> parameter. The <tt class="docutils literal"><span class="pre">count_of</span></tt> parameter has a meaning only when varfield is a field that holds a list (<tt class="docutils literal"><span class="pre">PacketListField</span></tt> or <tt class="docutils literal"><span class="pre">FieldListField</span></tt>). The value will be the name of the varfield, as a string. According to which parameter is used the <tt class="docutils literal"><span class="pre">i2len()</span></tt> or <tt class="docutils literal"><span class="pre">i2count()</span></tt> method will be called on the varfield value. The returned value will the be adjusted by the function provided in the adjust parameter. adjust will be applied on 2 arguments: the packet instance and the value returned by <tt class="docutils literal"><span class="pre">i2len()</span></tt> or <tt class="docutils literal"><span class="pre">i2count()</span></tt>. By default, adjust does nothing:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">adjust</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">,</span><span class="n">x</span><span class="p">:</span> <span class="n">x</span>
+</pre></div>
+</div>
+<p>For instance, if <tt class="docutils literal"><span class="pre">the_varfield</span></tt> is a list</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">FieldLenField</span><span class="p">(</span><span class="s">&quot;the_lenfield&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">count_of</span><span class="o">=</span><span class="s">&quot;the_varfield&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or if the length is in 16bits words:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">FieldLenField</span><span class="p">(</span><span class="s">&quot;the_lenfield&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">length_of</span><span class="o">=</span><span class="s">&quot;the_varfield&quot;</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">,</span><span class="n">x</span><span class="p">:(</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-variable-length-field">
+<h5>The variable length field<a class="headerlink" href="#the-variable-length-field" title="Permalink to this headline">¶</a></h5>
+<p>A varfield can be: <tt class="docutils literal"><span class="pre">StrLenField</span></tt>, <tt class="docutils literal"><span class="pre">PacketLenField</span></tt>, <tt class="docutils literal"><span class="pre">PacketListField</span></tt>, <tt class="docutils literal"><span class="pre">FieldListField</span></tt>, ...</p>
+<p>For the two firsts, whe a packet is being dissected, their lengths are deduced from a lenfield already dissected. The link is done using the <tt class="docutils literal"><span class="pre">length_from</span></tt> parameter, which takes a function that, applied to the partly dissected packet, returns the length in bytes to take for the field. For instance:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">StrLenField</span><span class="p">(</span><span class="s">&quot;the_varfield&quot;</span><span class="p">,</span> <span class="s">&quot;the_default_value&quot;</span><span class="p">,</span> <span class="n">length_from</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">the_lenfield</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">StrLenField</span><span class="p">(</span><span class="s">&quot;the_varfield&quot;</span><span class="p">,</span> <span class="s">&quot;the_default_value&quot;</span><span class="p">,</span> <span class="n">length_from</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">the_lenfield</span><span class="o">-</span><span class="mi">12</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For the <tt class="docutils literal"><span class="pre">PacketListField</span></tt> and <tt class="docutils literal"><span class="pre">FieldListField</span></tt> and their derivatives, they work as above when they need a length. If they need a number of elements, the length_from parameter must be ignored and the count_from parameter must be used instead. For instance:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">FieldListField</span><span class="p">(</span><span class="s">&quot;the_varfield&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s">&quot;1.2.3.4&quot;</span><span class="p">],</span> <span class="n">IPField</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="s">&quot;0.0.0.0&quot;</span><span class="p">),</span> <span class="n">count_from</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">the_lenfield</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="examples">
+<h4>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">TestSLF</span><span class="p">(</span><span class="n">Packet</span><span class="p">):</span>
+    <span class="n">fields_desc</span><span class="o">=</span><span class="p">[</span> <span class="n">FieldLenField</span><span class="p">(</span><span class="s">&quot;len&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">length_of</span><span class="o">=</span><span class="s">&quot;data&quot;</span><span class="p">),</span>
+                  <span class="n">StrLenField</span><span class="p">(</span><span class="s">&quot;data&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">length_from</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span><span class="n">pkt</span><span class="o">.</span><span class="n">len</span><span class="p">)</span> <span class="p">]</span>
+
+<span class="k">class</span> <span class="nc">TestPLF</span><span class="p">(</span><span class="n">Packet</span><span class="p">):</span>
+    <span class="n">fields_desc</span><span class="o">=</span><span class="p">[</span> <span class="n">FieldLenField</span><span class="p">(</span><span class="s">&quot;len&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">count_of</span><span class="o">=</span><span class="s">&quot;plist&quot;</span><span class="p">),</span>
+                  <span class="n">PacketListField</span><span class="p">(</span><span class="s">&quot;plist&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">IP</span><span class="p">,</span> <span class="n">count_from</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span><span class="n">pkt</span><span class="o">.</span><span class="n">len</span><span class="p">)</span> <span class="p">]</span>
+
+<span class="k">class</span> <span class="nc">TestFLF</span><span class="p">(</span><span class="n">Packet</span><span class="p">):</span>
+    <span class="n">fields_desc</span><span class="o">=</span><span class="p">[</span>
+       <span class="n">FieldLenField</span><span class="p">(</span><span class="s">&quot;the_lenfield&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">count_of</span><span class="o">=</span><span class="s">&quot;the_varfield&quot;</span><span class="p">),</span>
+       <span class="n">FieldListField</span><span class="p">(</span><span class="s">&quot;the_varfield&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s">&quot;1.2.3.4&quot;</span><span class="p">],</span> <span class="n">IPField</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="s">&quot;0.0.0.0&quot;</span><span class="p">),</span>
+                       <span class="n">count_from</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">the_lenfield</span><span class="p">)</span> <span class="p">]</span>
+
+<span class="k">class</span> <span class="nc">TestPkt</span><span class="p">(</span><span class="n">Packet</span><span class="p">):</span>
+    <span class="n">fields_desc</span> <span class="o">=</span> <span class="p">[</span> <span class="n">ByteField</span><span class="p">(</span><span class="s">&quot;f1&quot;</span><span class="p">,</span><span class="mi">65</span><span class="p">),</span>
+                    <span class="n">ShortField</span><span class="p">(</span><span class="s">&quot;f2&quot;</span><span class="p">,</span><span class="mh">0x4244</span><span class="p">)</span> <span class="p">]</span>
+    <span class="k">def</span> <span class="nf">extract_padding</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">p</span>
+
+<span class="k">class</span> <span class="nc">TestPLF2</span><span class="p">(</span><span class="n">Packet</span><span class="p">):</span>
+    <span class="n">fields_desc</span> <span class="o">=</span> <span class="p">[</span> <span class="n">FieldLenField</span><span class="p">(</span><span class="s">&quot;len1&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">count_of</span><span class="o">=</span><span class="s">&quot;plist&quot;</span><span class="p">,</span><span class="n">fmt</span><span class="o">=</span><span class="s">&quot;H&quot;</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">,</span><span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="o">+</span><span class="mi">2</span><span class="p">),</span>
+                    <span class="n">FieldLenField</span><span class="p">(</span><span class="s">&quot;len2&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">length_of</span><span class="o">=</span><span class="s">&quot;plist&quot;</span><span class="p">,</span><span class="n">fmt</span><span class="o">=</span><span class="s">&quot;I&quot;</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">,</span><span class="n">x</span><span class="p">:(</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
+                    <span class="n">PacketListField</span><span class="p">(</span><span class="s">&quot;plist&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">TestPkt</span><span class="p">,</span> <span class="n">length_from</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:(</span><span class="n">x</span><span class="o">.</span><span class="n">len2</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">3</span><span class="o">*</span><span class="mi">3</span><span class="p">)</span> <span class="p">]</span>
+</pre></div>
+</div>
+<p>Test the <tt class="docutils literal"><span class="pre">FieldListField</span></tt> class:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">TestFLF</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\x00\x02</span><span class="s">ABCDEFGHIJKL&quot;</span><span class="p">)</span>
+<span class="go">&lt;TestFLF  the_lenfield=2 the_varfield=[&#39;65.66.67.68&#39;, &#39;69.70.71.72&#39;] |&lt;Raw  load=&#39;IJKL&#39; |&gt;&gt;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="special">
+<h3>Special<a class="headerlink" href="#special" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Emph</span>     <span class="c"># Wrapper to emphasize field when printing, e.g. Emph(IPField(&quot;dst&quot;, &quot;127.0.0.1&quot;)),</span>
+
+<span class="n">ActionField</span>
+
+<span class="n">ConditionalField</span><span class="p">(</span><span class="n">fld</span><span class="p">,</span> <span class="n">cond</span><span class="p">)</span>
+        <span class="c"># Wrapper to make field &#39;fld&#39; only appear if</span>
+        <span class="c"># function &#39;cond&#39; evals to True, e.g.</span>
+        <span class="c"># ConditionalField(XShortField(&quot;chksum&quot;,None),lambda pkt:pkt.chksumpresent==1)</span>
+
+
+<span class="n">PadField</span><span class="p">(</span><span class="n">fld</span><span class="p">,</span> <span class="n">align</span><span class="p">,</span> <span class="n">padwith</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+       <span class="c"># Add bytes after the proxified field so that it ends at</span>
+       <span class="c"># the specified alignment from its beginning</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="tcp-ip">
+<h3>TCP/IP<a class="headerlink" href="#tcp-ip" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">IPField</span>
+<span class="n">SourceIPField</span>
+
+<span class="n">IPoptionsField</span>
+<span class="n">TCPOptionsField</span>
+
+<span class="n">MACField</span>
+<span class="n">DestMACField</span><span class="p">(</span><span class="n">MACField</span><span class="p">)</span>
+<span class="n">SourceMACField</span><span class="p">(</span><span class="n">MACField</span><span class="p">)</span>
+<span class="n">ARPSourceMACField</span><span class="p">(</span><span class="n">MACField</span><span class="p">)</span>
+
+<span class="n">ICMPTimeStampField</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id3">
+<h3>802.11<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Dot11AddrMACField</span>
+<span class="n">Dot11Addr2MACField</span>
+<span class="n">Dot11Addr3MACField</span>
+<span class="n">Dot11Addr4MACField</span>
+<span class="n">Dot11SCField</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="dns">
+<h3>DNS<a class="headerlink" href="#dns" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">DNSStrField</span>
+<span class="n">DNSRRCountField</span>
+<span class="n">DNSRRField</span>
+<span class="n">DNSQRField</span>
+<span class="n">RDataField</span>
+<span class="n">RDLenField</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="asn-1">
+<h3>ASN.1<a class="headerlink" href="#asn-1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">ASN1F_element</span>
+<span class="n">ASN1F_field</span>
+<span class="n">ASN1F_INTEGER</span>
+<span class="n">ASN1F_enum_INTEGER</span>
+<span class="n">ASN1F_STRING</span>
+<span class="n">ASN1F_OID</span>
+<span class="n">ASN1F_SEQUENCE</span>
+<span class="n">ASN1F_SEQUENCE_OF</span>
+<span class="n">ASN1F_PACKET</span>
+<span class="n">ASN1F_CHOICE</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="other-protocols">
+<h3>Other protocols<a class="headerlink" href="#other-protocols" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">NetBIOSNameField</span>         <span class="c"># NetBIOS (StrFixedLenField)</span>
+
+<span class="n">ISAKMPTransformSetField</span>  <span class="c"># ISAKMP (StrLenField)</span>
+
+<span class="n">TimeStampField</span>           <span class="c"># NTP (BitField)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Adding new protocols</a><ul>
+<li><a class="reference internal" href="#simple-example">Simple example</a></li>
+<li><a class="reference internal" href="#layers">Layers</a><ul>
+<li><a class="reference internal" href="#building-a-new-layer">Building a new layer</a></li>
+<li><a class="reference internal" href="#manipulating-packets-manipulating-its-fields">Manipulating packets == manipulating its fields</a></li>
+<li><a class="reference internal" href="#example-variable-length-quantities">Example: variable length quantities</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dissecting">Dissecting</a><ul>
+<li><a class="reference internal" href="#the-basic-stuff">The basic stuff</a></li>
+<li><a class="reference internal" href="#dissecting-fields">Dissecting fields</a></li>
+<li><a class="reference internal" href="#binding-layers">Binding layers</a><ul>
+<li><a class="reference internal" href="#the-guess-payload-class-way">The <tt class="docutils literal"><span class="pre">guess_payload_class()</span></tt> way</a></li>
+<li><a class="reference internal" href="#changing-the-default-behavior">Changing the default behavior</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#under-the-hood-putting-everything-together">Under the hood: putting everything together</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#building">Building</a><ul>
+<li><a class="reference internal" href="#id1">The basic stuff</a></li>
+<li><a class="reference internal" href="#building-fields">Building fields</a></li>
+<li><a class="reference internal" href="#handling-default-values-post-build">Handling default values: <tt class="docutils literal"><span class="pre">post_build</span></tt></a></li>
+<li><a class="reference internal" href="#handling-default-values-automatic-computation">Handling default values: automatic computation</a></li>
+<li><a class="reference internal" href="#id2">Under the hood: putting everything together</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#fields">Fields</a><ul>
+<li><a class="reference internal" href="#simple-datatypes">Simple datatypes</a></li>
+<li><a class="reference internal" href="#enumerations">Enumerations</a></li>
+<li><a class="reference internal" href="#strings">Strings</a></li>
+<li><a class="reference internal" href="#lists-and-lengths">Lists and lengths</a><ul>
+<li><a class="reference internal" href="#variable-length-fields">Variable length fields</a><ul>
+<li><a class="reference internal" href="#the-length-field">The length field</a></li>
+<li><a class="reference internal" href="#the-variable-length-field">The variable length field</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#special">Special</a></li>
+<li><a class="reference internal" href="#tcp-ip">TCP/IP</a></li>
+<li><a class="reference internal" href="#id3">802.11</a></li>
+<li><a class="reference internal" href="#dns">DNS</a></li>
+<li><a class="reference internal" href="#asn-1">ASN.1</a></li>
+<li><a class="reference internal" href="#other-protocols">Other protocols</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="extending.html"
+                        title="previous chapter">Build your own tools</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="troubleshooting.html"
+                        title="next chapter">Troubleshooting</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/build_dissect.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="troubleshooting.html" title="Troubleshooting"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="extending.html" title="Build your own tools"
+             >previous</a> |</li>
+        <li><a href="index.html">Scapy 2.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, 2009 Philippe Biondi and the Scapy community.
+      Last updated on Jun 26, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

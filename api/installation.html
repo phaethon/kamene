@@ -1,0 +1,547 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Download and Installation &mdash; Scapy 2.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Scapy 2.3.1 documentation" href="index.html" />
+    <link rel="next" title="Usage" href="usage.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="usage.html" title="Usage"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="introduction.html" title="Introduction"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Scapy 2.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="download-and-installation">
+<h1>Download and Installation<a class="headerlink" href="#download-and-installation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ol class="arabic simple" start="0">
+<li>Install <em>Python 2.5</em>.</li>
+<li>Download and install <em>Scapy</em>.</li>
+<li>(For non-Linux platforms): Install <em>libpcap and libdnet</em> and their Python wrappers.</li>
+<li>(Optional): Install <em>additional software</em> for special features.</li>
+<li>Run Scapy with root priviledges.</li>
+</ol>
+</div></blockquote>
+<p>Each of these steps can be done in a different way dependent on your platform and on the version of Scapy you want to use.</p>
+<p>At the moment, there are two different versions of Scapy:</p>
+<ul class="simple">
+<li><strong>Scapy v1.x</strong>. It consists of only one file and works on Python 2.4, so it might be easier to install.
+Moreover, your OS may already have a specially prepared packages or ports for it. Last version is v1.2.2.</li>
+<li><strong>Scapy v2.x</strong>. The current development version adds several features (e.g. IPv6). It consists of several
+files  packaged in the standard distutils way. Scapy v2 needs Python 2.5.</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">In Scapy v2 use <tt class="docutils literal"><span class="pre">from</span> <span class="pre">scapy.all</span> <span class="pre">import</span> <span class="pre">*</span></tt> instead of <tt class="docutils literal"><span class="pre">from</span> <span class="pre">scapy</span> <span class="pre">import</span> <span class="pre">*</span></tt>.</p>
+</div>
+</div>
+<div class="section" id="installing-scapy-v2-x">
+<h2>Installing Scapy v2.x<a class="headerlink" href="#installing-scapy-v2-x" title="Permalink to this headline">¶</a></h2>
+<p>The following steps describe how to install (or update) Scapy itself.
+Dependent on your platform, some additional libraries might have to be installed to make it actually work.
+So please also have a look at the platform specific chapters on how to install those requirements.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The following steps apply to Unix-like operating systems (Linux, BSD, Mac OS X).
+For Windows, see the special chapter below.</p>
+</div>
+<p>Make sure you have Python installed before you go on.</p>
+<div class="section" id="latest-release">
+<h3>Latest release<a class="headerlink" href="#latest-release" title="Permalink to this headline">¶</a></h3>
+<p>Download the <a class="reference external" href="http://scapy.net">latest version</a> to a temporary directory and install it in the standard <a class="reference external" href="http://docs.python.org/inst/inst.html">distutils</a> way:</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="nv">$ </span><span class="nb">cd</span> /tmp
+<span class="nv">$ </span>wget scapy.net
+<span class="nv">$ </span>unzip scapy-latest.zip
+<span class="nv">$ </span><span class="nb">cd </span>scapy-2.*
+<span class="nv">$ </span>sudo python setup.py install
+</pre></div>
+</div>
+<p>Alternatively, you can execute the zip file:</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="nv">$ </span>chmod +x scapy-latest.zip
+<span class="nv">$ </span>sudo ./scapy-latest.zip
+</pre></div>
+</div>
+<p>or:</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="nv">$ </span>sudo sh scapy-latest.zip
+</pre></div>
+</div>
+<p>or:</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="nv">$ </span>mv scapy-latest.zip /usr/local/bin/scapy
+<span class="nv">$ </span>sudo scapy
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">To make a zip executable, some bytes have been added before the zip header.
+Most zip programs handle this, but not all. If your zip program complains
+about the zip file to be corrupted, either change it, or download a
+non-executable zip at <a class="reference external" href="http://hg.secdev.org/scapy/archive/tip.zip">http://hg.secdev.org/scapy/archive/tip.zip</a></p>
+</div>
+</div>
+<div class="section" id="current-development-version">
+<h3>Current development version<a class="headerlink" href="#current-development-version" title="Permalink to this headline">¶</a></h3>
+<p id="index-0">If you always want the latest version with all new features and bugfixes, use Scapy&#8217;s Mercurial repository:</p>
+<ol class="arabic">
+<li><p class="first">Install the <a class="reference external" href="http://www.selenic.com/mercurial/">Mercurial</a> version control system. For example, on Debian/Ubuntu use:</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="nv">$ </span>sudo apt-get install mercurial
+</pre></div>
+</div>
+<p>or on OpenBSD:</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="nv">$ </span>pkg_add mercurial
+</pre></div>
+</div>
+</li>
+<li><p class="first">Check out a clone of Scapy&#8217;s repository:</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="nv">$ </span>hg clone http://hg.secdev.org/scapy
+</pre></div>
+</div>
+</li>
+<li><p class="first">Install Scapy in the standard distutils way:</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="nv">$ </span><span class="nb">cd </span>scapy
+<span class="nv">$ </span>sudo python setup.py install
+</pre></div>
+</div>
+</li>
+</ol>
+<p>Then you can always update to the latest version:</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="nv">$ </span>hg pull
+<span class="nv">$ </span>hg update
+<span class="nv">$ </span>sudo python setup.py install
+</pre></div>
+</div>
+<p>For more information about Mercurial, have a look at the <a class="reference external" href="http://hgbook.red-bean.com/">Mercurial book</a>.</p>
+</div>
+</div>
+<div class="section" id="installing-scapy-v1-2">
+<h2>Installing Scapy v1.2<a class="headerlink" href="#installing-scapy-v1-2" title="Permalink to this headline">¶</a></h2>
+<p>As Scapy v1 consists only of one single Python file, installation is easy:
+Just download the last version and run it with your Python interpreter:</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="nv">$ </span>wget http://hg.secdev.org/scapy/raw-file/v1.2.0.2/scapy.py
+<span class="nv">$ </span>sudo python scapy.py
+</pre></div>
+</div>
+<p id="index-1">On BSD systems, you can also try the latest version of <a class="reference external" href="http://hg.natisbad.org/scapy-bpf/raw-file/tip/scapy.py">Scapy-bpf</a> (<a class="reference external" href="http://hg.natisbad.org/scapy-bpf/">development repository</a>). It doesn&#8217;t need libpcap or libdnet.</p>
+</div>
+<div class="section" id="optional-software-for-special-features">
+<h2>Optional software for special features<a class="headerlink" href="#optional-software-for-special-features" title="Permalink to this headline">¶</a></h2>
+<p>For some special features you have to install more software.
+Platform-specific instructions on how to install those packages can be found in the next chapter.
+Here are the topics involved and some examples that you can use to try if your installation was successful.</p>
+<ul id="index-2">
+<li><p class="first">Plotting. <tt class="docutils literal"><span class="pre">plot()</span></tt> needs <a class="reference external" href="http://gnuplot-py.sourceforge.net/">Gnuplot-py</a> which needs <a class="reference external" href="http://www.gnuplot.info/">GnuPlot</a> and <a class="reference external" href="http://numpy.scipy.org/">NumPy</a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">=</span><span class="n">sniff</span><span class="p">(</span><span class="n">count</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">2D graphics. <tt class="docutils literal"><span class="pre">psdump()</span></tt> and <tt class="docutils literal"><span class="pre">pdfdump()</span></tt> need <a class="reference external" href="http://pyx.sourceforge.net/">PyX</a> which in turn needs a <a class="reference external" href="http://www.tug.org/texlive/">LaTeX distribution</a>. For viewing the PDF and PS files interactively, you also need <a class="reference external" href="http://www.adobe.com/products/reader/">Adobe Reader</a> (<tt class="docutils literal"><span class="pre">acroread</span></tt>) and <a class="reference external" href="http://wwwthep.physik.uni-mainz.de/~plass/gv/">gv</a> (<tt class="docutils literal"><span class="pre">gv</span></tt>).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">=</span><span class="n">IP</span><span class="p">()</span><span class="o">/</span><span class="n">ICMP</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">pdfdump</span><span class="p">(</span><span class="s">&quot;test.pdf&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Graphs. <tt class="docutils literal"><span class="pre">conversations()</span></tt> needs <a class="reference external" href="http://www.graphviz.org/">Grapviz</a> and <a class="reference external" href="http://www.imagemagick.org/">ImageMagick</a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">=</span><span class="n">readpcap</span><span class="p">(</span><span class="s">&quot;myfile.pcap&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">conversations</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s">&quot;jpg&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s">&quot;&gt; test.jpg&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">3D graphics. <tt class="docutils literal"><span class="pre">trace3D()</span></tt> needs <a class="reference external" href="http://www.vpython.org/">VPython</a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">,</span><span class="n">u</span><span class="o">=</span><span class="n">traceroute</span><span class="p">([</span><span class="s">&quot;www.python.org&quot;</span><span class="p">,</span> <span class="s">&quot;google.com&quot;</span><span class="p">,</span><span class="s">&quot;slashdot.org&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">trace3D</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<ul id="index-3">
+<li><p class="first">WEP decryption. <tt class="docutils literal"><span class="pre">unwep()</span></tt> needs <a class="reference external" href="http://www.dlitz.net/software/pycrypto/">PyCrypto</a>. Example using a <a class="reference external" href="http://weplab.sourceforge.net/caps/weplab-64bit-AA-managed.pcap">Weplap test file</a>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">enc</span><span class="o">=</span><span class="n">rdpcap</span><span class="p">(</span><span class="s">&quot;weplab-64bit-AA-managed.pcap&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">enc</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">enc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go"> &gt;&gt;&gt; conf.wepkey=&quot;AA\x00\x00\x00&quot;</span>
+<span class="go"> &gt;&gt;&gt; dec=Dot11PacketList(enc).toEthernet()</span>
+<span class="go"> &gt;&gt;&gt; dec.show()</span>
+<span class="go"> &gt;&gt;&gt; dec[0]</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Fingerprinting. <tt class="docutils literal"><span class="pre">nmap_fp()</span></tt> needs <a class="reference external" href="http://nmap.org">Nmap</a>. You need an <a class="reference external" href="http://nmap.org/dist-old/">old version</a> (before v4.23) that still supports first generation fingerprinting.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">load_module</span><span class="p">(</span><span class="s">&quot;nmap&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nmap_fp</span><span class="p">(</span><span class="s">&quot;192.168.0.1&quot;</span><span class="p">)</span>
+<span class="go">Begin emission:</span>
+<span class="go">Finished to send 8 packets.</span>
+<span class="go">Received 19 packets, got 4 answers, remaining 4 packets</span>
+<span class="go">(0.88749999999999996, [&#39;Draytek Vigor 2000 ISDN router&#39;])</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<ul class="simple" id="index-4">
+<li>VOIP. <tt class="docutils literal"><span class="pre">voip_play()</span></tt> needs <a class="reference external" href="http://sox.sourceforge.net/">SoX</a>.</li>
+</ul>
+</div>
+<div class="section" id="platform-specific-instructions">
+<h2>Platform-specific instructions<a class="headerlink" href="#platform-specific-instructions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="linux-native">
+<h3>Linux native<a class="headerlink" href="#linux-native" title="Permalink to this headline">¶</a></h3>
+<p>Scapy can run natively on Linux, without libdnet and libpcap.</p>
+<ul class="simple">
+<li>Install <a class="reference external" href="http://www.python.org">Python 2.5</a>.</li>
+<li>Install <a class="reference external" href="http://www.tcpdump.org">tcpdump</a> and make sure it is in the $PATH. (It&#8217;s only used to compile BPF filters (<tt class="docutils literal"><span class="pre">-ddd</span> <span class="pre">option</span></tt>))</li>
+<li>Make sure your kernel has Packet sockets selected (<tt class="docutils literal"><span class="pre">CONFIG_PACKET</span></tt>)</li>
+<li>If your kernel is &lt; 2.6, make sure that Socket filtering is selected <tt class="docutils literal"><span class="pre">CONFIG_FILTER</span></tt>)</li>
+</ul>
+</div>
+<div class="section" id="debian-ubuntu">
+<h3>Debian/Ubuntu<a class="headerlink" href="#debian-ubuntu" title="Permalink to this headline">¶</a></h3>
+<p>Just use the standard packages:</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="nv">$ </span>sudo apt-get install tcpdump graphviz imagemagick python-gnuplot python-crypto python-pyx
+</pre></div>
+</div>
+</div>
+<div class="section" id="fedora">
+<h3>Fedora<a class="headerlink" href="#fedora" title="Permalink to this headline">¶</a></h3>
+<p>Here&#8217;s how to install Scapy on Fedora 9:</p>
+<div class="highlight-text"><div class="highlight"><pre># yum install mercurial python-devel
+# cd /tmp
+# hg clone http://hg.secdev.org/scapy
+# cd scapy
+# python setup.py install
+</pre></div>
+</div>
+<p>Some optional packages:</p>
+<div class="highlight-text"><div class="highlight"><pre># yum install graphviz python-crypto sox PyX gnuplot numpy
+# cd /tmp
+# wget http://heanet.dl.sourceforge.net/sourceforge/gnuplot-py/gnuplot-py-1.8.tar.gz
+# tar xvfz gnuplot-py-1.8.tar.gz
+# cd gnuplot-py-1.8
+# python setup.py install
+</pre></div>
+</div>
+</div>
+<div class="section" id="mac-os-x">
+<h3>Mac OS X<a class="headerlink" href="#mac-os-x" title="Permalink to this headline">¶</a></h3>
+<p>Here&#8217;s how to install Scapy on Mac OS 10.4 (Tiger) or 10.5 (Leopard).</p>
+<div class="section" id="set-up-a-development-environment">
+<h4>Set up a development environment<a class="headerlink" href="#set-up-a-development-environment" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li>Install X11.
+On the Mac OS X DVD, it is located in the &#8220;Optional Installs.mpkg&#8221; package.</li>
+<li>Install SDK.
+On the Mac OS X DVD, it is located in the &#8220;Xcode Tools/Packages&#8221; directory.</li>
+<li>Install Python 2.5 from Python.org.
+Using Apple&#8217;s Python version will lead to some problems.
+Get it from <a class="reference external" href="http://www.python.org/ftp/python/2.5.2/python-2.5.2-macosx.dmg">http://www.python.org/ftp/python/2.5.2/python-2.5.2-macosx.dmg</a></li>
+</ol>
+</div>
+<div class="section" id="install-using-macports">
+<h4>Install using MacPorts<a class="headerlink" href="#install-using-macports" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic" start="3">
+<li><p class="first">Install MacPorts
+Download the dmg from macports.org and install it.</p>
+</li>
+<li><p class="first">Update MacPorts:</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="nv">$ </span>sudo port -d selfupdate
+</pre></div>
+</div>
+</li>
+<li><p class="first">Install Scapy:</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="nv">$ </span>sudo port install scapy
+</pre></div>
+</div>
+</li>
+</ol>
+<p>You can then update to the latest version as shown in the generic installation above.</p>
+</div>
+<div class="section" id="install-from-original-sources">
+<h4>Install from original sources<a class="headerlink" href="#install-from-original-sources" title="Permalink to this headline">¶</a></h4>
+<p>Install libdnet and its Python wrapper:</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="nv">$ </span>wget http://libdnet.googlecode.com/files/libdnet-1.12.tgz
+<span class="nv">$ </span>tar xfz libdnet-1.12.tgz
+<span class="nv">$ </span>./configure
+<span class="nv">$ </span>make
+<span class="nv">$ </span>sudo make install
+<span class="nv">$ </span><span class="nb">cd </span>python
+<span class="nv">$ </span>python2.5 setup.py install
+</pre></div>
+</div>
+<p>Install libpcap and its Python wrapper:</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="nv">$ </span>wget http://dfn.dl.sourceforge.net/sourceforge/pylibpcap/pylibpcap-0.6.2.tar.gz
+<span class="nv">$ </span>tar xfz pylibpcap-0.6.2.tar.gz
+<span class="nv">$ </span><span class="nb">cd </span>pylibpcap-0.6.2
+<span class="nv">$ </span>python2.5 setup.py install
+</pre></div>
+</div>
+<p>Optionally: Install readline:</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="nv">$ </span>python <span class="sb">`</span>python -c <span class="s2">&quot;import pimp; print(pimp.__file__)&quot;</span><span class="sb">`</span> -i readline
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="openbsd">
+<h3>OpenBSD<a class="headerlink" href="#openbsd" title="Permalink to this headline">¶</a></h3>
+<p>Here&#8217;s how to install Scapy on OpenBSD 4.3.</p>
+<div class="highlight-text"><div class="highlight"><pre># export PKG_PATH=ftp://ftp.openbsd.org/pub/OpenBSD/4.3/packages/i386/
+# pkg_add py-libpcap py-libdnet mercurial
+# ln -sf /usr/local/bin/python2.5 /usr/local/bin/python
+# cd /tmp
+# hg clone http://hg.secdev.org/scapy
+# cd scapy
+# python setup.py install
+</pre></div>
+</div>
+<div class="section" id="optional-packages">
+<h4>Optional packages<a class="headerlink" href="#optional-packages" title="Permalink to this headline">¶</a></h4>
+<p>py-crypto</p>
+<div class="highlight-text"><div class="highlight"><pre># pkg_add py-crypto
+</pre></div>
+</div>
+<p>gnuplot and its Python binding:</p>
+<div class="highlight-text"><div class="highlight"><pre># pkg_add gnuplot py-gnuplot
+</pre></div>
+</div>
+<p>Graphviz (large download, will install several GNOME libraries)</p>
+<div class="highlight-text"><div class="highlight"><pre># pkg_add graphviz
+</pre></div>
+</div>
+<p>ImageMagick (takes long to compile)</p>
+<div class="highlight-text"><div class="highlight"><pre># cd /tmp
+# ftp ftp://ftp.openbsd.org/pub/OpenBSD/4.3/ports.tar.gz
+# cd /usr
+# tar xvfz /tmp/ports.tar.gz
+# cd /usr/ports/graphics/ImageMagick/
+# make install
+</pre></div>
+</div>
+<p>PyX (very large download, will install texlive etc.)</p>
+<div class="highlight-text"><div class="highlight"><pre># pkg_add py-pyx
+</pre></div>
+</div>
+<p>/etc/ethertypes</p>
+<div class="highlight-text"><div class="highlight"><pre># wget http://www.secdev.org/projects/scapy/files/ethertypes -O /etc/ethertypes
+</pre></div>
+</div>
+<p>python-bz2 (for UTscapy)</p>
+<div class="highlight-text"><div class="highlight"><pre># pkg_add python-bz2
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="windows">
+<span id="windows-installation"></span><h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h3>
+<p>Scapy is primarily being developed for Unix-like systems and works best on those platforms. But the latest version of Scapy supports Windows out-of-the-box. So you can use nearly all of Scapy&#8217;s features on your Windows machine as well.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you update from Scapy-win v1.2.0.2 to Scapy v2 remember to use <tt class="docutils literal"><span class="pre">from</span> <span class="pre">scapy.all</span> <span class="pre">import</span> <span class="pre">*</span></tt> instead of <tt class="docutils literal"><span class="pre">from</span> <span class="pre">scapy</span> <span class="pre">import</span> <span class="pre">*</span></tt>.</p>
+</div>
+<a class="reference internal image-reference" href="_images/scapy-win-screenshot1.png"><img alt="_images/scapy-win-screenshot1.png" class="align-center" src="_images/scapy-win-screenshot1.png" style="width: 538.4px; height: 278.40000000000003px;" /></a>
+<p>You need the following software packages in order to install Scapy on Windows:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://www.python.org">Python</a>: <a class="reference external" href="http://www.python.org/ftp/python/2.5.4/python-2.5.4.msi">python-2.5.4.msi</a>. <a class="reference external" href="http://www.python.org/ftp/python/2.6.3/python-2.6.3.msi">python-2.6.3.msi</a>. After installation, add the Python installation directory and its Scripts subdirectory to your PATH. Depending on your Python version, the defaults would be <tt class="docutils literal"><span class="pre">C:\Python25</span></tt> and <tt class="docutils literal"><span class="pre">C:\Python25\Scripts</span></tt> or <tt class="docutils literal"><span class="pre">C:\Python26</span></tt> and <tt class="docutils literal"><span class="pre">C:\Python26\Scripts</span></tt> respectively.</li>
+<li><a class="reference external" href="http://www.secdev.org/projects/scapy/">Scapy</a>: <a class="reference external" href="http://hg.secdev.org/scapy/archive/tip.zip">latest development version</a> from the <a class="reference external" href="http://hg.secdev.org/scapy">Mercurial repository</a>. Unzip the archive, open a command prompt in that directory and run &#8220;python setup.py install&#8221;.</li>
+<li><a class="reference external" href="http://python.net/crew/mhammond/win32/Downloads.html">pywin32</a>: <a class="reference external" href="http://surfnet.dl.sourceforge.net/sourceforge/pywin32/pywin32-214.win32-py2.5.exe">pywin32-214.win32-py2.5.exe</a> <a class="reference external" href="http://downloads.sourceforge.net/project/pywin32/pywin32/Build%20214/pywin32-214.win32-py2.6.exe">pywin32-214.win32-py2.6.exe</a></li>
+<li><a class="reference external" href="http://www.winpcap.org/">WinPcap</a>: <a class="reference external" href="http://www.winpcap.org/install/bin/WinPcap_4_1_1.exe">WinPcap_4_1_1.exe</a>. You might want to choose &#8220;[x] Automatically start the WinPcap driver at boot time&#8221;, so that non-privileged users can sniff, especially under Vista and Windows 7. If you want to use the ethernet vendor database to resolve MAC addresses or use the <tt class="docutils literal"><span class="pre">wireshark()</span></tt> command, download <a class="reference external" href="http://www.wireshark.org/">Wireshark</a> which already includes WinPcap.</li>
+<li><a class="reference external" href="http://code.google.com/p/pypcap/">pypcap</a>: <a class="reference external" href="http://www.secdev.org/projects/scapy/files/pcap-1.1-scapy-20090720.win32-py2.5.exe">pcap-1.1-scapy-20090720.win32-py25.exe</a> <a class="reference external" href="http://www.secdev.org/projects/scapy/files/pcap-1.1-scapy-20090720.win32-py2.6.exe">pcap-1.1-scapy-20090720.win32-py2.6.exe</a>. This is a <em>special version for Scapy</em>, as the original leads to some timing problems. Now works on Vista and Windows 7, too. Under Vista/Win7 please right-click on the installer and choose &#8220;Run as administrator&#8221;.</li>
+<li><a class="reference external" href="http://code.google.com/p/libdnet/">libdnet</a>:  <a class="reference external" href="http://libdnet.googlecode.com/files/dnet-1.12.win32-py2.5.exe">dnet-1.12.win32-py2.5.exe</a> <a class="reference external" href="http://www.secdev.org/projects/scapy/files/dnet-1.12.win32-py2.6.exe">dnet-1.12.win32-py2.6.exe</a>. Under Vista/Win7 please right-click on the installer and choose &#8220;Run as administrator&#8221;</li>
+<li><a class="reference external" href="http://ipython.scipy.org/moin/PyReadline/Intro">pyreadline</a>: <a class="reference external" href="http://ipython.scipy.org/dist/pyreadline-1.5-win32-setup.exe">pyreadline-1.5-win32-setup.exe</a></li>
+</ul>
+</div></blockquote>
+<p>Just download the files and run the setup program. Choosing the default installation options should be safe.</p>
+<p>For your convenience direct links are given to the versions I used (for Python 2.5 and Python 2.6). If these links do not work or if you are using a different Python version, just visit the homepage of the respective package and look for a Windows binary. As a last resort, search the web for the filename.</p>
+<p>After all packages are installed, open a command prompt (cmd.exe) and run Scapy by typing <tt class="docutils literal"><span class="pre">scapy</span></tt>. If you have set the PATH correctly, this will find a little batch file in your <tt class="docutils literal"><span class="pre">C:\Python26\Scripts</span></tt> directory and instruct the Python interpreter to load Scapy.</p>
+<p>If really nothing seems to work, consider skipping the Windows version and using Scapy from a Linux Live CD &#8211; either in a virtual machine on your Windows host or by booting from CDROM: An older version of Scapy is already included in grml and BackTrack for example. While using the Live CD you can easily upgrade to the lastest Scapy version by typing <tt class="docutils literal"><span class="pre">cd</span> <span class="pre">/tmp</span> <span class="pre">&amp;&amp;</span> <span class="pre">wget</span> <span class="pre">scapy.net</span></tt>.</p>
+<div class="section" id="id1">
+<h4>Optional packages<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<p>Plotting (<tt class="docutils literal"><span class="pre">plot</span></tt>)</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://www.gnuplot.info/">GnuPlot</a>: <a class="reference external" href="http://downloads.sourceforge.net/gnuplot/gp420win32.zip">gp420win32.zip</a>. Extract the zip file (e.g. to <tt class="docutils literal"><span class="pre">c:\gnuplot</span></tt>) and add the <tt class="docutils literal"><span class="pre">gnuplot\bin</span></tt> directory to your PATH.</li>
+<li><a class="reference external" href="http://numpy.scipy.org/">NumPy</a>: <a class="reference external" href="http://downloads.sourceforge.net/project/numpy/NumPy/1.3.0/numpy-1.3.0-win32-superpack-python2.5.exe">numpy-1.3.0-win32-superpack-python2.5.exe</a> <a class="reference external" href="http://downloads.sourceforge.net/project/numpy/NumPy/1.3.0/numpy-1.3.0-win32-superpack-python2.6.exe">numpy-1.3.0-win32-superpack-python2.6.exe</a>. Gnuplot-py 1.8 needs NumPy.</li>
+<li><a class="reference external" href="http://gnuplot-py.sourceforge.net/">Gnuplot-py</a>: <a class="reference external" href="http://downloads.sourceforge.net/project/gnuplot-py/Gnuplot-py/1.8/gnuplot-py-1.8.zip">gnuplot-py-1.8.zip</a>. Extract to temp dir, open command prompt, change to tempdir and type <tt class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span></tt>.</li>
+</ul>
+</div></blockquote>
+<p>2D Graphics (<tt class="docutils literal"><span class="pre">psdump</span></tt>, <tt class="docutils literal"><span class="pre">pdfdump</span></tt>)</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://pyx.sourceforge.net/">PyX</a>: <a class="reference external" href="http://mesh.dl.sourceforge.net/sourceforge/pyx/PyX-0.10.tar.gz">PyX-0.10.tar.gz</a>. Extract to temp dir, open command prompt, change to tempdir and type <tt class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span></tt></li>
+<li><a class="reference external" href="http://miktex.org/">MikTeX</a>: <a class="reference external" href="http://miktex.org/2.8/setup">Basic MiKTeX 2.8 Installer</a>. PyX needs a LaTeX installation. Choose an installation directory WITHOUT spaces (e.g. <tt class="docutils literal"><span class="pre">C:\MikTex2.8</span></tt> and add the <tt class="docutils literal"><span class="pre">(INSTALLDIR)\miktex\bin</span></tt> subdirectory to your PATH.</li>
+</ul>
+</div></blockquote>
+<p>Graphs (conversations)</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://www.graphviz.org/">Graphviz</a>: <a class="reference external" href="http://www.graphviz.org/pub/graphviz/stable/windows/graphviz-2.24.msi">graphviz-2.24.exe</a>. Add <tt class="docutils literal"><span class="pre">(INSTALLDIR)\ATT\Graphviz\bin</span></tt> to your PATH.</li>
+</ul>
+</div></blockquote>
+<p>3D Graphics (trace3d)</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://www.vpython.org/">VPython</a>: <a class="reference external" href="http://www.vpython.org/download/VPython-Win-Py2.5-3.2.11.exe">VPython-Win-Py2.5-3.2.11.exe</a>. No binary installer for Python 2.6 seems to be available yet.</li>
+</ul>
+</div></blockquote>
+<p>WEP decryption</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://www.dlitz.net/software/pycrypto/">PyCrypto</a>: <a class="reference external" href="http://www.voidspace.org.uk/downloads/pycrypto-2.1.0.win32-py2.5.zip">pycrypto-2.1.0.win32-py2.5.zip</a> <a class="reference external" href="http://www.voidspace.org.uk/downloads/pycrypto-2.1.0.win32-py2.6.zip">pycrypto-2.1.0.win32-py2.6.zip</a></li>
+</ul>
+</div></blockquote>
+<p>Fingerprinting</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://nmap.org">Nmap</a>. <a class="reference external" href="http://download.insecure.org/nmap/dist-old/nmap-4.20-setup.exe">nmap-4.20-setup.exe</a>. If you use the default installation directory, Scapy should automatically find the fingerprints file.</li>
+<li>Queso: <a class="reference external" href="http://www.packetstormsecurity.org/UNIX/scanners/queso-980922.tar.gz">queso-980922.tar.gz</a>. Extract the tar.gz file (e.g. using <a class="reference external" href="http://www.7-zip.org/">7-Zip</a>) and put <tt class="docutils literal"><span class="pre">queso.conf</span></tt> into your Scapy directory</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="screenshot">
+<h4>Screenshot<a class="headerlink" href="#screenshot" title="Permalink to this headline">¶</a></h4>
+<a class="reference internal image-reference" href="_images/scapy-win-screenshot2.png"><img alt="_images/scapy-win-screenshot2.png" class="align-center" src="_images/scapy-win-screenshot2.png" style="width: 538.4px; height: 278.40000000000003px;" /></a>
+</div>
+<div class="section" id="known-bugs">
+<h4>Known bugs<a class="headerlink" href="#known-bugs" title="Permalink to this headline">¶</a></h4>
+<blockquote>
+<div><ul class="simple">
+<li>You may not be able to capture WLAN traffic on Windows. Reasons are explained on the Wireshark wiki and in the WinPcap FAQ. Try switching off promiscuous mode with <tt class="docutils literal"><span class="pre">conf.sniff_promisc=False</span></tt>.</li>
+<li>Packets cannot be sent to localhost (or local IP addresses on your own host).</li>
+<li>The <tt class="docutils literal"><span class="pre">voip_play()</span></tt> functions do not work because they output the sound via <tt class="docutils literal"><span class="pre">/dev/dsp</span></tt> which is not available on Windows.</li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Download and Installation</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#installing-scapy-v2-x">Installing Scapy v2.x</a><ul>
+<li><a class="reference internal" href="#latest-release">Latest release</a></li>
+<li><a class="reference internal" href="#current-development-version">Current development version</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#installing-scapy-v1-2">Installing Scapy v1.2</a></li>
+<li><a class="reference internal" href="#optional-software-for-special-features">Optional software for special features</a></li>
+<li><a class="reference internal" href="#platform-specific-instructions">Platform-specific instructions</a><ul>
+<li><a class="reference internal" href="#linux-native">Linux native</a></li>
+<li><a class="reference internal" href="#debian-ubuntu">Debian/Ubuntu</a></li>
+<li><a class="reference internal" href="#fedora">Fedora</a></li>
+<li><a class="reference internal" href="#mac-os-x">Mac OS X</a><ul>
+<li><a class="reference internal" href="#set-up-a-development-environment">Set up a development environment</a></li>
+<li><a class="reference internal" href="#install-using-macports">Install using MacPorts</a></li>
+<li><a class="reference internal" href="#install-from-original-sources">Install from original sources</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#openbsd">OpenBSD</a><ul>
+<li><a class="reference internal" href="#optional-packages">Optional packages</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#windows">Windows</a><ul>
+<li><a class="reference internal" href="#id1">Optional packages</a></li>
+<li><a class="reference internal" href="#screenshot">Screenshot</a></li>
+<li><a class="reference internal" href="#known-bugs">Known bugs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="introduction.html"
+                        title="previous chapter">Introduction</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="usage.html"
+                        title="next chapter">Usage</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/installation.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="usage.html" title="Usage"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="introduction.html" title="Introduction"
+             >previous</a> |</li>
+        <li><a href="index.html">Scapy 2.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, 2009 Philippe Biondi and the Scapy community.
+      Last updated on Jun 26, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

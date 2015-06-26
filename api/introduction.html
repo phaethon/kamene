@@ -1,0 +1,303 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Introduction &mdash; Scapy 2.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Scapy 2.3.1 documentation" href="index.html" />
+    <link rel="next" title="Download and Installation" href="installation.html" />
+    <link rel="prev" title="Welcome to Scapy’s documentation!" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="installation.html" title="Download and Installation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Scapy’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Scapy 2.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="about-scapy">
+<h2>About Scapy<a class="headerlink" href="#about-scapy" title="Permalink to this headline">¶</a></h2>
+<p>Scapy is a Python program that enables the user to send, sniff and dissect and forge network packets. This capability allows construction of tools that can probe, scan or attack networks.</p>
+<p>In other words, Scapy is a powerful interactive packet manipulation program.
+It is able to forge or decode packets of a wide number of protocols,
+send them on the wire, capture them, match requests and replies, and
+much more. Scapy can easily handle most classical tasks like scanning,
+tracerouting, probing, unit tests, attacks or network discovery. It can replace hping, arpspoof, arp-sk, arping, p0f and even some parts of Nmap, tcpdump, and tshark).</p>
+<a class="reference internal image-reference" href="_images/testing-taxonomy.png"><img alt="_images/testing-taxonomy.png" src="_images/testing-taxonomy.png" style="width: 198.0px; height: 91.0px;" /></a>
+<p>Scapy also performs very well on a lot of other
+specific tasks that most other tools can&#8217;t handle, like sending invalid frames,
+injecting your own 802.11 frames, combining techniques
+(VLAN hopping+ARP cache poisoning, VOIP decoding on WEP encrypted channel, ...), etc.</p>
+<p>The idea is simple. Scapy mainly does two things: sending packets and receiving answers. You define a set of packets, it sends them, receives answers, matches requests with answers and returns a list of packet couples (request, answer) and a list of unmatched packets. This has the big advantage over tools like Nmap or hping that an answer is not reduced to (open/closed/filtered), but is the whole packet.</p>
+<p>On top of this can be build more high level functions, for example one that does traceroutes and give as a result only the start TTL of the request and the source IP of the answer. One that pings a whole network and gives the list of machines answering. One that does a portscan and returns a LaTeX report.</p>
+</div>
+<div class="section" id="what-makes-scapy-so-special">
+<h2>What makes Scapy so special<a class="headerlink" href="#what-makes-scapy-so-special" title="Permalink to this headline">¶</a></h2>
+<p>First, with most other networking tools, you won&#8217;t build someting the author did not imagine. These tools have been built for a specific goal and can&#8217;t deviate much from it. For example, an ARP cache poisoning program won&#8217;t let you use double 802.1q encapsulation. Or try to find a program that can send, say, an ICMP packet with padding (I said <em>padding</em>, not <em>payload</em>, see?). In fact, each time you have a new need, you have to build a new tool.</p>
+<p>Second, they usually confuse decoding and interpreting. Machines are good at decoding and can help human beings with that. Interpretation is reserved to human beings. Some programs try to mimic this behaviour. For instance they say &#8220;<em>this port is open</em>&#8221; instead of &#8220;<em>I received a SYN-ACK</em>&#8221;. Sometimes they are right. Sometimes not. It&#8217;s easier for beginners, but when you know what you&#8217;re doing, you keep on trying to deduce what really happened from the program&#8217;s interpretation to make your own, which is hard because you lost a big amount of information. And you often end up using <tt class="docutils literal"><span class="pre">tcpdump</span> <span class="pre">-xX</span></tt> to decode and interpret what the tool missed.</p>
+<p>Third, even programs which only decode do not give you all the information they received. The network&#8217;s vision they give you is the one their author thought was sufficient. But it is not complete, and you have a bias. For instance, do you know a tool that reports the Ethernet padding?</p>
+<p>Scapy tries to overcome those problems. It enables you to build exactly the packets you want. Even if I think stacking a 802.1q layer on top of TCP has no sense, it may have some for somebody else working on some product I don&#8217;t know. Scapy has a flexible model that tries to avoid such arbitrary limits. You&#8217;re free to put any value you want in any field you want, and stack them like you want. You&#8217;re an adult after all.</p>
+<p>In fact, it&#8217;s like building a new tool each time, but instead of dealing with a hundred line C program, you only write 2 lines of Scapy.</p>
+<p>After a probe (scan, traceroute, etc.) Scapy always gives you the full decoded packets from the probe, before any interpretation. That means that you can probe once and interpret many times, ask for a traceroute and look at the padding for instance.</p>
+<div class="section" id="fast-packet-design">
+<h3>Fast packet design<a class="headerlink" href="#fast-packet-design" title="Permalink to this headline">¶</a></h3>
+<p>Other tools stick to the <strong>program-that-you-run-from-a-shell</strong> paradigm.
+The result is an awful syntax to describe a packet. For these tools, the
+solution adopted uses a higher but less powerful description, in the form of
+scenarios imagined by the tool&#8217;s author. As an example, only the IP address must
+be given to a port scanner to trigger the <strong>port scanning</strong> scenario. Even
+if the scenario is tweaked a bit, you still are stuck to a port scan.</p>
+<p>Scapy&#8217;s paradigm is to propose a Domain Specific Language (DSL) that
+enables a powerful and fast description of any kind of packet. Using the Python
+syntax and a Python interpreter as the DSL syntax and interpreter has many
+advantages: there is no need to write a separate interpreter, users don&#8217;t need
+to learn yet another language and they benefit from a complete, concise
+and very powerful language.</p>
+<p>Scapy enables the user to describe a packet or set of packets as layers that are
+stacked one upon another. Fields of each layer have useful default values that
+can be overloaded. Scapy does not oblige the user to use predetermined methods
+or templates. This alleviates the requirement of writing a new tool each time a
+different scenario is required. In C, it may take an average of 60 lines to
+describe a packet. With Scapy, the packets to be sent may be described in only a
+single line with another line to print the result. 90% of the network probing
+tools can be rewritten in 2 lines of Scapy.</p>
+</div>
+<div class="section" id="probe-once-interpret-many">
+<h3>Probe once, interpret many<a class="headerlink" href="#probe-once-interpret-many" title="Permalink to this headline">¶</a></h3>
+<p>Network discovery is blackbox testing. When probing a network, many stimuli are
+sent while only a few of them are answered. If the right stimuli are
+chosen, the desired information may be obtained by the responses or the lack of
+responses. Unlike many tools, Scapy gives all the information, i.e. all the
+stimuli sent and all the responses received. Examination of this data will give
+the user the desired information. When the dataset is small, the user can just
+dig for it. In other cases, the interpretation of the data will depend on the
+point of view taken. Most tools choose the viewpoint and discard all the data
+not related to that point of view. Because Scapy gives the complete raw data,
+that data may be used many times allowing the viewpoint to evolve during
+analysis. For example, a TCP port scan may be probed and the data visualized as
+the result of the port scan. The data could then also be visualized with respect
+to the TTL of response packet. A new probe need not be initiated to adjust the
+viewpoint of the data.</p>
+<a class="reference internal image-reference" href="_images/scapy-concept.png"><img alt="_images/scapy-concept.png" src="_images/scapy-concept.png" style="width: 603.2px; height: 281.6px;" /></a>
+</div>
+<div class="section" id="scapy-decodes-it-does-not-interpret">
+<h3>Scapy decodes, it does not interpret<a class="headerlink" href="#scapy-decodes-it-does-not-interpret" title="Permalink to this headline">¶</a></h3>
+<p>A common problem with network probing tools is they try to interpret the answers
+received instead of only decoding and giving facts. Reporting something like
+<strong>Received a TCP Reset on port 80</strong> is not subject to interpretation errors.
+Reporting <strong>Port 80 is closed</strong> is an interpretation that may be right most
+of the time but wrong in some specific contexts the tool&#8217;s author did not
+imagine. For instance, some scanners tend to report a filtered TCP port when
+they receive an ICMP destination unreachable packet. This may be right, but in
+some cases it means the packet was not filtered by the firewall but rather there
+was no host to forward the packet to.</p>
+<p>Interpreting results can help users that don&#8217;t know what a port scan is but
+it can also make more harm than good, as it injects bias into the results. What
+can tend to happen is that so that they can do the interpretation themselves,
+knowledgeable users will try to reverse engineer the tool&#8217;s interpretation to
+derive the facts that triggered that interpretation. Unfortunately much
+information is lost in this operation.</p>
+</div>
+</div>
+<div class="section" id="quick-demo">
+<h2>Quick demo<a class="headerlink" href="#quick-demo" title="Permalink to this headline">¶</a></h2>
+<p>First, we play a bit and create four IP packets at once. Let&#8217;s see how it works. We first instantiate the IP class. Then, we instantiate it again and we provide a destination that is worth four IP addresses (/30 gives the netmask). Using a Python idiom, we develop this implicit packet in a set of explicit packets. Then, we quit the interpreter. As we provided a session file, the variables we were working on are saved, then reloaded:</p>
+<div class="highlight-python"><div class="highlight"><pre># ./scapy.py -s mysession
+New session [mysession]
+Welcome to Scapy (0.9.17.108beta)
+&gt;&gt;&gt; IP()
+&lt;IP |&gt;
+&gt;&gt;&gt; target=&quot;www.target.com&quot;
+&gt;&gt;&gt; target=&quot;www.target.com/30&quot;
+&gt;&gt;&gt; ip=IP(dst=target)
+&gt;&gt;&gt; ip
+&lt;IP dst=&lt;Net www.target.com/30&gt; |&gt;
+&gt;&gt;&gt; [p for p in ip]
+[&lt;IP dst=207.171.175.28 |&gt;, &lt;IP dst=207.171.175.29 |&gt;,
+ &lt;IP dst=207.171.175.30 |&gt;, &lt;IP dst=207.171.175.31 |&gt;]
+&gt;&gt;&gt; ^D
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre># scapy -s mysession
+Using session [mysession]
+Welcome to Scapy (0.9.17.108beta)
+&gt;&gt;&gt; ip
+&lt;IP dst=&lt;Net www.target.com/30&gt; |&gt;
+</pre></div>
+</div>
+<p>Now, let&#8217;s manipulate some packets:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">IP</span><span class="p">()</span>
+<span class="go">&lt;IP |&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">=</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s">&quot;172.16.1.40&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span>
+<span class="go">&lt;IP dst=172.16.1.40 |&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">dst</span>
+<span class="go">&#39;172.16.1.40&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">ttl</span>
+<span class="go">64</span>
+</pre></div>
+</div>
+<p>Let&#8217;s say I want a broadcast MAC address, and IP payload to ketchup.com
+and to mayo.com, TTL value from 1 to 9, and an UDP payload:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Ether</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s">&quot;ff:ff:ff:ff:ff:ff&quot;</span><span class="p">)</span>
+<span class="go">      /IP(dst=[&quot;ketchup.com&quot;,&quot;mayo.com&quot;],ttl=(1,9))</span>
+<span class="go">      /UDP()</span>
+</pre></div>
+</div>
+<p>We have 18 packets defined in 1 line (1 implicit packet)</p>
+<div class="section" id="sensible-default-values">
+<h3>Sensible default values<a class="headerlink" href="#sensible-default-values" title="Permalink to this headline">¶</a></h3>
+<p>Scapy tries to use sensible default values for all packet fields.
+If not overriden,</p>
+<ul class="simple">
+<li>IP source is chosen according to destination and routing table</li>
+<li>Checksum is computed</li>
+<li>Source MAC is chosen according to the output interface</li>
+<li>Ethernet type and IP protocol are determined by the upper layer</li>
+</ul>
+<a class="reference internal image-reference" href="_images/default-values-ip.png"><img alt="_images/default-values-ip.png" src="_images/default-values-ip.png" style="width: 342.59999999999997px; height: 206.4px;" /></a>
+<p>Other fields’ default values are chosen to be the most useful ones:</p>
+<ul class="simple">
+<li>TCP source port is 20, destination port is 80.</li>
+<li>UDP source and destination ports are 53.</li>
+<li>ICMP type is echo request.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="learning-python">
+<h2>Learning Python<a class="headerlink" href="#learning-python" title="Permalink to this headline">¶</a></h2>
+<p>Scapy uses the Python interpreter as a command board. That means that you can directly use the Python language (assign variables, use loops, define functions, etc.)</p>
+<p>If you are new to Python and you really don&#8217;t understand a word because of that, or if you want to learn this language, take an hour to read the very good <a class="reference external" href="http://docs.python.org/tutorial/">Python tutorial</a>  by Guido Van Rossum. After that, you&#8217;ll know Python :) (really!). For a more in-depth tutorial <a class="reference external" href="http://diveintopython.org/">Dive Into Python</a> is a very good start too.</p>
+<p>For a quick start, here&#8217;s an overview of Python&#8217;s data types:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">int</span></tt> (signed, 32bits) : <tt class="docutils literal"><span class="pre">42</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">long</span></tt> (signed, infinite): <tt class="docutils literal"><span class="pre">42L</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">str</span></tt> : <tt class="docutils literal"><span class="pre">&quot;bell\x07\n&quot;</span></tt> or <tt class="docutils literal"><span class="pre">’bell\x07\n’</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">tuple</span></tt> (immutable): <tt class="docutils literal"><span class="pre">(1,4,&quot;42&quot;)</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">list</span></tt> (mutable): <tt class="docutils literal"><span class="pre">[4,2,&quot;1&quot;]</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">dict`</span> <span class="pre">(mutable):</span> <span class="pre">``{</span> <span class="pre">&quot;one&quot;:1</span> <span class="pre">,</span> <span class="pre">&quot;two&quot;:2</span> <span class="pre">}</span></tt></li>
+</ul>
+<p>There are no block delimiters in Python. Instead, indendation does matter:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">cond</span><span class="p">:</span>
+    <span class="n">instr</span>
+    <span class="n">instr</span>
+<span class="k">elif</span> <span class="n">cond2</span><span class="p">:</span>
+    <span class="n">instr</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">instr</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Introduction</a><ul>
+<li><a class="reference internal" href="#about-scapy">About Scapy</a></li>
+<li><a class="reference internal" href="#what-makes-scapy-so-special">What makes Scapy so special</a><ul>
+<li><a class="reference internal" href="#fast-packet-design">Fast packet design</a></li>
+<li><a class="reference internal" href="#probe-once-interpret-many">Probe once, interpret many</a></li>
+<li><a class="reference internal" href="#scapy-decodes-it-does-not-interpret">Scapy decodes, it does not interpret</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#quick-demo">Quick demo</a><ul>
+<li><a class="reference internal" href="#sensible-default-values">Sensible default values</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#learning-python">Learning Python</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to Scapy&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="installation.html"
+                        title="next chapter">Download and Installation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/introduction.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="installation.html" title="Download and Installation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Scapy’s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">Scapy 2.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, 2009 Philippe Biondi and the Scapy community.
+      Last updated on Jun 26, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

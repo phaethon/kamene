@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Troubleshooting &mdash; Scapy 2.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Scapy 2.3.1 documentation" href="index.html" />
+    <link rel="next" title="Scapy development" href="development.html" />
+    <link rel="prev" title="Adding new protocols" href="build_dissect.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="development.html" title="Scapy development"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="build_dissect.html" title="Adding new protocols"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Scapy 2.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="troubleshooting">
+<h1>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="faq">
+<h2>FAQ<a class="headerlink" href="#faq" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="my-tcp-connections-are-reset-by-scapy-or-by-my-kernel">
+<h3>My TCP connections are reset by Scapy or by my kernel.<a class="headerlink" href="#my-tcp-connections-are-reset-by-scapy-or-by-my-kernel" title="Permalink to this headline">¶</a></h3>
+<p>The kernel is not aware of what Scapy is doing behind his back. If Scapy sends a SYN, the target replies with a SYN-ACK and your kernel sees it, it will reply with a RST. To prevent this, use local firewall rules (e.g. NetFilter for Linux). Scapy does not mind about local firewalls.</p>
+</div>
+<div class="section" id="i-can-t-ping-127-0-0-1-scapy-does-not-work-with-127-0-0-1-or-on-the-loopback-interface">
+<h3>I can&#8217;t ping 127.0.0.1. Scapy does not work with 127.0.0.1 or on the loopback interface<a class="headerlink" href="#i-can-t-ping-127-0-0-1-scapy-does-not-work-with-127-0-0-1-or-on-the-loopback-interface" title="Permalink to this headline">¶</a></h3>
+<p>The loopback interface is a very special interface. Packets going through it are not really assembled and dissassembled. The kernel routes the packet to its destination while it is still stored an internal structure. What you see with tcpdump -i lo is only a fake to make you think everything is normal. The kernel is not aware of what Scapy is doing behind his back, so what you see on the loopback interface is also a fake. Except this one did not come from a local structure. Thus the kernel will never receive it.</p>
+<p>In order to speak to local applications, you need to build your packets one layer upper, using a PF_INET/SOCK_RAW socket instead of a PF_PACKET/SOCK_RAW (or its equivalent on other systems that Linux):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">L3socket</span>
+<span class="go">&lt;class __main__.L3PacketSocket at 0xb7bdf5fc&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">L3socket</span><span class="o">=</span><span class="n">L3RawSocket</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sr1</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s">&quot;127.0.0.1&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">())</span>
+<span class="go">&lt;IP  version=4L ihl=5L tos=0x0 len=28 id=40953 flags= frag=0L ttl=64 proto=ICMP chksum=0xdce5 src=127.0.0.1 dst=127.0.0.1 options=&#39;&#39; |&lt;ICMP  type=echo-reply code=0 chksum=0xffff id=0x0 seq=0x0 |&gt;&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="bpf-filters-do-not-work-i-m-on-a-ppp-link">
+<h3>BPF filters do not work. I&#8217;m on a ppp link<a class="headerlink" href="#bpf-filters-do-not-work-i-m-on-a-ppp-link" title="Permalink to this headline">¶</a></h3>
+<p>This is a known bug. BPF filters must compiled with different offsets on ppp links. It may work if you use libpcap (which will be used to compile the BPF filter) instead of using native linux support (PF_PACKET sockets).</p>
+</div>
+<div class="section" id="traceroute-does-not-work-i-m-on-a-ppp-link">
+<h3>traceroute() does not work. I&#8217;m on a ppp link<a class="headerlink" href="#traceroute-does-not-work-i-m-on-a-ppp-link" title="Permalink to this headline">¶</a></h3>
+<p>This is a known bug. See BPF filters do not work. I&#8217;m on a ppp link</p>
+<p>To work arround this, use <tt class="docutils literal"><span class="pre">nofilter=1</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">traceroute</span><span class="p">(</span><span class="s">&quot;target&quot;</span><span class="p">,</span> <span class="n">nofilter</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="graphs-are-ugly-fonts-are-too-big-image-is-truncated">
+<h3>Graphs are ugly/fonts are too big/image is truncated.<a class="headerlink" href="#graphs-are-ugly-fonts-are-too-big-image-is-truncated" title="Permalink to this headline">¶</a></h3>
+<p>Quick fix: use png format:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">graph</span><span class="p">(</span><span class="n">format</span><span class="o">=</span><span class="s">&quot;png&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Upgrade to latest version of GraphViz.</p>
+<p>Try providing different DPI options (50,70,75,96,101,125, for instance):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">graph</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="s">&quot;-Gdpi=70&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If it works, you can make it permanenent:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">prog</span><span class="o">.</span><span class="n">dot</span> <span class="o">=</span> <span class="s">&quot;dot -Gdpi=70&quot;</span>
+</pre></div>
+</div>
+<p>You can also put this line in your <tt class="docutils literal"><span class="pre">~/.scapy_startup.py</span></tt> file</p>
+</div>
+</div>
+<div class="section" id="getting-help">
+<h2>Getting help<a class="headerlink" href="#getting-help" title="Permalink to this headline">¶</a></h2>
+<p>Common problems are answered in the FAQ.</p>
+<p>There&#8217;s a low traffic mailing list at <tt class="docutils literal"><span class="pre">scapy.ml(at)secdev.org</span></tt>  (<a class="reference external" href="http://news.gmane.org/gmane.comp.security.scapy.general">archive</a>, <a class="reference external" href="http://gmane.org/info.php?group=gmane.comp.security.scapy.general">RSS, NNTP</a>). You are encouraged to send questions, bug reports, suggestions, ideas, cool usages of Scapy, etc. to this list. Subscribe by sending a mail to <tt class="docutils literal"><span class="pre">scapy.ml-subscribe(at)secdev.org</span></tt>.</p>
+<p>To avoid spam, you must subscribe to the mailing list to post.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Troubleshooting</a><ul>
+<li><a class="reference internal" href="#faq">FAQ</a><ul>
+<li><a class="reference internal" href="#my-tcp-connections-are-reset-by-scapy-or-by-my-kernel">My TCP connections are reset by Scapy or by my kernel.</a></li>
+<li><a class="reference internal" href="#i-can-t-ping-127-0-0-1-scapy-does-not-work-with-127-0-0-1-or-on-the-loopback-interface">I can&#8217;t ping 127.0.0.1. Scapy does not work with 127.0.0.1 or on the loopback interface</a></li>
+<li><a class="reference internal" href="#bpf-filters-do-not-work-i-m-on-a-ppp-link">BPF filters do not work. I&#8217;m on a ppp link</a></li>
+<li><a class="reference internal" href="#traceroute-does-not-work-i-m-on-a-ppp-link">traceroute() does not work. I&#8217;m on a ppp link</a></li>
+<li><a class="reference internal" href="#graphs-are-ugly-fonts-are-too-big-image-is-truncated">Graphs are ugly/fonts are too big/image is truncated.</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#getting-help">Getting help</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="build_dissect.html"
+                        title="previous chapter">Adding new protocols</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="development.html"
+                        title="next chapter">Scapy development</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/troubleshooting.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="development.html" title="Scapy development"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="build_dissect.html" title="Adding new protocols"
+             >previous</a> |</li>
+        <li><a href="index.html">Scapy 2.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, 2009 Philippe Biondi and the Scapy community.
+      Last updated on Jun 26, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

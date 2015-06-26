@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Build your own tools &mdash; Scapy 2.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Scapy 2.3.1 documentation" href="index.html" />
+    <link rel="next" title="Adding new protocols" href="build_dissect.html" />
+    <link rel="prev" title="Advanced usage" href="advanced_usage.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="build_dissect.html" title="Adding new protocols"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="advanced_usage.html" title="Advanced usage"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Scapy 2.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="build-your-own-tools">
+<h1>Build your own tools<a class="headerlink" href="#build-your-own-tools" title="Permalink to this headline">¶</a></h1>
+<p>You can use Scapy to make your own automated tools. You can also extend Scapy without having to edit its source file.</p>
+<p>If you have built some interesting tools, please contribute back to the mailing-list!</p>
+<div class="section" id="using-scapy-in-your-tools">
+<h2>Using Scapy in your tools<a class="headerlink" href="#using-scapy-in-your-tools" title="Permalink to this headline">¶</a></h2>
+<p>You can easily use Scapy in your own tools. Just import what you need and do it.</p>
+<p>This first example take an IP or a name as first parameter, send an ICMP echo request packet and display the completely dissected return packet:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#! /usr/bin/env python</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">scapy.all</span> <span class="kn">import</span> <span class="n">sr1</span><span class="p">,</span><span class="n">IP</span><span class="p">,</span><span class="n">ICMP</span>
+
+<span class="n">p</span><span class="o">=</span><span class="n">sr1</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="n">ICMP</span><span class="p">())</span>
+<span class="k">if</span> <span class="n">p</span><span class="p">:</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This is a more complex example which does an ARP ping and reports what it found with LaTeX formating:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#! /usr/bin/env python</span>
+<span class="c"># arping2tex : arpings a network and outputs a LaTeX table as a result</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Usage: arping2tex &lt;net&gt;</span><span class="se">\n</span><span class="s">  eg: arping2tex 192.168.1.0/24&quot;</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">scapy.all</span> <span class="kn">import</span> <span class="n">srp</span><span class="p">,</span><span class="n">Ether</span><span class="p">,</span><span class="n">ARP</span><span class="p">,</span><span class="n">conf</span>
+<span class="n">conf</span><span class="o">.</span><span class="n">verb</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">srp</span><span class="p">(</span><span class="n">Ether</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s">&quot;ff:ff:ff:ff:ff:ff&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">ARP</span><span class="p">(</span><span class="n">pdst</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+              <span class="n">timeout</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">r&quot;\begin{tabular}{|l|l|}&quot;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s">r&quot;\hline&quot;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s">r&quot;MAC &amp; IP</span><span class="se">\\</span><span class="s">&quot;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s">r&quot;\hline&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">snd</span><span class="p">,</span><span class="n">rcv</span> <span class="ow">in</span> <span class="n">ans</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">rcv</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s">r&quot;</span><span class="si">%E</span><span class="s">ther.src% &amp; %ARP.psrc%</span><span class="se">\\</span><span class="s">&quot;</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="s">r&quot;\hline&quot;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s">r&quot;\end{tabular}&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here is another tool that will constantly monitor all interfaces on a machine and print all ARP request it sees, even on 802.11 frames from a Wi-Fi card in monitor mode. Note the store=0 parameter to sniff() to avoid storing all packets in memory for nothing:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#! /usr/bin/env python</span>
+<span class="kn">from</span> <span class="nn">scapy.all</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">def</span> <span class="nf">arp_monitor_callback</span><span class="p">(</span><span class="n">pkt</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">ARP</span> <span class="ow">in</span> <span class="n">pkt</span> <span class="ow">and</span> <span class="n">pkt</span><span class="p">[</span><span class="n">ARP</span><span class="p">]</span><span class="o">.</span><span class="n">op</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">):</span> <span class="c">#who-has or is-at</span>
+        <span class="k">return</span> <span class="n">pkt</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s">&quot;%ARP.hwsrc</span><span class="si">% %</span><span class="s">ARP.psrc%&quot;</span><span class="p">)</span>
+
+<span class="n">sniff</span><span class="p">(</span><span class="n">prn</span><span class="o">=</span><span class="n">arp_monitor_callback</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="s">&quot;arp&quot;</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For a real life example, you can check <a class="reference external" href="http://sid.rstack.org/static/articles/w/i/f/Wifitap_EN_9613.html">Wifitap</a>.</p>
+</div>
+<div class="section" id="extending-scapy-with-add-ons">
+<h2>Extending Scapy with add-ons<a class="headerlink" href="#extending-scapy-with-add-ons" title="Permalink to this headline">¶</a></h2>
+<p>If you need to add some new protocols, new functions, anything, you can write it directly into Scapy source file. But this is not very convenient. Even if those modifications are to be integrated into Scapy, it can be more convenient to write them in a separate file.</p>
+<p>Once you&#8217;ve done that, you can launch Scapy and import your file, but this is still not very convenient. Another way to do that is to make your file executable and have it call the Scapy function named interact():</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#! /usr/bin/env python</span>
+
+<span class="c"># Set log level to benefit from Scapy warnings</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&quot;scapy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">scapy.all</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">class</span> <span class="nc">Test</span><span class="p">(</span><span class="n">Packet</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;Test packet&quot;</span>
+    <span class="n">fields_desc</span> <span class="o">=</span> <span class="p">[</span> <span class="n">ShortField</span><span class="p">(</span><span class="s">&quot;test1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                    <span class="n">ShortField</span><span class="p">(</span><span class="s">&quot;test2&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">make_test</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">Ether</span><span class="p">()</span><span class="o">/</span><span class="n">IP</span><span class="p">()</span><span class="o">/</span><span class="n">Test</span><span class="p">(</span><span class="n">test1</span><span class="o">=</span><span class="n">x</span><span class="p">,</span><span class="n">test2</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">interact</span><span class="p">(</span><span class="n">mydict</span><span class="o">=</span><span class="nb">globals</span><span class="p">(),</span> <span class="n">mybanner</span><span class="o">=</span><span class="s">&quot;Test add-on v3.14&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you put the above listing in the test_interact.py file and make it executable, you&#8217;ll get:</p>
+<div class="highlight-python"><div class="highlight"><pre># ./test_interact.py
+Welcome to Scapy (0.9.17.109beta)
+Test add-on v3.14
+&gt;&gt;&gt; make_test(42,666)
+&lt;Ether type=0x800 |&lt;IP |&lt;Test test1=42 test2=666 |&gt;&gt;&gt;
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Build your own tools</a><ul>
+<li><a class="reference internal" href="#using-scapy-in-your-tools">Using Scapy in your tools</a></li>
+<li><a class="reference internal" href="#extending-scapy-with-add-ons">Extending Scapy with add-ons</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="advanced_usage.html"
+                        title="previous chapter">Advanced usage</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="build_dissect.html"
+                        title="next chapter">Adding new protocols</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/extending.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="build_dissect.html" title="Adding new protocols"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="advanced_usage.html" title="Advanced usage"
+             >previous</a> |</li>
+        <li><a href="index.html">Scapy 2.3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, 2009 Philippe Biondi and the Scapy community.
+      Last updated on Jun 26, 2015.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>
