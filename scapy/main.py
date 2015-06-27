@@ -10,6 +10,8 @@ Main module for interactive startup.
 import os,sys,socket
 import glob
 import builtins
+import types
+import gzip
 from .error import *
 from . import utils
 
@@ -101,7 +103,9 @@ def list_contrib(name=None):
 ##############################
 
 
-def save_session(fname=None, session=None, pickleProto=3):
+def save_session(fname=None, session=None, pickleProto=4):
+    import dill as pickle
+
     if fname is None:
         fname = conf.session
         if not fname:
@@ -112,12 +116,13 @@ def save_session(fname=None, session=None, pickleProto=3):
 
     to_be_saved = session.copy()
         
-    if "__builtins__" in to_be_saved:
-        del(to_be_saved["__builtins__"])
-
     for k in list(to_be_saved.keys()):
-        if type(to_be_saved[k]) in [type, types.ModuleType]:
-             log_interactive.error("[%s] (%s) can't be saved." % (k, type(to_be_saved[k])))
+        if k in ["__builtins__", "In", "Out", "conf"] or k.startswith("_") or \
+                (hasattr(to_be_saved[k], "__module__") and str(to_be_saved[k].__module__).startswith('IPython')):
+            del(to_be_saved[k])
+            continue
+        if type(to_be_saved[k]) in [type, types.ModuleType, types.MethodType]:
+             log_interactive.info("[%s] (%s) can't be saved." % (k, type(to_be_saved[k])))
              del(to_be_saved[k])
 
     try:
@@ -125,10 +130,19 @@ def save_session(fname=None, session=None, pickleProto=3):
     except OSError:
         pass
     f=gzip.open(fname,"wb")
-    pickle.dump(to_be_saved, f, pickleProto)
+    for i in to_be_saved.keys():
+        #d = {i: to_be_saved[i]}
+        #pickle.dump(d, f, pickleProto)
+        pickle.dump(to_be_saved, f, pickleProto)
     f.close()
 
 def load_session(fname=None):
+    if conf.interactive_shell.lower() == "ipython":
+        log_interactive.error("There are issues with load_session in ipython. Use python for interactive shell, or use -s parameter to load session")    
+        return
+
+    import dill as pickle
+
     if fname is None:
         fname = conf.session
     try:
@@ -140,6 +154,7 @@ def load_session(fname=None):
     scapy_session.update(s)
 
 def update_session(fname=None):
+    import dill as pickle
     if fname is None:
         fname = conf.session
     try:
@@ -342,16 +357,10 @@ def interact(mydict=None,argv=None,mybanner=None,loglevel=20):
     if IPYTHON:
         banner = the_banner % (conf.version) + " using IPython %s" % IPython.__version__
 
-        # Old way to embed IPython kept for backward compatibility
-        try:
-          args = ['']  # IPython command line args (will be seen as sys.argv)
-          ipshell = IPython.Shell.IPShellEmbed(args, banner = banner)
-          ipshell(local_ns=session)
-        except AttributeError as e:
-          pass
-
-        # In the IPython cookbook, see 'Updating-code-for-use-with-IPython-0.11-and-later'
-        IPython.embed(user_ns=session, banner2=banner)
+        if conf.ipython_embedded:
+            IPython.embed(user_ns=session, banner2=banner)
+        else:
+            IPython.start_ipython(argv=[], user_ns=session)
 
     else:
         code.interact(banner = the_banner % (conf.version),

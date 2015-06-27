@@ -777,6 +777,9 @@ We can reimport the produced hex string by selecting the appropriate starting la
 
 Base64
 ^^^^^^
+.. note::
+
+   export_object() and import_object() require dill library. Install it with `pip3 install dill`
 
 Using the ``export_object()`` function, Scapy can export a base64 encoded Python data structure representing a packet::
 
@@ -799,8 +802,8 @@ The output above can be reimported back into Scapy using ``import_object()``::
 
     >>> new_pkt = import_object(exported_string)
     >>> new_pkt
-    <Ether  dst=00:50:56:fc:ce:50 src=00:0c:29:2b:53:19 type=0x800 |<IP  version=4L 
-    ihl=5L tos=0x0 len=84 id=0 flags=DF frag=0L ttl=64 proto=icmp chksum=0x5a7c 
+    <Ether  dst=00:50:56:fc:ce:50 src=00:0c:29:2b:53:19 type=0x800 |<IP  version=4 
+    ihl=5 tos=0x0 len=84 id=0 flags=DF frag=0 ttl=64 proto=icmp chksum=0x5a7c 
     src=192.168.25.130 dst=4.2.2.1 options='' |<ICMP  type=echo-request code=0 
     chksum=0x9c90 id=0x5a61 seq=0x1 |<Raw  load='\xe6\xdapI\xb6\xe5\x08\x00\x08\t\n
     \x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f 
@@ -809,11 +812,18 @@ The output above can be reimported back into Scapy using ``import_object()``::
 Sessions
 ^^^^^^^^
 
+.. note::
+
+   Session saving/loading functions require dill library. Install it with `pip3 install dill`
+
+
 At last Scapy is capable of saving all session variables using the ``save_session()`` function:
 
 >>> dir()
 ['__builtins__', 'conf', 'new_pkt', 'pkt', 'pkt_export', 'pkt_hex', 'pkt_str', 'pkts']
 >>> save_session("session.scapy")
+
+Variables, which start with `_` are not saved, as well as those typical to IPython (In, Out, or inherited from IPython module). Also, conf is not saved.
 
 Next time you start Scapy you can load the previous saved session using the ``load_session()`` command::
 
