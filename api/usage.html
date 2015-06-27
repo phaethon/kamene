@@ -819,6 +819,10 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 </div>
 <div class="section" id="base64">
 <h4>Base64<a class="headerlink" href="#base64" title="Permalink to this headline">¶</a></h4>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">export_object() and import_object() require dill library. Install it with <cite>pip3 install dill</cite></p>
+</div>
 <p>Using the <tt class="docutils literal"><span class="pre">export_object()</span></tt> function, Scapy can export a base64 encoded Python data structure representing a packet:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">pkt</span>
 <span class="go">&lt;Ether  dst=00:50:56:fc:ce:50 src=00:0c:29:2b:53:19 type=0x800 |&lt;IP  version=4L</span>
@@ -839,8 +843,8 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 <p>The output above can be reimported back into Scapy using <tt class="docutils literal"><span class="pre">import_object()</span></tt>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">new_pkt</span> <span class="o">=</span> <span class="n">import_object</span><span class="p">(</span><span class="n">exported_string</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">new_pkt</span>
-<span class="go">&lt;Ether  dst=00:50:56:fc:ce:50 src=00:0c:29:2b:53:19 type=0x800 |&lt;IP  version=4L</span>
-<span class="go">ihl=5L tos=0x0 len=84 id=0 flags=DF frag=0L ttl=64 proto=icmp chksum=0x5a7c</span>
+<span class="go">&lt;Ether  dst=00:50:56:fc:ce:50 src=00:0c:29:2b:53:19 type=0x800 |&lt;IP  version=4</span>
+<span class="go">ihl=5 tos=0x0 len=84 id=0 flags=DF frag=0 ttl=64 proto=icmp chksum=0x5a7c</span>
 <span class="go">src=192.168.25.130 dst=4.2.2.1 options=&#39;&#39; |&lt;ICMP  type=echo-request code=0</span>
 <span class="go">chksum=0x9c90 id=0x5a61 seq=0x1 |&lt;Raw  load=&#39;\xe6\xdapI\xb6\xe5\x08\x00\x08\t\n</span>
 <span class="go">\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f</span>
@@ -850,12 +854,17 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 </div>
 <div class="section" id="sessions">
 <h4>Sessions<a class="headerlink" href="#sessions" title="Permalink to this headline">¶</a></h4>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Session saving/loading functions require dill library. Install it with <cite>pip3 install dill</cite></p>
+</div>
 <p>At last Scapy is capable of saving all session variables using the <tt class="docutils literal"><span class="pre">save_session()</span></tt> function:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">dir</span><span class="p">()</span>
 <span class="go">[&#39;__builtins__&#39;, &#39;conf&#39;, &#39;new_pkt&#39;, &#39;pkt&#39;, &#39;pkt_export&#39;, &#39;pkt_hex&#39;, &#39;pkt_str&#39;, &#39;pkts&#39;]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">save_session</span><span class="p">(</span><span class="s">&quot;session.scapy&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Variables, which start with <cite>_</cite> are not saved, as well as those typical to IPython (In, Out, or inherited from IPython module). Also, conf is not saved.</p>
 <p>Next time you start Scapy you can load the previous saved session using the <tt class="docutils literal"><span class="pre">load_session()</span></tt> command:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">dir</span><span class="p">()</span>
 <span class="go">[&#39;__builtins__&#39;, &#39;conf&#39;]</span>
