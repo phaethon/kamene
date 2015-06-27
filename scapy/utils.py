@@ -9,7 +9,7 @@ General utility functions.
 
 import os,sys,socket,types
 import random,time
-import gzip,zlib,pickle
+import gzip,zlib
 import re,struct,array,stat
 import subprocess
 
@@ -489,9 +489,11 @@ def import_object(obj):
 
 
 def save_object(fname, obj):
+    import dill as pickle
     pickle.dump(obj,gzip.open(fname,"wb"))
 
 def load_object(fname):
+    import dill as pickle
     return pickle.load(gzip.open(fname,"rb"))
 
 @conf.commands.register
