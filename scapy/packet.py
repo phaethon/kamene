@@ -645,7 +645,7 @@ Creates an EPS file describing a packet. If filename is not provided a temporary
 
     def hide_defaults(self):
         """Removes fields' values that are the same as default values."""
-        for k in self.fields.keys():
+        for k in list(self.fields.keys()):
             if k in self.default_fields:
                 if self.default_fields[k] == self.fields[k]:
                     del(self.fields[k])
