@@ -8,6 +8,7 @@ Common customizations for all Unix-like operating systems other than Linux
 """
 
 import sys,os,struct,socket,time
+from subprocess import check_output
 from fcntl import ioctl
 from scapy.error import warning
 import scapy.config
@@ -29,30 +30,28 @@ from .pcapdnet import *
 
 def read_routes():
     if scapy.arch.SOLARIS:
-        f=os.popen("netstat -rvn") # -f inet
+        f=check_output(["netstat", "-rvn"], universal_newlines = True) # -f inet
     elif scapy.arch.FREEBSD:
-        f=os.popen("netstat -rnW") # -W to handle long interface names
+        f=check_output(["netstat", "-rnW"], universal_newlines = True) # -W to handle long interface names
     else:
-        f=os.popen("netstat -rn") # -f inet
-    ok = 0
-    mtu_present = False
-    prio_present = False
+        f=check_output(["netstat", "-rn"], universal_newlines = True) # -f inet
+    ok = False
     routes = []
     pending_if = []
-    for l in f.readlines():
+    for l in f.split('\n'):
+        l = l.strip()
         if not l:
             break
-        l = l.strip()
         if l.find("----") >= 0: # a separation line
             continue
         if not ok:
             if l.find("Destination") >= 0:
-                ok = 1
-                mtu_present = l.find("Mtu") >= 0
-                prio_present = l.find("Prio") >= 0
+                ok = True
+                try:
+                    if_index = filter(lambda x: x in l.split(), ['Iface', 'Netif', 'Interface', 'Device']).__next__()
+                except StopIteration:
+                    ok = False
             continue
-        if not l:
-            break
         if scapy.arch.SOLARIS:
             lspl = l.split()
             if len(lspl) == 10:
@@ -63,7 +62,7 @@ def read_routes():
         else:
             rt = l.split()
             dest,gw,flg = rt[:3]
-            netif = rt[5+mtu_present+prio_present]
+            netif = rt[if_index]
         if flg.find("Lc") >= 0:
             continue                
         if dest == "default":
@@ -86,7 +85,6 @@ def read_routes():
             routes.append((dest,netmask,gw,netif,ifaddr))
         else:
             pending_if.append((dest,netmask,gw))
-    f.close()
 
     # On Solaris, netstat does not provide output interfaces for some routes
     # We need to parse completely the routing table to route their gw and
