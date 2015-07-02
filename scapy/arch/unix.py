@@ -40,18 +40,18 @@ def read_routes():
     pending_if = []
     for l in f.split('\n'):
         l = l.strip()
-        if not l:
-            break
         if l.find("----") >= 0: # a separation line
             continue
         if not ok:
             if l.find("Destination") >= 0:
                 ok = True
                 try:
-                    if_index = filter(lambda x: x in l.split(), ['Iface', 'Netif', 'Interface', 'Device']).__next__()
-                except StopIteration:
+                    if_index = l.split().index(filter(lambda x: x in l.split(), ['Iface', 'Netif', 'Interface', 'Device']).__next__())
+                except (StopIteration, ValueError):
                     ok = False
             continue
+        if not l:
+            break
         if scapy.arch.SOLARIS:
             lspl = l.split()
             if len(lspl) == 10:
