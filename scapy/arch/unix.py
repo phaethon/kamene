@@ -43,12 +43,10 @@ def read_routes():
         if l.find("----") >= 0: # a separation line
             continue
         if not ok:
-            if l.find("Destination") >= 0:
+            if_index = [ l.split().index(i) for i in ['Iface', 'Netif', 'Interface', 'Device'] if i in l.split()]
+            if if_index:
                 ok = True
-                try:
-                    if_index = l.split().index(filter(lambda x: x in l.split(), ['Iface', 'Netif', 'Interface', 'Device']).__next__())
-                except (StopIteration, ValueError):
-                    ok = False
+                if_index = if_index[0]
             continue
         if not l:
             break
