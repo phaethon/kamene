@@ -64,20 +64,31 @@ class RandomEnumeration:
             if not self.forever:
                 raise StopIteration
 
+class MetaVolatile(type):
+    def __init__(cls, name, bases, dct):
+        def special_gen(special_method):
+            def special_wrapper(self):
+                return getattr(getattr(self, "_fix")(), special_method)
+            return special_wrapper
 
-class VolatileValue:
+        #This is from scapy2 code. Usage places should be identified and fixed as there is no more __cmp__ in python3
+        # if attr == "__cmp__":
+        #     x = self._fix()
+        #     def cmp2(y,x=x):
+        #         if type(x) != type(y):
+        #             return -1
+        #         return x.__cmp__(y)
+        #     return cmp2
+
+        type.__init__(cls, name, bases, dct) 
+        for i in ["__int__", "__repr__", "__str__", "__index__"]:
+            setattr(cls, i, property(special_gen(i)))
+
+
+class VolatileValue(metaclass = MetaVolatile):
     def __repr__(self):
         return "<%s>" % self.__class__.__name__
     def __getattr__(self, attr):
-        if attr == "__setstate__":
-            raise AttributeError(attr)
-        elif attr == "__cmp__":
-            x = self._fix()
-            def cmp2(y,x=x):
-                if type(x) != type(y):
-                    return -1
-                return x.__cmp__(y)
-            return cmp2
         return getattr(self._fix(),attr)
     def _fix(self):
         return None
