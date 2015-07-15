@@ -404,11 +404,11 @@ class L3PacketSocket(SuperSocket):
             sx = bytes(ll(x))
             x.sent_time = time.time()
             self.outs.sendto(sx, sdto)
-        except socket.error as msg:
+        except OSError as msg:
             x.sent_time = time.time()  # bad approximation
-            if conf.auto_fragment and msg[0] == 90:
+            if conf.auto_fragment and msg.errno == 90:
                 for p in x.fragment():
-                    self.outs.sendto(str(ll(p)), sdto)
+                    self.outs.sendto(bytes(ll(p)), sdto)
             else:
                 raise
 
