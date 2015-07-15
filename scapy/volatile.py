@@ -35,7 +35,7 @@ class RandomEnumeration:
             n += 1
         self.n =n
 
-        self.fs = min(3,(n+1)/2)
+        self.fs = min(3,(n+1)//2)
         self.fsmask = 2**self.fs-1
         self.rounds = max(self.n,3)
         self.turns = 0
@@ -43,7 +43,7 @@ class RandomEnumeration:
 
     def __iter__(self):
         return self
-    def next(self):
+    def __next__(self):
         while True:
             if self.turns == 0 or (self.i == 0 and self.renewkeys):
                 self.cnt_key = self.rnd.randint(0,2**self.n-1)
@@ -81,7 +81,7 @@ class MetaVolatile(type):
         #     return cmp2
 
         type.__init__(cls, name, bases, dct) 
-        for i in ["__int__", "__repr__", "__str__", "__index__"]:
+        for i in ["__int__", "__repr__", "__str__", "__index__", "__add__", "__radd__", "__bytes__"]:
             setattr(cls, i, property(special_gen(i)))
 
 
@@ -228,11 +228,10 @@ class RandBin(RandString):
 class RandTermString(RandString):
     def __init__(self, size, term):
         #RandString.__init__(self, size, b"".join(map(chr,range(1,256))))
-        RandString.__init__(self, size, b"".join([bytes([i]) for i in range(1,256)]))
+        RandString.__init__(self, size, bytes([i for i in range(1,256)]))
         self.term = term
     def _fix(self):
-        return RandString._fix(self)+self.term
-    
+        return RandString._fix(self)+self.term    
     
 
 class RandIP(RandString):
@@ -554,7 +553,7 @@ class RandSingSLong(RandSingNum):
     def __init__(self):
         RandSingNum.__init__(self, -2**63, 2**63-1)
 
-class RandSingString(RandSingularity):
+class RandSingString(RandSingularity): #TODO3
     def __init__(self):
         self._choice = [ b"",
                          b"%x",
