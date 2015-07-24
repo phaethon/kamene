@@ -16,8 +16,10 @@ from scapy.utils import Enum_metaclass, EnumElement
 class RandASN1Object(RandField):
     def __init__(self, objlist=None):
         if objlist is None:
-            objlist = map(lambda x:x._asn1_obj,
-                          [ x for x in ASN1_Class_UNIVERSAL.__rdict__.values() if hasattr(x,"_asn1_obj") ])
+            objlist = [ x._asn1_obj for x in 
+                          [ x for x in ASN1_Class_UNIVERSAL.__rdict__.values() if hasattr(x,"_asn1_obj") ]]
+#            objlist = map(lambda x:x._asn1_obj,
+#                          [ x for x in ASN1_Class_UNIVERSAL.__rdict__.values() if hasattr(x,"_asn1_obj") ])
         self.objlist = objlist
         self.chars = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
     def _fix(self, n=0):
@@ -29,10 +31,11 @@ class RandASN1Object(RandField):
             return o(z)
         elif issubclass(o, ASN1_STRING):
             z = int(random.expovariate(0.05)+1)
-            return o(b"".join([random.choice(self.chars) for i in range(z)]))
+            return o(bytes([random.choice(self.chars) for i in range(z)]))
         elif issubclass(o, ASN1_SEQUENCE) and (n < 10):
             z = int(random.expovariate(0.08)+1)
-            return o(map(lambda x:x._fix(n+1), [self.__class__(objlist=self.objlist)]*z))
+#            return o(map(lambda x:x._fix(n+1), [self.__class__(objlist=self.objlist)]*z))
+            return o([ x._fix(n+1) for x in [self.__class__(objlist=self.objlist)]*z])
         return ASN1_INTEGER(int(random.gauss(0,1000)))
 
 
