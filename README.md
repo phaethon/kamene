@@ -34,7 +34,7 @@ p = IP(dst = 'www.somesite.ex') / TCP(dport = 80) / Raw(b'Some raw bytes')
 # to see packet content as bytes use bytes(p) not str(p)
 sr1(p)
 ```
-Notice `'www.somesite.ex'` as a string, and `b'Some raw bytes'` as bytes. Domain name is normal human input, thus it is string, raw packet content is byte data. Once you start using, it will seem easier than in looks.
+Notice `'www.somesite.ex'` as a string, and `b'Some raw bytes'` as bytes. Domain name is normal human input, thus it is string, raw packet content is byte data. Once you start using, it will seem easier than it looks.
 
 Use ls() to list all supported layers. Use lsc() to list all commands.
 

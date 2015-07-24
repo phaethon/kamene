@@ -127,7 +127,7 @@ lfilter: truth function to apply to each packet to decide whether it will be dis
     
     def filter(self, func):
         """Returns a packet list filtered by a truth function"""
-        return self.__class__(filter(func,self.res),
+        return self.__class__(list(filter(func,self.res)),
                               name="filtered %s"%self.listname)
     def make_table(self, *args, **kargs):
         """Prints a table using a function that returs for each packet its head column value, head row value and displayed value
