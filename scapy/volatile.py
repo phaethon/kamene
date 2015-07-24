@@ -89,6 +89,8 @@ class VolatileValue(metaclass = MetaVolatile):
     def __repr__(self):
         return "<%s>" % self.__class__.__name__
     def __getattr__(self, attr):
+        if attr == "__setstate__":
+            raise AttributeError("__setstate__")
         return getattr(self._fix(),attr)
     def _fix(self):
         return None
@@ -642,7 +644,7 @@ class IntAutoTime(AutoTime):
 
 
 class ZuluTime(AutoTime):
-    def __init__(self, diff=None):
+    def __init__(self, diff=0):
         self.diff=diff
     def _fix(self):
         return time.strftime("%y%m%d%H%M%SZ",time.gmtime(time.time()+self.diff))
