@@ -421,7 +421,7 @@ Creates an EPS file describing a packet. If filename is not provided a temporary
     def canvas_dump(self, layer_shift=0, rebuild=1):
         canvas = pyx.canvas.canvas()
         if rebuild:
-            p,t = self.__class__(str(self)).build_ps()
+            p,t = self.__class__(bytes(self)).build_ps()
         else:
             p,t = self.build_ps()
         YTXT=len(t)
