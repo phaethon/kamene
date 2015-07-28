@@ -314,23 +314,23 @@ lfilter: truth function to apply to each packet to decide whether it will be dis
             return m,M
 
         #mins,maxs = minmax(map(lambda (x,y): x, sl.values()))
-        mins,maxs = minmax(map(lambda a: a[0], sl.values()))
+        mins,maxs = minmax([ a[0] for a in sl.values()])
         #mine,maxe = minmax(map(lambda (x,y): x, el.values()))
-        mine,maxe = minmax(map(lambda a: a[0], el.values()))
+        mine,maxe = minmax([ a[0] for a in el.values()])
         mind,maxd = minmax(dl.values())
     
         gr = 'digraph "afterglow" {\n\tedge [len=2.5];\n'
 
         gr += "# src nodes\n"
         for s in sl:
-            n,l = sl[s]; n = 1+float(n-mins)/(maxs-mins)
+            n,l = sl[s]; n = 1+(n-mins)/(maxs-mins)
             gr += '"src.%s" [label = "%s", shape=box, fillcolor="#FF0000", style=filled, fixedsize=1, height=%.2f,width=%.2f];\n' % (repr(s),repr(s),n,n)
         gr += "# event nodes\n"
         for e in el:
-            n,l = el[e]; n = n = 1+float(n-mine)/(maxe-mine)
+            n,l = el[e]; n = n = 1+(n-mine)/(maxe-mine)
             gr += '"evt.%s" [label = "%s", shape=circle, fillcolor="#00FFFF", style=filled, fixedsize=1, height=%.2f, width=%.2f];\n' % (repr(e),repr(e),n,n)
         for d in dl:
-            n = dl[d]; n = n = 1+float(n-mind)/(maxd-mind)
+            n = dl[d]; n = n = 1+(n-mind)/(maxd-mind)
             gr += '"dst.%s" [label = "%s", shape=triangle, fillcolor="#0000ff", style=filled, fixedsize=1, height=%.2f, width=%.2f];\n' % (repr(d),repr(d),n,n)
 
         gr += "###\n"

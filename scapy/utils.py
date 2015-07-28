@@ -365,8 +365,10 @@ def do_graph(graph,prog=None,format=None,target=None,type=None,string=None,optio
             target = "| %s" % conf.prog.display
     if format is not None:
         format = "-T %s" % format
-    w,r = os.popen2("%s %s %s %s" % (prog,options or "", format or "", target))
-    w.write(graph)
+#    w,r = os.popen2("%s %s %s %s" % (prog,options or "", format or "", target))
+    p = subprocess.Popen("%s %s %s %s" % (prog,options or "", format or "", target), shell = True, stdin = subprocess.PIPE, stdout = subprocess.PIPE)
+    w, r = p.stdin, p.stdout
+    w.write(graph.encode('utf-8'))
     w.close()
     if start_viewer:
         # Workaround for file not found error: We wait until tempfile is written.
