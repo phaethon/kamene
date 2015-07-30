@@ -15,7 +15,7 @@ import itertools
 import collections
 import time
 from scapy.error import log_interactive,warning
-from queue import Queue
+import queue
 
 class PipeEngine:
     pipes = {}
@@ -486,7 +486,7 @@ class QueueSink(Sink):
 """
     def __init__(self, name=None):
         Sink.__init__(self, name=name)
-        self.q = Queue.Queue()
+        self.q = queue.Queue()
     def push(self, msg):
         self.q.put(msg)
     def high_push(self, msg):
@@ -495,7 +495,7 @@ class QueueSink(Sink):
         while True:
             try:
                 return self.q.get(True, timeout=0.1)
-            except Queue.Empty:
+            except queue.Empty:
                 pass
 
 
