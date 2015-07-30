@@ -8,7 +8,7 @@ Automata with states, transitions and actions.
 """
 
 from __future__ import with_statement
-import types,itertools,time,os,sys,socket
+import types,itertools,time,os,sys,socket,functools
 from select import select
 from collections import deque
 import _thread
@@ -41,7 +41,20 @@ class Message:
                                          for (k,v) in self.__dict__.items()
                                          if not k.startswith("_"))
 
-class _instance_state:
+# Currently does not seem necessary
+# class _meta_instance_state(type):
+#     def __init__(cls, name, bases, dct):
+#         def special_gen(special_method):
+#             def special_wrapper(self):
+#                 print("Calling %s" % special_method)
+#                 return getattr(getattr(self, "im_func"), special_method)
+#             return special_wrapper
+
+#         type.__init__(cls, name, bases, dct) 
+#         for i in ["__int__", "__repr__", "__str__", "__index__", "__add__", "__radd__", "__bytes__"]:
+#             setattr(cls, i, property(special_gen(i)))
+
+class _instance_state():
     def __init__(self, instance):
         self.im_self = instance.__self__
         self.im_func = instance.__func__
@@ -102,10 +115,11 @@ class ATMT:
             f.atmt_initial = initial
             f.atmt_final = final
             f.atmt_error = error
+#            @functools.wraps(f)  This is possible alternative to assigning __qualname__; it would save __doc__, too
             def state_wrapper(self, *args, **kargs):
                 return ATMT.NewStateRequested(f, self, *args, **kargs)
 
-            state_wrapper.__name__ = "%s_wrapper" % f.__name__
+            state_wrapper.__qualname__ = "%s_wrapper" % f.__name__
             state_wrapper.atmt_type = ATMT.STATE
             state_wrapper.atmt_state = f.__name__
             state_wrapper.atmt_initial = initial
@@ -188,8 +202,10 @@ class _ATMT_supersocket(SuperSocket):
     def fileno(self):
         return self.spa.fileno()
     def send(self, s):
-        if type(s) is not str:
-            s = str(s)
+        if type(s) is str:
+            s = s.encode()
+        elif type(s) is not bytes:
+            s = bytes(s)
         return self.spa.send(s)
     def recv(self, n=MTU):
         r = self.spa.recv(n)
@@ -293,7 +309,7 @@ class Automaton_metaclass(type):
         s += se
 
         for st in self.states.values():
-            for n in st.atmt_origfunc.func_code.co_names+st.atmt_origfunc.func_code.co_consts:
+            for n in st.atmt_origfunc.__code__.co_names+st.atmt_origfunc.__code__.co_consts:
                 if n in self.states:
                     s += '\t"%s" -> "%s" [ color=green ];\n' % (st.atmt_state,n)
             
@@ -302,7 +318,7 @@ class Automaton_metaclass(type):
                       [("red",k,v) for k,v in self.recv_conditions.items()]+
                       [("orange",k,v) for k,v in self.ioevents.items()]):
             for f in v:
-                for n in f.func_code.co_names+f.func_code.co_consts:
+                for n in f.__code__.co_names+f.__code__.co_consts:
                     if n in self.states:
                         l = f.atmt_condname
                         for x in self.actions[f.atmt_condname]:
@@ -312,7 +328,7 @@ class Automaton_metaclass(type):
             for t,f in v:
                 if f is None:
                     continue
-                for n in f.func_code.co_names+f.func_code.co_consts:
+                for n in f.__code__.co_names+f.__code__.co_consts:
                     if n in self.states:
                         l = "%s/%.1fs" % (f.atmt_condname,t)                        
                         for x in self.actions[f.atmt_condname]:
