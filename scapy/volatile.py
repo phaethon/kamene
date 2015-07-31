@@ -81,7 +81,7 @@ class MetaVolatile(type):
         #     return cmp2
 
         type.__init__(cls, name, bases, dct) 
-        for i in ["__int__", "__repr__", "__str__", "__index__", "__add__", "__radd__", "__bytes__"]:
+        for i in ["__int__", "__repr__", "__str__", "__index__", "__add__", "__radd__", "__bytes__","__mul__","__rmul__"]:
             setattr(cls, i, property(special_gen(i)))
 
 
