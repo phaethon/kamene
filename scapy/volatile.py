@@ -297,7 +297,7 @@ class RandIP6(RandString):
                     remain = random.randint(0,remain)
                 for j in range(remain):
                     ip.append("%04x" % random.randint(0,65535))
-            if n == 0:
+            elif n == 0:
               ip.append("0")
             elif not n:
                 ip.append("")
@@ -592,10 +592,10 @@ class RandSingString(RandSingularity): #TODO3
                          b"%00",
                          b"\\",
                          b"../../../../../../../../../../../../../../../../../etc/passwd",
-                         b"%2e%2e%2f" * 20 + "etc/passwd",
-                         b"%252e%252e%252f" * 20 + "boot.ini",
-                         b"..%c0%af" * 20 + "etc/passwd",
-                         b"..%c0%af" * 20 + "boot.ini",
+                         b"%2e%2e%2f" * 20 + b"etc/passwd",
+                         b"%252e%252e%252f" * 20 + b"boot.ini",
+                         b"..%c0%af" * 20 + b"etc/passwd",
+                         b"..%c0%af" * 20 + b"boot.ini",
                          b"//etc/passwd",
                          br"..\..\..\..\..\..\..\..\..\..\..\..\..\..\..\..\..\boot.ini",
                          b"AUX:",

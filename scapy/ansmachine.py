@@ -68,7 +68,7 @@ class AnsweringMachine(object):
     def parse_all_options(self, mode, kargs):
         sniffopt = {}
         sendopt = {}
-        for k in kargs.keys():            
+        for k in list(kargs):
             if k in self.sniff_options_list:
                 sniffopt[k] = kargs[k]
             if k in self.send_options_list:
