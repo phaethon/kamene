@@ -64,7 +64,7 @@ class RandomEnumeration:
             if not self.forever:
                 raise StopIteration
 
-class MetaVolatile(type):
+class _MetaVolatile(type):
     def __init__(cls, name, bases, dct):
         def special_gen(special_method):
             def special_wrapper(self):
@@ -85,7 +85,7 @@ class MetaVolatile(type):
             setattr(cls, i, property(special_gen(i)))
 
 
-class VolatileValue(metaclass = MetaVolatile):
+class VolatileValue(metaclass = _MetaVolatile):
     def __repr__(self):
         return "<%s>" % self.__class__.__name__
     def __getattr__(self, attr):
