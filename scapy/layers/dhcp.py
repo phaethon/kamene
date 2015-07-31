@@ -163,7 +163,7 @@ class RandDHCPOptions(RandField):
         if rndstr is None:
             rndstr = RandBin(RandNum(0,255))
         self.rndstr=rndstr
-        self._opts = DHCPOptions.values()
+        self._opts = list(DHCPOptions.values())
         self._opts.remove("pad")
         self._opts.remove("end")
     def _fix(self):
