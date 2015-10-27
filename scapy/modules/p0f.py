@@ -9,6 +9,7 @@ Clone of p0f passive OS fingerprinting
 
 from scapy.data import KnowledgeBase
 from scapy.config import conf
+from scapy.error import warning
 from scapy.layers.inet import IP, TCP, TCPOptions
 from scapy.packet import NoPayload
 
