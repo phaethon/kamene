@@ -263,14 +263,15 @@ sendp(packets, [inter=0], [loop=0], [verbose=conf.verb]) -> None"""
     __gen_send(conf.L2socket(iface=iface, *args, **kargs), x, inter=inter, loop=loop, count=count, verbose=verbose, realtime=realtime)
 
 @conf.commands.register
-def sendpfast(x, pps=None, mbps=None, realtime=None, loop=0, file_cache=False, iface=None):
+def sendpfast(x, pps=None, mbps=None, realtime=None, loop=0, file_cache=False, iface=None, verbose=True):
     """Send packets at layer 2 using tcpreplay for performance
     pps:  packets per second
     mpbs: MBits per second
     realtime: use packet's timestamp, bending time with realtime value
     loop: number of times to process the packet list
     file_cache: cache packets in RAM instead of reading from disk at each iteration
-    iface: output interface """
+    iface: output interface
+    verbose: if False, discard tcpreplay output """
     if iface is None:
         iface = conf.iface
     argv = [conf.prog.tcpreplay, "--intf1=%s" % iface ]
@@ -282,7 +283,8 @@ def sendpfast(x, pps=None, mbps=None, realtime=None, loop=0, file_cache=False, i
         argv.append("--multiplier=%i" % realtime)
     else:
         argv.append("--topspeed")
-
+    if not verbose:
+        argv.append("-q")
     if loop:
         argv.append("--loop=%i" % loop)
         if file_cache:
@@ -291,19 +293,23 @@ def sendpfast(x, pps=None, mbps=None, realtime=None, loop=0, file_cache=False, i
     f = get_temp_file()
     argv.append(f)
     wrpcap(f, x)
-    try:
-        subprocess.check_call(argv)
-    except KeyboardInterrupt:
-        log_interactive.info("Interrupted by user")
-    except Exception as e:
-        log_interactive.error("while trying to exec [%s]: %s" % (argv[0],e))
-    finally:
-        os.unlink(f)
+    with open(os.devnull, "wb") as null:
+        proc_output = null if not verbose else None
+        try:
+            subprocess.check_call(argv,
+                                  stdout=proc_output,
+                                  stderr=proc_output)
+        except KeyboardInterrupt:
+            log_interactive.info("Interrupted by user")
+        except Exception as e:
+            log_interactive.error("while trying to exec [%s]: %s" % (argv[0],e))
+        finally:
+            os.unlink(f)
 
-        
 
-        
-    
+
+
+
 @conf.commands.register
 def sr(x,filter=None, iface=None, nofilter=0, *args,**kargs):
     """Send and receive packets at layer 3
