@@ -541,8 +541,7 @@ def rdpcap(filename, count=-1):
     """Read a pcap file and return a packet list
 count: read only <count> packets"""
     with PcapReader(filename) as pcap:
-        pkts = pcap.read_all(count=count)
-    return pkts
+        return pcap.read_all(count=count)
 
 class RawPcapReader:
     """A stateful pcap reader. Each packet is returned as bytes"""
