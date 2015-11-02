@@ -131,7 +131,7 @@ Graphical dumps (PDF, PS)
 .. index::
    single: pdfdump(), psdump()
 
-* N.B.! Not tested on scapy3k * If you have PyX installed, you can make a graphical PostScript/PDF dump of a packet or a list of packets (see the ugly PNG image below. PostScript/PDF are far better quality...)::
+If you have PyX installed, you can make a graphical PostScript/PDF dump of a packet or a list of packets (see the ugly PNG image below. PostScript/PDF are far better quality...)::
 
     >>> a[423].pdfdump(layer_shift=1)
     >>> a[423].psdump("/tmp/isakmp_pkt.eps",layer_shift=1)
