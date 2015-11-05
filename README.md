@@ -11,6 +11,8 @@ Please, submit all issues https://github.com/phaethon/scapy preferrably with .pc
 ## News
 [Follow @scapy3k](https://twitter.com/scapy3k) and/or see [scapy3k](https://phaethon.github.io/scapy) for recent news.
 
+Scapy3k is included in the [Network Security Toolkit] (http://www.networksecuritytoolkit.org/nst/index.html) Release 22. 
+
 There are several new features compared to classic scapy:
 * Reading PCAP Next Generation (PCAPNG) files (please, add issues on GitHub for block types and options, which need support. Currently, reading packets only from Enhanced Packet Block)
 * new command tdecode to call tshark decoding on one packet and display results, this is handy for interactive work and debugging
