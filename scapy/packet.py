@@ -370,7 +370,7 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
             if isinstance(f, ConditionalField) and not f._evalcond(self):
                 continue
             p = f.addfield(self, p, self.getfieldval(f.name) )
-            if type(p) is str:
+            if type(p) is bytes:
                 r = p[len(q):]
                 q = p
             else:
@@ -446,7 +446,7 @@ Creates an EPS file describing a packet. If filename is not provided a temporary
         def hexstr(x):
             s = []
             for c in x:
-                s.append("%02x" % ord(c))
+                s.append("%02x" % c)
             return " ".join(s)
 
                 
