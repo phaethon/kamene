@@ -512,4 +512,6 @@ lfilter: truth function to apply to each packet pair to decide whether it will b
                 print(self._elt2sum((s, r)))
             else:
                 print(prn(s, r))
-                                                                               
+    def filter(self, func):
+        """Returns a SndRcv list filtered by a truth function"""
+        return self.__class__( [ i for i in self.res if func(*i) ], name='filtered %s'%self.listname)
