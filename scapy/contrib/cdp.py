@@ -184,7 +184,7 @@ _cdp_capabilities = [ "Router",
                       "Switch",
                       "Host",
                       "IGMPCapable",
-                      "Repeater"] + map(lambda x: "Bit%d" % x, range(25,0,-1))
+                      "Repeater"] + ["Bit%d" % x for x in range(25,0,-1)]
 
 
 class CDPMsgCapabilities(CDPMsgGeneric):
