@@ -196,6 +196,7 @@ class DHCPOptionsField(StrField):
         
     def getfield(self, pkt, s):
         return b"", self.m2i(pkt, s)
+
     def m2i(self, pkt, x):
         opt = []
         while x:
@@ -288,7 +289,7 @@ class DHCP(Packet):
 bind_layers( UDP,           BOOTP,         dport=67, sport=68)
 bind_layers( UDP,           BOOTP,         dport=68, sport=67)
 bind_bottom_up( UDP, BOOTP, dport=67, sport=67)
-bind_layers( BOOTP,         DHCP,          options='c\x82Sc')
+bind_layers( BOOTP,         DHCP,          options=b'c\x82Sc')
 
 def dhcp_request(iface=None,**kargs):
     if conf.checkIPaddr != 0:
