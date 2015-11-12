@@ -12,6 +12,7 @@ Generators and packet meta classes.
 ################
 
 import re,random,socket
+from types import GeneratorType
 import scapy.config
 from . import error
 
@@ -22,7 +23,7 @@ class Gen(object):
 class SetGen(Gen):
     def __init__(self, col, _iterpacket=1):
         self._iterpacket=_iterpacket
-        if type(col) is list:
+        if type(col) is list or isinstance(col, GeneratorType):
             self.col = col
         elif isinstance(col, BasePacketList):
             self.col = list(col)
