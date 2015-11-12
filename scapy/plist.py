@@ -136,16 +136,6 @@ lfilter: truth function to apply to each packet to decide whether it will be dis
         """Returns a packet list filtered by a truth function"""
         return self.__class__(list(filter(func,self.res)),
                               name="filtered %s"%self.listname)
-    def make_table(self, *args, **kargs):
-        """Prints a table using a function that returs for each packet its head column value, head row value and displayed value
-        ex: p.make_table(lambda x:(x[IP].dst, x[TCP].dport, x[TCP].sprintf("%flags%")) """
-        return make_table(self.res, *args, **kargs)
-    def make_lined_table(self, *args, **kargs):
-        """Same as make_table, but print a table with lines"""
-        return make_lined_table(self.res, *args, **kargs)
-    def make_tex_table(self, *args, **kargs):
-        """Same as make_table, but print a table with LaTeX syntax"""
-        return make_tex_table(self.res, *args, **kargs)
 
     def plot(self, f, lfilter=None,**kargs):
         """Applies a function to each packet to get a value that will be plotted with GnuPlot. A gnuplot object is returned
@@ -515,3 +505,14 @@ lfilter: truth function to apply to each packet pair to decide whether it will b
     def filter(self, func):
         """Returns a SndRcv list filtered by a truth function"""
         return self.__class__( [ i for i in self.res if func(*i) ], name='filtered %s'%self.listname)
+
+    def make_table(self, *args, **kargs):
+        """Prints a table using a function that returs for each packet its head column value, head row value and displayed value
+        ex: p.make_table(lambda s, r:(s[IP].dst, r[TCP].sport, s[TCP].sprintf("%flags%")) """
+        return make_table(self.res, *args, **kargs)
+    def make_lined_table(self, *args, **kargs):
+        """Same as make_table, but print a table with lines"""
+        return make_lined_table(self.res, *args, **kargs)
+    def make_tex_table(self, *args, **kargs):
+        """Same as make_table, but print a table with LaTeX syntax"""
+        return make_tex_table(self.res, *args, **kargs)

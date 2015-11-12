@@ -838,7 +838,7 @@ def defrag(plist):
             
 @conf.commands.register
 def defragment(plist):
-    """defrag(plist) -> plist defragmented as much as possible """
+    """defragment(plist) -> plist defragmented as much as possible """
     frags = defaultdict(lambda:[])
     final = []
 
@@ -939,7 +939,7 @@ def _packetlist_timeskew_graph(self, ip, **kargs):
 ### Create a new packet list
 class TracerouteResult(SndRcvList):
     def __init__(self, res=None, name="Traceroute", stats=None):
-        PacketList.__init__(self, res, name, stats)
+        PacketList.__init__(self, res, name, stats, vector_index = 1)
         self.graphdef = None
         self.graphASres = 0
         self.padding = 0
@@ -1319,6 +1319,7 @@ traceroute(target, [maxttl=30,] [dport=80,] [sport=80,] [verbose=conf.verb]) -> 
                  timeout=timeout, filter=filter, verbose=verbose, **kargs)
 
     a = TracerouteResult(a.res)
+
     if verbose:
         a.show()
     return a,b
