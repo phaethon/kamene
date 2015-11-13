@@ -3,3 +3,5 @@ _build
 __pycache__
 *.pyc
 *.sublime-project
+*.sublime-workspace
+scapy_python3.egg-info
