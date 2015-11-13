@@ -13,11 +13,9 @@ from scapy.error import *
 import scapy.config
 
 try:
-    import Gnuplot
-    GNUPLOT=1
+    import matplotlib.pyplot as plt
 except ImportError:
-    log_loading.info("Can't import python gnuplot wrapper . Won't be able to plot.")
-    GNUPLOT=0
+    log_loading.info("Can't import matplotlib. Not critical, but won't be able to plot.")
 
 try:
     import pyx

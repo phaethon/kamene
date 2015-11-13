@@ -12,8 +12,6 @@ from scapy.config import conf
 
 conf.IPCountry_base = "GeoIPCountry4Scapy.gz"
 conf.countryLoc_base = "countryLoc.csv"
-conf.gnuplot_world = "world.dat"
-
 
 ##########################
 ## IP location database ##

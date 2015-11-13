@@ -15,11 +15,7 @@ from collections import defaultdict
 
 from .utils import do_graph,hexdump,make_table,make_lined_table,make_tex_table,get_temp_file
 
-#TODO import issue
-#import scapy.arch
-#if scapy.arch.GNUPLOT:
-#    Gnuplot=scapy.arch.Gnuplot
-
+#import matplotlib.pyplot as plt
 
 
 #############
@@ -138,47 +134,33 @@ lfilter: truth function to apply to each packet to decide whether it will be dis
                               name="filtered %s"%self.listname)
 
     def plot(self, f, lfilter=None,**kargs):
-        """Applies a function to each packet to get a value that will be plotted with GnuPlot. A gnuplot object is returned
+        """Applies a function to each packet to get a value that will be plotted with matplotlib. A matplotlib object is returned
         lfilter: a truth function that decides whether a packet must be ploted"""
-        g=Gnuplot.Gnuplot()
-        l = self.res
-        if lfilter is not None:
-            l = filter(lfilter, l)
-        l = map(f,l)
-        g.plot(Gnuplot.Data(l, **kargs))
-        return g
+
+        return plt.plot([ f(i) for i in self.res if not lfilter or lfilter(i) ], **kargs)
 
     def diffplot(self, f, delay=1, lfilter=None, **kargs):
         """diffplot(f, delay=1, lfilter=None)
         Applies a function to couples (l[i],l[i+delay])"""
-        g = Gnuplot.Gnuplot()
-        l = self.res
-        if lfilter is not None:
-            l = filter(lfilter, l)
-        l = map(f,l[:-delay],l[delay:])
-        g.plot(Gnuplot.Data(l, **kargs))
-        return g
+
+        return plt.plot([ f(i, j) for i in self.res[:-delay] for j in self.res[delay:] if not lfilter or (lfilter(i) and lfilter(j))], 
+            **kargs)
 
     def multiplot(self, f, lfilter=None, **kargs):
         """Uses a function that returns a label and a value for this label, then plots all the values label by label"""
-        g=Gnuplot.Gnuplot()
-        l = self.res
-        if lfilter is not None:
-            l = filter(lfilter, l)
 
-        d={}
-        for e in l:
-            k,v = f(e)
-            if k in d:
-                d[k].append(v)
-            else:
-                d[k] = [v]
-        data=[]
-        for k in d:
-            data.append(Gnuplot.Data(d[k], title=k, **kargs))
+        d = defaultdict(list)
+        for i in self.res:
+            if lfilter and not lfilter(i):
+                continue 
+            k, v = f(i)
+            d[k].append(v)
 
-        g.plot(*data)
-        return g
+        figure = plt.figure()
+        ax = figure.add_axes(plt.axes())
+        for i in d:
+            ax.plot(d[i], **kargs)
+        return figure
         
 
     def rawhexdump(self):
