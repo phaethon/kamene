@@ -21,6 +21,7 @@ from .data import MTU
 from .error import log_runtime,log_loading,log_interactive, Scapy_Exception
 from .base_classes import BasePacketList,BasePacket
 
+
 WINDOWS=sys.platform.startswith("win32")
 
 ###########
@@ -334,55 +335,64 @@ def ltoa(x):
 def itom(x):
     return (0xffffffff00000000>>x)&0xffffffff
 
-def do_graph(graph,prog=None,format=None,target=None,type=None,string=None,options=None):
+def do_graph(graph,prog=None,format=None,target=None,type=None,string=None,options=None, **kargs):
     """do_graph(graph, prog=conf.prog.dot, format="svg",
          target="| conf.prog.display", options=None, [string=1]):
+    if networkx library is available and graph is instance of Graph, use networkx.draw
+
     string: if not None, simply return the graph string
     graph: GraphViz graph description
     format: output type (svg, ps, gif, jpg, etc.), passed to dot's "-T" option
     target: filename or redirect. Defaults pipe to Imagemagick's display program
     prog: which graphviz program to use
     options: options to be passed to prog"""
-        
-    if format is None:
-        if WINDOWS:
-            format = "png" # use common format to make sure a viewer is installed
-        else:
-            format = "svg"
-    if string:
-        return graph
-    if type is not None:
-        format=type
-    if prog is None:
-        prog = conf.prog.dot
-    start_viewer=False
-    if target is None:
-        if WINDOWS:
-            tempfile = os.tempnam("", "scapy") + "." + format
-            target = "> %s" % tempfile
-            start_viewer = True
-        else:
-            target = "| %s" % conf.prog.display
-    if format is not None:
-        format = "-T %s" % format
-#    w,r = os.popen2("%s %s %s %s" % (prog,options or "", format or "", target))
-    p = subprocess.Popen("%s %s %s %s" % (prog,options or "", format or "", target), shell = True, stdin = subprocess.PIPE, stdout = subprocess.PIPE)
-    w, r = p.stdin, p.stdout
-    w.write(graph.encode('utf-8'))
-    w.close()
-    if start_viewer:
-        # Workaround for file not found error: We wait until tempfile is written.
-        waiting_start = time.time()
-        while not os.path.exists(tempfile):
-            time.sleep(0.1)
-            if time.time() - waiting_start > 3:
-                warning("Temporary file '%s' could not be written. Graphic will not be displayed." % tempfile)
-                break
-        else:  
-            if conf.prog.display == conf.prog._default:
-                os.startfile(tempfile)
+
+    from scapy.arch import NETWORKX
+    if NETWORKX:
+        import networkx as nx
+
+    if NETWORKX and isinstance(graph, nx.Graph):
+        nx.draw(graph, with_labels = True, edge_color = '0.75', **kargs)
+    else: # otherwise use dot as in scapy 2.x
+        if format is None:
+            if WINDOWS:
+                format = "png" # use common format to make sure a viewer is installed
             else:
-                subprocess.Popen([conf.prog.display, tempfile])
+                format = "svg"
+        if string:
+            return graph
+        if type is not None:
+            format=type
+        if prog is None:
+            prog = conf.prog.dot
+        start_viewer=False
+        if target is None:
+            if WINDOWS:
+                tempfile = os.tempnam("", "scapy") + "." + format
+                target = "> %s" % tempfile
+                start_viewer = True
+            else:
+                target = "| %s" % conf.prog.display
+        if format is not None:
+            format = "-T %s" % format
+    #    w,r = os.popen2("%s %s %s %s" % (prog,options or "", format or "", target))
+        p = subprocess.Popen("%s %s %s %s" % (prog,options or "", format or "", target), shell = True, stdin = subprocess.PIPE, stdout = subprocess.PIPE)
+        w, r = p.stdin, p.stdout
+        w.write(graph.encode('utf-8'))
+        w.close()
+        if start_viewer:
+            # Workaround for file not found error: We wait until tempfile is written.
+            waiting_start = time.time()
+            while not os.path.exists(tempfile):
+                time.sleep(0.1)
+                if time.time() - waiting_start > 3:
+                    warning("Temporary file '%s' could not be written. Graphic will not be displayed." % tempfile)
+                    break
+            else:  
+                if conf.prog.display == conf.prog._default:
+                    os.startfile(tempfile)
+                else:
+                    subprocess.Popen([conf.prog.display, tempfile])
 
 _TEX_TR = {
     "{":"{\\tt\\char123}",
@@ -810,6 +820,7 @@ class PcapReader(RawPcapReader):
                 raise
             p = conf.raw_layer(s)
         p.time = sec+0.000001*usec
+        p.wirelen = wirelen
         return p
 
     def read_all(self,count=-1):

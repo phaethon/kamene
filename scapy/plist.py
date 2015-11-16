@@ -15,7 +15,9 @@ from collections import defaultdict
 
 from .utils import do_graph,hexdump,make_table,make_lined_table,make_tex_table,get_temp_file
 
-#import matplotlib.pyplot as plt
+from scapy.arch import NETWORKX
+if NETWORKX:
+    import networkx as nx
 
 
 #############
@@ -219,11 +221,12 @@ lfilter: truth function to apply to each packet to decide whether it will be dis
                     hexdump(p1.getlayer(conf.padding_layer).load)
         
 
-    def conversations(self, getsrcdst=None,**kargs):
+    def conversations(self, getsrcdst=None, draw = True, **kargs):
         """Graphes a conversations between sources and destinations and display it
         (using graphviz and imagemagick)
         getsrcdst: a function that takes an element of the list and return the source and dest
                    by defaults, return source and destination IP
+        if networkx library is available returns a DiGraph, or draws it if draw = True otherwise graphviz is used
         type: output type (svg, ps, gif, jpg, etc.), passed to dot's "-T" option
         target: filename or redirect. Defaults pipe to Imagemagick's display program
         prog: which graphviz program to use"""
@@ -238,11 +241,25 @@ lfilter: truth function to apply to each packet to decide whether it will be dis
                 #XXX warning()
                 continue
             conv[c] = conv.get(c,0)+1
-        gr = 'digraph "conv" {\n'
-        for s,d in conv:
-            gr += '\t "%s" -> "%s"\n' % (s,d)
-        gr += "}\n"        
-        return do_graph(gr, **kargs)
+
+        if NETWORKX: # networkx is available
+            gr = nx.DiGraph()
+            for s,d in conv:
+                if s not in gr:
+                    gr.add_node(s)
+                if d not in gr:
+                    gr.add_node(d)
+                gr.add_edge(s, d)
+            if draw:
+                return do_graph(gr, **kargs)
+            else:
+                return gr
+        else:
+            gr = 'digraph "conv" {\n'
+            for s,d in conv:
+                gr += '\t "%s" -> "%s"\n' % (s,d)
+            gr += "}\n"        
+            return do_graph(gr, **kargs)
 
     def afterglow(self, src=None, event=None, dst=None, **kargs):
         """Experimental clone attempt of http://sourceforge.net/projects/afterglow
