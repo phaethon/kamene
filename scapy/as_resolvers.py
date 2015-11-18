@@ -44,7 +44,7 @@ class AS_resolver:
         return asn,desc.strip()
 
     def _resolve_one(self, ip):
-        self.s.send(b"%s\n" % ip.encode('ascii'))
+        self.s.send(str2bytes("%s\n" % ip.encode('ascii')))
         x = b""
         while not (b"%" in x or b"source" in x):
             x += self.s.recv(8192)
