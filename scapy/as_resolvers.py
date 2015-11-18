@@ -25,28 +25,28 @@ class AS_resolver:
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.connect((self.server,self.port))
         if self.options:
-            self.s.send(self.options+"\n")
+            self.s.send(self.options+b"\n")
             self.s.recv(8192)
     def _stop(self):
         self.s.close()
         
     def _parse_whois(self, txt):
-        asn,desc = None,""
+        asn,desc = None,b""
         for l in txt.splitlines():
-            if not asn and l.startswith("origin:"):
+            if not asn and l.startswith(b"origin:"):
                 asn = l[7:].strip()
-            if l.startswith("descr:"):
+            if l.startswith(b"descr:"):
                 if desc:
-                    desc += r"\n"
+                    desc += br"\n"
                 desc += l[6:].strip()
             if asn is not None and desc:
                 break
         return asn,desc.strip()
 
     def _resolve_one(self, ip):
-        self.s.send("%s\n" % ip)
-        x = ""
-        while not ("%" in x  or "source" in x):
+        self.s.send(b"%s\n" % ip.encode('ascii'))
+        x = b""
+        while not (b"%" in x or b"source" in x):
             x += self.s.recv(8192)
         asn, desc = self._parse_whois(x)
         return ip,asn,desc
@@ -62,12 +62,12 @@ class AS_resolver:
 
 class AS_resolver_riswhois(AS_resolver):
     server = "riswhois.ripe.net"
-    options = "-k -M -1"
+    options = b"-k -M -1"
 
 
 class AS_resolver_radb(AS_resolver):
     server = "whois.ra.net"
-    options = "-k -M"
+    options = b"-k -M"
     
 
 class AS_resolver_cymru(AS_resolver):
@@ -77,18 +77,18 @@ class AS_resolver_cymru(AS_resolver):
         ASNlist = []
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((self.server,self.port))
-        s.send("begin\r\n"+"\r\n".join(ips)+"\r\nend\r\n")
-        r = ""
+        s.send(b"begin\r\n"+b"\r\n".join([ i.encode('ascii') for i in ips])+b"\r\nend\r\n")
+        r = b""
         while 1:
             l = s.recv(8192)
-            if l == "":
+            if l == b"":
                 break
             r += l
         s.close()
         for l in r.splitlines()[1:]:
-            if "|" not in l:
+            if b"|" not in l:
                 continue
-            asn,ip,desc = map(str.strip, l.split("|"))
+            asn,ip,desc = [ i.decode('ascii') for i in map(bytes.strip, l.split(b"|")) ]
             if asn == "NA":
                 continue
             asn = int(asn)

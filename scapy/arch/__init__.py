@@ -13,11 +13,20 @@ from scapy.error import *
 import scapy.config
 
 try:
-    import Gnuplot
-    GNUPLOT=1
+    import matplotlib.pyplot as plt
+    MATPLOTLIB = True
+    if scapy.config.conf.interactive:
+        plt.ion()
 except ImportError:
-    log_loading.info("Can't import python gnuplot wrapper . Won't be able to plot.")
-    GNUPLOT=0
+    log_loading.info("Can't import matplotlib. Not critical, but won't be able to plot.")
+    MATPLOTLIB = False
+
+try:
+    import networkx as nx
+    NETWORKX = True
+except ImportError:
+    log_loading.info("Can't import networkx. Not criticial, but won't be able to draw network graphs.")
+    NETWORKX = False
 
 try:
     import pyx

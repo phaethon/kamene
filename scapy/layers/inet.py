@@ -838,7 +838,7 @@ def defrag(plist):
             
 @conf.commands.register
 def defragment(plist):
-    """defrag(plist) -> plist defragmented as much as possible """
+    """defragment(plist) -> plist defragmented as much as possible """
     frags = defaultdict(lambda:[])
     final = []
 
@@ -929,9 +929,7 @@ def _packetlist_timeskew_graph(self, ip, **kargs):
         return
     #d = map(lambda (x,y): (x%2000,((x-c[0][0])-((y-c[0][1])/1000.0))),c)
     d = map(lambda a: (a[0]%2000,((a[0]-c[0][0])-((a[1]-c[0][1])/1000.0))),c)
-    g = Gnuplot.Gnuplot()
-    g.plot(Gnuplot.Data(d,**kargs))
-    return g
+    return plt.plot(d, **kargs)
 
 #PacketList.timeskew_graph = types.MethodType(_packetlist_timeskew_graph, None)
 
@@ -939,7 +937,7 @@ def _packetlist_timeskew_graph(self, ip, **kargs):
 ### Create a new packet list
 class TracerouteResult(SndRcvList):
     def __init__(self, res=None, name="Traceroute", stats=None):
-        PacketList.__init__(self, res, name, stats)
+        PacketList.__init__(self, res, name, stats, vector_index = 1)
         self.graphdef = None
         self.graphASres = 0
         self.padding = 0
@@ -1081,49 +1079,49 @@ class TracerouteResult(SndRcvList):
                 visual.scene.center -= visual.scene.mouse.pos-movcenter
                 movcenter = visual.scene.mouse.pos
                 
-                
-    def world_trace(self):
-        from modules.geo import locate_ip
-        ips = {}
-        rt = {}
-        ports_done = {}
-        for s,r in self.res:
-            ips[r.src] = None
-            if s.haslayer(TCP) or s.haslayer(UDP):
-                trace_id = (s.src,s.dst,s.proto,s.dport)
-            elif s.haslayer(ICMP):
-                trace_id = (s.src,s.dst,s.proto,s.type)
-            else:
-                trace_id = (s.src,s.dst,s.proto,0)
-            trace = rt.get(trace_id,{})
-            if not r.haslayer(ICMP) or r.type != 11:
-                if trace_id in ports_done:
-                    continue
-                ports_done[trace_id] = None
-            trace[s.ttl] = r.src
-            rt[trace_id] = trace
-
-        trt = {}
-        for trace_id in rt:
-            trace = rt[trace_id]
-            loctrace = []
-            for i in range(max(trace.keys())):
-                ip = trace.get(i,None)
-                if ip is None:
-                    continue
-                loc = locate_ip(ip)
-                if loc is None:
-                    continue
-#                loctrace.append((ip,loc)) # no labels yet
-                loctrace.append(loc)
-            if loctrace:
-                trt[trace_id] = loctrace
-
-        tr = map(lambda x: Gnuplot.Data(x,with_="lines"), trt.values())
-        g = Gnuplot.Gnuplot()
-        world = Gnuplot.File(conf.gnuplot_world,with_="lines")
-        g.plot(world,*tr)
-        return g
+## world_trace needs to be reimplemented as gnuplot dependency is removed                
+#    def world_trace(self):
+#        from modules.geo import locate_ip
+#        ips = {}
+#        rt = {}
+#        ports_done = {}
+#        for s,r in self.res:
+#            ips[r.src] = None
+#            if s.haslayer(TCP) or s.haslayer(UDP):
+#                trace_id = (s.src,s.dst,s.proto,s.dport)
+#            elif s.haslayer(ICMP):
+#                trace_id = (s.src,s.dst,s.proto,s.type)
+#            else:
+#                trace_id = (s.src,s.dst,s.proto,0)
+#            trace = rt.get(trace_id,{})
+#            if not r.haslayer(ICMP) or r.type != 11:
+#                if trace_id in ports_done:
+#                    continue
+#                ports_done[trace_id] = None
+#            trace[s.ttl] = r.src
+#            rt[trace_id] = trace
+#
+#        trt = {}
+#        for trace_id in rt:
+#            trace = rt[trace_id]
+#            loctrace = []
+#            for i in range(max(trace.keys())):
+#                ip = trace.get(i,None)
+#                if ip is None:
+#                    continue
+#                loc = locate_ip(ip)
+#                if loc is None:
+#                    continue
+##                loctrace.append((ip,loc)) # no labels yet
+#                loctrace.append(loc)
+#            if loctrace:
+#                trt[trace_id] = loctrace
+#
+#        tr = map(lambda x: Gnuplot.Data(x,with_="lines"), trt.values())
+#        g = Gnuplot.Gnuplot()
+#        world = Gnuplot.File(conf.gnuplot_world,with_="lines")
+#        g.plot(world,*tr)
+#        return g
 
     def make_graph(self,ASres=None,padding=0):
         if ASres is None:
@@ -1319,6 +1317,7 @@ traceroute(target, [maxttl=30,] [dport=80,] [sport=80,] [verbose=conf.verb]) -> 
                  timeout=timeout, filter=filter, verbose=verbose, **kargs)
 
     a = TracerouteResult(a.res)
+
     if verbose:
         a.show()
     return a,b

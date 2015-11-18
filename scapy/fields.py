@@ -373,7 +373,7 @@ class StrField(Field):
 
 class PacketField(StrField):
     holds_packets=1
-    def __init__(self, name, default, cls, remain=0):
+    def __init__(self, name, default, cls, remain=0): #is remain used somewhere?
         StrField.__init__(self, name, default, remain=remain)
         self.cls = cls
     def i2m(self, pkt, i):

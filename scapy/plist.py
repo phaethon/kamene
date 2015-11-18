@@ -15,11 +15,9 @@ from collections import defaultdict
 
 from .utils import do_graph,hexdump,make_table,make_lined_table,make_tex_table,get_temp_file
 
-#TODO import issue
-#import scapy.arch
-#if scapy.arch.GNUPLOT:
-#    Gnuplot=scapy.arch.Gnuplot
-
+from scapy.arch import NETWORKX
+if NETWORKX:
+    import networkx as nx
 
 
 #############
@@ -136,59 +134,35 @@ lfilter: truth function to apply to each packet to decide whether it will be dis
         """Returns a packet list filtered by a truth function"""
         return self.__class__(list(filter(func,self.res)),
                               name="filtered %s"%self.listname)
-    def make_table(self, *args, **kargs):
-        """Prints a table using a function that returs for each packet its head column value, head row value and displayed value
-        ex: p.make_table(lambda x:(x[IP].dst, x[TCP].dport, x[TCP].sprintf("%flags%")) """
-        return make_table(self.res, *args, **kargs)
-    def make_lined_table(self, *args, **kargs):
-        """Same as make_table, but print a table with lines"""
-        return make_lined_table(self.res, *args, **kargs)
-    def make_tex_table(self, *args, **kargs):
-        """Same as make_table, but print a table with LaTeX syntax"""
-        return make_tex_table(self.res, *args, **kargs)
 
     def plot(self, f, lfilter=None,**kargs):
-        """Applies a function to each packet to get a value that will be plotted with GnuPlot. A gnuplot object is returned
+        """Applies a function to each packet to get a value that will be plotted with matplotlib. A matplotlib object is returned
         lfilter: a truth function that decides whether a packet must be ploted"""
-        g=Gnuplot.Gnuplot()
-        l = self.res
-        if lfilter is not None:
-            l = filter(lfilter, l)
-        l = map(f,l)
-        g.plot(Gnuplot.Data(l, **kargs))
-        return g
+
+        return plt.plot([ f(i) for i in self.res if not lfilter or lfilter(i) ], **kargs)
 
     def diffplot(self, f, delay=1, lfilter=None, **kargs):
         """diffplot(f, delay=1, lfilter=None)
         Applies a function to couples (l[i],l[i+delay])"""
-        g = Gnuplot.Gnuplot()
-        l = self.res
-        if lfilter is not None:
-            l = filter(lfilter, l)
-        l = map(f,l[:-delay],l[delay:])
-        g.plot(Gnuplot.Data(l, **kargs))
-        return g
+
+        return plt.plot([ f(i, j) for i in self.res[:-delay] for j in self.res[delay:] if not lfilter or (lfilter(i) and lfilter(j))], 
+            **kargs)
 
     def multiplot(self, f, lfilter=None, **kargs):
         """Uses a function that returns a label and a value for this label, then plots all the values label by label"""
-        g=Gnuplot.Gnuplot()
-        l = self.res
-        if lfilter is not None:
-            l = filter(lfilter, l)
 
-        d={}
-        for e in l:
-            k,v = f(e)
-            if k in d:
-                d[k].append(v)
-            else:
-                d[k] = [v]
-        data=[]
-        for k in d:
-            data.append(Gnuplot.Data(d[k], title=k, **kargs))
+        d = defaultdict(list)
+        for i in self.res:
+            if lfilter and not lfilter(i):
+                continue 
+            k, v = f(i)
+            d[k].append(v)
 
-        g.plot(*data)
-        return g
+        figure = plt.figure()
+        ax = figure.add_axes(plt.axes())
+        for i in d:
+            ax.plot(d[i], **kargs)
+        return figure
         
 
     def rawhexdump(self):
@@ -247,11 +221,12 @@ lfilter: truth function to apply to each packet to decide whether it will be dis
                     hexdump(p1.getlayer(conf.padding_layer).load)
         
 
-    def conversations(self, getsrcdst=None,**kargs):
+    def conversations(self, getsrcdst=None, draw = True, **kargs):
         """Graphes a conversations between sources and destinations and display it
         (using graphviz and imagemagick)
         getsrcdst: a function that takes an element of the list and return the source and dest
                    by defaults, return source and destination IP
+        if networkx library is available returns a DiGraph, or draws it if draw = True otherwise graphviz is used
         type: output type (svg, ps, gif, jpg, etc.), passed to dot's "-T" option
         target: filename or redirect. Defaults pipe to Imagemagick's display program
         prog: which graphviz program to use"""
@@ -266,11 +241,25 @@ lfilter: truth function to apply to each packet to decide whether it will be dis
                 #XXX warning()
                 continue
             conv[c] = conv.get(c,0)+1
-        gr = 'digraph "conv" {\n'
-        for s,d in conv:
-            gr += '\t "%s" -> "%s"\n' % (s,d)
-        gr += "}\n"        
-        return do_graph(gr, **kargs)
+
+        if NETWORKX: # networkx is available
+            gr = nx.DiGraph()
+            for s,d in conv:
+                if s not in gr:
+                    gr.add_node(s)
+                if d not in gr:
+                    gr.add_node(d)
+                gr.add_edge(s, d)
+            if draw:
+                return do_graph(gr, **kargs)
+            else:
+                return gr
+        else:
+            gr = 'digraph "conv" {\n'
+            for s,d in conv:
+                gr += '\t "%s" -> "%s"\n' % (s,d)
+            gr += "}\n"        
+            return do_graph(gr, **kargs)
 
     def afterglow(self, src=None, event=None, dst=None, **kargs):
         """Experimental clone attempt of http://sourceforge.net/projects/afterglow
@@ -512,4 +501,17 @@ lfilter: truth function to apply to each packet pair to decide whether it will b
                 print(self._elt2sum((s, r)))
             else:
                 print(prn(s, r))
-                                                                               
+    def filter(self, func):
+        """Returns a SndRcv list filtered by a truth function"""
+        return self.__class__( [ i for i in self.res if func(*i) ], name='filtered %s'%self.listname)
+
+    def make_table(self, *args, **kargs):
+        """Prints a table using a function that returs for each packet its head column value, head row value and displayed value
+        ex: p.make_table(lambda s, r:(s[IP].dst, r[TCP].sport, s[TCP].sprintf("%flags%")) """
+        return make_table(self.res, *args, **kargs)
+    def make_lined_table(self, *args, **kargs):
+        """Same as make_table, but print a table with lines"""
+        return make_lined_table(self.res, *args, **kargs)
+    def make_tex_table(self, *args, **kargs):
+        """Same as make_table, but print a table with LaTeX syntax"""
+        return make_tex_table(self.res, *args, **kargs)
