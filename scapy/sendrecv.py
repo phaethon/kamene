@@ -540,8 +540,7 @@ iface:    listen answers only on the given interface"""
 
 
 @conf.commands.register
-def sniff(count=0, store=1, offline=None, prn = None, lfilter=None, L2socket=None, timeout=None,
-          opened_socket=None, stop_filter=None, *arg, **karg):
+def sniff(count=0, store=1, offline=None, prn = None, lfilter=None, L2socket=None, timeout=None, stopperTimeout=None, stopper = None, *arg, **karg):
     """Sniff packets
 sniff([count=0,] [prn=None,] [store=1,] [offline=None,] [lfilter=None,] + L2ListenSocket args) -> list of packets
 
@@ -555,35 +554,50 @@ lfilter: python function applied to each packet to determine
          ex: lfilter = lambda x: x.haslayer(Padding)
 offline: pcap file to read packets from, instead of sniffing them
 timeout: stop sniffing after a given time (default: None)
+stopperTimeout: break the select to check the returned value of 
+         stopper() and stop sniffing if needed (select timeout)
+stopper: function returning true or false to stop the sniffing process
 L2socket: use the provided L2socket
-opened_socket: provide an object ready to use .recv() on
-stop_filter: python function applied to each packet to determine
-             if we have to stop the capture after this packet
-             ex: stop_filter = lambda x: x.haslayer(TCP)
     """
     c = 0
-    
-    if opened_socket is not None:
-        s = opened_socket
+
+    if offline is None:
+        if L2socket is None:
+            L2socket = conf.L2listen
+        s = L2socket(type=ETH_P_ALL, *arg, **karg)
     else:
-        if offline is None:
-            if L2socket is None:
-                L2socket = conf.L2listen
-            s = L2socket(type=ETH_P_ALL, *arg, **karg)
-        else:
-            s = PcapReader(offline)
+        s = PcapReader(offline)
 
     lst = []
     if timeout is not None:
         stoptime = time.time()+timeout
     remain = None
-    try:
-        while 1:
+
+    if stopperTimeout is not None:
+        stopperStoptime = time.time()+stopperTimeout
+    remainStopper = None
+    while 1:
+        try:
             if timeout is not None:
                 remain = stoptime-time.time()
                 if remain <= 0:
                     break
-            sel = select([s],[],[],remain)
+
+            if stopperTimeout is not None:
+                remainStopper = stopperStoptime-time.time()
+                if remainStopper <=0:
+                    if stopper and stopper():
+                        break
+                    stopperStoptime = time.time()+stopperTimeout
+                    remainStopper = stopperStoptime-time.time()
+
+                sel = select([s],[],[],remainStopper)
+                if s not in sel[0]:
+                    if stopper and stopper():
+                        break
+            else:
+                sel = select([s],[],[],remain)
+
             if s in sel[0]:
                 p = s.recv(MTU)
                 if p is None:
@@ -597,14 +611,11 @@ stop_filter: python function applied to each packet to determine
                     r = prn(p)
                     if r is not None:
                         print(r)
-                if stop_filter and stop_filter(p):
-                    break
                 if count > 0 and c >= count:
                     break
-    except KeyboardInterrupt:
-        pass
-    if opened_socket is None:
-        s.close()
+        except KeyboardInterrupt:
+            break
+    s.close()
     return plist.PacketList(lst,"Sniffed")
 
 
