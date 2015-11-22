@@ -1002,16 +1002,16 @@ def hexedit(x):
       x = f.read()
     return x
 
-def __make_table(yfmtfunc, fmtfunc, endline, li, fxyz, sortx=None, sorty=None, seplinefunc=None):
+def __make_table(yfmtfunc, fmtfunc, endline, items, fxyz, sortx=None, sorty=None, seplinefunc=None):
     vx = {} 
     vy = {} 
     vz = {}
     vxf = {}
     vyf = {}
-    l = 0
-    for e in li:
-        xx,yy,zz = map(str, fxyz(e[0], e[1]))
-        l = max(len(yy),l)
+    max_length = 0
+    for record in items:
+        xx,yy,zz = map(str, fxyz(record[0], record[1]))
+        max_length = max(len(yy),max_length)
         vx[xx] = max(vx.get(xx,0), len(xx), len(zz))
         vy[yy] = None
         vz[(xx,yy)] = zz
@@ -1035,10 +1035,10 @@ def __make_table(yfmtfunc, fmtfunc, endline, li, fxyz, sortx=None, sorty=None, s
 
 
     if seplinefunc:
-        sepline = seplinefunc(l, map(lambda x:vx[x],vxk))
+        sepline = seplinefunc(max_length, [vx[x] for x in vxk])
         print(sepline)
 
-    fmt = yfmtfunc(l)
+    fmt = yfmtfunc(max_length)
     print(fmt % "", end = " ")
     for x in vxk:
         vxf[x] = fmtfunc(vx[x])
@@ -1059,7 +1059,7 @@ def make_table(*args, **kargs):
     
 def make_lined_table(*args, **kargs):
     __make_table(lambda l:"%%-%is |" % l, lambda l:"%%-%is |" % l, "",
-                 seplinefunc=lambda a,x:"+".join(map(lambda y:"-"*(y+2), [a-1]+x+[-2])),
+                 seplinefunc=lambda max_length,x:"+".join([ "-"*(y+2) for y in [max_length-1]+x+[-2]]),
                  *args, **kargs)
 
 def make_tex_table(*args, **kargs):
