@@ -34,14 +34,15 @@ class AS_resolver:
         asn,desc = None,b""
         for l in txt.splitlines():
             if not asn and l.startswith(b"origin:"):
-                asn = l[7:].strip()
+                asn = l[7:].strip().decode('utf-8')
             if l.startswith(b"descr:"):
                 if desc:
                     desc += br"\n"
                 desc += l[6:].strip()
-            if asn is not None and desc:
+            if asn is not None and desc.strip():
+                desc = desc.strip().decode('utf-8')
                 break
-        return asn,desc.strip()
+        return asn, desc
 
     def _resolve_one(self, ip):
         self.s.send(b"%s\n" % ip.encode('ascii'))
