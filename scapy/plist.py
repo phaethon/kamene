@@ -223,12 +223,12 @@ lfilter: truth function to apply to each packet to decide whether it will be dis
 
     def conversations(self, getsrcdst=None, draw = True, **kargs):
         """Graphes a conversations between sources and destinations and display it
-        (using graphviz and imagemagick)
+        (using graphviz)
         getsrcdst: a function that takes an element of the list and return the source and dest
                    by defaults, return source and destination IP
         if networkx library is available returns a DiGraph, or draws it if draw = True otherwise graphviz is used
-        type: output type (svg, ps, gif, jpg, etc.), passed to dot's "-T" option
-        target: filename or redirect. Defaults pipe to Imagemagick's display program
+        format: output type (svg, ps, gif, jpg, etc.), passed to dot's "-T" option
+        target: output filename. If None, matplotlib is used to display
         prog: which graphviz program to use"""
         if getsrcdst is None:
             getsrcdst = lambda x:(x['IP'].src, x['IP'].dst)

@@ -1283,8 +1283,9 @@ class TracerouteResult(SndRcvList):
         ASres=AS_resolver() : default whois AS resolver (riswhois.ripe.net)
         ASres=AS_resolver_cymru(): use whois.cymru.com whois database
         ASres=AS_resolver(server="whois.ra.net")
-        type: output type (svg, ps, gif, jpg, etc.), passed to dot's "-T" option
-        target: filename or redirect. Defaults pipe to Imagemagick's display program
+        format: output type (svg, ps, gif, jpg, etc.), passed to dot's "-T" option
+        figsize: w,h tuple in inches. See matplotlib documentation
+        target: filename. If None uses matplotlib to display
         prog: which graphviz program to use"""
         if ASres is None:
             ASres = conf.AS_resolver
