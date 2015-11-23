@@ -314,14 +314,17 @@ import scapy.layers.l2
 scapy.layers.l2.getmacbyip = getmacbyip
 
 try:
-    import readline
-    console = readline.GetOutputFile()
-except (ImportError, AttributeError):
-    log_loading.info("Could not get readline console. Will not interpret ANSI color codes.") 
-else:
-    conf.readfunc = readline.rl.readline
-    orig_stdout = sys.stdout
-    sys.stdout = console
+    __IPYTHON__
+except NameError:
+    try:
+        import readline
+        console = readline.GetOutputFile()
+    except (ImportError, AttributeError):
+        log_loading.info("Could not get readline console. Will not interpret ANSI color codes.") 
+    else:
+        conf.readfunc = readline.rl.readline
+        orig_stdout = sys.stdout
+        sys.stdout = console
 
 
 
