@@ -116,7 +116,7 @@ elif conf.use_winpcapy:
     try:
       p = devs
       while p:
-        if p.contents.name == iff.encode('ascii'):
+        if p.contents.name.endswith(iff.encode('ascii')):
           a = p.contents.addresses
           while a:
             if hasattr(socket, 'AF_LINK') and a.contents.addr.contents.sa_family == socket.AF_LINK:

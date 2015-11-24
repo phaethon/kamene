@@ -183,7 +183,6 @@ class NetworkInterfaceDict(UserDict):
                 return iface.name
         raise ValueError("Unknown network interface index %r" % if_index)
 
-
     def show(self, resolve_mac=True):
         """Print list of available network interfaces in human readable form"""
 
@@ -227,6 +226,10 @@ def show_interfaces(resolve_mac=True):
 
 _orig_open_pcap = pcapdnet.open_pcap
 pcapdnet.open_pcap = lambda iface,*args,**kargs: _orig_open_pcap(pcap_name(iface),*args,**kargs)
+
+_orig_get_if_raw_hwaddr = pcapdnet.get_if_raw_hwaddr
+pcapdnet.get_if_raw_hwaddr = lambda iface,*args,**kargs: [ int(i, 16) for i in ifaces[iface].mac.split(':') ]
+get_if_raw_hwaddr = pcapdnet.get_if_raw_hwaddr
 
 def read_routes():
     routes = []
@@ -394,7 +397,7 @@ def sndrcv(pks, pkt, timeout = 2, inter = 0, verbose=None, chainCC=0, retry=0, m
                 else:
                     stoptime = 0
                 remaintime = None
-                inmask = [pks.ins.fd]
+                # inmask = [pks.ins.fd]
                 try:
                     try:
                         while 1:
@@ -441,7 +444,11 @@ def sndrcv(pks, pkt, timeout = 2, inter = 0, verbose=None, chainCC=0, retry=0, m
         finally:
             pass
 
-        remain = reduce(list.__add__, hsent.values(), [])
+        remain = []
+        for i in hsent.values():
+            remain += [i]
+
+        # remain = reduce(list.__add__, hsent.values(), [])
         if multi:
             #remain = filter(lambda p: not hasattr(p, '_answered'), remain);
             remain = [ p for p in remain if not hasattr(p, '_answered')]
