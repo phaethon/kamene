@@ -20,7 +20,6 @@ from scapy.layers.l2 import Ether, ARP
 from scapy.data import MTU, ETHER_BROADCAST, ETH_P_ARP
 
 conf.use_winpcapy = True
-conf.use_netifaces = True
 from scapy.arch import pcapdnet
 from scapy.arch.pcapdnet import *
 
@@ -70,8 +69,6 @@ class WinProgPath(ConfClass):
 
 conf.prog = WinProgPath()
 
-
-
 class PcapNameNotFoundError(Scapy_Exception):
     pass    
 
@@ -98,7 +95,7 @@ def get_windows_if_list():
         elif name == b'InterfaceGuid':
             current_interface['guid'] = value.decode('ascii')
         elif name == b'MacAddress':
-            current_interface['mac'] = struct.pack('BBBBBB', *[ int(j, 16) for j in value.split(b'-') ])
+            current_interface['mac'] = ':'.join([ j.decode('ascii') for j in value.split(b'-')])    
     if current_interface:
         interface_list.append(current_interface)
     return interface_list
@@ -119,6 +116,7 @@ class NetworkInterface(object):
     def update(self, data):
         """Update info about network interface according to given dnet dictionary"""
         self.name = data["name"]
+        self.description = data['description']
         # Other attributes are optional
         self._update_pcapdata()
         try:
@@ -139,10 +137,9 @@ class NetworkInterface(object):
         raise PcapNameNotFoundError
     
     def __repr__(self):
-        return "<%s: %s %s %s pcap_name=%s win_name=%s>" % (self.__class__.__name__,
+        return "<%s: %s %s %s pcap_name=%s description=%s>" % (self.__class__.__name__,
                      self.name, self.ip, self.mac, self.pcap_name, self.description)
 
-#from UserDict import IterableUserDict
 from collections import UserDict
 
 class NetworkInterfaceDict(UserDict):
@@ -161,10 +158,8 @@ class NetworkInterfaceDict(UserDict):
                                 "Check your winpcap and powershell installation, and access rights.")
     
     def pcap_name(self, devname):
-        """Return pypcap device name for given libdnet/Scapy device name
-        
-        This mapping is necessary because pypcap numbers the devices differently."""
-        
+        """Return pcap device name for given Windows device name."""
+
         try:
             pcap_name = self.data[devname].pcap_name
         except KeyError:
@@ -173,9 +168,7 @@ class NetworkInterfaceDict(UserDict):
             return pcap_name
             
     def devname(self, pcap_name):
-        """Return libdnet/Scapy device name for given pypcap device name
-        
-        This mapping is necessary because pypcap numbers the devices differently."""
+        """Return Windows device name for given pcap device name."""
         
         for devname, iface in self.items():
             if iface.pcap_name == pcap_name:
@@ -184,16 +177,23 @@ class NetworkInterfaceDict(UserDict):
     
     def show(self, resolve_mac=True):
         """Print list of available network interfaces in human readable form"""
-        print("%s  %s  %s" % ("IFACE".ljust(5), "IP".ljust(15), "MAC"))
+
+        print("%s  %s  %s" % ("IFACE".ljust(35), "IP".ljust(15), "MAC"))
         for iface_name in sorted(self.data.keys()):
             dev = self.data[iface_name]
-            mac = str(dev.mac)
+            mac = dev.mac
             if resolve_mac:
                 mac = conf.manufdb._resolve_MAC(mac)
-            print("%s  %s  %s" % (str(dev.name).ljust(5), str(dev.ip).ljust(15), mac)     )
+            print("%s  %s  %s" % (str(dev.name).ljust(35), str(dev.ip).ljust(15), mac)     )
             
 ifaces = NetworkInterfaceDict()
 ifaces.load_from_powershell()
+if 'Ethernet' in ifaces:
+    conf.iface = 'Ethernet'
+elif 'Wi-Fi' in ifaces:
+    conf.iface = 'Wi-Fi'
+elif len(ifaces) > 0:
+    conf.iface = ifaces[list(ifaces.keys())[0]]
 
 def pcap_name(devname):
     """Return pypcap device name for given libdnet/Scapy device name"""  
@@ -307,10 +307,6 @@ except NameError:
         conf.readfunc = readline.rl.readline
         orig_stdout = sys.stdout
         sys.stdout = console
-
-
-
-
 
 def sndrcv(pks, pkt, timeout = 2, inter = 0, verbose=None, chainCC=0, retry=0, multi=0):
     if not isinstance(pkt, Gen):
@@ -461,7 +457,7 @@ scapy.sendrecv.sndrcv = sndrcv
 def sniff(count=0, store=1, offline=None, prn = None, lfilter=None, L2socket=None, timeout=None, *arg, **karg):
     """Sniff packets
 sniff([count=0,] [prn=None,] [store=1,] [offline=None,] [lfilter=None,] + L2ListenSocket args) -> list of packets
-
+Select interface to sniff by setting conf.iface. Use show_interfaces() to see interface names.
   count: number of packets to capture. 0 means infinity
   store: wether to store sniffed packets or discard them
     prn: function to apply to each packet. If something is returned,
@@ -477,6 +473,7 @@ L2socket: use the provided L2socket
     c = 0
 
     if offline is None:
+        log_runtime.info('Sniffing on %s' % conf.iface)
         if L2socket is None:
             L2socket = conf.L2listen
         s = L2socket(type=ETH_P_ALL, *arg, **karg)
@@ -522,9 +519,10 @@ scapy.sendrecv.sniff = sniff
 # def get_if_list():
 #     print('windows if_list')
 #     return sorted(ifaces.keys())
-        
-def get_working_if():
-    try:
-        return devname(pcap.lookupdev())
-    except Exception:
-        return 'lo0'
+
+# unused function      
+# def get_working_if():
+#     try:
+#         return devname(pcap.lookupdev())
+#     except Exception:
+#         return 'lo0'
