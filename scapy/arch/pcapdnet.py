@@ -30,6 +30,21 @@ if conf.use_dnet:
 if conf.use_winpcapy:
   try:
     from .winpcapy import *
+    def winpcapy_get_if_list():
+      err = create_string_buffer(PCAP_ERRBUF_SIZE)
+      devs = POINTER(pcap_if_t)()
+      ret = []
+      if pcap_findalldevs(byref(devs), err) < 0:
+        return ret
+      try:
+        p = devs
+        while p:
+          ret.append(p.contents.name.decode('ascii'))
+          p = p.contents.next
+        return ret
+      finally:
+        pcap_freealldevs(devs)
+
   except OSError as e:
     if conf.interactive:
       log_loading.error("Unable to import libpcap library: %s" % e)
@@ -123,7 +138,7 @@ elif conf.use_winpcapy:
     try:
       p = devs
       while p:
-        if p.contents.name == iff.encode('ascii'):
+        if p.contents.name.endswith(iff.encode('ascii')):
           a = p.contents.addresses
           while a:
             if a.contents.addr.contents.sa_family == socket.AF_INET:
@@ -136,20 +151,7 @@ elif conf.use_winpcapy:
       return ret
     finally:
       pcap_freealldevs(devs)
-  def get_if_list():
-    err = create_string_buffer(PCAP_ERRBUF_SIZE)
-    devs = POINTER(pcap_if_t)()
-    ret = []
-    if pcap_findalldevs(byref(devs), err) < 0:
-      return ret
-    try:
-      p = devs
-      while p:
-        ret.append(p.contents.name.decode('ascii'))
-        p = p.contents.next
-      return ret
-    finally:
-      pcap_freealldevs(devs)
+  get_if_list = winpcapy_get_if_list
   def in6_getifaddr():
     err = create_string_buffer(PCAP_ERRBUF_SIZE)
     devs = POINTER(pcap_if_t)()
