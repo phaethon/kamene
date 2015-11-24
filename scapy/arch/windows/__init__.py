@@ -188,9 +188,9 @@ class NetworkInterfaceDict(UserDict):
             
 ifaces = NetworkInterfaceDict()
 ifaces.load_from_powershell()
-if 'Ethernet' in ifaces:
+if 'Ethernet' in ifaces and ifaces['Ethernet'].ip != '0.0.0.0':
     conf.iface = 'Ethernet'
-elif 'Wi-Fi' in ifaces:
+elif 'Wi-Fi' in ifaces and ifaces['Wi-Fi'].ip != '0.0.0.0':
     conf.iface = 'Wi-Fi'
 elif len(ifaces) > 0:
     conf.iface = ifaces[list(ifaces.keys())[0]]
