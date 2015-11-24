@@ -12,7 +12,7 @@ import subprocess as sp
 from glob import glob
 from scapy.config import conf,ConfClass
 from scapy.error import Scapy_Exception,log_loading,log_runtime
-from scapy.utils import atol, inet_aton, inet_ntoa, PcapReader
+from scapy.utils import atol, itom, inet_aton, inet_ntoa, PcapReader
 from scapy.base_classes import Gen, Net, SetGen
 import scapy.plist as plist
 from scapy.sendrecv import debug, srp1
@@ -117,6 +117,7 @@ class NetworkInterface(object):
         """Update info about network interface according to given dnet dictionary"""
         self.name = data["name"]
         self.description = data['description']
+        self.win_index = data['win_index']
         # Other attributes are optional
         self._update_pcapdata()
         try:
@@ -175,16 +176,24 @@ class NetworkInterfaceDict(UserDict):
                 return iface.name
         raise ValueError("Unknown pypcap network interface %r" % pcap_name)
     
+    def devname_from_index(self, if_index):
+        """Return interface name from interface index"""
+        for devname, iface in self.items():
+            if iface.win_index == if_index:
+                return iface.name
+        raise ValueError("Unknown network interface index %r" % if_index)
+
+
     def show(self, resolve_mac=True):
         """Print list of available network interfaces in human readable form"""
 
-        print("%s  %s  %s" % ("IFACE".ljust(35), "IP".ljust(15), "MAC"))
+        print("%s  %s  %s  %s" % ("INDEX".ljust(4), "IFACE".ljust(35), "IP".ljust(15), "MAC"))
         for iface_name in sorted(self.data.keys()):
             dev = self.data[iface_name]
             mac = dev.mac
             if resolve_mac:
                 mac = conf.manufdb._resolve_MAC(mac)
-            print("%s  %s  %s" % (str(dev.name).ljust(35), str(dev.ip).ljust(15), mac)     )
+            print("%s  %s  %s  %s" % (str(dev.win_index).ljust(4), str(dev.name).ljust(35), str(dev.ip).ljust(15), mac)     )
             
 ifaces = NetworkInterfaceDict()
 ifaces.load_from_powershell()
@@ -207,6 +216,10 @@ def pcap_name(devname):
 def devname(pcap_name):
     """Return libdnet/Scapy device name for given pypcap device name"""
     return ifaces.devname(pcap_name)
+
+def devname_from_index(if_index):
+    """Return Windows adapter name for given Windows interface index"""
+    return ifaces.devname_from_index(if_index)
     
 def show_interfaces(resolve_mac=True):
     """Print list of available network interfaces"""
@@ -216,25 +229,32 @@ _orig_open_pcap = pcapdnet.open_pcap
 pcapdnet.open_pcap = lambda iface,*args,**kargs: _orig_open_pcap(pcap_name(iface),*args,**kargs)
 
 def read_routes():
-    ok = 0
     routes = []
-    ip = '(\d+\.\d+\.\d+\.\d+)'
-    # On Vista and Windows 7 the gateway can be IP or 'On-link'.
-    # But the exact 'On-link' string depends on the locale, so we allow any text.
-    gw_pattern = '(.+)'
+    if_index = '(\d+)'
+    dest = '(\d+\.\d+\.\d+\.\d+)/(\d+)'
+    next_hop = '(\d+\.\d+\.\d+\.\d+)'
     metric_pattern = "(\d+)"
     delim = "\s+"        # The columns are separated by whitespace
-    netstat_line = delim.join([ip, ip, gw_pattern, ip, metric_pattern])
+    netstat_line = delim.join([if_index, dest, next_hop, metric_pattern])
     pattern = re.compile(netstat_line)
-    f=os.popen("netstat -rn")
-    for l in f.readlines():
-        match = re.search(pattern,l)
+    ps = sp.Popen(['powershell', 'Get-NetRoute', '-AddressFamily IPV4', '|', 'select ifIndex, DestinationPrefix, NextHop, RouteMetric'], stdout = sp.PIPE)
+    stdout, stdin = ps.communicate(timeout = 5)
+    for l in stdout.split(b'\r\n'):
+        match = re.search(pattern,l.decode('utf-8'))
         if match:
-            dest   = match.group(1)
-            mask   = match.group(2)
-            gw     = match.group(3)
-            netif  = match.group(4)
-            metric = match.group(5)
+            try:
+                iface = devname_from_index(int(match.group(1)))
+                addr = ifaces[iface].ip
+            except:
+                continue
+            dest = atol(match.group(2))
+            mask = itom(int(match.group(3)))
+            gw = match.group(4)
+            # dest   = match.group(1)
+            # mask   = match.group(2)
+            # gw     = match.group(3)
+            # netif  = match.group(4)
+            # metric = match.group(5)
             # try:
             #     intf = pcapdnet.dnet.intf().get_dst(pcapdnet.dnet.addr(type=2, addrtxt=dest))
             # except OSError:
@@ -253,47 +273,45 @@ def read_routes():
             #     gw = gw_ipmatch.group(0)
             # else:
             #     gw = netif
-            # routes.append((dest,mask,gw, str(intf["name"]), addr))
-    f.close()
+            routes.append((dest, mask, gw, iface, addr))
     return routes
 
 def read_routes6():
     return []
 
-def getmacbyip(ip, chainCC=0):
-    """Return MAC address corresponding to a given IP address"""
-    if isinstance(ip,Net):
-        ip = next(iter(ip))
-    tmp = map(ord, inet_aton(ip))
-    if (tmp[0] & 0xf0) == 0xe0: # mcast @
-        return "01:00:5e:%.2x:%.2x:%.2x" % (tmp[1]&0x7f,tmp[2],tmp[3])
-    iff,a,gw = conf.route.route(ip)
-    if ( (iff == LOOPBACK_NAME) or (ip == conf.route.get_if_bcast(iff)) ):
-        return "ff:ff:ff:ff:ff:ff"
-    # Windows uses local IP instead of 0.0.0.0 to represent locally reachable addresses
-    # ifip = str(pcapdnet.dnet.intf().get(iff)['addr'])
-    if gw != ifip.split('/')[0]:
-        ip = gw
+# def getmacbyip(ip, chainCC=0):
+#     """Return MAC address corresponding to a given IP address"""
+#     if isinstance(ip,Net):
+#         ip = next(iter(ip))
+#     tmp = inet_aton(ip)
+#     if (tmp[0] & 0xf0) == 0xe0: # mcast @
+#         return "01:00:5e:%.2x:%.2x:%.2x" % (tmp[1]&0x7f,tmp[2],tmp[3])
+#     iff,a,gw = conf.route.route(ip)
+#     if ( (iff == LOOPBACK_NAME) or (ip == conf.route.get_if_bcast(iff)) ):
+#         return "ff:ff:ff:ff:ff:ff"
 
-    mac = conf.netcache.arp_cache.get(ip)
-    if mac:
-        return mac
+#     if gw != "0.0.0.0":
+#         ip = gw
 
-    res = srp1(Ether(dst=ETHER_BROADCAST)/ARP(op="who-has", pdst=ip),
-               type=ETH_P_ARP,
-               iface = iff,
-               timeout=2,
-               verbose=0,
-               chainCC=chainCC,
-               nofilter=1)
-    if res is not None:
-        mac = res.payload.hwsrc
-        conf.netcache.arp_cache[ip] = mac
-        return mac
-    return None
+#     mac = conf.netcache.arp_cache.get(ip)
+#     if mac:
+#         return mac
 
-import scapy.layers.l2
-scapy.layers.l2.getmacbyip = getmacbyip
+#     res = srp1(Ether(dst=ETHER_BROADCAST)/ARP(op="who-has", pdst=ip),
+#                type=ETH_P_ARP,
+#                iface = iff,
+#                timeout=2,
+#                verbose=0,
+#                chainCC=chainCC,
+#                nofilter=1)
+#     if res is not None:
+#         mac = res.payload.hwsrc
+#         conf.netcache.arp_cache[ip] = mac
+#         return mac
+#     return None
+
+# import scapy.layers.l2
+# scapy.layers.l2.getmacbyip = getmacbyip
 
 try:
     __IPYTHON__
