@@ -104,7 +104,7 @@ elif conf.use_winpcapy:
         if p.contents.name == iff.encode('ascii'):
           a = p.contents.addresses
           while a:
-            if a.contents.addr.contents.sa_family == socket.AF_LINK:
+            if hasattr(socket, 'AF_LINK') and a.contents.addr.contents.sa_family == socket.AF_LINK:
               ap = a.contents.addr
               val = cast(ap, POINTER(sockaddr_dl))
               ret = bytes(val.contents.sdl_data[ val.contents.sdl_nlen : val.contents.sdl_nlen + val.contents.sdl_alen ])
