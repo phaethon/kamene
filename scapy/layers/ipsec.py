@@ -40,6 +40,13 @@ True
 """
 
 import socket
+
+if not hasattr(socket, 'IPPROTO_AH'):
+    socket.IPPROTO_AH = 51
+if not hasattr(socket, 'IPPROTO_ESP'):
+    socket.IPPROTO_ESP = 50
+
+    
 import fractions
 
 from scapy.data import IP_PROTOS

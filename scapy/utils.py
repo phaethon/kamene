@@ -30,7 +30,7 @@ WINDOWS=sys.platform.startswith("win32")
 
 def get_temp_file(keep=False, autoext=""):
     import tempfile
-    fd, fname  = tempfile.mkstemp(suffix = ".scapy")
+    fd, fname  = tempfile.mkstemp(suffix = ".scapy" + autoext)
     os.close(fd)
     if not keep:
         conf.temp_files.append(fname)
@@ -335,15 +335,15 @@ def ltoa(x):
 def itom(x):
     return (0xffffffff00000000>>x)&0xffffffff
 
-def do_graph(graph,prog=None,format=None,target=None,type=None,string=None,options=None, **kargs):
-    """do_graph(graph, prog=conf.prog.dot, format="svg",
-         target="| conf.prog.display", options=None, [string=1]):
+def do_graph(graph,prog=None,format='png',target=None,string=False,options=None, figsize = (12, 12), **kargs):
+    """do_graph(graph, prog=conf.prog.dot, format="png",
+         target=None, options=None, string=False):
     if networkx library is available and graph is instance of Graph, use networkx.draw
 
-    string: if not None, simply return the graph string
+    string: if not False, simply return the graph string
     graph: GraphViz graph description
-    format: output type (svg, ps, gif, jpg, etc.), passed to dot's "-T" option
-    target: filename or redirect. Defaults pipe to Imagemagick's display program
+    format: output type (svg, ps, gif, jpg, etc.), passed to dot's "-T" option. Ignored if target==None
+    target: filename. If None uses matplotlib to display
     prog: which graphviz program to use
     options: options to be passed to prog"""
 
@@ -354,45 +354,32 @@ def do_graph(graph,prog=None,format=None,target=None,type=None,string=None,optio
     if NETWORKX and isinstance(graph, nx.Graph):
         nx.draw(graph, with_labels = True, edge_color = '0.75', **kargs)
     else: # otherwise use dot as in scapy 2.x
-        if format is None:
-            if WINDOWS:
-                format = "png" # use common format to make sure a viewer is installed
-            else:
-                format = "svg"
         if string:
             return graph
-        if type is not None:
-            format=type
         if prog is None:
             prog = conf.prog.dot
-        start_viewer=False
-        if target is None:
-            if WINDOWS:
-                tempfile = os.tempnam("", "scapy") + "." + format
-                target = "> %s" % tempfile
-                start_viewer = True
-            else:
-                target = "| %s" % conf.prog.display
-        if format is not None:
-            format = "-T %s" % format
-    #    w,r = os.popen2("%s %s %s %s" % (prog,options or "", format or "", target))
-        p = subprocess.Popen("%s %s %s %s" % (prog,options or "", format or "", target), shell = True, stdin = subprocess.PIPE, stdout = subprocess.PIPE)
+
+        if not target or not format:
+            format = 'png'
+        format = "-T %s" % format
+
+        p = subprocess.Popen("%s %s %s" % (prog,options or "", format or ""), shell = True, stdin = subprocess.PIPE, stdout = subprocess.PIPE)
         w, r = p.stdin, p.stdout
         w.write(graph.encode('utf-8'))
         w.close()
-        if start_viewer:
-            # Workaround for file not found error: We wait until tempfile is written.
-            waiting_start = time.time()
-            while not os.path.exists(tempfile):
-                time.sleep(0.1)
-                if time.time() - waiting_start > 3:
-                    warning("Temporary file '%s' could not be written. Graphic will not be displayed." % tempfile)
-                    break
-            else:  
-                if conf.prog.display == conf.prog._default:
-                    os.startfile(tempfile)
-                else:
-                    subprocess.Popen([conf.prog.display, tempfile])
+        if target:
+            with open(target, 'wb') as f:
+                f.write(r.read())
+        else:
+            try:
+                import matplotlib.image as mpimg
+                import matplotlib.pyplot as plt
+                plt.figure(figsize = figsize)                
+                plt.axis('off')
+                return plt.imshow(mpimg.imread(r, format = format), **kargs)
+
+            except ImportError:
+                warning('matplotlib.image required for interactive graph viewing. Use target option to write to a file')
 
 _TEX_TR = {
     "{":"{\\tt\\char123}",
@@ -1002,16 +989,16 @@ def hexedit(x):
       x = f.read()
     return x
 
-def __make_table(yfmtfunc, fmtfunc, endline, li, fxyz, sortx=None, sorty=None, seplinefunc=None):
+def __make_table(yfmtfunc, fmtfunc, endline, items, fxyz, sortx=None, sorty=None, seplinefunc=None):
     vx = {} 
     vy = {} 
     vz = {}
     vxf = {}
     vyf = {}
-    l = 0
-    for e in li:
-        xx,yy,zz = map(str, fxyz(e[0], e[1]))
-        l = max(len(yy),l)
+    max_length = 0
+    for record in items:
+        xx,yy,zz = map(str, fxyz(record[0], record[1]))
+        max_length = max(len(yy),max_length)
         vx[xx] = max(vx.get(xx,0), len(xx), len(zz))
         vy[yy] = None
         vz[(xx,yy)] = zz
@@ -1035,10 +1022,10 @@ def __make_table(yfmtfunc, fmtfunc, endline, li, fxyz, sortx=None, sorty=None, s
 
 
     if seplinefunc:
-        sepline = seplinefunc(l, map(lambda x:vx[x],vxk))
+        sepline = seplinefunc(max_length, [vx[x] for x in vxk])
         print(sepline)
 
-    fmt = yfmtfunc(l)
+    fmt = yfmtfunc(max_length)
     print(fmt % "", end = " ")
     for x in vxk:
         vxf[x] = fmtfunc(vx[x])
@@ -1059,7 +1046,7 @@ def make_table(*args, **kargs):
     
 def make_lined_table(*args, **kargs):
     __make_table(lambda l:"%%-%is |" % l, lambda l:"%%-%is |" % l, "",
-                 seplinefunc=lambda a,x:"+".join(map(lambda y:"-"*(y+2), [a-1]+x+[-2])),
+                 seplinefunc=lambda max_length,x:"+".join([ "-"*(y+2) for y in [max_length-1]+x+[-2]]),
                  *args, **kargs)
 
 def make_tex_table(*args, **kargs):

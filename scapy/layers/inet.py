@@ -952,22 +952,24 @@ class TracerouteResult(SndRcvList):
 
 
     def get_trace(self):
-        trace = {}
+        raw_trace = {}
         for s,r in self.res:
             if IP not in s:
                 continue
             d = s[IP].dst
-            if d not in trace:
-                trace[d] = {}
-            trace[d][s[IP].ttl] = r[IP].src, ICMP not in r
-        for k in trace.values():
-            m = [ x for x in k.keys() if k[x][1] ]
+            if d not in raw_trace:
+                raw_trace[d] = {}
+            raw_trace[d][s[IP].ttl] = r[IP].src, ICMP not in r
+
+        trace = {}
+        for k in raw_trace.keys():
+            m = [ x for x in raw_trace[k].keys() if raw_trace[k][x][1] ]
             if not m:
-                continue
-            m = min(m)
-            for l in k.keys():
-                if l > m:
-                    del(k[l])
+                trace[k] = raw_trace[k]
+            else:
+                m = min(m)
+                trace[k] = {i: raw_trace[k][i] for i in raw_trace[k].keys() if not raw_trace[k][i][1] or i<=m}
+
         return trace
 
     def trace3D(self):
@@ -1281,8 +1283,9 @@ class TracerouteResult(SndRcvList):
         ASres=AS_resolver() : default whois AS resolver (riswhois.ripe.net)
         ASres=AS_resolver_cymru(): use whois.cymru.com whois database
         ASres=AS_resolver(server="whois.ra.net")
-        type: output type (svg, ps, gif, jpg, etc.), passed to dot's "-T" option
-        target: filename or redirect. Defaults pipe to Imagemagick's display program
+        format: output type (svg, ps, gif, jpg, etc.), passed to dot's "-T" option
+        figsize: w,h tuple in inches. See matplotlib documentation
+        target: filename. If None uses matplotlib to display
         prog: which graphviz program to use"""
         if ASres is None:
             ASres = conf.AS_resolver

@@ -103,6 +103,7 @@ def get_if_list():
         lst.append(l.split(":")[0].strip())
     f.close()
     return lst
+
 def get_working_if():
     for i in get_if_list():
         if i == LOOPBACK_NAME:                
