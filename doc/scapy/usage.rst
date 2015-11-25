@@ -1058,7 +1058,7 @@ Traceroute result object also have a very neat feature: they can make a directed
 
 .. note::
 
-   VPython is currently not ported to python3.x.
+VPython is currently not ported to python3.x.
 
 
 If you have VPython installed, you also can have a 3D representation of the traceroute. With the right button, you can rotate the scene, with the middle button, you can zoom, with the left button, you can move the scene. If you click on a ball, it's IP will appear/disappear. If you Ctrl-click on a ball, ports 21, 22, 23, 25, 80 and 443 will be scanned and the result displayed::
