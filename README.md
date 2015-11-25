@@ -9,7 +9,7 @@ Please, submit all issues https://github.com/phaethon/scapy preferrably with .pc
 [winpcapy.py by Massimo Ciani] (https://code.google.com/p/winpcapy/) integrated inside code.
 
 ## Supporting scapy3k
-Please, vot for scapy3k at [Best security tool 2015 survey](http://www.toolswatch.org/2015/11/vote-for-2015-best-security-tool/).
+Please, vote for scapy3k at [Best security tool 2015 survey](http://www.toolswatch.org/2015/11/vote-for-2015-best-security-tool/).
 
 Support scapy3k inclusion in Kali linux by commenting on the [issue at Kali bug tracker](https://bugs.kali.org/view.php?id=2336).
 
