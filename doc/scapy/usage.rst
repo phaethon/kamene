@@ -926,9 +926,9 @@ Matplotlib
 .. index::
    single: Matplotlib, plot()
 
-We can easily plot some harvested values using the Matplotlib is a python 2D plotting library. (Make sure that you have matplotlib installed.) For example, we can observe the random source ports used when sending out and receiving packets with the following command::
+One can easily plot some harvested values using the python 2D plotting library: Matplotlib. (Make sure that you have matplotlib installed.) For example, we can plot the random source ports generated when sending and receiving packets with the following command::
 
-    In [1]: a,b=sr(IP(dst="www.target.com")/TCP(sport=[RandShort()]*200), timeout=1)
+    In [1]: ans,unans=sr(IP(dst="www.target.com")/TCP(sport=[RandShort()]*200), timeout=1)
     Begin emission:
     ...................................*.........*......*......*.......*......*.....*......*
     ......*.......*.......*....*..........*.......*......*......*......*......*.....*.......*
@@ -942,7 +942,7 @@ We can easily plot some harvested values using the Matplotlib is a python 2D plo
     ........................................................
     Received 734 packets, got 95 answers, remaining 105 packets
     
-    In [2]: a.plot(lambda x:x[1].seq)
+    In [2]: ans.plot(lambda x: x[1].dport)
     Out[2]: [<matplotlib.lines.Line2D at 0x7f6ccccbe470>]
 
 .. image:: graphics/plot-random-sport.png
