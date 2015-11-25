@@ -902,14 +902,13 @@ Now scapy has its own routing table, so that you can have your packets routed di
     192.168.8.0     255.255.255.0   0.0.0.0         eth0
     0.0.0.0         0.0.0.0         192.168.8.1     eth0
 
-Gnuplot
--------
+Matplotlib
+----------
 
 .. index::
-   single: Gnuplot, plot()
+   single: Matplotlib, plot()
 
-We can easily plot some harvested values using Gnuplot. (Make sure that you have Gnuplot-py and Gnuplot installed.)
-For example, we can observe the IP ID patterns to know how many distinct IP stacks are used behind a load balancer::
+We can easily plot some harvested values using the Matplotlib is a python 2D plotting library. (Make sure that you have matplotlib installed.) For example, we can observe the IP ID patterns to know how many distinct IP stacks are used behind a load balancer::
 
     >>> a,b=sr(IP(dst="www.target.com")/TCP(sport=[RandShort()]*1000))
     >>> a.plot(lambda x:x[1].id)
