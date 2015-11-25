@@ -258,18 +258,19 @@ def read_routes():
 def read_routes6():
     return []
 
-try:
-    __IPYTHON__
-except NameError:
+if conf.interactive_shell != 'ipython':
     try:
-        import readline
-        console = readline.GetOutputFile()
-    except (ImportError, AttributeError):
-        log_loading.info("Could not get readline console. Will not interpret ANSI color codes.") 
-    else:
-        conf.readfunc = readline.rl.readline
-        orig_stdout = sys.stdout
-        sys.stdout = console
+        __IPYTHON__
+    except NameError:
+        try:
+            import readline
+            console = readline.GetOutputFile()
+        except (ImportError, AttributeError):
+            log_loading.info("Could not get readline console. Will not interpret ANSI color codes.") 
+        else:
+            conf.readfunc = readline.rl.readline
+            orig_stdout = sys.stdout
+            sys.stdout = console
 
 def sndrcv(pks, pkt, timeout = 2, inter = 0, verbose=None, chainCC=0, retry=0, multi=0):
     if not isinstance(pkt, Gen):
