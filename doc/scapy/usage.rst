@@ -4,7 +4,7 @@ Usage
 
 .. note::
 
-   This section has not been updated for scapy3k yet. Code examples may not work directly. Try bytes() instead of str() and b'string' instead of b'somestring'.
+   This section has been partially updated for scapy3k. Some code examples may not work directly. Try bytes() instead of str() and b'string' instead of b'somestring'.
 
 Starting Scapy
 ==============
@@ -926,13 +926,26 @@ Matplotlib
 .. index::
    single: Matplotlib, plot()
 
-We can easily plot some harvested values using the Matplotlib is a python 2D plotting library. (Make sure that you have matplotlib installed.) For example, we can observe the IP ID patterns to know how many distinct IP stacks are used behind a load balancer::
+We can easily plot some harvested values using the Matplotlib is a python 2D plotting library. (Make sure that you have matplotlib installed.) For example, we can observe the random source ports used when sending out and receiving packets with the following command::
 
-    >>> a,b=sr(IP(dst="www.target.com")/TCP(sport=[RandShort()]*1000))
-    >>> a.plot(lambda x:x[1].id)
-    <Gnuplot._Gnuplot.Gnuplot instance at 0xb7d6a74c>
+    In [1]: a,b=sr(IP(dst="www.target.com")/TCP(sport=[RandShort()]*200), timeout=1)
+    Begin emission:
+    ...................................*.........*......*......*.......*......*.....*......*
+    ......*.......*.......*....*..........*.......*......*......*......*......*.....*.......*
+    ......*......*......*......*......*......*......*......*......*......*......*.........*
+    ......*......*......*......*......*......*........*.....*......*.....*...
+    Finished to send 200 packets.
+    ...*........*......*....*.......*.....*........*....*........*......*...*..*.*......*
+    ......*......*......*......*........*..*....*....*............*.....*..*.*...*........*
+    .............*.......*.......*.*.*..*...***......**...*.*.......*..*.*..*.*.**.*....*
+    ...*.*....*.........................................................................
+    ........................................................
+    Received 734 packets, got 95 answers, remaining 105 packets
+    
+    In [2]: a.plot(lambda x:x[1].seq)
+    Out[2]: [<matplotlib.lines.Line2D at 0x7f6ccccbe470>]
 
-.. image:: graphics/ipid.png
+.. image:: graphics/plot_random_sport.png
 
 
 TCP traceroute (2)
@@ -1042,6 +1055,11 @@ Traceroute result object also have a very neat feature: they can make a directed
     >>> res.graph(target="> /tmp/graph.svg") # saved to file 
 
 .. image:: graphics/graph_traceroute.png
+
+.. note::
+
+   VPython is currently not ported to python3.x.
+
 
 If you have VPython installed, you also can have a 3D representation of the traceroute. With the right button, you can rotate the scene, with the middle button, you can zoom, with the left button, you can move the scene. If you click on a ball, it's IP will appear/disappear. If you Ctrl-click on a ball, ports 21, 22, 23, 25, 80 and 443 will be scanned and the result displayed::
 
