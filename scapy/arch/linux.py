@@ -103,15 +103,15 @@ def get_if_list():
         lst.append(l.split(":")[0].strip())
     f.close()
     return lst
-# unused function
-# def get_working_if():
-#     for i in get_if_list():
-#         if i == LOOPBACK_NAME:                
-#             continue
-#         ifflags = struct.unpack("16xH14x",get_if(i,SIOCGIFFLAGS))[0]
-#         if ifflags & IFF_UP:
-#             return i
-#     return LOOPBACK_NAME
+
+def get_working_if():
+    for i in get_if_list():
+        if i == LOOPBACK_NAME:                
+            continue
+        ifflags = struct.unpack("16xH14x",get_if(i,SIOCGIFFLAGS))[0]
+        if ifflags & IFF_UP:
+            return i
+    return LOOPBACK_NAME
 def attach_filter(s, filter):
     # XXX We generate the filter on the interface conf.iface 
     # because tcpdump open the "any" interface and ppp interfaces
