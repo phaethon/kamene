@@ -945,7 +945,7 @@ We can easily plot some harvested values using the Matplotlib is a python 2D plo
     In [2]: a.plot(lambda x:x[1].seq)
     Out[2]: [<matplotlib.lines.Line2D at 0x7f6ccccbe470>]
 
-.. image:: graphics/plot_random_sport.png
+.. image:: graphics/plot-random-sport.png
 
 
 TCP traceroute (2)
