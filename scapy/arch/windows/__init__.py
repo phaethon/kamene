@@ -74,7 +74,7 @@ class PcapNameNotFoundError(Scapy_Exception):
 
 def get_windows_if_list():
     ps = sp.Popen(['powershell', 'Get-NetAdapter', '|', 'select Name, InterfaceIndex, InterfaceDescription, InterfaceGuid, MacAddress', '|', 'fl'], stdout = sp.PIPE)
-    stdout, stdin = ps.communicate(timeout = 3)
+    stdout, stdin = ps.communicate(timeout = 10)
     current_interface = None
     interface_list = []
     for i in stdout.split(b'\r\n'):
