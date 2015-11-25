@@ -7,7 +7,7 @@
 Customizations needed to support Microsoft Windows.
 """
 
-import os,re,sys,socket,time
+import os,re,sys,socket,time, itertools
 import subprocess as sp
 from glob import glob
 from scapy.config import conf,ConfClass
@@ -444,11 +444,9 @@ def sndrcv(pks, pkt, timeout = 2, inter = 0, verbose=None, chainCC=0, retry=0, m
         finally:
             pass
 
-        remain = []
-        for i in hsent.values():
-            remain += [i]
-
         # remain = reduce(list.__add__, hsent.values(), [])
+        remain = list(itertools.chain(*[ i for i in hsent.values() ]))
+
         if multi:
             #remain = filter(lambda p: not hasattr(p, '_answered'), remain);
             remain = [ p for p in remain if not hasattr(p, '_answered')]
