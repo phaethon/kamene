@@ -389,7 +389,10 @@ if conf.use_winpcapy:
       #    L2pcapSocket.__init__(self, iface, type, filter, nofilter)
       def recv(self, x = MTU):
           r = L2pcapSocket.recv(self, x) 
-          return r.payload
+          if r:
+            return r.payload
+          else:
+            return
       def send(self, x):
           cls = conf.l2types[1]
           sx = bytes(cls()/x)

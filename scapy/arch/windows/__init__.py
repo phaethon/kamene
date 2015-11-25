@@ -241,7 +241,7 @@ def read_routes():
     netstat_line = delim.join([if_index, dest, next_hop, metric_pattern])
     pattern = re.compile(netstat_line)
     ps = sp.Popen(['powershell', 'Get-NetRoute', '-AddressFamily IPV4', '|', 'select ifIndex, DestinationPrefix, NextHop, RouteMetric'], stdout = sp.PIPE)
-    stdout, stdin = ps.communicate(timeout = 5)
+    stdout, stdin = ps.communicate(timeout = 10)
     for l in stdout.split(b'\r\n'):
         match = re.search(pattern,l.decode('utf-8'))
         if match:
