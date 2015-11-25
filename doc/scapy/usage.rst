@@ -17,8 +17,9 @@ send the packets, so we're using ``sudo`` here::
     WARNING: IPython not available. Using standard Python shell instead.
     Welcome to Scapy (3.0.0)
     >>>
-    
+
 If you have installed IPython this is an example Scapy startup::
+
     $ sudo scapy
     INFO: Please, report issues to https://github.com/phaethon/scapy
     Python 3.4.2 (default, Jul  9 2015, 17:24:30) 
@@ -29,9 +30,9 @@ If you have installed IPython this is an example Scapy startup::
     %quickref -> Quick reference.
     help      -> Python's own help system.
     object?   -> Details about 'object', use 'object??' for extra details.
-
+    
     Welcome to Scapy (3.0.0) using IPython 2.4.1
-   In [1]: 
+    In [1]: 
 
 If you do not have all optional packages installed, Scapy will inform you that 
 some features will not be available:: 
