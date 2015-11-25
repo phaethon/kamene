@@ -1056,8 +1056,8 @@ Traceroute result object also have a very neat feature: they can make a directed
 
 .. image:: graphics/graph_traceroute.png
 
-.. note::
 
+.. note::
 VPython is currently not ported to python3.x.
 
 
