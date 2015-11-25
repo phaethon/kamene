@@ -196,12 +196,6 @@ class NetworkInterfaceDict(UserDict):
             
 ifaces = NetworkInterfaceDict()
 ifaces.load_from_powershell()
-if 'Ethernet' in ifaces and ifaces['Ethernet'].ip != '0.0.0.0':
-    conf.iface = 'Ethernet'
-elif 'Wi-Fi' in ifaces and ifaces['Wi-Fi'].ip != '0.0.0.0':
-    conf.iface = 'Wi-Fi'
-elif len(ifaces) > 0:
-    conf.iface = ifaces[list(ifaces.keys())[0]]
 
 def pcap_name(devname):
     """Return pypcap device name for given libdnet/Scapy device name"""  
@@ -253,68 +247,16 @@ def read_routes():
             dest = atol(match.group(2))
             mask = itom(int(match.group(3)))
             gw = match.group(4)
-            # dest   = match.group(1)
-            # mask   = match.group(2)
-            # gw     = match.group(3)
-            # netif  = match.group(4)
-            # metric = match.group(5)
             # try:
             #     intf = pcapdnet.dnet.intf().get_dst(pcapdnet.dnet.addr(type=2, addrtxt=dest))
             # except OSError:
             #     log_loading.warning("Building Scapy's routing table: Couldn't get outgoing interface for destination %s" % dest)
             #     continue               
-            # if not "addr" in intf:
-            #     break
-            # addr = str(intf["addr"])
-            # addr = addr.split("/")[0]
-            
-            # dest = atol(dest)
-            # mask = atol(mask)
-            # # If the gateway is no IP we assume it's on-link
-            # gw_ipmatch = re.search('\d+\.\d+\.\d+\.\d+', gw)
-            # if gw_ipmatch:
-            #     gw = gw_ipmatch.group(0)
-            # else:
-            #     gw = netif
             routes.append((dest, mask, gw, iface, addr))
     return routes
 
 def read_routes6():
     return []
-
-# def getmacbyip(ip, chainCC=0):
-#     """Return MAC address corresponding to a given IP address"""
-#     if isinstance(ip,Net):
-#         ip = next(iter(ip))
-#     tmp = inet_aton(ip)
-#     if (tmp[0] & 0xf0) == 0xe0: # mcast @
-#         return "01:00:5e:%.2x:%.2x:%.2x" % (tmp[1]&0x7f,tmp[2],tmp[3])
-#     iff,a,gw = conf.route.route(ip)
-#     if ( (iff == LOOPBACK_NAME) or (ip == conf.route.get_if_bcast(iff)) ):
-#         return "ff:ff:ff:ff:ff:ff"
-
-#     if gw != "0.0.0.0":
-#         ip = gw
-
-#     mac = conf.netcache.arp_cache.get(ip)
-#     if mac:
-#         return mac
-
-#     res = srp1(Ether(dst=ETHER_BROADCAST)/ARP(op="who-has", pdst=ip),
-#                type=ETH_P_ARP,
-#                iface = iff,
-#                timeout=2,
-#                verbose=0,
-#                chainCC=chainCC,
-#                nofilter=1)
-#     if res is not None:
-#         mac = res.payload.hwsrc
-#         conf.netcache.arp_cache[ip] = mac
-#         return mac
-#     return None
-
-# import scapy.layers.l2
-# scapy.layers.l2.getmacbyip = getmacbyip
 
 try:
     __IPYTHON__
@@ -543,9 +485,17 @@ scapy.sendrecv.sniff = sniff
 #     print('windows if_list')
 #     return sorted(ifaces.keys())
 
-# unused function      
-# def get_working_if():
-#     try:
-#         return devname(pcap.lookupdev())
-#     except Exception:
-#         return 'lo0'
+def get_working_if():
+    try:
+        if 'Ethernet' in ifaces and ifaces['Ethernet'].ip != '0.0.0.0':
+            return 'Ethernet'
+        elif 'Wi-Fi' in ifaces and ifaces['Wi-Fi'].ip != '0.0.0.0':
+            return 'Wi-Fi'
+        elif len(ifaces) > 0:
+            return ifaces[list(ifaces.keys())[0]]
+        else:
+            return LOOPBACK_NAME
+    except:
+        return LOOPBACK_NAME
+
+conf.iface = get_working_if()
