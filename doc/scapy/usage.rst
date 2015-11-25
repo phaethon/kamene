@@ -19,7 +19,8 @@ send the packets, so we're using ``sudo`` here::
 If you do not have all optional packages installed, Scapy will inform you that 
 some features will not be available:: 
                                  
-    INFO: Can't import python gnuplot wrapper . Won't be able to plot.
+    INFO: Can't import matplotlib. Not critical, but won't be able to plot.
+    INFO: Can't import networkx. Not criticial, but won't be able to draw network graphs.
     INFO: Can't import PyX. Won't be able to use psdump() or pdfdump().
 
 The basic features of sending and receiving packets should still work, though. 
