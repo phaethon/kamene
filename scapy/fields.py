@@ -901,7 +901,10 @@ class FlagsField(BitField):
         i=0
         while x:
             if x & 1:
-                r += [ self.names[i] ]
+                if self.multi:
+                    r += [ self.names[i] ]
+                else:
+                    r += self.names[i]
             i += 1
             x >>= 1
         if self.multi:
