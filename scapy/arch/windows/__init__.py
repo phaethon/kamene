@@ -73,29 +73,29 @@ class PcapNameNotFoundError(Scapy_Exception):
     pass    
 
 def get_windows_if_list():
-    ps = sp.Popen(['powershell', 'Get-NetAdapter', '|', 'select Name, InterfaceIndex, InterfaceDescription, InterfaceGuid, MacAddress', '|', 'fl'], stdout = sp.PIPE)
+    ps = sp.Popen(['powershell', 'Get-NetAdapter', '|', 'select Name, InterfaceIndex, InterfaceDescription, InterfaceGuid, MacAddress', '|', 'fl'], stdout = sp.PIPE, universal_newlines = True)
     stdout, stdin = ps.communicate(timeout = 10)
     current_interface = None
     interface_list = []
-    for i in stdout.split(b'\r\n'):
+    for i in stdout.split('\n'):
         if not i.strip():
             continue
-        if i.find(b':')<0:
+        if i.find(':')<0:
             continue
-        name, value = [ j.strip() for j in i.split(b':') ]
-        if name == b'Name':
+        name, value = [ j.strip() for j in i.split(':') ]
+        if name == 'Name':
             if current_interface:
                 interface_list.append(current_interface)
             current_interface = {}
-            current_interface['name'] = value.decode('ascii')
-        elif name == b'InterfaceIndex':
+            current_interface['name'] = value
+        elif name == 'InterfaceIndex':
             current_interface['win_index'] = int(value)
-        elif name == b'InterfaceDescription':
-            current_interface['description'] = value.decode('ascii')
-        elif name == b'InterfaceGuid':
-            current_interface['guid'] = value.decode('ascii')
-        elif name == b'MacAddress':
-            current_interface['mac'] = ':'.join([ j.decode('ascii') for j in value.split(b'-')])    
+        elif name == 'InterfaceDescription':
+            current_interface['description'] = value
+        elif name == 'InterfaceGuid':
+            current_interface['guid'] = value
+        elif name == 'MacAddress':
+            current_interface['mac'] = ':'.join([ j for j in value.split('-')])    
     if current_interface:
         interface_list.append(current_interface)
     return interface_list
@@ -234,10 +234,10 @@ def read_routes():
     delim = "\s+"        # The columns are separated by whitespace
     netstat_line = delim.join([if_index, dest, next_hop, metric_pattern])
     pattern = re.compile(netstat_line)
-    ps = sp.Popen(['powershell', 'Get-NetRoute', '-AddressFamily IPV4', '|', 'select ifIndex, DestinationPrefix, NextHop, RouteMetric'], stdout = sp.PIPE)
+    ps = sp.Popen(['powershell', 'Get-NetRoute', '-AddressFamily IPV4', '|', 'select ifIndex, DestinationPrefix, NextHop, RouteMetric'], stdout = sp.PIPE, universal_newlines = True)
     stdout, stdin = ps.communicate(timeout = 10)
-    for l in stdout.split(b'\r\n'):
-        match = re.search(pattern,l.decode('utf-8'))
+    for l in stdout.split('\n'):
+        match = re.search(pattern,l)
         if match:
             try:
                 iface = devname_from_index(int(match.group(1)))
