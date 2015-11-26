@@ -67,6 +67,7 @@ All commands listed by lsc() should work. Tested layers are:
 * NTP
 * Padding
 * PPP
+* RadioTap
 * Raw
 * SCTP
 * SNAP
