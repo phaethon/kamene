@@ -50,6 +50,8 @@ class Field:
         if type(x) is str:
           x = bytes([ ord(i) for i in x ])
         return x
+    def i2dict(self, pkt, x):
+        return { self.name: x }
     def h2i(self, pkt, x):
         """Convert human value to internal value"""
         if type(x) is str:
@@ -266,6 +268,10 @@ class SourceIPField(IPField):
 class ByteField(Field):
     def __init__(self, name, default):
         Field.__init__(self, name, default, "B")
+
+class SignedByteField(Field):
+    def __init__(self, name, default):
+        Field.__init__(self, name, default, "b")
         
 class XByteField(ByteField):
     def i2repr(self, pkt, x):
@@ -325,6 +331,10 @@ class XIntField(IntField):
 class LongField(Field):
     def __init__(self, name, default):
         Field.__init__(self, name, default, "Q")
+
+class LELongField(Field):
+    def __init__(self, name, default):
+        Field.__init__(self, name, default, "<Q")
 
 class XLongField(LongField):
     def i2repr(self, pkt, x):
@@ -864,10 +874,10 @@ class LEFieldLenField(FieldLenField):
 
 class FlagsField(BitField):
     def __init__(self, name, default, size, names):
-        self.multi = type(names) is list
+        self.multi = type(names) is list or type(names) is tuple
         if self.multi:
             #self.names = map(lambda x:[x], names)
-            self.names = [ [x] for x in names ]
+            self.names = names
         else:
             self.names = names
         BitField.__init__(self, name, default, size)
@@ -875,7 +885,7 @@ class FlagsField(BitField):
         if type(x) is str:
             if self.multi:
                 #x = map(lambda y:[y], x.split("+"))
-                x = [ [y] for y in x.split("+") ]
+                x = x.split("+")
             y = 0
             for i in x:
                 y |= 1 << self.names.index(i)
@@ -891,11 +901,23 @@ class FlagsField(BitField):
         i=0
         while x:
             if x & 1:
-                r += self.names[i]
+                r += [ self.names[i] ]
             i += 1
             x >>= 1
         if self.multi:
             r = "+".join(r)
+        return r
+    def i2dict(self, pkt, x): # Potential compatibility issue for older code. And fields to conf.noenum for old behaviour
+        if self.multi:
+            r = {}
+        else:
+            return { self.names: x }
+        for i,n in enumerate(self.names):
+            if x & 1:
+                r[n] = True
+            else:
+                r[n] = False
+            x >>= 1
         return r
 
             

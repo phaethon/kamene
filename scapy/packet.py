@@ -179,6 +179,10 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
         fld,v = self.getfield_and_val(attr)
         return fld.i2repr(self, v)
 
+    def getdictval(self, attr):
+        fld,v = self.getfield_and_val(attr)
+        return fld.i2dict(self, v)
+
     def getfield_and_val(self, attr):
         if attr in self.fields:
             return self.get_field(attr),self.fields[attr]
