@@ -14,7 +14,7 @@ python3 setup.py install
 
 or `pip3 install scapy-python3` for latest published package version.
 
-On all OS except Linux libpcap should be installed for sending and receiving packets (not python modules - just C libraries). libdnet is recommended for sending packets, without libdnet packets will be sent by libpcap, which is limited. Also, netifaces module can be used for alternative and possibly cleaner way to determine local addresses.
+On all OS except Linux libpcap (winpcap on Windows) should be installed for sending and receiving packets (not python modules - just C libraries). libdnet is recommended for Darwin, FreeBSD, Unix. Windows does not require libdnet. If running into issues with routes and interface detection, netifaces module installation can sometimes help, but otherwise is not required.
 
 ## Basic usage
 
@@ -62,4 +62,4 @@ All commands listed by lsc() should work. Tested layers are:
 * TFTP
 * UDP
 
-Currently, works on Linux, Darwin, Unix and co. Using python 3.4 on Ubuntu and FreeBSD for testing. Windows support in progress.
+Currently, works on Windows (8/2012 and up), Linux, Darwin, Unix and co. Using python 3.4 on Ubuntu and FreeBSD for testing. Using Windows 10/Anaconda 3.5/WinPcap 4.1.3 for testing on Windows.
