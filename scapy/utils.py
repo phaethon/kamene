@@ -373,9 +373,10 @@ def do_graph(graph,prog=None,format='png',target=None,string=False,options=None,
             try:
                 import matplotlib.image as mpimg
                 import matplotlib.pyplot as plt
-                plt.figure(figsize = figsize)                
+                figure = plt.figure(figsize = figsize)                
                 plt.axis('off')
-                return plt.imshow(mpimg.imread(r, format = format), **kargs)
+                plt.imshow(mpimg.imread(r, format = format), **kargs)
+                return figure
 
             except ImportError:
                 warning('matplotlib.image required for interactive graph viewing. Use target option to write to a file')
