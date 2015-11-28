@@ -8,12 +8,21 @@ Please, submit all issues https://github.com/phaethon/scapy preferrably with .pc
 
 [winpcapy.py by Massimo Ciani] (https://code.google.com/p/winpcapy/) integrated inside code.
 
+## Supporting scapy3k
+Please, vote for scapy3k at [Best security tool 2015 survey](http://www.toolswatch.org/2015/11/vote-for-2015-best-security-tool/).
+
+Support scapy3k inclusion in Kali linux by commenting on the [issue at Kali bug tracker](https://bugs.kali.org/view.php?id=2336).
+
+
 ## News
 [Follow @scapy3k](https://twitter.com/scapy3k) and/or see [scapy3k](https://phaethon.github.io/scapy) for recent news.
 
 Scapy3k is included in the [Network Security Toolkit] (http://www.networksecuritytoolkit.org/nst/index.html) Release 22. 
 
 There are several new features compared to classic scapy:
+* Windows support without a need for libdnet
+* option to return Networkx graphs instead of image, e.g. for conversations
+* replaced gnuplot with Matplotlib
 * Reading PCAP Next Generation (PCAPNG) files (please, add issues on GitHub for block types and options, which need support. Currently, reading packets only from Enhanced Packet Block)
 * new command tdecode to call tshark decoding on one packet and display results, this is handy for interactive work and debugging
 * some bugs fixed, which are still present in original scapy
@@ -22,7 +31,7 @@ There are several new features compared to classic scapy:
 
 Install with 'python3 setup.py install' from source tree (get it with `git clone https://github.com/phaethon/scapy.git`) or `pip3 install scapy-python3` for latest published version.
 
-On all OS except Linux libpcap should be installed for sending and receiving packets (not python modules - just C libraries). libdnet is recommended for sending packets, without libdnet packets will be sent by libpcap, which is limited. Also, netifaces module can be used for alternative and possibly cleaner way to determine local addresses.
+On all OS except Linux libpcap should be installed for sending and receiving packets (not python modules - just C libraries) or winpcap driver on Windows. On some OS and configurations installing libdnet may imporove experience. On Windows libdnet is not required. On some less common configurations netifaces may improve experience.
 
 ## Usage
 
@@ -58,6 +67,7 @@ All commands listed by lsc() should work. Tested layers are:
 * NTP
 * Padding
 * PPP
+* RadioTap
 * Raw
 * SCTP
 * SNAP

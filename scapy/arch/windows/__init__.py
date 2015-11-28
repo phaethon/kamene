@@ -7,19 +7,19 @@
 Customizations needed to support Microsoft Windows.
 """
 
-import os,re,sys,socket,time
+import os,re,sys,socket,time, itertools
+import subprocess as sp
 from glob import glob
 from scapy.config import conf,ConfClass
 from scapy.error import Scapy_Exception,log_loading,log_runtime
-from scapy.utils import atol, inet_aton, inet_ntoa, PcapReader
+from scapy.utils import atol, itom, inet_aton, inet_ntoa, PcapReader
 from scapy.base_classes import Gen, Net, SetGen
 import scapy.plist as plist
 from scapy.sendrecv import debug, srp1
 from scapy.layers.l2 import Ether, ARP
 from scapy.data import MTU, ETHER_BROADCAST, ETH_P_ARP
 
-conf.use_winpcapy = 1
-conf.use_netifaces = 1
+conf.use_winpcapy = True
 from scapy.arch import pcapdnet
 from scapy.arch.pcapdnet import *
 
@@ -69,120 +69,100 @@ class WinProgPath(ConfClass):
 
 conf.prog = WinProgPath()
 
-
-
-import winreg
-
 class PcapNameNotFoundError(Scapy_Exception):
     pass    
+
+def get_windows_if_list():
+    # This works only starting from Windows 8/2012 and up. For older Windows another solution is needed
+    # Get-WmiObject Win32_NetworkAdapter possibly could be used on Windows 7
+    ps = sp.Popen(['powershell', 'Get-NetAdapter', '|', 'select Name, InterfaceIndex, InterfaceDescription, InterfaceGuid, MacAddress', '|', 'fl'], stdout = sp.PIPE, universal_newlines = True)
+    stdout, stdin = ps.communicate(timeout = 10)
+    current_interface = None
+    interface_list = []
+    for i in stdout.split('\n'):
+        if not i.strip():
+            continue
+        if i.find(':')<0:
+            continue
+        name, value = [ j.strip() for j in i.split(':') ]
+        if name == 'Name':
+            if current_interface:
+                interface_list.append(current_interface)
+            current_interface = {}
+            current_interface['name'] = value
+        elif name == 'InterfaceIndex':
+            current_interface['win_index'] = int(value)
+        elif name == 'InterfaceDescription':
+            current_interface['description'] = value
+        elif name == 'InterfaceGuid':
+            current_interface['guid'] = value
+        elif name == 'MacAddress':
+            current_interface['mac'] = ':'.join([ j for j in value.split('-')])    
+    if current_interface:
+        interface_list.append(current_interface)
+    return interface_list
 
 class NetworkInterface(object):
     """A network interface of your local host"""
     
-    def __init__(self, dnetdict=None):
+    def __init__(self, data=None):
         self.name = None
         self.ip = None
         self.mac = None
         self.pcap_name = None
-        self.win_name = None
-        self.uuid = None
-        self.dnetdict = dnetdict
-        if dnetdict is not None:
-            self.update(dnetdict)
+        self.description = None
+        self.data = data
+        if data is not None:
+            self.update(data)
         
-    def update(self, dnetdict):
+    def update(self, data):
         """Update info about network interface according to given dnet dictionary"""
-        self.name = dnetdict["name"]
+        self.name = data["name"]
+        self.description = data['description']
+        self.win_index = data['win_index']
         # Other attributes are optional
+        self._update_pcapdata()
         try:
-            self.ip = socket.inet_ntoa(dnetdict["addr"].ip)
+            self.ip = socket.inet_ntoa(get_if_raw_addr(data['guid']))
         except (KeyError, AttributeError, NameError):
             pass
         try:
-            self.mac = dnetdict["link_addr"]
+            self.mac = data['mac']
         except KeyError:
             pass
-        self._update_pcapdata()
     
     def _update_pcapdata(self):
-        """Supplement more info from pypcap and the Windows registry"""
-        
-        # XXX: We try eth0 - eth29 by bruteforce and match by IP address, 
-        # because only the IP is available in both pypcap and dnet.
-        # This may not work with unorthodox network configurations and is
-        # slow because we have to walk through the Windows registry.
-        for n in range(30):
-            guess = "eth%s" % n
-            win_name = pcapdnet.pcap.ex_name(guess)
-            if win_name.endswith("}"):
-                try:
-                    uuid = win_name[win_name.index("{"):win_name.index("}")+1]
-                    keyname = r"SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\%s" % uuid
-                    try:
-                        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, keyname)
-                    except WindowsError:
-                        log_loading.debug("Couldn't open 'HKEY_LOCAL_MACHINE\\%s' (for guessed pcap iface name '%s')." % (keyname, guess))
-                        continue
-                    try:    
-                        fixed_ip = winreg.QueryValueEx(key, "IPAddress")[0][0].encode("utf-8")
-                    except (WindowsError, UnicodeDecodeError, IndexError):
-                        fixed_ip = None
-                    try:
-                        dhcp_ip = winreg.QueryValueEx(key, "DhcpIPAddress")[0].encode("utf-8")
-                    except (WindowsError, UnicodeDecodeError, IndexError):
-                        dhcp_ip = None
-                    # "0.0.0.0" or None means the value is not set (at least not correctly).
-                    # If both fixed_ip and dhcp_ip are set, fixed_ip takes precedence 
-                    if fixed_ip is not None and fixed_ip != "0.0.0.0":
-                        ip = fixed_ip
-                    elif dhcp_ip is not None and dhcp_ip != "0.0.0.0":
-                        ip = dhcp_ip
-                    else:
-                        continue
-                except IOError:
-                    continue
-                else:
-                    if ip == self.ip:
-                        self.pcap_name = guess
-                        self.win_name = win_name
-                        self.uuid = uuid
-                        break
-        else:
-            raise PcapNameNotFoundError
+        for i in winpcapy_get_if_list():
+            if i.endswith(self.data['guid']):
+                self.pcap_name = i
+                return
+
+        raise PcapNameNotFoundError
     
     def __repr__(self):
-        return "<%s: %s %s %s pcap_name=%s win_name=%s>" % (self.__class__.__name__,
-                     self.name, self.ip, self.mac, self.pcap_name, self.win_name)
+        return "<%s: %s %s %s pcap_name=%s description=%s>" % (self.__class__.__name__,
+                     self.name, self.ip, self.mac, self.pcap_name, self.description)
 
-#from UserDict import IterableUserDict
 from collections import UserDict
 
 class NetworkInterfaceDict(UserDict):
     """Store information about network interfaces and convert between names""" 
-    def load_from_dnet(self):
-        pass
-    # def load_from_dnet(self):
-    #     """Populate interface table via dnet"""
-    #     for i in pcapdnet.dnet.intf():
-    #         try:
-    #             # XXX: Only Ethernet for the moment: localhost is not supported by dnet and pcap
-    #             # We only take interfaces that have an IP address, because the IP
-    #             # is used for the mapping between dnet and pcap interface names
-    #             # and this significantly improves Scapy's startup performance
-    #             if i["name"].startswith("eth") and "addr" in i:
-    #                 self.data[i["name"]] = NetworkInterface(i)
-    #         except (KeyError, PcapNameNotFoundError):
-    #             pass
-    #     if len(self.data) == 0:
-    #         log_loading.warning("No match between your pcap and dnet network interfaces found. "
-    #                             "You probably won't be able to send packets. "
-    #                             "Deactivating unneeded interfaces and restarting Scapy might help.")
+    def load_from_powershell(self):
+        for i in get_windows_if_list():
+            try:
+                interface = NetworkInterface(i)
+                self.data[interface.name] = interface
+            except (KeyError, PcapNameNotFoundError):
+                pass
+        if len(self.data) == 0:
+            log_loading.warning("No match between your pcap and windows network interfaces found. "
+                                "You probably won't be able to send packets. "
+                                "Deactivating unneeded interfaces and restarting Scapy might help."
+                                "Check your winpcap and powershell installation, and access rights.")
     
     def pcap_name(self, devname):
-        """Return pypcap device name for given libdnet/Scapy device name
-        
-        This mapping is necessary because pypcap numbers the devices differently."""
-        
+        """Return pcap device name for given Windows device name."""
+
         try:
             pcap_name = self.data[devname].pcap_name
         except KeyError:
@@ -191,27 +171,33 @@ class NetworkInterfaceDict(UserDict):
             return pcap_name
             
     def devname(self, pcap_name):
-        """Return libdnet/Scapy device name for given pypcap device name
-        
-        This mapping is necessary because pypcap numbers the devices differently."""
+        """Return Windows device name for given pcap device name."""
         
         for devname, iface in self.items():
             if iface.pcap_name == pcap_name:
                 return iface.name
         raise ValueError("Unknown pypcap network interface %r" % pcap_name)
     
+    def devname_from_index(self, if_index):
+        """Return interface name from interface index"""
+        for devname, iface in self.items():
+            if iface.win_index == if_index:
+                return iface.name
+        raise ValueError("Unknown network interface index %r" % if_index)
+
     def show(self, resolve_mac=True):
         """Print list of available network interfaces in human readable form"""
-        print("%s  %s  %s" % ("IFACE".ljust(5), "IP".ljust(15), "MAC"))
+
+        print("%s  %s  %s  %s" % ("INDEX".ljust(5), "IFACE".ljust(35), "IP".ljust(15), "MAC"))
         for iface_name in sorted(self.data.keys()):
             dev = self.data[iface_name]
-            mac = str(dev.mac)
+            mac = dev.mac
             if resolve_mac:
                 mac = conf.manufdb._resolve_MAC(mac)
-            print("%s  %s  %s" % (str(dev.name).ljust(5), str(dev.ip).ljust(15), mac)     )
+            print("%s  %s  %s  %s" % (str(dev.win_index).ljust(5), str(dev.name).ljust(35), str(dev.ip).ljust(15), mac)     )
             
 ifaces = NetworkInterfaceDict()
-ifaces.load_from_dnet()
+ifaces.load_from_powershell()
 
 def pcap_name(devname):
     """Return pypcap device name for given libdnet/Scapy device name"""  
@@ -225,6 +211,10 @@ def pcap_name(devname):
 def devname(pcap_name):
     """Return libdnet/Scapy device name for given pypcap device name"""
     return ifaces.devname(pcap_name)
+
+def devname_from_index(if_index):
+    """Return Windows adapter name for given Windows interface index"""
+    return ifaces.devname_from_index(if_index)
     
 def show_interfaces(resolve_mac=True):
     """Print list of available network interfaces"""
@@ -233,99 +223,57 @@ def show_interfaces(resolve_mac=True):
 _orig_open_pcap = pcapdnet.open_pcap
 pcapdnet.open_pcap = lambda iface,*args,**kargs: _orig_open_pcap(pcap_name(iface),*args,**kargs)
 
+_orig_get_if_raw_hwaddr = pcapdnet.get_if_raw_hwaddr
+pcapdnet.get_if_raw_hwaddr = lambda iface,*args,**kargs: [ int(i, 16) for i in ifaces[iface].mac.split(':') ]
+get_if_raw_hwaddr = pcapdnet.get_if_raw_hwaddr
+
 def read_routes():
-    ok = 0
     routes = []
-    ip = '(\d+\.\d+\.\d+\.\d+)'
-    # On Vista and Windows 7 the gateway can be IP or 'On-link'.
-    # But the exact 'On-link' string depends on the locale, so we allow any text.
-    gw_pattern = '(.+)'
+    if_index = '(\d+)'
+    dest = '(\d+\.\d+\.\d+\.\d+)/(\d+)'
+    next_hop = '(\d+\.\d+\.\d+\.\d+)'
     metric_pattern = "(\d+)"
     delim = "\s+"        # The columns are separated by whitespace
-    netstat_line = delim.join([ip, ip, gw_pattern, ip, metric_pattern])
+    netstat_line = delim.join([if_index, dest, next_hop, metric_pattern])
     pattern = re.compile(netstat_line)
-    f=os.popen("netstat -rn")
-    for l in f.readlines():
+    # This works only starting from Windows 8/2012 and up. For older Windows another solution is needed
+    ps = sp.Popen(['powershell', 'Get-NetRoute', '-AddressFamily IPV4', '|', 'select ifIndex, DestinationPrefix, NextHop, RouteMetric'], stdout = sp.PIPE, universal_newlines = True)
+    stdout, stdin = ps.communicate(timeout = 10)
+    for l in stdout.split('\n'):
         match = re.search(pattern,l)
         if match:
-            dest   = match.group(1)
-            mask   = match.group(2)
-            gw     = match.group(3)
-            netif  = match.group(4)
-            metric = match.group(5)
+            try:
+                iface = devname_from_index(int(match.group(1)))
+                addr = ifaces[iface].ip
+            except:
+                continue
+            dest = atol(match.group(2))
+            mask = itom(int(match.group(3)))
+            gw = match.group(4)
             # try:
             #     intf = pcapdnet.dnet.intf().get_dst(pcapdnet.dnet.addr(type=2, addrtxt=dest))
             # except OSError:
             #     log_loading.warning("Building Scapy's routing table: Couldn't get outgoing interface for destination %s" % dest)
             #     continue               
-            # if not "addr" in intf:
-            #     break
-            # addr = str(intf["addr"])
-            # addr = addr.split("/")[0]
-            
-            # dest = atol(dest)
-            # mask = atol(mask)
-            # # If the gateway is no IP we assume it's on-link
-            # gw_ipmatch = re.search('\d+\.\d+\.\d+\.\d+', gw)
-            # if gw_ipmatch:
-            #     gw = gw_ipmatch.group(0)
-            # else:
-            #     gw = netif
-            # routes.append((dest,mask,gw, str(intf["name"]), addr))
-    f.close()
+            routes.append((dest, mask, gw, iface, addr))
     return routes
 
 def read_routes6():
     return []
 
-def getmacbyip(ip, chainCC=0):
-    """Return MAC address corresponding to a given IP address"""
-    if isinstance(ip,Net):
-        ip = next(iter(ip))
-    tmp = map(ord, inet_aton(ip))
-    if (tmp[0] & 0xf0) == 0xe0: # mcast @
-        return "01:00:5e:%.2x:%.2x:%.2x" % (tmp[1]&0x7f,tmp[2],tmp[3])
-    iff,a,gw = conf.route.route(ip)
-    if ( (iff == LOOPBACK_NAME) or (ip == conf.route.get_if_bcast(iff)) ):
-        return "ff:ff:ff:ff:ff:ff"
-    # Windows uses local IP instead of 0.0.0.0 to represent locally reachable addresses
-    # ifip = str(pcapdnet.dnet.intf().get(iff)['addr'])
-    if gw != ifip.split('/')[0]:
-        ip = gw
-
-    mac = conf.netcache.arp_cache.get(ip)
-    if mac:
-        return mac
-
-    res = srp1(Ether(dst=ETHER_BROADCAST)/ARP(op="who-has", pdst=ip),
-               type=ETH_P_ARP,
-               iface = iff,
-               timeout=2,
-               verbose=0,
-               chainCC=chainCC,
-               nofilter=1)
-    if res is not None:
-        mac = res.payload.hwsrc
-        conf.netcache.arp_cache[ip] = mac
-        return mac
-    return None
-
-import scapy.layers.l2
-scapy.layers.l2.getmacbyip = getmacbyip
-
-try:
-    import readline
-    console = readline.GetOutputFile()
-except (ImportError, AttributeError):
-    log_loading.info("Could not get readline console. Will not interpret ANSI color codes.") 
-else:
-    conf.readfunc = readline.rl.readline
-    orig_stdout = sys.stdout
-    sys.stdout = console
-
-
-
-
+if conf.interactive_shell != 'ipython':
+    try:
+        __IPYTHON__
+    except NameError:
+        try:
+            import readline
+            console = readline.GetOutputFile()
+        except (ImportError, AttributeError):
+            log_loading.info("Could not get readline console. Will not interpret ANSI color codes.") 
+        else:
+            conf.readfunc = readline.rl.readline
+            orig_stdout = sys.stdout
+            sys.stdout = console
 
 def sndrcv(pks, pkt, timeout = 2, inter = 0, verbose=None, chainCC=0, retry=0, multi=0):
     if not isinstance(pkt, Gen):
@@ -395,7 +343,7 @@ def sndrcv(pks, pkt, timeout = 2, inter = 0, verbose=None, chainCC=0, retry=0, m
                 else:
                     stoptime = 0
                 remaintime = None
-                inmask = [pks.ins.fd]
+                # inmask = [pks.ins.fd]
                 try:
                     try:
                         while 1:
@@ -414,7 +362,7 @@ def sndrcv(pks, pkt, timeout = 2, inter = 0, verbose=None, chainCC=0, retry=0, m
                                     if r.answers(hlst[i]):
                                         ans.append((hlst[i],r))
                                         if verbose > 1:
-                                            os.write(1, "*")
+                                            os.write(1, b"*")
                                         ok = 1                                
                                         if not multi:
                                             del(hlst[i])
@@ -428,7 +376,7 @@ def sndrcv(pks, pkt, timeout = 2, inter = 0, verbose=None, chainCC=0, retry=0, m
                                 break
                             if not ok:
                                 if verbose > 1:
-                                    os.write(1, ".")
+                                    os.write(1, b".")
                                 nbrecv += 1
                                 if conf.debug_match:
                                     debug.recv.append(r)
@@ -442,7 +390,9 @@ def sndrcv(pks, pkt, timeout = 2, inter = 0, verbose=None, chainCC=0, retry=0, m
         finally:
             pass
 
-        remain = reduce(list.__add__, hsent.values(), [])
+        # remain = reduce(list.__add__, hsent.values(), [])
+        remain = list(itertools.chain(*[ i for i in hsent.values() ]))
+
         if multi:
             #remain = filter(lambda p: not hasattr(p, '_answered'), remain);
             remain = [ p for p in remain if not hasattr(p, '_answered')]
@@ -476,7 +426,7 @@ scapy.sendrecv.sndrcv = sndrcv
 def sniff(count=0, store=1, offline=None, prn = None, lfilter=None, L2socket=None, timeout=None, *arg, **karg):
     """Sniff packets
 sniff([count=0,] [prn=None,] [store=1,] [offline=None,] [lfilter=None,] + L2ListenSocket args) -> list of packets
-
+Select interface to sniff by setting conf.iface. Use show_interfaces() to see interface names.
   count: number of packets to capture. 0 means infinity
   store: wether to store sniffed packets or discard them
     prn: function to apply to each packet. If something is returned,
@@ -492,6 +442,7 @@ L2socket: use the provided L2socket
     c = 0
 
     if offline is None:
+        log_runtime.info('Sniffing on %s' % conf.iface)
         if L2socket is None:
             L2socket = conf.L2listen
         s = L2socket(type=ETH_P_ALL, *arg, **karg)
@@ -534,11 +485,21 @@ L2socket: use the provided L2socket
 import scapy.sendrecv
 scapy.sendrecv.sniff = sniff
 
-def get_if_list():
-    return sorted(ifaces.keys())
-        
+# def get_if_list():
+#     print('windows if_list')
+#     return sorted(ifaces.keys())
+
 def get_working_if():
     try:
-        return devname(pcap.lookupdev())
-    except Exception:
-        return 'lo0'
+        if 'Ethernet' in ifaces and ifaces['Ethernet'].ip != '0.0.0.0':
+            return 'Ethernet'
+        elif 'Wi-Fi' in ifaces and ifaces['Wi-Fi'].ip != '0.0.0.0':
+            return 'Wi-Fi'
+        elif len(ifaces) > 0:
+            return ifaces[list(ifaces.keys())[0]]
+        else:
+            return LOOPBACK_NAME
+    except:
+        return LOOPBACK_NAME
+
+conf.iface = get_working_if()

@@ -4,32 +4,23 @@ Scapy development
 
 .. note::
 
-   This section has not been updated for scapy3k yet. Code examples may not work directly.
+   This section is only partly updated for scapy3k yet. Code examples may not work directly.
 
 Project organization
 ====================
 
-Scapy development uses the Mercurial version control system.
-Scapy's reference repository is at http://hg.secdev.org/scapy/. 
-
-Project management is done with `Trac <http://trac.secdev.org/scapy>`_. Trac works on Scapy's reference repository.
-It provides a freely editable `Wiki <http://trac.secdev.org/scapy/wiki/>`_ (please contribute!) that can 
-reference tickets, changesets, files from the project. It also provides 
-a ticket management service that is used to avoid forgetting patches or bugs.
-
-Mercurial's distributed way of working enables Philippe to provide two repositories
-where anybody can commit stuff: 
-the Scapy `community repository <http://hg.secdev.org/scapy-com>`_ and the Scapy `Windows port repository <http://hg.secdev.org/scapy-com>`_. 
+Scapy3k development uses the `GitHub repository <http://github.com/phaethon/scapy>`_
+Scapy3k is not synchronized with scapy v2.x repository at http://hg.secdev.org/scapy/. Changes in one project reflect on the other only if somebody manually transfers the change.
 
 
 How to contribute
 =================
 
-* Found a bug in Scapy? `Add a ticket <http://trac.secdev.org/scapy/newticket>`_.
+* Found a bug in Scapy3k? `Add a ticket <http://github.com/phaethon/scapy/issues>`_.
 * Improve this documentation.
-* Program a new layer and share it on the mailing list. Or add it as an enhancement on the bugtracker. 
-* Contribute new `regression tests <http://trac.secdev.org/scapy/wiki/RegressionTests>`_.
-* Upload packet samples for new protocols on the `packet samples page <http://trac.secdev.org/scapy/wiki/PacketsSamples>`_.
+* Program a new layer and create a pull request. 
+* Contribute new regression tests.
+* Upload packet samples for new protocols.
 
 
 Testing with UTScapy

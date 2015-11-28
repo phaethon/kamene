@@ -342,7 +342,7 @@ def do_graph(graph,prog=None,format='png',target=None,string=False,options=None,
 
     string: if not False, simply return the graph string
     graph: GraphViz graph description
-    format: output type (svg, ps, gif, jpg, etc.), passed to dot's "-T" option
+    format: output type (svg, ps, gif, jpg, etc.), passed to dot's "-T" option. Ignored if target==None
     target: filename. If None uses matplotlib to display
     prog: which graphviz program to use
     options: options to be passed to prog"""
@@ -359,8 +359,9 @@ def do_graph(graph,prog=None,format='png',target=None,string=False,options=None,
         if prog is None:
             prog = conf.prog.dot
 
-        if format is not None:
-            format = "-T %s" % format
+        if not target or not format:
+            format = 'png'
+        format = "-T %s" % format
 
         p = subprocess.Popen("%s %s %s" % (prog,options or "", format or ""), shell = True, stdin = subprocess.PIPE, stdout = subprocess.PIPE)
         w, r = p.stdin, p.stdout

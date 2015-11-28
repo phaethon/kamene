@@ -118,12 +118,48 @@ class RadioTap(Packet):
     fields_desc = [ ByteField('version', 0),
                     ByteField('pad', 0),
                     FieldLenField('len', None, 'notdecoded', '<H', adjust=lambda pkt,x:x+8),
-                    FlagsField('present', None, -32, ['TSFT','Flags','Rate','Channel','FHSS','dBm_AntSignal',
-                                                     'dBm_AntNoise','Lock_Quality','TX_Attenuation','dB_TX_Attenuation',
-                                                      'dBm_TX_Power', 'Antenna', 'dB_AntSignal', 'dB_AntNoise',
-                                                     'b14', 'b15','b16','b17','b18','b19','b20','b21','b22','b23',
-                                                     'b24','b25','b26','b27','b28','b29','b30','Ext']),
-                    StrLenField('notdecoded', "", length_from= lambda pkt:pkt.len-8) ]
+                    FlagsField('present', None, -32, ['TSFT','Flags','Rate','Channel','FHSS','dBm_AntSignal', # 0-5
+                                                     'dBm_AntNoise','Lock_Quality','TX_Attenuation','dB_TX_Attenuation', # 6-9
+                                                      'dBm_TX_Power', 'Antenna', 'dB_AntSignal', 'dB_AntNoise', # 10-13
+                                                     'RX_Flags', 'b15','b16','b17','b18','MCS','A-MPDU_Status','VHT', # 14-21
+                                                     'b22','b23','b24','b25','b26','b27','b28','Reset','Vendor','Ext']),
+                    ConditionalField(LELongField('tsft', 0), lambda pkt: pkt.getdictval('present')['TSFT']),
+                    ConditionalField(FlagsField('flags', None, -8, ['CFP', 'short', 'WEP', 'fragmentation', 'FCS', 'padding', 'failed', 'HT']), lambda pkt: pkt.getdictval('present')['Flags']),
+                    ConditionalField(ByteField('rate', 0), lambda pkt: pkt.getdictval('present')['Rate']),
+                    ConditionalField(LEShortField('channel_freq', 0), lambda pkt: pkt.getdictval('present')['Channel']),
+                    ConditionalField(FlagsField('channel_flags', None, -16, ['b0', 'b1', 'b2', 'b3',
+                                                        'Turbo', 'CCK', 'OFDM', '2GHz', '5GHz', 'Passive', 'Dynamic', 'GFSK',
+                                                        'b12', 'b13', 'b14', 'b15']), lambda pkt: pkt.getdictval('present')['Channel']),
+                    ConditionalField(ByteField('hop_set', 0), lambda pkt: pkt.getdictval('present')['FHSS']),
+                    ConditionalField(ByteField('hop_pattern', 0), lambda pkt: pkt.getdictval('present')['FHSS']),
+                    ConditionalField(SignedByteField('dbm_antsignal', 0), lambda pkt: pkt.getdictval('present')['dBm_AntSignal']),
+                    ConditionalField(SignedByteField('dbm_antnoise', 0), lambda pkt: pkt.getdictval('present')['dBm_AntNoise']),
+                    ConditionalField(LEShortField('lock_quality', 0), lambda pkt: pkt.getdictval('present')['Lock_Quality']),
+                    ConditionalField(LEShortField('tx_attenuation', 0), lambda pkt: pkt.getdictval('present')['TX_Attenuation']),
+                    ConditionalField(LEShortField('db_tx_attenuation', 0), lambda pkt: pkt.getdictval('present')['dB_TX_Attenuation']),
+                    ConditionalField(SignedByteField('dbm_tx_power', 0), lambda pkt: pkt.getdictval('present')['dBm_TX_Power']),
+                    ConditionalField(ByteField('antenna', 0), lambda pkt: pkt.getdictval('present')['Antenna']),
+                    ConditionalField(SignedByteField('db_antsignal', 0), lambda pkt: pkt.getdictval('present')['dB_AntSignal']),
+                    ConditionalField(SignedByteField('db_antnoise', 0), lambda pkt: pkt.getdictval('present')['dB_AntNoise']),
+                    ConditionalField(FlagsField('rx_flags', None, -16, ['b0', 'PLCP_CRC_Failed']), lambda pkt: pkt.getdictval('present')['RX_Flags']),
+
+                    StrLenField('notdecoded', "", length_from= lambda pkt:pkt.len-8
+                        -pkt.getdictval('present')['TSFT']*8
+                        -pkt.getdictval('present')['Flags']*1
+                        -pkt.getdictval('present')['Rate']*1
+                        -pkt.getdictval('present')['Channel']*4
+                        -pkt.getdictval('present')['FHSS']*2
+                        -pkt.getdictval('present')['dBm_AntSignal']*1
+                        -pkt.getdictval('present')['dBm_AntNoise']*1
+                        -pkt.getdictval('present')['Lock_Quality']*2
+                        -pkt.getdictval('present')['TX_Attenuation']*2
+                        -pkt.getdictval('present')['dB_TX_Attenuation']*2
+                        -pkt.getdictval('present')['dBm_TX_Power']*1
+                        -pkt.getdictval('present')['Antenna']*1
+                        -pkt.getdictval('present')['dB_AntSignal']*1
+                        -pkt.getdictval('present')['dB_AntNoise']*1
+                        -pkt.getdictval('present')['RX_Flags']*2
+                          ) ]
 
 class PPI(Packet):
     name = "Per-Packet Information header (partial)"
