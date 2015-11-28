@@ -53,20 +53,39 @@
 <h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">This section has not been updated for scapy3k yet. Code examples may not work directly. Try bytes() instead of str() and b&#8217;string&#8217; instead of b&#8217;somestring&#8217;.</p>
+<p class="last">This section has been partially updated for scapy3k. Some code examples may not work directly. Try bytes() instead of str() and b&#8217;string&#8217; instead of b&#8217;somestring&#8217;.</p>
 </div>
 <div class="section" id="starting-scapy">
 <h2>Starting Scapy<a class="headerlink" href="#starting-scapy" title="Permalink to this headline">¶</a></h2>
 <p>Scapy&#8217;s interactive shell is run in a terminal session. Root privileges are needed to
 send the packets, so we&#8217;re using <tt class="docutils literal"><span class="pre">sudo</span></tt> here:</p>
 <div class="highlight-python"><div class="highlight"><pre>$ sudo scapy
+INFO: Please, report issues to https://github.com/phaethon/scapy
+WARNING: IPython not available. Using standard Python shell instead.
 Welcome to Scapy (3.0.0)
 &gt;&gt;&gt;
 </pre></div>
 </div>
+<p>If you have installed IPython this is an example Scapy startup:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ sudo scapy
+INFO: Please, report issues to https://github.com/phaethon/scapy
+Python 3.4.2 (default, Jul  9 2015, 17:24:30)
+Type &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
+
+IPython 2.4.1 -- An enhanced Interactive Python.
+?         -&gt; Introduction and overview of IPython&#39;s features.
+%quickref -&gt; Quick reference.
+help      -&gt; Python&#39;s own help system.
+object?   -&gt; Details about &#39;object&#39;, use &#39;object??&#39; for extra details.
+
+Welcome to Scapy (3.0.0) using IPython 2.4.1
+In [1]:
+</pre></div>
+</div>
 <p>If you do not have all optional packages installed, Scapy will inform you that
 some features will not be available:</p>
-<div class="highlight-python"><div class="highlight"><pre>INFO: Can&#39;t import python gnuplot wrapper . Won&#39;t be able to plot.
+<div class="highlight-python"><div class="highlight"><pre>INFO: Can&#39;t import matplotlib. Not critical, but won&#39;t be able to plot.
+INFO: Can&#39;t import networkx. Not criticial, but won&#39;t be able to draw network graphs.
 INFO: Can&#39;t import PyX. Won&#39;t be able to use psdump() or pdfdump().
 </pre></div>
 </div>
@@ -929,16 +948,28 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 </pre></div>
 </div>
 </div>
-<div class="section" id="gnuplot">
-<h3>Gnuplot<a class="headerlink" href="#gnuplot" title="Permalink to this headline">¶</a></h3>
-<p id="index-14">We can easily plot some harvested values using Gnuplot. (Make sure that you have Gnuplot-py and Gnuplot installed.)
-For example, we can observe the IP ID patterns to know how many distinct IP stacks are used behind a load balancer:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s">&quot;www.target.com&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">sport</span><span class="o">=</span><span class="p">[</span><span class="n">RandShort</span><span class="p">()]</span><span class="o">*</span><span class="mi">1000</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-<span class="go">&lt;Gnuplot._Gnuplot.Gnuplot instance at 0xb7d6a74c&gt;</span>
+<div class="section" id="matplotlib">
+<h3>Matplotlib<a class="headerlink" href="#matplotlib" title="Permalink to this headline">¶</a></h3>
+<p id="index-14">One can easily plot some harvested values using the python 2D plotting library: Matplotlib. (Make sure that you have matplotlib installed.) For example, we can plot the random source ports generated when sending and receiving packets with the following command:</p>
+<div class="highlight-python"><div class="highlight"><pre>In [1]: ans,unans=sr(IP(dst=&quot;www.target.com&quot;)/TCP(sport=[RandShort()]*200), timeout=1)
+Begin emission:
+...................................*.........*......*......*.......*......*.....*......*
+......*.......*.......*....*..........*.......*......*......*......*......*.....*.......*
+......*......*......*......*......*......*......*......*......*......*......*.........*
+......*......*......*......*......*......*........*.....*......*.....*...
+Finished to send 200 packets.
+...*........*......*....*.......*.....*........*....*........*......*...*..*.*......*
+......*......*......*......*........*..*....*....*............*.....*..*.*...*........*
+.............*.......*.......*.*.*..*...***......**...*.*.......*..*.*..*.*.**.*....*
+...*.*....*.........................................................................
+........................................................
+Received 734 packets, got 95 answers, remaining 105 packets
+
+In [2]: ans.plot(lambda x: x[1].dport)
+Out[2]: [&lt;matplotlib.lines.Line2D at 0x7f6ccccbe470&gt;]
 </pre></div>
 </div>
-<img alt="_images/ipid.png" src="_images/ipid.png" />
+<img alt="_images/plot-random-sport.png" src="_images/plot-random-sport.png" />
 </div>
 <div class="section" id="tcp-traceroute-2">
 <h3>TCP traceroute (2)<a class="headerlink" href="#tcp-traceroute-2" title="Permalink to this headline">¶</a></h3>
@@ -1043,6 +1074,10 @@ For example, we can observe the IP ID patterns to know how many distinct IP stac
 </pre></div>
 </div>
 <img alt="_images/graph_traceroute.png" src="_images/graph_traceroute.png" />
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">VPython is currently not ported to python3.x.</p>
+</div>
 <p>If you have VPython installed, you also can have a 3D representation of the traceroute. With the right button, you can rotate the scene, with the middle button, you can zoom, with the left button, you can move the scene. If you click on a ball, it&#8217;s IP will appear/disappear. If you Ctrl-click on a ball, ports 21, 22, 23, 25, 80 and 443 will be scanned and the result displayed:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">trace3D</span><span class="p">()</span>
 </pre></div>
@@ -1529,7 +1564,7 @@ only his own NIC’s IP are reachable with this TTL:</p>
 </li>
 <li><a class="reference internal" href="#making-tables">Making tables</a></li>
 <li><a class="reference internal" href="#routing">Routing</a></li>
-<li><a class="reference internal" href="#gnuplot">Gnuplot</a></li>
+<li><a class="reference internal" href="#matplotlib">Matplotlib</a></li>
 <li><a class="reference internal" href="#tcp-traceroute-2">TCP traceroute (2)</a></li>
 <li><a class="reference internal" href="#wireless-frame-injection">Wireless frame injection</a></li>
 </ul>
@@ -1636,7 +1671,7 @@ only his own NIC’s IP are reachable with this TTL:</p>
     </div>
     <div class="footer">
         &copy; Copyright 2008, 2009 Philippe Biondi and the Scapy community.
-      Last updated on Nov 13, 2015.
+      Last updated on Nov 28, 2015.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>

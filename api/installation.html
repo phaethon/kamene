@@ -56,7 +56,7 @@
 <blockquote>
 <div><ol class="arabic simple" start="0">
 <li>Install <em>Python 3.x</em>.</li>
-<li>Download and install <em>Scapy</em>.</li>
+<li>Install <em>Scapy</em> using pip or by cloning/installing from git.</li>
 <li>(For non-Linux platforms): Install <em>libpcap and libdnet</em> and their Python wrappers.</li>
 <li>(Optional): Install <em>additional software</em> for special features.</li>
 <li>Run Scapy with root priviledges.</li>
@@ -134,7 +134,13 @@ Windows, currently is under development.</p>
 </pre></div>
 </div>
 </li>
-<li><p class="first">ipython. For interactive sessions using ipython can be great advantage. Install using pip3</p>
+<li><p class="first">ipython. For interactive sessions using ipython can be great advantage. Install using pip3 or from your package manager</p>
+</li>
+<li><p class="first">Graphviz. For some visualizations, e.g. traceroute graph, dot is required on the PATH</p>
+</li>
+<li><p class="first">Matplotlib. Required for interactive plot/graph viewing.</p>
+</li>
+<li><p class="first">Networkx. Conversations can be converted to Networkx graph if library is present.</p>
 </li>
 </ul>
 </div>
@@ -142,9 +148,9 @@ Windows, currently is under development.</p>
 <h2>Platform-specific instructions<a class="headerlink" href="#platform-specific-instructions" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="linux-native">
 <h3>Linux native<a class="headerlink" href="#linux-native" title="Permalink to this headline">¶</a></h3>
-<p>Scapy can run natively on Linux, without libdnet and libpcap.</p>
+<p>Scapy can run natively on Linux. I does not require libdnet and libpcap.</p>
 <ul class="simple">
-<li>Install <a class="reference external" href="http://www.python.org">Python 3.x</a>.</li>
+<li>Install python3 from your package manager if it is not already present</li>
 <li>Install <a class="reference external" href="http://www.tcpdump.org">tcpdump</a> and make sure it is in the $PATH. (It&#8217;s only used to compile BPF filters (<tt class="docutils literal"><span class="pre">-ddd</span> <span class="pre">option</span></tt>))</li>
 <li>Make sure your kernel has Packet sockets selected (<tt class="docutils literal"><span class="pre">CONFIG_PACKET</span></tt>)</li>
 <li>If your kernel is &lt; 2.6, make sure that Socket filtering is selected <tt class="docutils literal"><span class="pre">CONFIG_FILTER</span></tt>)</li>
@@ -163,7 +169,8 @@ Windows, currently is under development.</p>
 </div>
 <div class="section" id="windows">
 <h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h3>
-<p>Scapy is primarily being developed for Unix-like systems and works best on those platforms. scapy3k has not yet been ported to Windows. Use at your own risk.</p>
+<p>Scapy works on Windows 8/2012 and newer version. Unlike earlier versions libdnet is not required. Testing is being done on following configuration: Windows 10/Anaconda 3.5/WinPcap 4.1.3</p>
+<p>On Windows 7 (and possibly earlier) scapy can be used for offline packet crafting/dissection. Sniffing and sending requires manual setting of network interface information and routing as corresponding powershell cmdlets used to gather this information are not working on Windows 7.</p>
 </div>
 </div>
 </div>
@@ -240,7 +247,7 @@ Windows, currently is under development.</p>
     </div>
     <div class="footer">
         &copy; Copyright 2008, 2009 Philippe Biondi and the Scapy community.
-      Last updated on Nov 13, 2015.
+      Last updated on Nov 28, 2015.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>
