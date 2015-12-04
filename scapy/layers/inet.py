@@ -10,7 +10,7 @@ IPv4 (Internet Protocol v4).
 import os,time,struct,re,socket,types
 from select import select
 from collections import defaultdict
-from scapy.utils import checksum
+from scapy.utils import checksum,is_privateaddr
 from scapy.layers.l2 import *
 from scapy.config import conf
 from scapy.fields import *
@@ -36,8 +36,9 @@ class IPTools:
         t.sort()
         return t[t.index(self.ttl)+1]
     def hops(self):
-        return self.ottl()-self.ttl-1 
-
+        return self.ottl()-self.ttl-1
+    def is_privaddr(self):
+        return is_privateaddr(self.src)
 
 _ip_options_names = { 0: "end_of_list",
                       1: "nop",
@@ -1325,12 +1326,12 @@ traceroute(target, [maxttl=30,] [dport=80,] [sport=80,] [verbose=conf.verb]) -> 
 
 
 ################################
-## Multi-TCP Traceroute Class ##
+## Multi-Traceroute Class ##
 ################################
 class MTR:
     def __init__(self, nquery = 1):
         #
-        # Multi-Trace Vars...
+        # Multi-Traceroute Vars...
         self._NQuery = nquery
         self._TCnt = 0			# Trace count
         self._TLblId = []		# Trace label IDs
@@ -1427,20 +1428,18 @@ class MTR:
         #
         # Define the default node shape and drawing color...
         s += "\n\tnode [shape=ellipse,color=black,fillcolor=white,style=filled];\n\n"
-        #   
+        #
         s += "\n###ASN clustering###\n"
         for asn in self._ASNs:
             s += '\tsubgraph cluster_%s {\n' % asn
             col = next(backcolorlist)
-            s += '\t\tcolor="#%s%s%s";' % col
-            s += '\t\tnode [fillcolor="#%s%s%s",style=filled];' % col
-            s += '\t\tfontsize = 10;'
-            s += '\t\tlabel = "%s\\n[%s]"\n' % (asn, self._ASDs[asn])
+            s += '\t\tcolor="#%s%s%s";\n' % col
+            s += '\t\tnode [fillcolor="#%s%s%s",style=filled];\n' % col
+            s += '\t\tfontsize=10;\n'
+            s += '\t\tlabel="%s\\n[%s]"\n' % (asn, self._ASDs[asn])
             for ip in self._ASNs[asn]:
                 s += '\t\t"%s";\n'%ip
-            s += "\t}"
-        #
-        s += "\n###Begin Points###\n"
+            s += "\t}\n"
         #
         # Combine Trace Probe Begin Points...
         #
@@ -1474,9 +1473,23 @@ class MTR:
             else:
                 bpip[k[0]] = [(tr, p, v[0])]
         #
+        # Probe Cluster...
+        s += "\n###Probe Begin Points###\n"
+        s += '\tsubgraph cluster_probe {\n'
+        s += '\t\tcolor="orange";\n'
+        s += '\t\tfillcolor="lightgray";\n'
+        s += '\t\tstyle="filled";\n'
+        s += '\t\tfontsize=14;\n'
+        s += '\t\tlabel = "Multi-Traceroute Probe"\n'
+        for k,v in bpip.items():
+            s += '\t\t"{ip:s}";\n'.format(ip = k)
+        s += "\t}\n"
+        #
         # Build Begin Point strings...
         # Ex bps = "192.168.43.48" [shape=record,color=black,fillcolor=orange,style=filled,"
         #        + "label="192.168.43.48\nProbe|{http|{<BT1>T1|<BT3>T3}}|{https:{<BT2>T4|<BT3>T4}}"];
+        #
+        s += "\n###Probe Begin Points###\n"
         for k,v in bpip.items():
             tr = ''
             for sv in v:
@@ -1488,7 +1501,7 @@ class MTR:
             bps2 = 'label="{ip:s}\\nProbe|{tr:s}"];\n'.format(ip = k, tr = tr)
             s += bps1 + bps2
         #
-        s += "\n###Endpoints###\n"
+        s += "\n###Target Endpoints###\n"
         #
         # Combine Trace Target Endpoints...
         #
@@ -1571,9 +1584,9 @@ class MTR:
                 # Enhance target Endpoint replacement...
                 for k,v in self._TLblId[t].items():
                     if (v[6] == 'BH'):		# Blackhole detection - do not create Enhanced Endpoint
-                        s += '\t%s;\n' % trace[max(tk)]
+                        s += '\t%s;\n\n' % trace[max(tk)]
                     else:
-                        s += '\t"{ep:s}":E{tr:s}:n;\n'.format(ep = k, tr = v[0])
+                        s += '\t"{ep:s}":E{tr:s}:n;\n\n'.format(ep = k, tr = v[0])
                 t += 1				# Next trace
  
         #
@@ -1584,7 +1597,7 @@ class MTR:
         self._GraphDef = s
 
     #
-    # Graph the Multi-TCP Traceroute...
+    # Graph the Multi-Traceroute...
     def graph(self, ASres = None, padding = 0, **kargs):
         """x.graph(ASres=conf.AS_resolver, other args):
         ASres=None          : no AS resolver => no clustering
@@ -1605,9 +1618,9 @@ class MTR:
 
         return do_graph(self._GraphDef, **kargs)
 
-########################################
-## Multi-TCP Traceroute Results Class ##
-########################################
+####################################
+## Multi-Traceroute Results Class ##
+####################################
 class MTracerouteResult(SndRcvList):
     def __init__(self, res = None, name = "MTraceroute", stats = None):
         PacketList.__init__(self, res, name, stats, vector_index = 1)
@@ -1699,12 +1712,12 @@ class MTracerouteResult(SndRcvList):
             tlid = {rtk[1]: ('T' + str(mtrc._TCnt), rtk[0], rtk[1], rtk[2], rtk[3], pn, fl)}
             mtrc._TLblId.append(tlid)
 
-##########################
-## Multi-TCP Traceroute ##
-##########################
+######################
+## Multi-Traceroute ##
+######################
 @conf.commands.register
 def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4 = None, filter=None, timeout=2, verbose=None, nquery=1, **kargs):
-    """Multi-TCP traceroute
+    """Multi-Traceroute
 mtr(target, [maxttl=30,] [dport=80,] [sport=80,] [minttl=1,] [maxttl=1,]
     [l4=None,] [filter=None,] [nquery=1,] [verbose=conf.verb])
 """

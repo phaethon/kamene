@@ -12,6 +12,7 @@ import random,time
 import gzip,zlib
 import re,struct,array,stat
 import subprocess
+import ipaddress
 
 import warnings
 warnings.filterwarnings("ignore","tempnam",RuntimeWarning, __name__)
@@ -89,6 +90,17 @@ def sane(x):
         else:
             r=r+chb(i)
     return r
+
+@conf.commands.register
+def is_privateaddr(x):
+    """Returns True if the IPv4 Address is an RFC 1918 private address."""
+    paddrs = ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16']
+    found = False
+    for ipr in paddrs:
+        if ipaddress.ip_address(x) in ipaddress.ip_network(ipr):
+            found = True
+            continue
+    return found
 
 def lhex(x):
     if type(x) is int:
