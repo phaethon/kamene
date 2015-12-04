@@ -1435,9 +1435,57 @@ class MTR:
             s += '\t\tlabel = "%s\\n[%s]"\n' % (asn, self._ASDs[asn])
             for ip in self._ASNs[asn]:
                 s += '\t\t"%s";\n'%ip
-            s += "\t}\n"
+            s += "\t}"
         #
-        s += "###Endpoints###\n"
+        s += "\n###Begin Points###\n"
+        #
+        # Combine Trace Probe Begin Points...
+        #
+        # Ex: bp = {('192.168.43.48',80,'http'): ['T1','T3'], ('192.168.43.48',443,'https'): ['T2','T4']}
+        bp = {}				# ep -> A single services label for a given IP
+        for d in self._TLblId:          #               k            v0          v1               v2       v3   v4    v5      v6
+            for k,v in d.items():	# Ex: k:  162.144.22.87 v: ('T1', '192.168.43.48', '162.144.22.87', 6, 443, 'https', 'SA')
+                p = bp.get((v[1], v[4], v[5]))
+                if (p == None):
+                    bp[(v[1], v[4], v[5])] = [v[0]]	# Add new (TCP Flags / ICMP / Proto) and initial trace ID
+                else:
+                    bp[(v[1], v[4], v[5])].append(v[0])	# Append additional trace IDs
+        #
+        # Combine Begin Point services...
+        #                   k                         v                            v
+        #                   k                 sv0           sv1            sv0          sv1
+        # Ex bpip = {'192.168.43.48': [('<BT2>T2|<BT4>T4', 'https'), ('<BB1>T1|<BT3>T3', 'http')]}
+        bpip = {}			# epip -> Combined Endpoint services label for a given IP
+        for k,v in bp.items():
+            tr = ''
+            for t in range(0, len(v)):
+                if (tr == ''):
+                    tr += '<B{ts:s}>{ts:s}'.format(ts = v[t])
+                else:
+                    tr += '|<B{ts:s}>{ts:s}'.format(ts = v[t])
+            p = k[2]
+            if (p == ''):		# Use port number not name if resolved
+              p = str(k[1])
+            if k[0] in bpip:
+                bpip[k[0]].append((tr, p, v[0]))
+            else:
+                bpip[k[0]] = [(tr, p, v[0])]
+        #
+        # Build Begin Point strings...
+        # Ex bps = "192.168.43.48" [shape=record,color=black,fillcolor=orange,style=filled,"
+        #        + "label="192.168.43.48\nProbe|{http|{<BT1>T1|<BT3>T3}}|{https:{<BT2>T4|<BT3>T4}}"];
+        for k,v in bpip.items():
+            tr = ''
+            for sv in v:
+                if (tr == ''):
+                    tr += '{{{p:s}|{{{t:s}}}}}'.format(p = sv[1], t = sv[0])
+                else:
+                    tr += '|{{{p:s}|{{{t:s}}}}}'.format(p = sv[1], t = sv[0])
+            bps1 = '\t"{ip:s}" [shape=record,color=black,fillcolor=orange,style=filled,'.format(ip = k)
+            bps2 = 'label="{ip:s}\\nProbe|{tr:s}"];\n'.format(ip = k, tr = tr)
+            s += bps1 + bps2
+        #
+        s += "\n###Endpoints###\n"
         #
         # Combine Trace Target Endpoints...
         #
@@ -1446,24 +1494,24 @@ class MTR:
         for d in self._TLblId:          #               k            v0          v1               v2       v3   v4    v5      v6
             for k,v in d.items():	# Ex: k:  162.144.22.87 v: ('T1', '10.222.222.10', '162.144.22.87', 6, 443, 'https', 'SA')
                 if not (v[6] == 'BH'):	# Blackhole detection - do not create Endpoint
-                    p = ep.get((k, v[3], v[5]))
+                    p = ep.get((k, v[4], v[5]))
                     if (p == None):
-                        ep[(k, v[3], v[5])] = [v[6], v[0]]	# Add new (TCP Flags / ICMP / Proto) and initial trace ID
+                        ep[(k, v[4], v[5])] = [v[6], v[0]]	# Add new (TCP Flags / ICMP / Proto) and initial trace ID
                     else:
-                        ep[(k, v[3], v[5])].append(v[0])	# Append additional trace IDs
+                        ep[(k, v[4], v[5])].append(v[0])	# Append additional trace IDs
         #
         # Combine Endpoint services...
         #                   k                                 v                                 v
         #                   k                 sv0            sv1     sv2          sv0          sv1    sv2
-        # Ex epip = {'206.111.13.58': [('<T8>T8|<T10>T10', 'https', 'SA'), ('<T7>T7|<T6>T6', 'http', 'SA')]}
+        # Ex epip = {'206.111.13.58': [('<ET8>T8|<ET10>T10', 'https', 'SA'), ('<ET7>T7|<ET6>T6', 'http', 'SA')]}
         epip = {}			# epip -> Combined Endpoint services label for a given IP
         for k,v in ep.items():
             tr = ''
             for t in range(1, len(v)):
                 if (tr == ''):
-                    tr += '<{ts:s}>{ts:s}'.format(ts = v[t])
+                    tr += '<E{ts:s}>{ts:s}'.format(ts = v[t])
                 else:
-                    tr += '|<{ts:s}>{ts:s}'.format(ts = v[t])
+                    tr += '|<E{ts:s}>{ts:s}'.format(ts = v[t])
             if k[0] in epip:
                 epip[k[0]].append((tr, k[2], v[0]))
             else:
@@ -1471,7 +1519,7 @@ class MTR:
         #
         # Build Endpoint strings...
         # Ex eps = "162.144.22.87" [shape=record,color=black,fillcolor=green,style=filled,"
-        #        + "label="162.144.22.87|{{<T1>T1|<T3>T3}|https SA}|{{<T2>T4|<T3>T4}|http SA}"];
+        #        + "label="162.144.22.87\nTarget|{{<ET1>T1|<ET3>T3}|https SA}|{{<ET2>T4|<ET3>T4}|http SA}"];
         for k,v in epip.items():
             tr = ''
             for sv in v:
@@ -1480,7 +1528,7 @@ class MTR:
                 else:
                     tr += '|{{{{{t:s}}}|{p:s} {f:s}}}'.format(t = sv[0], p = sv[1], f = sv[2])
             eps1 = '\t"{ip:s}" [shape=record,color=black,fillcolor=green,style=filled,'.format(ip = k)
-            eps2 = 'label="{ip:s}|{tr:s}"];\n'.format(ip = k, tr = tr)
+            eps2 = 'label="{ip:s}\\nTarget|{tr:s}"];\n'.format(ip = k, tr = tr)
             s += eps1 + eps2 
         #
         s += "\n###Blackholes###\n"
@@ -1507,18 +1555,22 @@ class MTR:
         for q in range(0, self._NQuery):
             for rtk in self._Rt[q]:
                 s += "#---[%s\n" % repr(rtk)
-                s += '\t\tedge [color="#%s%s%s"];\n' % next(forecolorlist)
+                s += '\t\tedge [color="#%s%s%s"]\n' % next(forecolorlist)
+                #
+                # Probe Begin Point...
+                for k,v in self._TLblId[t].items():
+                    s += '\t"{bp:s}":B{tr:s}:s->\n'.format(bp = v[1], tr = v[0])
                 trace = self._Rt[q][rtk]
                 tk = trace.keys()
                 for n in range(min(tk), max(tk)):
                     s += '\t%s ->\n' % trace[n]
                 #
-                # Enhance target replacement...
+                # Enhance target Endpoint replacement...
                 for k,v in self._TLblId[t].items():
                     if (v[6] == 'BH'):		# Blackhole detection - do not create Enhanced Endpoint
                         s += '\t%s;\n' % trace[max(tk)]
                     else:
-                        s += '\t"{ip:s}":{tr:s};\n'.format(ip = k, tr = v[0])
+                        s += '\t"{ep:s}":E{tr:s}:n;\n'.format(ep = k, tr = v[0])
                 t += 1				# Next trace
  
         #
