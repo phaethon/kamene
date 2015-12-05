@@ -92,7 +92,7 @@ def sane(x):
     return r
 
 @conf.commands.register
-def is_privateaddr(x):
+def is_private_addr(x):
     """Returns True if the IPv4 Address is an RFC 1918 private address."""
     paddrs = ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16']
     found = False
