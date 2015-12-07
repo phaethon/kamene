@@ -1545,15 +1545,12 @@ class MTR:
         #        + "label="162.144.22.87\nTarget|{{<ET1>T1|<ET3>T3}|https SA}|{{<ET2>T4|<ET3>T4}|http SA}"];
         for k,v in epip.items():
             tr = ''
-            cl = 'green'
             for sv in v:
                 if (tr == ''):
                     tr += '{{{{{t:s}}}|{p:s} {f:s}}}'.format(t = sv[0], p = sv[1], f = sv[2])
                 else:
                     tr += '|{{{{{t:s}}}|{p:s} {f:s}}}'.format(t = sv[0], p = sv[1], f = sv[2])
-                if (sv[2] != 'SA'):		# Check for non-normal flags: 'SA'
-                  cl = 'yellow'
-            eps1 = '\t"{ip:s}" [shape=record,color=black,fillcolor={cl:s},style=filled,'.format(ip = k, cl = cl)
+            eps1 = '\t"{ip:s}" [shape=record,color=black,fillcolor=green,style=filled,'.format(ip = k)
             eps2 = 'label="{ip:s}\\nTarget|{tr:s}"];\n'.format(ip = k, tr = tr)
             s += eps1 + eps2 
         #
