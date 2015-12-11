@@ -932,23 +932,26 @@ class PcapWriter(RawPcapWriter):
                 self.linktype = 1
         RawPcapWriter._write_header(self, pkt)
 
-    def get_packet_time(self, t):
-        """Return the second and micro-second time components for a packet."""
-        sec = int(t)
+    def get_packet_time(self, pkt):
+        """Return the second and micro-second timestamp components for a packet."""
+        if pkt.sent_time:
+          t = pkt.sent_time
+          sec = int(t)
+        else:
+          t = pkt.time
+          sec = int(t)
         usec = int(round((t-sec)*1000000))
         return (sec,usec)
 
     def _write_packet(self, packet):        
         try:
-          if packet.sent_time:
-              t = self.get_packet_time(packet.sent_time)
-          else:
-              t = self.get_packet_time(packet.time)
+          t = self.get_packet_time(packet)
           s = bytes(packet)
           caplen = len(s)
           RawPcapWriter._write_packet(self, s, t[0], t[1], caplen, caplen)
         except Exception as e:
           log_interactive.error(e)
+
     def write(self, pkt):
         """accepts a either a single packet or a list of packets
         to be written to the dumpfile
