@@ -932,13 +932,21 @@ class PcapWriter(RawPcapWriter):
                 self.linktype = 1
         RawPcapWriter._write_header(self, pkt)
 
+    def get_packet_time(self, t):
+        """Return the second and micro-second time components for a packet."""
+        sec = int(t)
+        usec = int(round((t-sec)*1000000))
+        return (sec,usec)
+
     def _write_packet(self, packet):        
         try:
-          sec = int(packet.time)
-          usec = int(round((packet.time-sec)*1000000))
+          if packet.sent_time:
+              t = self.get_packet_time(packet.sent_time)
+          else:
+              t = self.get_packet_time(packet.time)
           s = bytes(packet)
           caplen = len(s)
-          RawPcapWriter._write_packet(self, s, sec, usec, caplen, caplen)
+          RawPcapWriter._write_packet(self, s, t[0], t[1], caplen, caplen)
         except Exception as e:
           log_interactive.error(e)
     def write(self, pkt):
