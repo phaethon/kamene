@@ -10,7 +10,7 @@ IPv4 (Internet Protocol v4).
 import os,time,struct,re,socket,types
 from select import select
 from collections import defaultdict
-from scapy.utils import checksum
+from scapy.utils import checksum,is_private_addr
 from scapy.layers.l2 import *
 from scapy.config import conf
 from scapy.fields import *
@@ -36,8 +36,9 @@ class IPTools:
         t.sort()
         return t[t.index(self.ttl)+1]
     def hops(self):
-        return self.ottl()-self.ttl-1 
-
+        return self.ottl()-self.ttl-1
+    def is_priv_addr(self):
+        return is_private_addr(self.src)
 
 _ip_options_names = { 0: "end_of_list",
                       1: "nop",
@@ -1169,7 +1170,7 @@ class TracerouteResult(SndRcvList):
             else:
                 trace[ttl] = r.sprintf('"%r,src%"')
             rt[trace_id] = trace
-    
+
         # Fill holes with unk%i nodes
         unknown_label = incremental_label("unk%i")
         blackholes = []
@@ -1296,8 +1297,6 @@ class TracerouteResult(SndRcvList):
 
         return do_graph(self.graphdef, **kargs)
 
-
-
 @conf.commands.register
 def traceroute(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4 = None, filter=None, timeout=2, verbose=None, **kargs):
     """Instant TCP traceroute
@@ -1326,11 +1325,496 @@ traceroute(target, [maxttl=30,] [dport=80,] [sport=80,] [verbose=conf.verb]) -> 
     return a,b
 
 
+############################
+## Multi-Traceroute Class ##
+############################
+class MTR:
+    def __init__(self, nquery = 1):
+        #
+        # Multi-Traceroute Vars...
+        self._nquery = nquery
+        self._tcnt = 0			# Trace count
+        self._tlblid = []		# Trace label IDs
+        self._res = []
+        self._ures = []
+        self._ips = {}
+        self._rt = []
+        self._ports = {}
+        self._portsdone = {}
+        self._unknownlabel = incremental_label("unk%i")
+        self._blackholes = []
+        self._blackholesip = {}
+        self._asres = conf.AS_resolver
+        self._asns = {}
+        self._asds = {}
+        self._graphdef = None
+        self._graphasres = 0
+        self._graphpadding = 0
+    #
+    # Compute Black Holes...
+    def get_black_holes(self):
+        for t in range(0, self._nquery):
+            for rtk in self._rt[t]:
+                trace = self._rt[t][rtk]
+                k = trace.keys()
+                for n in range(min(k), max(k)):
+                    if not n in trace:
+                        trace[n] = next(self._unknownlabel)
+                if not rtk in self._portsdone:
+                    if rtk[2] == 1:	#ICMP
+                        bh = "%s %i/icmp" % (rtk[1],rtk[3])
+                        bha = "%i/icmp" % (rtk[3])
+                    elif rtk[2] == 6:	#TCP
+                        bh = "{ip:s} {dp:d}/tcp".format(ip = rtk[1], dp = rtk[3])
+                        bha = "{dp:d}/tcp".format(dp = rtk[3])
+                    elif rtk[2] == 17:	#UDP                    
+                        bh = '%s %i/udp' % (rtk[1],rtk[3])
+                        bha = '%i/udp' % (rtk[3])
+                    else:
+                        bh = '%s %i/proto' % (rtk[1],rtk[2]) 
+                        bha = '%i/proto' % (rtk[2]) 
+                    self._ips[bh] = None
+                    if not rtk[1] in self._blackholesip:	# If new, append blackhole IP and port
+                        self._blackholesip[rtk[1]] = bh
+                    else:					# Try to append blackhole port only
+                        cbh = self._blackholesip[rtk[1]]
+                        if (cbh.find(bha) == -1):		# Only append blackhole port if not already done
+                            self._blackholesip[rtk[1]] = cbh + " " + bha
+                    bh = '"%s"' % bh
+                    trace[max(k)+1] = bh
+                    if not bh in self._blackholes:
+                        self._blackholes.append(bh)
+    #
+    # Get AS Numbers...
+    def get_asns(self):
+        asnquerylist = dict.fromkeys(map(lambda x:x.rsplit(" ",1)[0], self._ips)).keys()
+        if self._asres is None:
+            asnlist = []
+        else:
+            asnlist = self._asres.resolve(*asnquerylist)            
+        for ip,asn,desc, in asnlist:
+            if asn is None:
+                continue
+            iplist = self._asns.get(asn,[])
+            if ip in self._blackholesip:
+                if ip in self._ports:
+                    iplist.append(ip)
+                iplist.append(self._blackholesip[ip])
+            else:
+                iplist.append(ip)
+            self._asns[asn] = iplist
+            self._asds[asn] = desc
+    #
+    # Make the DOT graph...
+    def make_dot_graph(self, ASres = None, padding = 0):
+        if ASres is None:
+            self._asres = conf.AS_resolver
+        self._graphasres = ASres
+        self._graphpadding = padding
+        #
+        # ASN box color generator...
+        backcolorlist=colgen("60","86","ba","ff")
+        #
+        # Edge (trace arrows)  color generator...
+        forecolorlist=colgen("a0","70","40","20")
+        #
+        # Begin the DOT Digraph...
+        s = "digraph mtr {\n"
+        #
+        # Define the default graph attributes...
+        s += "\n\tgraph [bgcolor=transparent];\n\n"
+        #
+        # Define the default node shape and drawing color...
+        s += "\n\tnode [shape=ellipse,color=black,fillcolor=white,style=filled];\n\n"
+        #
+        s += "\n###ASN clustering###\n"
+        for asn in self._asns:
+            s += '\tsubgraph cluster_%s {\n' % asn
+            col = next(backcolorlist)
+            s += '\t\tcolor="#%s%s%s";\n' % col
+            s += '\t\tnode [fillcolor="#%s%s%s",style=filled];\n' % col
+            s += '\t\tfontsize=10;\n'
+            s += '\t\tlabel="%s\\n[%s]"\n' % (asn, self._asds[asn])
+            for ip in self._asns[asn]:
+                s += '\t\t"%s";\n'%ip
+            s += "\t}\n"
+        #
+        # Combine Trace Probe Begin Points...
+        #
+        #                   k0       k1   k2       v0   v1           k0         k1    k2       v0   v1
+        # Ex: bp = {('192.168.43.48',80,'http'): ['T1','T3'], ('192.168.43.48',443,'https'): ['T2','T4']}
+        bp = {}				# ep -> A single services label for a given IP
+        for d in self._tlblid:          #               k            v0          v1               v2       v3   v4    v5      v6
+            for k,v in d.items():	# Ex: k:  162.144.22.87 v: ('T1', '192.168.43.48', '162.144.22.87', 6, 443, 'https', 'SA')
+                p = bp.get((v[1], v[4], v[5]))
+                if (p == None):
+                    bp[(v[1], v[4], v[5])] = [v[0]]	# Add new (TCP Flags / ICMP / Proto) and initial trace ID
+                else:
+                    bp[(v[1], v[4], v[5])].append(v[0])	# Append additional trace IDs
+        #
+        # Combine Begin Point services...
+        #                   k                         v                            v
+        #                   k                 sv0           sv1            sv0          sv1
+        # Ex bpip = {'192.168.43.48': [('<BT2>T2|<BT4>T4', 'https'), ('<BB1>T1|<BT3>T3', 'http')]}
+        bpip = {}			# epip -> Combined Endpoint services label for a given IP
+        for k,v in bp.items():
+            tr = ''
+            for t in range(0, len(v)):
+                if (tr == ''):
+                    tr += '<B{ts:s}>{ts:s}'.format(ts = v[t])
+                else:
+                    tr += '|<B{ts:s}>{ts:s}'.format(ts = v[t])
+            p = k[2]
+            if (p == ''):			# Use port number not name if resolved
+                p = str(k[1])
+            else:
+                p += '(' + str(k[1]) + ')'	# Use both name and port
+            if k[0] in bpip:
+                bpip[k[0]].append((tr, p, v[0]))
+            else:
+                bpip[k[0]] = [(tr, p, v[0])]
+        #
+        # Probe Cluster...
+        s += "\n###Probe Begin Points###\n"
+        s += '\tsubgraph cluster_probe {\n'
+        s += '\t\tcolor="orange";\n'
+        s += '\t\tfillcolor="lightgray";\n'
+        s += '\t\tstyle="filled";\n'
+        s += '\t\tfontsize=14;\n'
+        s += '\t\tlabel = "Multi-Traceroute Probe"\n'
+        for k,v in bpip.items():
+            s += '\t\t"{ip:s}";\n'.format(ip = k)
+        s += "\t}\n"
+        #
+        # Build Begin Point strings...
+        # Ex bps = "192.168.43.48" [shape=record,color=black,fillcolor=orange,style=filled,"
+        #        + "label="192.168.43.48\nProbe|{http|{<BT1>T1|<BT3>T3}}|{https:{<BT2>T4|<BT3>T4}}"];
+        #
+        s += "\n###Probe Begin Points###\n"
+        for k,v in bpip.items():
+            tr = ''
+            for sv in v:
+                if (tr == ''):
+                    tr += '{{{p:s}|{{{t:s}}}}}'.format(p = sv[1], t = sv[0])
+                else:
+                    tr += '|{{{p:s}|{{{t:s}}}}}'.format(p = sv[1], t = sv[0])
+            bps1 = '\t"{ip:s}" [shape=record,color=black,fillcolor=orange,style=filled,'.format(ip = k)
+            bps2 = 'label="{ip:s}\\nProbe|{tr:s}"];\n'.format(ip = k, tr = tr)
+            s += bps1 + bps2
+        #
+        s += "\n###Target Endpoints###\n"
+        #
+        # Combine Trace Target Endpoints...
+        #
+        #                   k0       k1   k2       v0   v1   v2           k0     k1     k2       v0   v1   v2
+        # Ex: ep = {('162.144.22.87',80,'http'): ['SA','T1','T3'], ('10.14.22.8',443,'https'): ['SA','T2','T4']}
+        ep = {}				# ep -> A single services label for a given IP
+        for d in self._tlblid:          #               k            v0          v1               v2       v3   v4    v5      v6
+            for k,v in d.items():	# Ex: k:  162.144.22.87 v: ('T1', '10.222.222.10', '162.144.22.87', 6, 443, 'https', 'SA')
+                if not (v[6] == 'BH'):	# Blackhole detection - do not create Endpoint
+                    p = ep.get((k, v[4], v[5]))
+                    if (p == None):
+                        ep[(k, v[4], v[5])] = [v[6], v[0]]	# Add new (TCP Flags / ICMP / Proto) and initial trace ID
+                    else:
+                        ep[(k, v[4], v[5])].append(v[0])	# Append additional trace IDs
+        #
+        # Combine Endpoint services...
+        #                   k                                 v                                 v
+        #                   k                 sv0            sv1     sv2          sv0          sv1    sv2
+        # Ex epip = {'206.111.13.58': [('<ET8>T8|<ET10>T10', 'https', 'SA'), ('<ET7>T7|<ET6>T6', 'http', 'SA')]}
+        epip = {}			# epip -> Combined Endpoint services label for a given IP
+        for k,v in ep.items():
+            tr = ''
+            for t in range(1, len(v)):
+                if (tr == ''):
+                    tr += '<E{ts:s}>{ts:s}'.format(ts = v[t])
+                else:
+                    tr += '|<E{ts:s}>{ts:s}'.format(ts = v[t])
+            p = k[2]
+            if (p == ''):			# Use port number not name if resolved
+                p = str(k[1])
+            else:
+                p += '(' + str(k[1]) + ')'	# Use both name and port
+            if k[0] in epip:
+                epip[k[0]].append((tr, p, v[0]))
+            else:
+                epip[k[0]] = [(tr, p, v[0])]
+        #
+        # Build Endpoint strings...
+        # Ex eps = "162.144.22.87" [shape=record,color=black,fillcolor=green,style=filled,"
+        #        + "label="162.144.22.87\nTarget|{{<ET1>T1|<ET3>T3}|https SA}|{{<ET2>T4|<ET3>T4}|http SA}"];
+        for k,v in epip.items():
+            tr = ''
+            for sv in v:
+                if (tr == ''):
+                    tr += '{{{{{t:s}}}|{p:s} {f:s}}}'.format(t = sv[0], p = sv[1], f = sv[2])
+                else:
+                    tr += '|{{{{{t:s}}}|{p:s} {f:s}}}'.format(t = sv[0], p = sv[1], f = sv[2])
+            eps1 = '\t"{ip:s}" [shape=record,color=black,fillcolor=green,style=filled,'.format(ip = k)
+            eps2 = 'label="{ip:s}\\nTarget|{tr:s}"];\n'.format(ip = k, tr = tr)
+            s += eps1 + eps2 
+        #
+        s += "\n###Blackholes###\n"
+        for bh in self._blackholes:
+            s += '\t%s [shape=octagon,color=black,fillcolor=red,style=filled];\n' % bh
+        #
+        if self._graphpadding:
+            s += "\n###Padding###\n"
+            pad = {}
+            for t in range(0, self._nquery):
+                for snd,rcv in self._res[t]:
+                    if rcv.src not in self._ports and rcv.haslayer(conf.padding_layer):
+                        p = rcv.getlayer(conf.padding_layer).load
+                        if p != "\x00" * len(p):
+                            pad[rcv.src] = None
+            for rcv in pad:
+                s += '\t"%s" [shape=triangle,color=black,fillcolor=red,style=filled];\n' % rcv
+        #
+        # Reset default node look...
+        s += "\n\tnode [shape=ellipse,color=black,fillcolor=white,style=filled];\n\n"
+        #
+        # Draw each trace for each number of queries... 
+        t = 0
+        for q in range(0, self._nquery):
+            for rtk in self._rt[q]:
+                s += "#---[%s\n" % repr(rtk)
+                s += '\t\tedge [color="#%s%s%s"]\n' % next(forecolorlist)
+                #
+                # Probe Begin Point...
+                for k,v in self._tlblid[t].items():
+                    s += '\t"{bp:s}":B{tr:s}:s->\n'.format(bp = v[1], tr = v[0])
+                trace = self._rt[q][rtk]
+                tk = trace.keys()
+                for n in range(min(tk), max(tk)):
+                    s += '\t%s ->\n' % trace[n]
+                #
+                # Enhance target Endpoint replacement...
+                for k,v in self._tlblid[t].items():
+                    if (v[6] == 'BH'):		# Blackhole detection - do not create Enhanced Endpoint
+                        s += '\t%s;\n\n' % trace[max(tk)]
+                    else:
+                        s += '\t"{ep:s}":E{tr:s}:n;\n\n'.format(ep = k, tr = v[0])
+                t += 1				# Next trace
+ 
+        #
+        # End the DOT Digraph...
+        s += "}\n";
+        #
+        # Store the DOT Digraph results...
+        self._graphdef = s
+
+    #
+    # Graph the Multi-Traceroute...
+    def graph(self, ASres = None, padding = 0, **kargs):
+        """x.graph(ASres=conf.AS_resolver, other args):
+        ASres=None          : no AS resolver => no clustering
+        ASres=AS_resolver() : default whois AS resolver (riswhois.ripe.net)
+        ASres=AS_resolver_cymru(): use whois.cymru.com whois database
+        ASres=AS_resolver(server="whois.ra.net")
+        padding: Show packets with padding as red triangles
+        format: output type (svg, ps, gif, jpg, etc.), passed to dot's "-T" option
+        figsize: w,h tuple in inches. See matplotlib documentation
+        target: filename. If None, uses matplotlib to display
+        prog: which graphviz program to use"""
+        if self._asres is None:
+            self._asres = conf.AS_resolver
+        if (self._graphdef is None or		# Remake the graph if there are any changes
+            self._graphasres != self._asres or
+            self._graphpadding != padding):
+            self.make_dot_graph(ASres, padding)
+
+        return do_graph(self._graphdef, **kargs)
+
+####################################
+## Multi-Traceroute Results Class ##
+####################################
+class MTracerouteResult(SndRcvList):
+    def __init__(self, res = None, name = "MTraceroute", stats = None):
+        PacketList.__init__(self, res, name, stats, vector_index = 1)
+
+    def show(self, ntrace):
+        return self.make_table(lambda s,r: 
+          (s.sprintf("Trace: " + str(ntrace) + " - %IP.dst%:{TCP:tcp%ir,TCP.dport%}{UDP:udp%ir,UDP.dport%}{ICMP:ICMP}"),
+           s.ttl,
+           r.sprintf("%-15s,IP.src% {TCP:%TCP.flags%}{ICMP:%ir,ICMP.type%}")))
+
+    #
+    # Get trace components...
+    #
+    #   mtrc - Instance of a MTRC class
+    def get_trace_components(self, mtrc):
+        ips = {}
+        rt = {}
+        ports = {}
+        portsdone = {}
+        for s,r in self.res:
+            r = r.getlayer(IP) or (conf.ipv6_enabled and r[scapy.layers.inet6.IPv6]) or r
+            s = s.getlayer(IP) or (conf.ipv6_enabled and s[scapy.layers.inet6.IPv6]) or s
+            ips[r.src] = None
+            if TCP in s:
+                trace_id = (s.src, s.dst, 6, s.dport)
+            elif UDP in s:
+                trace_id = (s.src, s.dst, 17, s.dport)
+            elif ICMP in s:
+                trace_id = (s.src, s.dst, 1, s.type)
+            else:
+                trace_id = (s.src, s.dst, s.proto, 0)
+            trace = rt.get(trace_id,{})
+            ttl = conf.ipv6_enabled and scapy.layers.inet6.IPv6 in s and s.hlim or s.ttl
+            if not (ICMP in r and r[ICMP].type == 11) and not (conf.ipv6_enabled and scapy.layers.inet6.IPv6 in r and scapy.layers.inet6.ICMPv6TimeExceeded in r):
+                if trace_id in portsdone:
+                    continue
+                portsdone[trace_id] = None
+                p = ports.get(r.src,[])
+                if TCP in r:
+                    p.append(r.sprintf("<T%ir,TCP.sport%> %TCP.sport% %TCP.flags%"))
+                    trace[ttl] = r.sprintf('"%r,src%":T%ir,TCP.sport%')
+                elif UDP in r:
+                    p.append(r.sprintf("<U%ir,UDP.sport%> %UDP.sport%"))
+                    trace[ttl] = r.sprintf('"%r,src%":U%ir,UDP.sport%')
+                elif ICMP in r:
+                    p.append(r.sprintf("<I%ir,ICMP.type%> ICMP %ICMP.type%"))
+                    trace[ttl] = r.sprintf('"%r,src%":I%ir,ICMP.type%')
+                else:
+                    p.append(r.sprintf("{IP:<P%ir,proto%> IP %proto%}{IPv6:<P%ir,nh%> IPv6 %nh%}"))
+                    trace[ttl] = r.sprintf('"%r,src%":{IP:P%ir,proto%}{IPv6:P%ir,nh%}')
+                ports[r.src] = p
+            else:
+                trace[ttl] = r.sprintf('"%r,src%"')
+            rt[trace_id] = trace
+        #
+        # Store each trace component...
+        mtrc._ips.update(ips)
+        mtrc._rt.append(rt)
+        mtrc._ports.update(ports)
+        mtrc._portsdone.update(portsdone)
+        #
+        # Update the Trace Label IDs...
+        for rtk in rt:
+            mtrc._tcnt += 1
+            #
+            # Derive flags from ports:
+            # Ex: {'63.117.14.247': ['<T80> http SA', '<T443> https SA']}
+            prtflgs = ports.get(rtk[1],[])
+            found = False
+            for pf in prtflgs:
+                if (pf.find(str(rtk[3])) != -1):
+                    found = True
+                    s = pf.split(' ')
+                    if (len(s) == 3):
+                        pn = s[1]	# Service Port name
+                        fl = s[2]	# TCP Flags / ICMP / Proto
+                    elif (len(s) == 2):
+                        pn = s[1]	# Service Port name
+                        fl = ''
+                    else:
+                        pn = ''
+                        fl = ''
+            if not found:		# Set Blackhole found - (fl -> 'BH')
+                pn = ''
+                fl = 'BH'
+            #
+            # Update the Trace Label ID:
+            # Ex: {'63.117.14.247': ('T2', '10.222.222.10', '162.144.22.87', 6, 443, 'https', 'SA')}
+            tlid = {rtk[1]: ('T' + str(mtrc._tcnt), rtk[0], rtk[1], rtk[2], rtk[3], pn, fl)}
+            mtrc._tlblid.append(tlid)
+
+######################
+## Multi-Traceroute ##
+######################
+@conf.commands.register
+def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4 = None, filter=None, timeout=2, verbose=None, nquery=1, **kargs):
+    """Multi-Traceroute (mtr)
+mtr(target, [maxttl=30,] [dport=80,] [sport=80,] [minttl=1,] [maxttl=1,]
+    [l4=None,] [filter=None,] [nquery=1,] [verbose=conf.verb])
+"""
+    trace = []				# Initialize vars
+    if (nquery < 1):			# Range check number of query traces
+        nquery = 1
+    mtrc = MTR(nquery = nquery)		# Create instance of an MTR class
+    if verbose is None:
+        verbose = conf.verb
+    if filter is None:
+        # Only consider ICMP error packets and TCP packets with at
+        # least the ACK flag set *and* either the SYN or the RST flag set...
+        filter="(icmp and (icmp[0]=3 or icmp[0]=4 or icmp[0]=5 or icmp[0]=11 or icmp[0]=12)) or (tcp and (tcp[13] & 0x16 > 0x10))"
+    if l4 is None:
+        for n in range(0, nquery):
+          a,b = sr(IP(dst=target, id=RandShort(), ttl=(minttl,maxttl))/TCP(seq=RandInt(),sport=sport, dport=dport),
+                   timeout=timeout, filter=filter, verbose=verbose, **kargs)
+          trace.append(MTracerouteResult(a.res))
+          mtrc._res.append(a)		# Store Response pckets
+          mtrc._ures.append(b)		# Store Unresponse packets
+          if verbose:
+              trace[n].show(ntrace = (n + 1))
+              print()
+    else:
+        filter="ip"
+        for n in range(0, nquery):
+          a,b = sr(IP(dst=target, id=RandShort(), ttl=(minttl,maxttl))/l4,
+                   timeout=timeout, filter=filter, verbose=verbose, **kargs)
+          trace.append(MTracerouteResult(a.res))
+          mtrc._res.append(a)
+          mtrc._ures.append(b)
+          if verbose:
+              trace[n].show(ntrace = n)
+              print()
+    #
+    # Get the trace components...
+    for n in range(0, nquery):
+        trace[n].get_trace_components(mtrc)
+    #
+    # Compute any Black Holes...
+    mtrc.get_black_holes()
+    #
+    # Resolve AS Numbers...
+    mtrc.get_asns()
+    #
+    # Debug: Print at verbose level 8...
+    if (verbose == 8):
+        print("\nmtrc._res (Trace Response Packets):")
+        print("=======================================================")
+        print(mtrc._res)
+        print("\nmtrc._ures (Trace Unresponse Packets):")
+        print("=======================================================")
+        print(mtrc._ures)
+        print("\nmtrc._ips (Trace Unique IP Addresses):")
+        print("=======================================================")
+        print(mtrc._ips)
+        print("\nmtrc._rt (Individual Route Traces):")
+        print("=======================================================")
+        print(mtrc._rt)
+        print("\nmtrc._tlblid (Trace Label IDs):")
+        print("=======================================================")
+        print(mtrc._tlblid)
+        print("\nmtrc._ports (Completed Targets & Ports):")
+        print("=======================================================")
+        print(mtrc._ports)
+        print("\nmtrc._portsdone (Completed Trace Routes & Ports):")
+        print("=======================================================")
+        print(mtrc._portsdone)
+        print("\nmtrc._blackholes (Failed Targets):")
+        print("=======================================================")
+        print(mtrc._blackholes)
+        print("\nmtrc._blackholes IPs (Failed Target IPs):")
+        print("=======================================================")
+        print(mtrc._blackholesip)
+        print("\nmtrc._asres Resolver (AS Resolver Method):")
+        print("=======================================================")
+        print(mtrc._asres)
+        print("\nmtrc._asns (AS Numbers):")
+        print("=======================================================")
+        print(mtrc._asns)
+        print("\nmtrc._asds (AS Descriptions):")
+        print("=======================================================")
+        print(mtrc._asds)
+       
+    return mtrc
+
 
 #############################
 ## Simple TCP client stack ##
 #############################
-
 class TCP_client(Automaton):
     
     def parse_args(self, ip, port, *args, **kargs):
