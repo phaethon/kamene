@@ -79,6 +79,7 @@ All commands listed by lsc() should work. Tested layers are:
 
 Currently, works on Linux, Darwin, Unix and co. Using python 3.4 on Ubuntu and FreeBSD for testing. Windows support in progress.
 
+Compatible with [scapy-http module](https://github.com/invernizzi/scapy-http)
 
 ## Short cookbook
 
