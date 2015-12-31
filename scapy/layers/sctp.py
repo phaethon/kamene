@@ -201,7 +201,7 @@ class SCTP(_SCTPChunkGuessPayload, Packet):
     def post_build(self, p, pay):
         p += pay
         if self.chksum is None:
-            crc = crc32c(str(p))
+            crc = crc32c(bytes(p))
             p = p[:8]+struct.pack(">I", crc)+p[12:]
         return p
 
