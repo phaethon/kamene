@@ -412,7 +412,6 @@ split_layers(UDP, ISAKMP, sport=500)
 split_layers(UDP, ISAKMP, dport=500)
 
 bind_layers( UDP,           IKEv2,        dport=500, sport=500) # TODO: distinguish IKEv1/IKEv2
-bind_layers( UDP,           IKEv2,        dport=4500, sport=4500)
 
 def ikev2scan(ip):
     return sr(IP(dst=ip)/UDP()/IKEv2(init_SPI=RandString(8),

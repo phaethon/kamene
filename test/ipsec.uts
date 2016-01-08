@@ -755,9 +755,19 @@ d
 + IKEv2
 
 #######################################
-= IKEv2_payload_Transform
+= IKEv2
 
 from scapy.contrib.ikev2 import *
+
+p = UDP(bytes(UDP()/IKEv2()))
+p
+
+assert(p.sport == 500)
+assert(p.dport == 500)
+
+#######################################
+= IKEv2_payload_Transform
+
 p = IKEv2_payload_Transform(bytes(IKEv2_payload_Transform()))
 p
 
