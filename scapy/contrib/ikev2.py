@@ -98,7 +98,7 @@ for n in IKEv2TransformTypes:
     tmp = {}
     for e in val[1]:
         tmp[val[1][e]] = e
-    IKEv2TransformNum[val[0]] = (n,tmp, val[2])
+    IKEv2TransformNum[val[0]] = tmp
 
 IKEv2Transforms = {}
 for n in IKEv2TransformTypes:
@@ -176,25 +176,6 @@ class IKEv2_Key_Length_Attribute(IntField):
 		
 	def h2i(self, pkt, x):
 		return IntField.h2i(self, pkt, struct.pack("!I", 0x800E0000 | int(x, 0)))
-
-
-class IKEv2_Transform_ID(ShortField):
-	def i2h(self, pkt, x):
-		if pkt == None:
-			return None
-		else:
-			map = IKEv2TransformNum[pkt.transform_type][1]
-			return map[x]
-		
-	def h2i(self, pkt, x):
-		if pkt == None:
-			return None
-		else:
-			map = IKEv2TransformNum[pkt.transform_type][1]
-			for k in keys(map):
-				if map[k] == x:
-					return k
-			return None
 		
 class IKEv2_payload_Transform(IKEv2_class):
     name = "IKE Transform"
@@ -204,7 +185,7 @@ class IKEv2_payload_Transform(IKEv2_class):
         ShortField("length",8),
         ByteEnumField("transform_type",None,IKEv2Transforms),
         ByteField("res2",0),
-        IKEv2_Transform_ID("transform_id", 0),
+        MultiEnumField("transform_id",None,IKEv2TransformNum,depends_on=lambda pkt:pkt.transform_type,fmt="H"),
         ConditionalField(IKEv2_Key_Length_Attribute("key_length"), lambda pkt: pkt.length > 8),
     ]
             
