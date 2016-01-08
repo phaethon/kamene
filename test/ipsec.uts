@@ -786,3 +786,26 @@ assert(p.group == 0)
 assert(p.res2 == 0)
 assert(p.load == b'')
 assert(bytes(p) == b'\x00\x00\x00\x08\x00\x00\x00\x00')
+
+#######################################
+= IKEv2_payload_Notify - Default
+
+p = IKEv2_payload_Notify(bytes(IKEv2_payload_Notify()))
+p
+
+assert(p.next_payload == 0)
+assert(p.res == 0)
+assert(p.length == 8)
+assert(p.proto == 0)
+assert(p.SPIsize == 0)
+assert(p.type == 0)
+assert(p.load == b'')
+assert(bytes(p) == b'\x00\x00\x00\x08\x00\x00\x00\x00')
+
+#######################################
+= IKEv2_payload_Notify - Message Types
+
+assert(IKEv2_payload_Notify(type = 'INVALID_IKE_SPI').type == 4)
+assert(IKEv2_payload_Notify(type = 'FAILED_CP_REQUIRED').type == 37)
+assert(IKEv2_payload_Notify(type = 'NAT_DETECTION_SOURCE_IP').type == 16388)
+assert(IKEv2_payload_Notify(type = 'NAT_DETECTION_DESTINATION_IP').type == 16389)
