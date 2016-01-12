@@ -1617,7 +1617,7 @@ class MTR:
     # Graph the Multi-Traceroute...
     def graph(self, ASres = None, padding = 0, **kargs):
         """x.graph(ASres=conf.AS_resolver, other args):
-        ASres=None          : no AS resolver => no clustering
+        ASres=None          : Use AS default resolver => 'conf.AS_resolver'
         ASres=AS_resolver() : default whois AS resolver (riswhois.ripe.net)
         ASres=AS_resolver_cymru(): use whois.cymru.com whois database
         ASres=AS_resolver(server="whois.ra.net")
@@ -1733,14 +1733,16 @@ class MTracerouteResult(SndRcvList):
 ## Multi-Traceroute ##
 ######################
 @conf.commands.register
-def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filter=None, timeout=2, verbose=None, nquery=1, privaddr=0, **kargs):
+def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filter=None, timeout=2, verbose=None, nquery=1, privaddr=0, rasn=1, **kargs):
     """A Multi-Traceroute (mtr) command:
          mtr(target, [maxttl=30,] [dport=80,] [sport=80,] [minttl=1,] [maxttl=1,]
-             [l4=None,] [filter=None,] [nquery=1,] [privaddr=0,] [verbose=conf.verb])
+             [l4=None,] [filter=None,] [nquery=1,] [privaddr=0,] [rasn=1,] [verbose=conf.verb])
 
-           nquery: Number of Traceroute queries to perform.
-           privaddr: 0 - Normal display of AS numbers,
-                     1 - Do not show an associated AS Number bound box (cluster) on graph for a private IPv4 Address."""
+             nquery: Number of Traceroute queries to perform.
+           privaddr: 0 - Default: Normal display of all resolved AS numbers,
+                     1 - Do not show an associated AS Number bound box (cluster) on graph for a private IPv4 Address.
+               rasn: 0 - Do not resolve AS Numbers - No graph clustering.
+                     1 - Default: Resolve all AS numbers."""
     trace = []				# Initialize vars
     if (nquery < 1):			# Range check number of query traces
         nquery = 1
@@ -1781,7 +1783,8 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
     mtrc.get_black_holes()
     #
     # Resolve AS Numbers...
-    mtrc.get_asns(privaddr)
+    if rasn:
+        mtrc.get_asns(privaddr)
     #
     # Debug: Print at verbose level 8...
     if (verbose == 8):
