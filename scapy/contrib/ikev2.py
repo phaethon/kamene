@@ -169,13 +169,13 @@ class IKEv2_Key_Length_Attribute(IntField):
 	# We only support the fixed-length Key Length attribute (the only one currently defined)
 	name="key length"
 	def __init__(self, name):
-		IntField.__init__(self, name, "0x800E0000")
+		IntField.__init__(self, name, 0x800E0000)
 		
 	def i2h(self, pkt, x):
 		return IntField.i2h(self, pkt, x & 0xFFFF)
 		
 	def h2i(self, pkt, x):
-		return IntField.h2i(self, pkt, struct.pack("!I", 0x800E0000 | int(x, 0)))
+		return IntField.h2i(self, pkt, x | 0x800E0000)
 		
 class IKEv2_payload_Transform(IKEv2_class):
     name = "IKE Transform"
