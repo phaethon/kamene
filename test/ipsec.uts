@@ -772,3 +772,17 @@ assert(bytes(p) == b'\x00\x00\x00\x08\x00\x00\x00\x00')
 
 p.length=12
 assert(bytes(p) == b'\x00\x00\x00\x0c\x00\x00\x00\x00\x80\x0e\x00\x00')
+
+#######################################
+= IKEv2_payload_KE
+
+p = IKEv2_payload_KE(bytes(IKEv2_payload_KE()))
+p
+
+assert(p.next_payload == 0)
+assert(p.res == 0)
+assert(p.length == 8)
+assert(p.group == 0)
+assert(p.res2 == 0)
+assert(p.load == b'')
+assert(bytes(p) == b'\x00\x00\x00\x08\x00\x00\x00\x00')

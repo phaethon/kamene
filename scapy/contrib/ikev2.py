@@ -270,9 +270,10 @@ class IKEv2_payload_KE(IKEv2_class):
     fields_desc = [
         ByteEnumField("next_payload",None,IKEv2_payload_type),
         ByteField("res",0),
-        FieldLenField("length",None,"load","H", adjust=lambda pkt,x:x+6),
+        FieldLenField("length",None,"load","H", adjust=lambda pkt,x:x+8),
         ShortEnumField("group", 0, IKEv2TransformTypes['GroupDesc'][1]),
-        StrLenField("load","",length_from=lambda x:x.length-6),
+        ShortField("res2", 0),
+        StrLenField("load","",length_from=lambda x:x.length-8),
         ]
 
 class IKEv2_payload_IDi(IKEv2_class):
