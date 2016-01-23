@@ -750,3 +750,72 @@ e[IPv6ExtHdrRouting].segleft = 0
 * integrity verification should pass
 d = sa.decrypt(e)
 d
+
+###############################################################################
++ IKEv2
+
+#######################################
+= IKEv2
+
+from scapy.contrib.ikev2 import *
+
+p = UDP(bytes(UDP()/IKEv2()))
+p
+
+assert(p.sport == 500)
+assert(p.dport == 500)
+
+#######################################
+= IKEv2_payload_Transform
+
+p = IKEv2_payload_Transform(bytes(IKEv2_payload_Transform()))
+p
+
+assert(p.next_payload == 0)
+assert(p.res == 0)
+assert(p.length == 8)
+assert(p.transform_type == 0)
+assert(p.res2 == 0)
+assert(p.transform_id == 0)
+assert(p.key_length == 0)
+assert(bytes(p) == b'\x00\x00\x00\x08\x00\x00\x00\x00')
+
+p.length=12
+assert(bytes(p) == b'\x00\x00\x00\x0c\x00\x00\x00\x00\x80\x0e\x00\x00')
+
+#######################################
+= IKEv2_payload_KE
+
+p = IKEv2_payload_KE(bytes(IKEv2_payload_KE()))
+p
+
+assert(p.next_payload == 0)
+assert(p.res == 0)
+assert(p.length == 8)
+assert(p.group == 0)
+assert(p.res2 == 0)
+assert(p.load == b'')
+assert(bytes(p) == b'\x00\x00\x00\x08\x00\x00\x00\x00')
+
+#######################################
+= IKEv2_payload_Notify - Default
+
+p = IKEv2_payload_Notify(bytes(IKEv2_payload_Notify()))
+p
+
+assert(p.next_payload == 0)
+assert(p.res == 0)
+assert(p.length == 8)
+assert(p.proto == 0)
+assert(p.SPIsize == 0)
+assert(p.type == 0)
+assert(p.load == b'')
+assert(bytes(p) == b'\x00\x00\x00\x08\x00\x00\x00\x00')
+
+#######################################
+= IKEv2_payload_Notify - Message Types
+
+assert(IKEv2_payload_Notify(type = 'INVALID_IKE_SPI').type == 4)
+assert(IKEv2_payload_Notify(type = 'FAILED_CP_REQUIRED').type == 37)
+assert(IKEv2_payload_Notify(type = 'NAT_DETECTION_SOURCE_IP').type == 16388)
+assert(IKEv2_payload_Notify(type = 'NAT_DETECTION_DESTINATION_IP').type == 16389)

@@ -87,6 +87,82 @@ IKEv2AttributeTypes= { "Encryption":    (1, { "DES-IV64"  : 1,
                                                  "ESN":   1,  }, 0),
                          }
 
+IKEv2NotifyMessageTypes = {
+  1 : "UNSUPPORTED_CRITICAL_PAYLOAD",
+  4 : "INVALID_IKE_SPI",
+  5 : "INVALID_MAJOR_VERSION",
+  7 : "INVALID_SYNTAX",
+  9 : "INVALID_MESSAGE_ID",
+  11 : "INVALID_SPI",
+  14 : "NO_PROPOSAL_CHOSEN",
+  17 : "INVALID_KE_PAYLOAD",
+  24 : "AUTHENTICATION_FAILED",
+  34 : "SINGLE_PAIR_REQUIRED",
+  35 : "NO_ADDITIONAL_SAS",
+  36 : "INTERNAL_ADDRESS_FAILURE",
+  37 : "FAILED_CP_REQUIRED",
+  38 : "TS_UNACCEPTABLE",
+  39 : "INVALID_SELECTORS",
+  40 : "UNACCEPTABLE_ADDRESSES",
+  41 : "UNEXPECTED_NAT_DETECTED",
+  42 : "USE_ASSIGNED_HoA",
+  43 : "TEMPORARY_FAILURE",
+  44 : "CHILD_SA_NOT_FOUND",
+  45 : "INVALID_GROUP_ID",
+  46 : "AUTHORIZATION_FAILED",
+  16384 : "INITIAL_CONTACT",
+  16385 : "SET_WINDOW_SIZE",
+  16386 : "ADDITIONAL_TS_POSSIBLE",
+  16387 : "IPCOMP_SUPPORTED",
+  16388 : "NAT_DETECTION_SOURCE_IP",
+  16389 : "NAT_DETECTION_DESTINATION_IP",
+  16390 : "COOKIE",
+  16391 : "USE_TRANSPORT_MODE",
+  16392 : "HTTP_CERT_LOOKUP_SUPPORTED",
+  16393 : "REKEY_SA",
+  16394 : "ESP_TFC_PADDING_NOT_SUPPORTED",
+  16395 : "NON_FIRST_FRAGMENTS_ALSO",
+  16396 : "MOBIKE_SUPPORTED",
+  16397 : "ADDITIONAL_IP4_ADDRESS",
+  16398 : "ADDITIONAL_IP6_ADDRESS",
+  16399 : "NO_ADDITIONAL_ADDRESSES",
+  16400 : "UPDATE_SA_ADDRESSES",
+  16401 : "COOKIE2",
+  16402 : "NO_NATS_ALLOWED",
+  16403 : "AUTH_LIFETIME",
+  16404 : "MULTIPLE_AUTH_SUPPORTED",
+  16405 : "ANOTHER_AUTH_FOLLOWS",
+  16406 : "REDIRECT_SUPPORTED",
+  16407 : "REDIRECT",
+  16408 : "REDIRECTED_FROM",
+  16409 : "TICKET_LT_OPAQUE",
+  16410 : "TICKET_REQUEST",
+  16411 : "TICKET_ACK",
+  16412 : "TICKET_NACK",
+  16413 : "TICKET_OPAQUE",
+  16414 : "LINK_ID",
+  16415 : "USE_WESP_MODE",
+  16416 : "ROHC_SUPPORTED",
+  16417 : "EAP_ONLY_AUTHENTICATION",
+  16418 : "CHILDLESS_IKEV2_SUPPORTED",
+  16419 : "QUICK_CRASH_DETECTION",
+  16420 : "IKEV2_MESSAGE_ID_SYNC_SUPPORTED",
+  16421 : "IPSEC_REPLAY_COUNTER_SYNC_SUPPORTED",
+  16422 : "IKEV2_MESSAGE_ID_SYNC",
+  16423 : "IPSEC_REPLAY_COUNTER_SYNC",
+  16424 : "SECURE_PASSWORD_METHODS",
+  16425 : "PSK_PERSIST",
+  16426 : "PSK_CONFIRM",
+  16427 : "ERX_SUPPORTED",
+  16428 : "IFOM_CAPABILITY",
+  16429 : "SENDER_REQUEST_ID",
+  16430 : "IKEV2_FRAGMENTATION_SUPPORTED",
+  16431 : "SIGNATURE_HASH_ALGORITHMS",
+  16432 : "CLONE_IKE_SA_SUPPORTED",
+  16433 : "CLONE_IKE_SA"
+}
+
+
 # the name 'IKEv2TransformTypes' is actually a misnomer (since the table 
 # holds info for all IKEv2 Attribute types, not just transforms, but we'll 
 # keep it for backwards compatibility... for now at least
@@ -98,7 +174,7 @@ for n in IKEv2TransformTypes:
     tmp = {}
     for e in val[1]:
         tmp[val[1][e]] = e
-    IKEv2TransformNum[val[0]] = (n,tmp, val[2])
+    IKEv2TransformNum[val[0]] = tmp
 
 IKEv2Transforms = {}
 for n in IKEv2TransformTypes:
@@ -169,32 +245,13 @@ class IKEv2_Key_Length_Attribute(IntField):
 	# We only support the fixed-length Key Length attribute (the only one currently defined)
 	name="key length"
 	def __init__(self, name):
-		IntField.__init__(self, name, "0x800E0000")
+		IntField.__init__(self, name, 0x800E0000)
 		
 	def i2h(self, pkt, x):
 		return IntField.i2h(self, pkt, x & 0xFFFF)
 		
 	def h2i(self, pkt, x):
-		return IntField.h2i(self, pkt, struct.pack("!I", 0x800E0000 | int(x, 0)))
-
-
-class IKEv2_Transform_ID(ShortField):
-	def i2h(self, pkt, x):
-		if pkt == None:
-			return None
-		else:
-			map = IKEv2TransformNum[pkt.transform_type][1]
-			return map[x]
-		
-	def h2i(self, pkt, x):
-		if pkt == None:
-			return None
-		else:
-			map = IKEv2TransformNum[pkt.transform_type][1]
-			for k in keys(map):
-				if map[k] == x:
-					return k
-			return None
+		return IntField.h2i(self, pkt, x | 0x800E0000)
 		
 class IKEv2_payload_Transform(IKEv2_class):
     name = "IKE Transform"
@@ -204,7 +261,7 @@ class IKEv2_payload_Transform(IKEv2_class):
         ShortField("length",8),
         ByteEnumField("transform_type",None,IKEv2Transforms),
         ByteField("res2",0),
-        IKEv2_Transform_ID("transform_id", 0),
+        MultiEnumField("transform_id",None,IKEv2TransformNum,depends_on=lambda pkt:pkt.transform_type,fmt="H"),
         ConditionalField(IKEv2_Key_Length_Attribute("key_length"), lambda pkt: pkt.length > 8),
     ]
             
@@ -279,8 +336,12 @@ class IKEv2_payload_Notify(IKEv2_class):
     fields_desc = [
         ByteEnumField("next_payload",None,IKEv2_payload_type),
         ByteField("res",0),
-        FieldLenField("length",None,"load","H", adjust=lambda pkt,x:x+4),
-        StrLenField("load","",length_from=lambda x:x.length-4),
+        FieldLenField("length",None,"load","H", adjust=lambda pkt,x:x+8),
+        ByteEnumField("proto",None,{2:"AH", 3:"ESP"}),
+        FieldLenField("SPIsize",None,"SPI","B"),
+        ShortEnumField("type",0,IKEv2NotifyMessageTypes),
+        StrLenField("SPI","",length_from=lambda x:x.SPIsize),
+        StrLenField("load","",length_from=lambda x:x.length-8),
         ]
 
 class IKEv2_payload_KE(IKEv2_class):
@@ -289,9 +350,10 @@ class IKEv2_payload_KE(IKEv2_class):
     fields_desc = [
         ByteEnumField("next_payload",None,IKEv2_payload_type),
         ByteField("res",0),
-        FieldLenField("length",None,"load","H", adjust=lambda pkt,x:x+6),
+        FieldLenField("length",None,"load","H", adjust=lambda pkt,x:x+8),
         ShortEnumField("group", 0, IKEv2TransformTypes['GroupDesc'][1]),
-        StrLenField("load","",length_from=lambda x:x.length-6),
+        ShortField("res2", 0),
+        StrLenField("load","",length_from=lambda x:x.length-8),
         ]
 
 class IKEv2_payload_IDi(IKEv2_class):
@@ -350,7 +412,6 @@ split_layers(UDP, ISAKMP, sport=500)
 split_layers(UDP, ISAKMP, dport=500)
 
 bind_layers( UDP,           IKEv2,        dport=500, sport=500) # TODO: distinguish IKEv1/IKEv2
-bind_layers( UDP,           IKEv2,        dport=4500, sport=4500)
 
 def ikev2scan(ip):
     return sr(IP(dst=ip)/UDP()/IKEv2(init_SPI=RandString(8),
