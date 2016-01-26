@@ -410,7 +410,27 @@ class IKEv2_payload_Encrypted(IKEv2_class):
         StrLenField("load","",length_from=lambda x:x.length-4),
         ]
 
+class IKEv2_payload_CERTREQ(IKEv2_class):
+    name = "IKEv2 Certificate Request"
+    overload_fields = { IKEv2: { "next_payload":38 }}
+    fields_desc = [
+        ByteEnumField("next_payload",None,IKEv2_payload_type),
+        ByteField("res",0),
+        FieldLenField("length",None,"cert_data","H",adjust=lambda pkt,x:x+5),
+        ByteEnumField("cert_type",0,IKEv2CertificateEncodings),
+        StrLenField("cert_data","",length_from=lambda x:x.length-5),
+        ]
 
+class IKEv2_payload_CERT(IKEv2_class):
+    name = "IKEv2 Certificate"
+    overload_fields = { IKEv2: { "next_payload":37 }}
+    fields_desc = [
+        ByteEnumField("next_payload",None,IKEv2_payload_type),
+        ByteField("res",0),
+        FieldLenField("length",None,"cert_data","H",adjust=lambda pkt,x:x+5),
+        ByteEnumField("cert_type",0,IKEv2CertificateEncodings),
+        StrLenField("cert_data","",length_from=lambda x:x.length-5),
+        ]
 
 IKEv2_payload_type_overload = {}
 for i in range(len(IKEv2_payload_type)):
