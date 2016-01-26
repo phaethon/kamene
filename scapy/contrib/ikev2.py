@@ -162,6 +162,20 @@ IKEv2NotifyMessageTypes = {
   16433 : "CLONE_IKE_SA"
 }
 
+IKEv2CertificateEncodings = {
+  1 : "PKCS #7 wrapped X.509 certificate",
+  2 : "PGP Certificate",
+  3 : "DNS Signed Key",
+  4 : "X.509 Certificate - Signature",
+  6 : "Kerberos Token",
+  7 : "Certificate Revocation List (CRL)",
+  8 : "Authority Revocation List (ARL)",
+  9 : "SPKI Certificate",
+  10 : "X.509 Certificate - Attribute",
+  11 : "Raw RSA Key",
+  12 : "Hash and URL of X.509 certificate",
+  13 : "Hash and URL of X.509 bundle"
+}
 
 # the name 'IKEv2TransformTypes' is actually a misnomer (since the table 
 # holds info for all IKEv2 Attribute types, not just transforms, but we'll 
