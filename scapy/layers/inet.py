@@ -1443,16 +1443,16 @@ class MTR:
         s += "\n\tnode [shape=ellipse,color=black,fillcolor=white,style=filled];\n\n"
 
         #
-        # Create Endpoint Clusters...
+        # Create Endpoint Target Clusters...
         epc = {}			# Endpoint Cluster Distionary
         epip = []			# Endpoint IP array
         for d in self._tlblid:		# Spin thru Target IDs
             for k,v in d.items():	# Get access to Target Endpoints
                 epip.append(k)
-        uepip = set(epip)		# Get a unique set
+        uepip = set(epip)		# Get a unique set of Endpoint IPs
         #
-        ecs = "\n\t###Endpoint Cluster###\n"
         for ep in uepip:
+            ecs = "\n\t\t###Endpoint (Target) Cluster###\n"
             uep = ep.replace('.', '_')
             ecs += '\t\tsubgraph cluster_{ep:s} {{\n'.format(ep = uep)
             ecs += '\t\t\tcolor="green";\n'
@@ -1470,8 +1470,9 @@ class MTR:
         #
         # Create ASN Clusters
         s += "\n###ASN Clusters###\n"
-        epu = {}			# Endpoints consumed (used) within a ASN Cluster 
+        cipall = []			# Array of IP Endpoints (Targets) consumed by All ASN Cluster
         for asn in self._asns:
+            cipcur = []			# Array of IP Endpoints (Targets) consumed by the Current ASN Cluster
             s += '\tsubgraph cluster_{asn:d} {{\n'.format(asn = asn)
             col = next(backcolorlist)
             s += '\t\tcolor="#{s0:s}{s1:s}{s2:s}";\n'.format(s0 = col[0], s1 = col[1], s2 = col[2])
@@ -1479,24 +1480,24 @@ class MTR:
             s += '\t\tfontsize=10;\n'
             s += '\t\tlabel="{asn:d}\\n[{des:s}]";\n'.format(asn = asn, des = self._asds[asn])
             s += '\t\tlabelloc="t";\n'
-            ipf = ''
             for ip in self._asns[asn]:
                 #
                 # Only add IP if not an Endpoint Target...
                 if not ip in uepip:
                     s += '\t\t"%s";\n'%ip
                 else:
-                    ipf = ip
+                    cipcur.append(ip)	# Current list of Endpoints consumed by this ASN Cluster
+                    cipall.append(ip)	# Accumulated list of Endpoints consumed by all ASN Clusters
             #
-            # Add Endpoint Cluster if part of this ASN Cluster...
-            if (ipf != ''):
-                s += epc[ipf]
-                epu[ipf] = None		# Indicate Endpoint was consumed (used)
+            # Add Endpoint Cluster(s) if part of this ASN Cluster (Nested Clusters)...
+            if (len(cipcur) > 0):
+                for ip in cipcur:
+                    s += epc[ip]
             s += "\t}\n"
         #
-        # Add any unconsumed Endpoint Clusters by an ASN Cluster...
+        # Add any Endpoint Target Clusters not consumed by an ASN Cluster (Stand-alone Cluster)...
         for ip in epc:
-            if not ip in epu:
+            if not ip in cipall:
                 s += epc[ip]
 
         #
