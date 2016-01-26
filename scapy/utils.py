@@ -97,9 +97,12 @@ def is_private_addr(x):
     paddrs = ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16']
     found = False
     for ipr in paddrs:
-        if ipaddress.ip_address(x) in ipaddress.ip_network(ipr):
-            found = True
-            continue
+        try:
+            if ipaddress.ip_address(x) in ipaddress.ip_network(ipr):
+                found = True
+                continue
+        except:
+            break
     return found
 
 def lhex(x):
