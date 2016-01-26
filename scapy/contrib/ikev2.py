@@ -292,7 +292,6 @@ class IKEv2_payload(IKEv2_class):
 
 class IKEv2_payload_VendorID(IKEv2_class):
     name = "IKEv2 Vendor ID"
-    overload_fields = { IKEv2: { "next_payload":43 }}
     fields_desc = [
         ByteEnumField("next_payload",None,IKEv2_payload_type),
         ByteField("res",0),
@@ -302,7 +301,6 @@ class IKEv2_payload_VendorID(IKEv2_class):
 
 class IKEv2_payload_Delete(IKEv2_class):
     name = "IKEv2 Vendor ID"
-    overload_fields = { IKEv2: { "next_payload":42 }}
     fields_desc = [
         ByteEnumField("next_payload",None,IKEv2_payload_type),
         ByteField("res",0),
@@ -312,7 +310,6 @@ class IKEv2_payload_Delete(IKEv2_class):
 
 class IKEv2_payload_SA(IKEv2_class):
     name = "IKEv2 SA"
-    overload_fields = { IKEv2: { "next_payload":33 }}
     fields_desc = [
         ByteEnumField("next_payload",None,IKEv2_payload_type),
         ByteField("res",0),
@@ -322,7 +319,6 @@ class IKEv2_payload_SA(IKEv2_class):
 
 class IKEv2_payload_Nonce(IKEv2_class):
     name = "IKEv2 Nonce"
-    overload_fields = { IKEv2: { "next_payload":40 }}
     fields_desc = [
         ByteEnumField("next_payload",None,IKEv2_payload_type),
         ByteField("res",0),
@@ -332,7 +328,6 @@ class IKEv2_payload_Nonce(IKEv2_class):
 
 class IKEv2_payload_Notify(IKEv2_class):
     name = "IKEv2 Notify"
-    overload_fields = { IKEv2: { "next_payload":41 }}
     fields_desc = [
         ByteEnumField("next_payload",None,IKEv2_payload_type),
         ByteField("res",0),
@@ -346,7 +341,6 @@ class IKEv2_payload_Notify(IKEv2_class):
 
 class IKEv2_payload_KE(IKEv2_class):
     name = "IKEv2 Key Exchange"
-    overload_fields = { IKEv2: { "next_payload":34 }}
     fields_desc = [
         ByteEnumField("next_payload",None,IKEv2_payload_type),
         ByteField("res",0),
@@ -358,7 +352,6 @@ class IKEv2_payload_KE(IKEv2_class):
 
 class IKEv2_payload_IDi(IKEv2_class):
     name = "IKEv2 Identification - Initiator"
-    overload_fields = { IKEv2: { "next_payload":35 }}
     fields_desc = [
         ByteEnumField("next_payload",None,IKEv2_payload_type),
         ByteField("res",0),
@@ -372,7 +365,6 @@ class IKEv2_payload_IDi(IKEv2_class):
 
 class IKEv2_payload_IDr(IKEv2_class):
     name = "IKEv2 Identification - Responder"
-    overload_fields = { IKEv2: { "next_payload":36 }}
     fields_desc = [
         ByteEnumField("next_payload",None,IKEv2_payload_type),
         ByteField("res",0),
@@ -388,7 +380,6 @@ class IKEv2_payload_IDr(IKEv2_class):
 
 class IKEv2_payload_Encrypted(IKEv2_class):
     name = "IKEv2 Encrypted and Authenticated"
-    overload_fields = { IKEv2: { "next_payload":46 }}
     fields_desc = [
         ByteEnumField("next_payload",None,IKEv2_payload_type),
         ByteField("res",0),
@@ -396,17 +387,20 @@ class IKEv2_payload_Encrypted(IKEv2_class):
         StrLenField("load","",length_from=lambda x:x.length-4),
         ]
 
-
-
-IKEv2_payload_type_overload = {}
+IKEv2_payload_classes = {}
 for i in range(len(IKEv2_payload_type)):
     name = "IKEv2_payload_%s" % IKEv2_payload_type[i]
     if name in globals():
-        IKEv2_payload_type_overload[globals()[name]] = {"next_payload":i}
+        IKEv2_payload_classes[globals()[name]] = i
+
+for i in IKEv2_payload_classes:
+    i.overload_fields = {IKEv2 : {"next_payload" : IKEv2_payload_classes[i]}}
+    for j in IKEv2_payload_classes:
+        i.overload_fields[j] = {"next_payload" : IKEv2_payload_classes[i]}
 
 del(i)
+del(j)
 del(name)
-IKEv2_class.overload_fields = IKEv2_payload_type_overload.copy()
 
 split_layers(UDP, ISAKMP, sport=500)
 split_layers(UDP, ISAKMP, dport=500)
