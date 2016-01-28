@@ -1569,7 +1569,6 @@ class MTR:
                     ct += 1
                     if (ct < lt):
                         tstr += ', '
-                #tstr += '>'
                 c += 1
                 if (c < l):
                     tstr += ', '
