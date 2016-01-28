@@ -401,10 +401,8 @@ class IKEv2_payload_Encrypted(IKEv2_class):
         StrLenField("load","",length_from=lambda x:x.length-4),
         ]
 
-<<<<<<< HEAD
 class IKEv2_payload_CERTREQ(IKEv2_class):
     name = "IKEv2 Certificate Request"
-    overload_fields = { IKEv2: { "next_payload":38 }}
     fields_desc = [
         ByteEnumField("next_payload",None,IKEv2_payload_type),
         ByteField("res",0),
@@ -415,7 +413,6 @@ class IKEv2_payload_CERTREQ(IKEv2_class):
 
 class IKEv2_payload_CERT(IKEv2_class):
     name = "IKEv2 Certificate"
-    overload_fields = { IKEv2: { "next_payload":37 }}
     fields_desc = [
         ByteEnumField("next_payload",None,IKEv2_payload_type),
         ByteField("res",0),
@@ -424,10 +421,7 @@ class IKEv2_payload_CERT(IKEv2_class):
         StrLenField("cert_data","",length_from=lambda x:x.length-5),
         ]
 
-IKEv2_payload_type_overload = {}
-=======
 IKEv2_payload_classes = {}
->>>>>>> upstream/master
 for i in range(len(IKEv2_payload_type)):
     name = "IKEv2_payload_%s" % IKEv2_payload_type[i]
     if name in globals():
