@@ -1346,7 +1346,7 @@ class MTR:
         self._rt = []
         self._ports = {}
         self._portsdone = {}
-        self._unknownlabel = incremental_label("unk%i")
+        self._unknownlabel = incremental_label('"Unk%i"')
         self._blackholes = []
         self._blackholesip = {}
         self._asres = conf.AS_resolver
@@ -1538,7 +1538,7 @@ class MTR:
 
         #
         # Probe Target Cluster...
-        s += "\n###Probe Begin Points###\n"
+        s += "\n###Probe Target Cluster###\n"
         s += '\tsubgraph cluster_probe_Title {\n'
         s += '\t\tcolor="orange";\n'
         s += '\t\tfillcolor="lightgray";\n'
@@ -1554,23 +1554,22 @@ class MTR:
             l = len(self._host2ip[t])
             c = 0
             for ip in self._host2ip[t]:
-                tstr += '{ip:s}'.format(ip = ip)
-                c += 1
-                if (c < l):
-                    tstr += ', '
-            tstr += ' - '
-            #
-            # Append Target IDs...
-            ti = []
-            for ip in self._host2ip[t]:
+                tstr += '{ip:s}<'.format(ip = ip)
+                #
+                # Append all associated Target IDs...
+                ti = []
                 for d in self._tlblid:		# Spin thru Target IDs
                     for k,v in d.items():	# Get access to Target ID (v[0])
                         if (k == ip):
                             ti.append(v[0])
-            l = len(ti)
-            c = 0
-            for t in ti:
-                tstr += '{t:s}'.format(t = t)
+                lt = len(ti)
+                ct = 0
+                for i in ti:
+                    tstr += '{i:s}'.format(i = i)
+                    ct += 1
+                    if (ct < lt):
+                        tstr += ', '
+                tstr += '>'
                 c += 1
                 if (c < l):
                     tstr += ', '
@@ -1840,7 +1839,7 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
                      1 - Default: Resolve all AS numbers."""
     #
     # Initialize vars...
-    trace = []
+    trace = []			# Individual trace array
     if (nquery < 1):		# Range check number of query traces
         nquery = 1
     #
@@ -1887,7 +1886,6 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
                 mtrc._res.append(a)		# Store Response pckets
                 mtrc._ures.append(b)		# Store Unresponse packets
                 if verbose:
-                    #trace[n].show(ntrace = (n + 1))
                     trace[ntraces].show(ntrace = (ntraces + 1))
                     print()
                 ntraces += 1
@@ -1903,7 +1901,6 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
                 mtrc._res.append(a)
                 mtrc._ures.append(b)
                 if verbose:
-                    #trace[n].show(ntrace = (n + 1))
                     trace[ntraces].show(ntrace = (ntraces + 1))
                     print()
                 ntraces += 1
