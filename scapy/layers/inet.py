@@ -1363,7 +1363,7 @@ class MTR:
                 trace = self._rt[t][rtk]
                 k = trace.keys()
                 for n in range(min(k), max(k)):
-                    if not n in trace:
+                    if not n in trace:				# Fill in 'Unknown' hops
                         trace[n] = next(self._unknownlabel)
                 if not rtk in self._portsdone:
                     if rtk[2] == 1:	#ICMP
@@ -1554,7 +1554,7 @@ class MTR:
             l = len(self._host2ip[t])
             c = 0
             for ip in self._host2ip[t]:
-                tstr += '{ip:s}<'.format(ip = ip)
+                tstr += '{ip:s} -> '.format(ip = ip)
                 #
                 # Append all associated Target IDs...
                 ti = []
@@ -1569,7 +1569,7 @@ class MTR:
                     ct += 1
                     if (ct < lt):
                         tstr += ', '
-                tstr += '>'
+                #tstr += '>'
                 c += 1
                 if (c < l):
                     tstr += ', '
