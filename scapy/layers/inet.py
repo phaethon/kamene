@@ -1329,9 +1329,9 @@ traceroute(target, [maxttl=30,] [dport=80,] [sport=80,] [verbose=conf.verb]) -> 
 ## Multi-Traceroute Class ##
 ############################
 class MTR:
+    #
+    # Initialize Multi-Traceroute Object Vars...
     def __init__(self, nquery = 1, target = ''):
-        #
-        # Multi-Traceroute Vars...
         self._nquery = nquery
         self._ntraces = 1
         self._target = target
@@ -1352,9 +1352,11 @@ class MTR:
         self._asres = conf.AS_resolver
         self._asns = {}
         self._asds = {}
+        self._unks = {}			# Unknown Hops ASN IP boundaries 
         self._graphdef = None
         self._graphasres = 0
         self._graphpadding = 0
+
     #
     # Compute Black Holes...
     def get_black_holes(self):
@@ -1389,6 +1391,7 @@ class MTR:
                     trace[max(k)+1] = bh
                     if not bh in self._blackholes:
                         self._blackholes.append(bh)
+
     #
     # Get AS Numbers...
     def get_asns(self, privaddr = 0):
@@ -1419,6 +1422,82 @@ class MTR:
                 iplist.append(ip)
             self._asns[asn] = iplist
             self._asds[asn] = desc
+
+    #
+    #  Get the ASN for a given IP Address.
+    #
+    #    ip - IP Address to get the ASN for.
+    #
+    #   Return the ASN for a given IP Address if found.
+    #   A -1 is returned if not found.
+    def get_asn_ip(self, ip):
+        for a in self._asns:
+            for i in self._asns[a]:
+                if (ip == i):
+                    return a
+        return -1
+
+    #
+    # Guess Traceroute 'Unknown (Unkn) Hops' ASNs.
+    #
+    #   Technique: Method to guess ASNs for Traceroute 'Unknown Hops'.
+    #              If the assign ASN for the known Ancestor IP is the
+    #              same as the known Descendant IP then use this ASN
+    #              for the 'Unknown Hop'.
+    def guess_unk_asns(self):
+        for q in range(0, self._ntraces):
+            for rtk in self._rt[q]:
+                trace = self._rt[q][rtk]
+                tk = trace.keys()
+                begip = endip = ''
+                unklist = []
+                for n in range(min(tk), (max(tk) + 1)):
+                    if (trace[n].find('Unk') == -1):
+                        #
+                        # IP Address Hop found...
+                        if (len(unklist) == 0):
+                            #
+                            # No 'Unknown Hop' found yet...
+                            begip = trace[n]
+                        else:
+                            #
+                            # At least one Unknown Hop found - Store IP boundary...
+                            endip = trace[n]
+                            for u in unklist:
+                                idx = begip.find(':')
+                                if (idx != -1):		# Remove Endpoint Trace port info: '"162.144.22.85":T443'
+                                    begip = begip[:idx]
+                                idx = endip.find(':')
+                                if (idx != -1):		# Remove Endpoint Trace port info: '"162.144.22.85":T443'
+                                    endip = endip[:idx]
+                                self._unks[u] = [begip, endip]
+                            #
+                            # Init var for new Unknown Hop search...
+                            begip = endip = ''
+                            unklist = []
+                    else:
+                        #
+                        # 'Unknown Hop' found...
+                        unklist.append(trace[n])
+        #
+        # Assign 'Unknown Hop' ASN...
+        for u in self._unks:
+            bip = self._unks[u][0]
+            bip = bip.replace('"','')			# Begin IP - Strip off surrounding double quotes (")
+            basn = self.get_asn_ip(bip)
+            if (basn == -1):
+                continue;
+            eip = self._unks[u][1]
+            eip = eip.replace('"','')
+            easn = self.get_asn_ip(eip)
+            if (easn == -1):
+                continue;
+            #
+            # Append the 'Unknown Hop' to an ASN if
+            # Ancestor/Descendant IP ASN match...
+            if (basn == easn):
+                self._asns[basn].append(u.replace('"',''))
+
     #
     # Make the DOT graph...
     def make_dot_graph(self, ASres = None, padding = 0):
@@ -1918,8 +1997,11 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
     # Resolve AS Numbers...
     if rasn:
         mtrc.get_asns(privaddr)
+        #
+        # Try to guess ASNs for Traceroute 'Unkown Hops'...
+        mtrc.guess_unk_asns()
     #
-    # Debug: Print at verbose level 8...
+    # Debug: Print object vars at verbose level 8...
     if (verbose == 8):
         print("\nmtrc._target (User Target(s)):")
         print("=======================================================")
@@ -1969,6 +2051,9 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
         print("\nmtrc._asds (AS Descriptions):")
         print("=======================================================")
         print(mtrc._asds)
+        print("\nmtrc._unks (Unknown Hops IP Boundary for AS Numbers):")
+        print("=======================================================")
+        print(mtrc._unks)
        
     return mtrc
 
