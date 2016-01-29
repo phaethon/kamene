@@ -162,6 +162,20 @@ IKEv2NotifyMessageTypes = {
   16433 : "CLONE_IKE_SA"
 }
 
+IKEv2CertificateEncodings = {
+  1 : "PKCS #7 wrapped X.509 certificate",
+  2 : "PGP Certificate",
+  3 : "DNS Signed Key",
+  4 : "X.509 Certificate - Signature",
+  6 : "Kerberos Token",
+  7 : "Certificate Revocation List (CRL)",
+  8 : "Authority Revocation List (ARL)",
+  9 : "SPKI Certificate",
+  10 : "X.509 Certificate - Attribute",
+  11 : "Raw RSA Key",
+  12 : "Hash and URL of X.509 certificate",
+  13 : "Hash and URL of X.509 bundle"
+}
 
 # the name 'IKEv2TransformTypes' is actually a misnomer (since the table 
 # holds info for all IKEv2 Attribute types, not just transforms, but we'll 
@@ -332,7 +346,7 @@ class IKEv2_payload_Notify(IKEv2_class):
         ByteEnumField("next_payload",None,IKEv2_payload_type),
         ByteField("res",0),
         FieldLenField("length",None,"load","H", adjust=lambda pkt,x:x+8),
-        ByteEnumField("proto",None,{2:"AH", 3:"ESP"}),
+        ByteEnumField("proto",None,{0:"Reserved",1:"IKE",2:"AH", 3:"ESP"}),
         FieldLenField("SPIsize",None,"SPI","B"),
         ShortEnumField("type",0,IKEv2NotifyMessageTypes),
         StrLenField("SPI","",length_from=lambda x:x.SPIsize),
@@ -356,7 +370,7 @@ class IKEv2_payload_IDi(IKEv2_class):
         ByteEnumField("next_payload",None,IKEv2_payload_type),
         ByteField("res",0),
         FieldLenField("length",None,"load","H",adjust=lambda pkt,x:x+8),
-        ByteEnumField("IDtype",1,{1:"IPv4_addr", 11:"Key"}),
+        ByteEnumField("IDtype",1,{1:"IPv4_addr", 2:"FQDN", 3:"Email_addr", 5:"IPv6_addr", 11:"Key"}),
         ByteEnumField("ProtoID",0,{0:"Unused"}),
         ShortEnumField("Port",0,{0:"Unused"}),
 #        IPField("IdentData","127.0.0.1"),
@@ -369,7 +383,7 @@ class IKEv2_payload_IDr(IKEv2_class):
         ByteEnumField("next_payload",None,IKEv2_payload_type),
         ByteField("res",0),
         FieldLenField("length",None,"load","H",adjust=lambda pkt,x:x+8),
-        ByteEnumField("IDtype",1,{1:"IPv4_addr", 11:"Key"}),
+        ByteEnumField("IDtype",1,{1:"IPv4_addr", 2:"FQDN", 3:"Email_addr", 5:"IPv6_addr", 11:"Key"}),
         ByteEnumField("ProtoID",0,{0:"Unused"}),
         ShortEnumField("Port",0,{0:"Unused"}),
 #        IPField("IdentData","127.0.0.1"),
@@ -385,6 +399,26 @@ class IKEv2_payload_Encrypted(IKEv2_class):
         ByteField("res",0),
         FieldLenField("length",None,"load","H",adjust=lambda pkt,x:x+4),
         StrLenField("load","",length_from=lambda x:x.length-4),
+        ]
+
+class IKEv2_payload_CERTREQ(IKEv2_class):
+    name = "IKEv2 Certificate Request"
+    fields_desc = [
+        ByteEnumField("next_payload",None,IKEv2_payload_type),
+        ByteField("res",0),
+        FieldLenField("length",None,"cert_data","H",adjust=lambda pkt,x:x+5),
+        ByteEnumField("cert_type",0,IKEv2CertificateEncodings),
+        StrLenField("cert_data","",length_from=lambda x:x.length-5),
+        ]
+
+class IKEv2_payload_CERT(IKEv2_class):
+    name = "IKEv2 Certificate"
+    fields_desc = [
+        ByteEnumField("next_payload",None,IKEv2_payload_type),
+        ByteField("res",0),
+        FieldLenField("length",None,"cert_data","H",adjust=lambda pkt,x:x+5),
+        ByteEnumField("cert_type",0,IKEv2CertificateEncodings),
+        StrLenField("cert_data","",length_from=lambda x:x.length-5),
         ]
 
 IKEv2_payload_classes = {}

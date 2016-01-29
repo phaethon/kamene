@@ -773,6 +773,8 @@ assert(IKEv2(bytes(IKEv2()/IKEv2_payload_SA()       )).next_payload == 33)
 assert(IKEv2(bytes(IKEv2()/IKEv2_payload_KE()       )).next_payload == 34)
 assert(IKEv2(bytes(IKEv2()/IKEv2_payload_IDi()      )).next_payload == 35)
 assert(IKEv2(bytes(IKEv2()/IKEv2_payload_IDr()      )).next_payload == 36)
+assert(IKEv2(bytes(IKEv2()/IKEv2_payload_CERT()     )).next_payload == 37)
+assert(IKEv2(bytes(IKEv2()/IKEv2_payload_CERTREQ()  )).next_payload == 38)
 assert(IKEv2(bytes(IKEv2()/IKEv2_payload_Nonce()    )).next_payload == 40)
 assert(IKEv2(bytes(IKEv2()/IKEv2_payload_Notify()   )).next_payload == 41)
 assert(IKEv2(bytes(IKEv2()/IKEv2_payload_Delete()   )).next_payload == 42)
@@ -842,6 +844,8 @@ assert(IKEv2_payload_SA       (bytes(IKEv2_payload_SA()       /IKEv2_payload_Not
 assert(IKEv2_payload_KE       (bytes(IKEv2_payload_KE()       /IKEv2_payload_Notify())).next_payload == 41)
 assert(IKEv2_payload_IDi      (bytes(IKEv2_payload_IDi()      /IKEv2_payload_Notify())).next_payload == 41)
 assert(IKEv2_payload_IDr      (bytes(IKEv2_payload_IDr()      /IKEv2_payload_Notify())).next_payload == 41)
+assert(IKEv2_payload_CERT     (bytes(IKEv2_payload_CERT()     /IKEv2_payload_Notify())).next_payload == 41)
+assert(IKEv2_payload_CERTREQ  (bytes(IKEv2_payload_CERTREQ()  /IKEv2_payload_Notify())).next_payload == 41)
 assert(IKEv2_payload_Nonce    (bytes(IKEv2_payload_Nonce()    /IKEv2_payload_Notify())).next_payload == 41)
 assert(IKEv2_payload_Notify   (bytes(IKEv2_payload_Notify()   /IKEv2_payload_Notify())).next_payload == 41)
 assert(IKEv2_payload_Delete   (bytes(IKEv2_payload_Delete()   /IKEv2_payload_Notify())).next_payload == 41)
@@ -856,8 +860,42 @@ assert(IKEv2_payload_Notify(bytes(IKEv2_payload_Notify()/IKEv2_payload_SA()     
 assert(IKEv2_payload_Notify(bytes(IKEv2_payload_Notify()/IKEv2_payload_KE()       )).next_payload == 34)
 assert(IKEv2_payload_Notify(bytes(IKEv2_payload_Notify()/IKEv2_payload_IDi()      )).next_payload == 35)
 assert(IKEv2_payload_Notify(bytes(IKEv2_payload_Notify()/IKEv2_payload_IDr()      )).next_payload == 36)
+assert(IKEv2_payload_Notify(bytes(IKEv2_payload_Notify()/IKEv2_payload_CERT()     )).next_payload == 37)
+assert(IKEv2_payload_Notify(bytes(IKEv2_payload_Notify()/IKEv2_payload_CERTREQ()  )).next_payload == 38)
 assert(IKEv2_payload_Notify(bytes(IKEv2_payload_Notify()/IKEv2_payload_Nonce()    )).next_payload == 40)
 assert(IKEv2_payload_Notify(bytes(IKEv2_payload_Notify()/IKEv2_payload_Notify()   )).next_payload == 41)
 assert(IKEv2_payload_Notify(bytes(IKEv2_payload_Notify()/IKEv2_payload_Delete()   )).next_payload == 42)
 assert(IKEv2_payload_Notify(bytes(IKEv2_payload_Notify()/IKEv2_payload_VendorID() )).next_payload == 43)
 assert(IKEv2_payload_Notify(bytes(IKEv2_payload_Notify()/IKEv2_payload_Encrypted())).next_payload == 46)
+
+######################################
+= IKEv2_payload_CERT - Certificate Encodings
+
+assert(IKEv2_payload_CERT(cert_type = 'X.509 Certificate - Signature').cert_type == 4)
+assert(IKEv2_payload_CERT(cert_type = 'Hash and URL of X.509 certificate').cert_type == 12)
+
+######################################
+= IKEv2_payload_CERT - Default
+
+p = IKEv2_payload_CERT(bytes(IKEv2_payload_CERT()))
+p
+
+assert(p.next_payload == 0)
+assert(p.res == 0)
+assert(p.length == 5)
+assert(p.cert_type == 0)
+assert(p.cert_data == b'')
+assert(bytes(p) == b'\x00\x00\x00\x05\x00')
+
+######################################
+= IKEv2_payload_CERTREQ - Default
+
+p = IKEv2_payload_CERTREQ(bytes(IKEv2_payload_CERTREQ()))
+p
+
+assert(p.next_payload == 0)
+assert(p.res == 0)
+assert(p.length == 5)
+assert(p.cert_type == 0)
+assert(p.cert_data == b'')
+assert(bytes(p) == b'\x00\x00\x00\x05\x00')
