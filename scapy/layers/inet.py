@@ -1468,7 +1468,7 @@ class MTR:
                                 if (idx != -1):		# Remove Endpoint Trace port info: '"162.144.22.85":T443'
                                     begip = begip[:idx]
                                 idx = endip.find(':')
-                                if (idx != -1):		# Remove Endpoint Trace port info: '"162.144.22.85":T443'
+                                if (idx != -1):
                                     endip = endip[:idx]
                                 self._unks[u] = [begip, endip]
                             #
@@ -1501,6 +1501,7 @@ class MTR:
     #
     # Make the DOT graph...
     def make_dot_graph(self, ASres = None, padding = 0):
+        import datetime
         if ASres is None:
             self._asres = conf.AS_resolver
         self._graphasres = ASres
@@ -1513,13 +1514,15 @@ class MTR:
         forecolorlist=colgen("a0","70","40","20")
         #
         # Begin the DOT Digraph...
-        s = "digraph mtr {\n"
+        s = "### Scapy3k Multi-Traceroute (MTR) DOT Graph Results ({t:s}) ###\n".format(t = datetime.datetime.now().isoformat(' '))
+
+        s += "\ndigraph mtr {\n"
         #
         # Define the default graph attributes...
-        s += "\n\tgraph [bgcolor=transparent];\n\n"
+        s += '\tgraph [bgcolor=transparent,ranksep=0.75];\n'
         #
         # Define the default node shape and drawing color...
-        s += "\n\tnode [shape=ellipse,color=black,fillcolor=white,style=filled];\n\n"
+        s += '\tnode [shape=ellipse,fontname="Sans-Serif",fontsize=11,color="black",gradientangle=270,fillcolor="white:#d0d0d0",style=filled];\n'
 
         #
         # Create Endpoint Target Clusters...
@@ -1531,14 +1534,16 @@ class MTR:
         uepip = set(epip)		# Get a unique set of Endpoint IPs
         #
         for ep in uepip:
-            ecs = "\n\t\t###Endpoint (Target) Cluster###\n"
+            ecs = "\n\t\t### Endpoint (Target) Cluster ###\n"
             uep = ep.replace('.', '_')
             ecs += '\t\tsubgraph cluster_{ep:s} {{\n'.format(ep = uep)
             ecs += '\t\t\tcolor="green";\n'
             ecs += '\t\t\tfontsize=11;\n'
-            ecs += '\t\t\tfillcolor="lightgray";\n'
+            ecs += '\t\t\tfontname="Sans-Serif";\n'
+            ecs += '\t\t\tgradientangle=270;\n'
+            ecs += '\t\t\tfillcolor="white:#a0a0a0";\n'
             ecs += '\t\t\tstyle="filled";\n'
-            ecs += '\t\t\tlabel="Target: {h:s}";\n'.format(h = self._ip2host[ep])
+            ecs += '\t\t\tlabel=<Target: <B>{h:s}</B>>;\n'.format(h = self._ip2host[ep])
             ecs += '\t\t\tlabelloc="b";\n'
             ecs += '\t\t\t"{ep:s}";\n'.format(ep = ep)
             ecs += "\t\t}\n"
@@ -1548,15 +1553,16 @@ class MTR:
 
         #
         # Create ASN Clusters
-        s += "\n###ASN Clusters###\n"
+        s += "\n\t### ASN Clusters ###\n"
         cipall = []			# Array of IP Endpoints (Targets) consumed by All ASN Cluster
         for asn in self._asns:
             cipcur = []			# Array of IP Endpoints (Targets) consumed by the Current ASN Cluster
             s += '\tsubgraph cluster_{asn:d} {{\n'.format(asn = asn)
             col = next(backcolorlist)
             s += '\t\tcolor="#{s0:s}{s1:s}{s2:s}";\n'.format(s0 = col[0], s1 = col[1], s2 = col[2])
-            s += '\t\tnode [fillcolor="#{s0:s}{s1:s}{s2:s}",style=filled];\n'.format(s0 = col[0], s1 = col[1], s2 = col[2])
+            s += '\t\tnode [color="#{s0:s}{s1:s}{s2:s}",gradientangle=270,fillcolor="white:#{s0:s}{s1:s}{s2:s}",style=filled];\n'.format(s0 = col[0], s1 = col[1], s2 = col[2])
             s += '\t\tfontsize=10;\n'
+            s += '\t\tfontname="Sans-Serif";\n'
             s += '\t\tlabel="{asn:d}\\n[{des:s}]";\n'.format(asn = asn, des = self._asds[asn])
             s += '\t\tlabelloc="t";\n'
             for ip in self._asns[asn]:
@@ -1617,23 +1623,25 @@ class MTR:
 
         #
         # Probe Target Cluster...
-        s += "\n###Probe Target Cluster###\n"
+        s += "\n\t### Probe Target Cluster ###\n"
         s += '\tsubgraph cluster_probe_Title {\n'
-        s += '\t\tcolor="orange";\n'
-        s += '\t\tfillcolor="lightgray";\n'
+        s += '\t\tcolor="darkorange";\n'
+        s += '\t\tgradientangle=270;\n'
+        s += '\t\tfillcolor="white:#a0a0a0";\n'
         s += '\t\tstyle="filled";\n'
         s += '\t\tfontsize=11;\n'
+        s += '\t\tfontname="Sans-Serif";\n'
         #
         # Format Label including trace targets...
         tstr = ''
         for t in self._target:
-            tstr += 'Target: {t:s} ('.format(t = t)
+            tstr += '<TR><TD><FONT POINT-SIZE="10">Target:&nbsp;{t:s}&nbsp;('.format(t = t)
             #
             # Append resolve IP Addresses...
             l = len(self._host2ip[t])
             c = 0
             for ip in self._host2ip[t]:
-                tstr += '{ip:s} -> '.format(ip = ip)
+                tstr += '{ip:s}&nbsp;&rarr;&nbsp;'.format(ip = ip)
                 #
                 # Append all associated Target IDs...
                 ti = []
@@ -1647,12 +1655,12 @@ class MTR:
                     tstr += '{i:s}'.format(i = i)
                     ct += 1
                     if (ct < lt):
-                        tstr += ', '
+                        tstr += ',&nbsp;'
                 c += 1
                 if (c < l):
-                    tstr += ', '
-            tstr += ')\\n'
-        s += '\t\tlabel="%s\\n%s";\n' % ("Multi-Traceroute Probe (MTR)", tstr)
+                    tstr += ',&nbsp;'
+            tstr += ')</FONT></TD></TR>'
+        s += '\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD><B>{s0:s}</B></TD></TR>{s1:s}</TABLE>>;\n'.format(s0 = "Multi-Traceroute Probe (MTR)", s1 = tstr)
         s += '\t\tlabelloc="t";\n'
         for k,v in bpip.items():
             s += '\t\t"{ip:s}";\n'.format(ip = k)
@@ -1660,10 +1668,10 @@ class MTR:
 
         #
         # Build Begin Point strings...
-        # Ex bps = "192.168.43.48" [shape=record,color=black,fillcolor=orange,style=filled,"
+        # Ex bps = "192.168.43.48" [shape=record,color="black",gradientangle=270,fillcolor="white:darkorange",style=filled,"
         #        + "label="192.168.43.48\nProbe|{http|{<BT1>T1|<BT3>T3}}|{https:{<BT2>T4|<BT3>T4}}"];
         #
-        s += "\n###Probe Begin Points###\n"
+        s += "\n\t### Probe Begin Traces ###\n"
         for k,v in bpip.items():
             tr = ''
             for sv in v:
@@ -1671,12 +1679,12 @@ class MTR:
                     tr += '{{{p:s}|{{{t:s}}}}}'.format(p = sv[1], t = sv[0])
                 else:
                     tr += '|{{{p:s}|{{{t:s}}}}}'.format(p = sv[1], t = sv[0])
-            bps1 = '\t"{ip:s}" [shape=record,color=black,fillcolor=orange,style=filled,'.format(ip = k)
+            bps1 = '\t"{ip:s}" [shape=record,color="black",gradientangle=270,fillcolor="white:darkorange",style=filled,'.format(ip = k)
             bps2 = 'label="{ip:s}\\nProbe|{tr:s}"];\n'.format(ip = k, tr = tr)
             s += bps1 + bps2
 
         #
-        s += "\n###Target Endpoints###\n"
+        s += "\n\t### Target Endpoints ###\n"
         #
         # Combine Trace Target Endpoints...
         #
@@ -1715,7 +1723,7 @@ class MTR:
                 epip[k[0]] = [(tr, p, v[0])]
         #
         # Build Endpoint strings...
-        # Ex eps = "162.144.22.87" [shape=record,color=black,fillcolor=green,style=filled,"
+        # Ex eps = "162.144.22.87" [shape=record,color="black",gradientangle=270,fillcolor="lightgreen:green",style=filled,"
         #        + "label="162.144.22.87\nTarget|{{<ET1>T1|<ET3>T3}|https SA}|{{<ET2>T4|<ET3>T4}|http SA}"];
         for k,v in epip.items():
             tr = ''
@@ -1724,18 +1732,18 @@ class MTR:
                     tr += '{{{{{t:s}}}|{p:s} {f:s}}}'.format(t = sv[0], p = sv[1], f = sv[2])
                 else:
                     tr += '|{{{{{t:s}}}|{p:s} {f:s}}}'.format(t = sv[0], p = sv[1], f = sv[2])
-            eps1 = '\t"{ip:s}" [shape=record,color=black,fillcolor=green,style=filled,'.format(ip = k)
+            eps1 = '\t"{ip:s}" [shape=record,color="black",gradientangle=270,fillcolor="lightgreen:green",style=filled,'.format(ip = k)
             eps2 = 'label="{ip:s}\\nTarget|{tr:s}"];\n'.format(ip = k, tr = tr)
             s += eps1 + eps2 
 
         #
         # Blackholes...
-        s += "\n###Blackholes###\n"
+        s += "\n\t### Blackholes ###\n"
         for bh in self._blackholes:
             s += '\t%s [shape=octagon,color=black,fillcolor=red,style=filled];\n' % bh
         #
         if self._graphpadding:
-            s += "\n###Padding###\n"
+            s += "\n### Nodes With Padding ###\n"
             pad = {}
             for t in range(0, self._ntraces):
                 for snd,rcv in self._res[t]:
@@ -1747,17 +1755,14 @@ class MTR:
                 s += '\t"%s" [shape=triangle,color=black,fillcolor=red,style=filled];\n' % rcv
 
         #
-        # Reset default node look...
-        s += "\n\tnode [shape=ellipse,color=black,fillcolor=white,style=filled];\n"
-
-        #
         # Draw each trace for each number of queries... 
-        s += "\n###Traces###\n"
+        s += "\n\t### Traces ###\n"
         t = 0
         for q in range(0, self._ntraces):
             for rtk in self._rt[q]:
-                s += "#---[%s\n" % repr(rtk)
-                s += '\t\tedge [color="#%s%s%s"]\n' % next(forecolorlist)
+                s += "\t### T{tr:d} -> {r:s} ###\n".format(tr = (t + 1), r = repr(rtk))
+                col = next(forecolorlist)
+                s += '\tedge [color="#{s0:s}{s1:s}{s2:s}"];\n'.format(s0 = col[0], s1 = col[1], s2 = col[2])
                 #
                 # Probe Begin Point...
                 for k,v in self._tlblid[t].items():
@@ -1765,16 +1770,21 @@ class MTR:
                 trace = self._rt[q][rtk]
                 tk = trace.keys()
                 for n in range(min(tk), max(tk)):
-                    s += '\t%s ->\n' % trace[n]
+                    s += '\t{tr:s} ->\n'.format(tr = trace[n])
                 #
                 # Enhance target Endpoint replacement...
                 for k,v in self._tlblid[t].items():
                     if (v[6] == 'BH'):		# Blackhole detection - do not create Enhanced Endpoint
-                        s += '\t%s;\n\n' % trace[max(tk)]
+                        s += '\t{tr:s};\n\n'.format(tr = trace[max(tk)])
                     else:
                         s += '\t"{ep:s}":E{tr:s}:n;\n\n'.format(ep = k, tr = v[0])
                 t += 1				# Next trace
  
+        #
+        # Decorate Unknown ('Unkn') Nodes...
+        s += "\n\t### Decoration For Unknown (Unkn) Node Hops ###\n"
+        for u in self._unks:
+            s += '\t{u:s} [shape=ellipse,fontname="Sans-Serif",fontsize=11,color="black",gradientangle=270,fillcolor="white:#d0d0d0",style=filled];\n'.format(u = u)
         #
         # End the DOT Digraph...
         s += "}\n";
