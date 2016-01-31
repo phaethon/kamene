@@ -1409,7 +1409,10 @@ class MTR:
         if self._asres is None:
             asnlist = []
         else:
-            asnlist = self._asres.resolve(*asnquerylist)            
+            try:
+                asnlist = self._asres.resolve(*asnquerylist)
+            except:
+                pass
         for ip,asn,desc, in asnlist:
             if asn is None:
                 continue
@@ -1420,8 +1423,20 @@ class MTR:
                 iplist.append(self._blackholesip[ip])
             else:
                 iplist.append(ip)
-            self._asns[asn] = iplist
-            self._asds[asn] = desc
+            #
+            # If ASN is a string Convert to a number: (i.e., 'AS3257' => 3257)
+            if (type(asn) == str):
+                asn = asn.upper()
+                asn = asn.replace('AS','')
+                try:
+                    asn = int(asn)
+                    self._asns[asn] = iplist
+                    self._asds[asn] = desc
+                except:
+                    continue
+            else:
+                self._asns[asn] = iplist
+                self._asds[asn] = desc
 
     #
     #  Get the ASN for a given IP Address.
@@ -1635,13 +1650,13 @@ class MTR:
         # Format Label including trace targets...
         tstr = ''
         for t in self._target:
-            tstr += '<TR><TD><FONT POINT-SIZE="10">Target:&nbsp;{t:s}&nbsp;('.format(t = t)
+            tstr += '<TR><TD ALIGN="center"><FONT POINT-SIZE="9">Target: {t:s} ('.format(t = t)
             #
             # Append resolve IP Addresses...
             l = len(self._host2ip[t])
             c = 0
             for ip in self._host2ip[t]:
-                tstr += '{ip:s}&nbsp;&rarr;&nbsp;'.format(ip = ip)
+                tstr += '{ip:s} &rarr; '.format(ip = ip)
                 #
                 # Append all associated Target IDs...
                 ti = []
@@ -1655,12 +1670,12 @@ class MTR:
                     tstr += '{i:s}'.format(i = i)
                     ct += 1
                     if (ct < lt):
-                        tstr += ',&nbsp;'
+                        tstr += ', '
                 c += 1
                 if (c < l):
-                    tstr += ',&nbsp;'
+                    tstr += ', '
             tstr += ')</FONT></TD></TR>'
-        s += '\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD><B>{s0:s}</B></TD></TR>{s1:s}</TABLE>>;\n'.format(s0 = "Multi-Traceroute Probe (MTR)", s1 = tstr)
+        s += '\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="center"><B>{s0:s}</B></TD></TR>{s1:s}</TABLE>>;\n'.format(s0 = "Multi-Traceroute Probe (MTR)", s1 = tstr)
         s += '\t\tlabelloc="t";\n'
         for k,v in bpip.items():
             s += '\t\t"{ip:s}";\n'.format(ip = k)
