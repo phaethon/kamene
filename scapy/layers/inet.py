@@ -1343,12 +1343,12 @@ class MTR:
         self._res = []
         self._ures = []
         self._ips = {}
+        self._hops = {}
         self._rt = []
         self._ports = {}
         self._portsdone = {}
         self._unknownlabel = incremental_label('"Unk%i"')
-        self._blackholes = []
-        self._blackholesip = {}
+        self._blackholes = {}
         self._asres = conf.AS_resolver
         self._asns = {}
         self._asds = {}
@@ -1380,17 +1380,28 @@ class MTR:
                     else:
                         bh = '%s %i/proto' % (rtk[1],rtk[2]) 
                         bha = '%i/proto' % (rtk[2]) 
-                    self._ips[bh] = None
-                    if not rtk[1] in self._blackholesip:	# If new, append blackhole IP and port
-                        self._blackholesip[rtk[1]] = bh
+                    self._ips[rtk[1]] = None			# Add the Blackhole IP to list of unique IP Addresses
+                    if not rtk[1] in self._blackholes:		# If new, append blackhole IP and port
+                        self._blackholes[rtk[1]] = bh
                     else:					# Try to append blackhole port only
-                        cbh = self._blackholesip[rtk[1]]
+                        cbh = self._blackholes[rtk[1]]
                         if (cbh.find(bha) == -1):		# Only append blackhole port if not already done
-                            self._blackholesip[rtk[1]] = cbh + " " + bha
+                            self._blackholes[rtk[1]] = cbh + " " + bha
                     bh = '"%s"' % bh
                     trace[max(k)+1] = bh
-                    if not bh in self._blackholes:
-                        self._blackholes.append(bh)
+
+    #
+    # Compute the Hop range for each trace...
+    def compute_hop_ranges(self):
+        n = 1
+        for t in range(0, self._ntraces):
+            for rtk in self._rt[t]:
+                trace = self._rt[t][rtk]
+                k = trace.keys()
+                hoplist = self._hops.get(rtk[1],[])     	# Get previous hop value
+                hoplist.append([n, min(k), max(k)])		# Append trace hop range for this trace
+                self._hops[rtk[1]] = hoplist			# Update mtr Hop value
+                n += 1
 
     #
     # Get AS Numbers...
@@ -1416,13 +1427,9 @@ class MTR:
         for ip,asn,desc, in asnlist:
             if asn is None:
                 continue
-            iplist = self._asns.get(asn,[])
-            if ip in self._blackholesip:
-                if ip in self._ports:
-                    iplist.append(ip)
-                iplist.append(self._blackholesip[ip])
-            else:
-                iplist.append(ip)
+            iplist = self._asns.get(asn,[])	# Get previous ASN value
+            iplist.append(ip)			# Append IP Address to previous ASN
+
             #
             # If ASN is a string Convert to a number: (i.e., 'AS3257' => 3257)
             if (type(asn) == str):
@@ -1549,7 +1556,19 @@ class MTR:
         uepip = set(epip)		# Get a unique set of Endpoint IPs
         #
         for ep in uepip:
-            ecs = "\n\t\t### Endpoint (Target) Cluster ###\n"
+            #
+            # Build Traceroute Hop Range label...
+            hr = self._hops[ep]
+            hrs = "Hop Ranges ("
+            l = len(hr)
+            c = 0
+            for r in hr:
+                hrs += 'T{s1:d}: {s2:d} &rarr; {s3:d}'.format(s1 = r[0], s2 = r[1], s3 = r[2])
+                c += 1
+                if (c < l):
+                    hrs += ', '
+            hrs += ')'
+            ecs = "\t\t### Endpoint (Target) Cluster ###\n"
             uep = ep.replace('.', '_')
             ecs += '\t\tsubgraph cluster_{ep:s} {{\n'.format(ep = uep)
             ecs += '\t\t\tcolor="green";\n'
@@ -1558,7 +1577,8 @@ class MTR:
             ecs += '\t\t\tgradientangle=270;\n'
             ecs += '\t\t\tfillcolor="white:#a0a0a0";\n'
             ecs += '\t\t\tstyle="filled";\n'
-            ecs += '\t\t\tlabel=<Target: <B>{h:s}</B>>;\n'.format(h = self._ip2host[ep])
+            ecs += '\t\t\tpenwidth=2;\n'
+            ecs += '\t\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="center"><B>Target: {h:s}</B></TD></TR><TR><TD><FONT POINT-SIZE="9">{hr:s}</FONT></TD></TR></TABLE>>;\n'.format(h = self._ip2host[ep], hr = hrs)
             ecs += '\t\t\tlabelloc="b";\n'
             ecs += '\t\t\t"{ep:s}";\n'.format(ep = ep)
             ecs += "\t\t}\n"
@@ -1578,8 +1598,9 @@ class MTR:
             s += '\t\tnode [color="#{s0:s}{s1:s}{s2:s}",gradientangle=270,fillcolor="white:#{s0:s}{s1:s}{s2:s}",style=filled];\n'.format(s0 = col[0], s1 = col[1], s2 = col[2])
             s += '\t\tfontsize=10;\n'
             s += '\t\tfontname="Sans-Serif";\n'
-            s += '\t\tlabel="{asn:d}\\n[{des:s}]";\n'.format(asn = asn, des = self._asds[asn])
+            s += '\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="center"><B><FONT POINT-SIZE="11">AS: {asn:d}</FONT></B></TD></TR><TR><TD>[{des:s}]</TD></TR></TABLE>>;\n'.format(asn = asn, des = self._asds[asn])
             s += '\t\tlabelloc="t";\n'
+            s += '\t\tpenwidth=3;\n'
             for ip in self._asns[asn]:
                 #
                 # Only add IP if not an Endpoint Target...
@@ -1644,6 +1665,7 @@ class MTR:
         s += '\t\tgradientangle=270;\n'
         s += '\t\tfillcolor="white:#a0a0a0";\n'
         s += '\t\tstyle="filled";\n'
+        s += '\t\tpenwidth=3;\n'
         s += '\t\tfontsize=11;\n'
         s += '\t\tfontname="Sans-Serif";\n'
         #
@@ -1755,10 +1777,12 @@ class MTR:
         # Blackholes...
         s += "\n\t### Blackholes ###\n"
         for bh in self._blackholes:
-            s += '\t%s [shape=octagon,color=black,fillcolor=red,style=filled];\n' % bh
+            lb = 'label=<{b:s}<BR/><FONT POINT-SIZE="8">Failed Target</FONT>>'.format(b = self._blackholes[bh])
+            s += '\t"{b:s}" [{l:s},shape=octagon,color="black",gradientangle=270,fillcolor="white:red",style=filled];\n'.format(b = bh, l = lb)
         #
+        # Padding check...
         if self._graphpadding:
-            s += "\n### Nodes With Padding ###\n"
+            s += "\n\t### Nodes With Padding ###\n"
             pad = {}
             for t in range(0, self._ntraces):
                 for snd,rcv in self._res[t]:
@@ -1766,8 +1790,9 @@ class MTR:
                         p = rcv.getlayer(conf.padding_layer).load
                         if p != "\x00" * len(p):
                             pad[rcv.src] = None
-            for rcv in pad:
-                s += '\t"%s" [shape=triangle,color=black,fillcolor=red,style=filled];\n' % rcv
+            for sr in pad:
+                lb = 'label=<<BR/>{r:s}<BR/><FONT POINT-SIZE="8">Padding</FONT>>'.format(r = sr)
+                s += '\t"{r:s}" [{l:s},shape=box3d,color="black",gradientangle=270,fillcolor="white:red",style=filled];\n'.format(r = sr, l = lb)
 
         #
         # Draw each trace for each number of queries... 
@@ -1790,9 +1815,9 @@ class MTR:
                 # Enhance target Endpoint replacement...
                 for k,v in self._tlblid[t].items():
                     if (v[6] == 'BH'):		# Blackhole detection - do not create Enhanced Endpoint
-                        s += '\t{tr:s};\n\n'.format(tr = trace[max(tk)])
+                        s += '\t"{tr:s}";\n'.format(tr = k)
                     else:
-                        s += '\t"{ep:s}":E{tr:s}:n;\n\n'.format(ep = k, tr = v[0])
+                        s += '\t"{ep:s}":E{tr:s}:n;\n'.format(ep = k, tr = v[0])
                 t += 1				# Next trace
  
         #
@@ -1815,7 +1840,7 @@ class MTR:
         ASres=AS_resolver() : default whois AS resolver (riswhois.ripe.net)
         ASres=AS_resolver_cymru(): use whois.cymru.com whois database
         ASres=AS_resolver(server="whois.ra.net")
-        padding: Show packets with padding as red triangles
+        padding: Show packets with padding as red octagons
         format: output type (svg, ps, gif, jpg, etc.), passed to dot's "-T" option
         figsize: w,h tuple in inches. See matplotlib documentation
         target: filename. If None, uses matplotlib to display
@@ -1866,7 +1891,7 @@ class MTracerouteResult(SndRcvList):
                 trace_id = (s.src, s.dst, 1, s.type)
             else:
                 trace_id = (s.src, s.dst, s.proto, 0)
-            trace = rt.get(trace_id,{})
+            trace = rt.get(trace_id, {})
             ttl = conf.ipv6_enabled and scapy.layers.inet6.IPv6 in s and s.hlim or s.ttl
             if not (ICMP in r and r[ICMP].type == 11) and not (conf.ipv6_enabled and scapy.layers.inet6.IPv6 in r and scapy.layers.inet6.ICMPv6TimeExceeded in r):
                 if trace_id in portsdone:
@@ -2019,6 +2044,9 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
     # Compute any Black Holes...
     mtrc.get_black_holes()
     #
+    # Compute Trace Hop Ranges...
+    mtrc.compute_hop_ranges()
+    #
     # Resolve AS Numbers...
     if rasn:
         mtrc.get_asns(privaddr)
@@ -2052,6 +2080,9 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
         print("\nmtrc._rt (Individual Route Traces):")
         print("=======================================================")
         print(mtrc._rt)
+        print("\nmtrc._hops (Traceroute Hop Ranges):")
+        print("=======================================================")
+        print(mtrc._hops)
         print("\nmtrc._tlblid (Trace Label IDs):")
         print("=======================================================")
         print(mtrc._tlblid)
@@ -2064,9 +2095,6 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
         print("\nmtrc._blackholes (Failed Targets):")
         print("=======================================================")
         print(mtrc._blackholes)
-        print("\nmtrc._blackholes IPs (Failed Target IPs):")
-        print("=======================================================")
-        print(mtrc._blackholesip)
         print("\nmtrc._asres Resolver (AS Resolver Method):")
         print("=======================================================")
         print(mtrc._asres)
