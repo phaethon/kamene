@@ -1522,7 +1522,7 @@ class MTR:
 
     #
     # Make the DOT graph...
-    def make_dot_graph(self, ASres = None, padding = 0):
+    def make_dot_graph(self, ASres = None, padding = 0, vspread = 0.75, title = "Multi-Traceroute Probe (MTR)", timestamp = ""):
         import datetime
         if ASres is None:
             self._asres = conf.AS_resolver
@@ -1541,7 +1541,7 @@ class MTR:
         s += "\ndigraph mtr {\n"
         #
         # Define the default graph attributes...
-        s += '\tgraph [bgcolor=transparent,ranksep=0.75];\n'
+        s += '\tgraph [bgcolor=transparent,ranksep={vs:.2f}];\n'.format(vs = vspread)
         #
         # Define the default node shape and drawing color...
         s += '\tnode [shape=ellipse,fontname="Sans-Serif",fontsize=11,color="black",gradientangle=270,fillcolor="white:#d0d0d0",style=filled];\n'
@@ -1559,8 +1559,11 @@ class MTR:
             #
             # Build Traceroute Hop Range label...
             hr = self._hops[ep]
-            hrs = "Hop Ranges ("
             l = len(hr)
+            if (l == 1):
+                hrs = "Hop Range ("
+            else:
+                hrs = "Hop Ranges ("
             c = 0
             for r in hr:
                 hrs += 'T{s1:d}: {s2:d} &rarr; {s3:d}'.format(s1 = r[0], s2 = r[1], s3 = r[2])
@@ -1697,7 +1700,10 @@ class MTR:
                 if (c < l):
                     tstr += ', '
             tstr += ')</FONT></TD></TR>'
-        s += '\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="center"><B>{s0:s}</B></TD></TR>{s1:s}</TABLE>>;\n'.format(s0 = "Multi-Traceroute Probe (MTR)", s1 = tstr)
+        s += '\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="center"><B>{s0:s}</B></TD></TR>'.format(s0 = title)
+        if (timestamp != ""):
+            s += '<TR><TD ALIGN="center"><FONT POINT-SIZE="9">{s0:s}</FONT></TD></TR>'.format(s0 = timestamp)
+        s += '{s0:s}</TABLE>>;\n'.format(s0 = tstr)
         s += '\t\tlabelloc="t";\n'
         for k,v in bpip.items():
             s += '\t\t"{ip:s}";\n'.format(ip = k)
@@ -1834,23 +1840,26 @@ class MTR:
 
     #
     # Graph the Multi-Traceroute...
-    def graph(self, ASres = None, padding = 0, **kargs):
+    def graph(self, ASres = None, padding = 0, vspread = 0.75, title = "Multi-Traceroute Probe (MTR)", timestamp = "", **kargs):
         """x.graph(ASres=conf.AS_resolver, other args):
-        ASres=None          : Use AS default resolver => 'conf.AS_resolver'
-        ASres=AS_resolver() : default whois AS resolver (riswhois.ripe.net)
-        ASres=AS_resolver_cymru(): use whois.cymru.com whois database
-        ASres=AS_resolver(server="whois.ra.net")
-        padding: Show packets with padding as red octagons
-        format: output type (svg, ps, gif, jpg, etc.), passed to dot's "-T" option
-        figsize: w,h tuple in inches. See matplotlib documentation
-        target: filename. If None, uses matplotlib to display
-        prog: which graphviz program to use"""
+        ASres = None          : Use AS default resolver => 'conf.AS_resolver'
+        ASres = AS_resolver() : default whois AS resolver (riswhois.ripe.net)
+        ASres = AS_resolver_cymru(): use whois.cymru.com whois database
+        ASres = AS_resolver(server="whois.ra.net")
+        padding: Show packets with padding as a red 3D-Box.
+        vspread: Vertical separation between nodes on graph.
+        title: Title text for the rendering graphic.
+        timestamp: Title Time Stamp text to appear below the Title text.
+        format: Output type (svg, ps, gif, jpg, etc.), passed to dot's "-T" option.
+        figsize: w,h tuple in inches. See matplotlib documentation.
+        target: filename. If None, uses matplotlib to display.
+        prog: Which graphviz program to use."""
         if self._asres is None:
             self._asres = conf.AS_resolver
         if (self._graphdef is None or		# Remake the graph if there are any changes
             self._graphasres != self._asres or
             self._graphpadding != padding):
-            self.make_dot_graph(ASres, padding)
+            self.make_dot_graph(ASres, padding, vspread, title, timestamp)
 
         return do_graph(self._graphdef, **kargs)
 
