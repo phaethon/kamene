@@ -1597,7 +1597,7 @@ class MTR:
         for asn in self._asns:
             cipcur = []			# Array of IP Endpoints (Targets) consumed by the Current ASN Cluster
             s += '\tsubgraph cluster_{asn:d} {{\n'.format(asn = asn)
-            s += '\t\ttooltip="AS: {asn:d}";\n'.format(asn = asn)
+            s += '\t\ttooltip="AS: {asn:d} - [{asnd:s}]";\n'.format(asn = asn, asnd = self._asds[asn])
             col = next(backcolorlist)
             s += '\t\tcolor="#{s0:s}{s1:s}{s2:s}";\n'.format(s0 = col[0], s1 = col[1], s2 = col[2])
             s += '\t\tnode [color="#{s0:s}{s1:s}{s2:s}",gradientangle=270,fillcolor="white:#{s0:s}{s1:s}{s2:s}",style=filled];\n'.format(s0 = col[0], s1 = col[1], s2 = col[2])
