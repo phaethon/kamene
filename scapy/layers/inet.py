@@ -1574,6 +1574,7 @@ class MTR:
             ecs = "\t\t### Endpoint (Target) Cluster ###\n"
             uep = ep.replace('.', '_')
             ecs += '\t\tsubgraph cluster_{ep:s} {{\n'.format(ep = uep)
+            ecs += '\t\t\ttooltip="Endpoint Host Target: {trg:s}";\n'.format(trg = self._ip2host[ep])
             ecs += '\t\t\tcolor="green";\n'
             ecs += '\t\t\tfontsize=11;\n'
             ecs += '\t\t\tfontname="Sans-Serif";\n'
@@ -1596,6 +1597,7 @@ class MTR:
         for asn in self._asns:
             cipcur = []			# Array of IP Endpoints (Targets) consumed by the Current ASN Cluster
             s += '\tsubgraph cluster_{asn:d} {{\n'.format(asn = asn)
+            s += '\t\ttooltip="AS: {asn:d}";\n'.format(asn = asn)
             col = next(backcolorlist)
             s += '\t\tcolor="#{s0:s}{s1:s}{s2:s}";\n'.format(s0 = col[0], s1 = col[1], s2 = col[2])
             s += '\t\tnode [color="#{s0:s}{s1:s}{s2:s}",gradientangle=270,fillcolor="white:#{s0:s}{s1:s}{s2:s}",style=filled];\n'.format(s0 = col[0], s1 = col[1], s2 = col[2])
@@ -1664,6 +1666,7 @@ class MTR:
         # Probe Target Cluster...
         s += "\n\t### Probe Target Cluster ###\n"
         s += '\tsubgraph cluster_probe_Title {\n'
+        s += '\t\ttooltip="Multi-Traceroute Probe (MTR)";\n'
         s += '\t\tcolor="darkorange";\n'
         s += '\t\tgradientangle=270;\n'
         s += '\t\tfillcolor="white:#a0a0a0";\n'
@@ -1723,7 +1726,7 @@ class MTR:
                 else:
                     tr += '|{{{p:s}|{{{t:s}}}}}'.format(p = sv[1], t = sv[0])
             bps1 = '\t"{ip:s}" [shape=record,color="black",gradientangle=270,fillcolor="white:darkorange",style=filled,'.format(ip = k)
-            bps2 = 'label="{ip:s}\\nProbe|{tr:s}"];\n'.format(ip = k, tr = tr)
+            bps2 = 'label="{ip:s}\\nProbe|{tr:s}",tooltip="Begin Host Probe: {ip:s}"];\n'.format(ip = k, tr = tr)
             s += bps1 + bps2
 
         #
@@ -1812,18 +1815,29 @@ class MTR:
                 #
                 # Probe Begin Point...
                 for k,v in self._tlblid[t].items():
-                    s += '\t"{bp:s}":B{tr:s}:s->\n'.format(bp = v[1], tr = v[0])
+                    ptr = v[1]
+                    s += '\t"{bp:s}":B{tr:s}:s -> '.format(bp = ptr, tr = v[0])
+                #
+                # In between traces...
                 trace = self._rt[q][rtk]
                 tk = trace.keys()
-                for n in range(min(tk), max(tk)):
-                    s += '\t{tr:s} ->\n'.format(tr = trace[n])
+                ntr = trace[min(tk)]
+                lb = 'Trace: {tr:d}:{tn:d} {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = min(tk), lbp = ptr, lbn = ntr.replace('"',''))
+                s += '{ntr:s} [tooltip="{lb:s}"];\n'.format(ntr = ntr, lb = lb)
+                for n in range(min(tk) + 1, max(tk)):
+                    ptr = ntr
+                    ntr = trace[n]
+                    lb = 'Trace: {tr:d}:{tn:d} {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = n, lbp = ptr.replace('"',''), lbn = ntr.replace('"',''))
+                    s += '\t{ptr:s} -> {ntr:s} [tooltip="{lb:s}"];\n'.format(ptr = ptr, ntr = ntr, lb = lb)
                 #
                 # Enhance target Endpoint replacement...
+                s += '\t{ptr:s} -> '.format(ptr = ntr)
                 for k,v in self._tlblid[t].items():
                     if (v[6] == 'BH'):		# Blackhole detection - do not create Enhanced Endpoint
-                        s += '\t"{tr:s}";\n'.format(tr = k)
+                        s += '"{tr:s}";\n'.format(tr = k)
                     else:
-                        s += '\t"{ep:s}":E{tr:s}:n;\n'.format(ep = k, tr = v[0])
+                        lb = 'Trace: {tr:d}:{tn:d} {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = n + 1, lbp = ptr.replace('"',''), lbn = k)
+                        s += '"{ep:s}":E{tr:s}:n [tooltip="{lb:s}"];\n'.format(ep = k, tr = v[0], lb = lb)
                 t += 1				# Next trace
  
         #
