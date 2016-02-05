@@ -1882,8 +1882,8 @@ class MTR:
                 for k,v in self._tlblid[t].items():
                     if (v[6] == 'BH'):		# Blackhole detection - do not create Enhanced Endpoint
                         lb = 'Trace: {tr:d}'.format(tr = (t + 1))
-                        s += '"{bh:s} {bhp:d}/{bht:s}" [tooltip="{lb:s}"];\n'.format(bh = k, bhp = v[4], bht = v[3], lb = lb)
-                    else:
+                        s += '"{bh:s} {bhp:d}/{bht:s}" [label=<<FONT POINT-SIZE="8">&nbsp; T{tr:d}</FONT>>,tooltip="{lb:s}"];\n'.format(bh = k, bhp = v[4], bht = v[3], tr = (t + 1), lb = lb)
+                    else:			# Enhanced Target Endpoint
                         lb = 'Trace: {tr:d}:{tn:d} {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = n + 1, lbp = ntr.replace('"',''), lbn = k)
                         if not 'Unk' in k:
                             lb += ' (RTT: {rtt:s}ms)'.format(rtt = self._rtt[t + 1][n + 1])
