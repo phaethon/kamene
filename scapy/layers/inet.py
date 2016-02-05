@@ -1333,12 +1333,12 @@ class MTR:
     # Initialize Multi-Traceroute Object Vars...
     def __init__(self, nquery = 1, target = ''):
         self._nquery = nquery
-        self._ntraces = 1
+        self._ntraces = 1		# Number of trace runs 
         self._target = target
         self._exptrg = []		# Expanded targets
         self._host2ip = {}
         self._ip2host = {}
-        self._tcnt = 0			# Trace count
+        self._tcnt = 0			# Total Trace count
         self._tlblid = []		# Trace label IDs
         self._res = []
         self._ures = []
@@ -1347,6 +1347,7 @@ class MTR:
         self._rt = []
         self._ports = {}
         self._portsdone = {}
+        self._rtt = {}
         self._unknownlabel = incremental_label('"Unk%i"')
         self._blackholes = {}
         self._asres = conf.AS_resolver
@@ -1382,12 +1383,14 @@ class MTR:
                         bha = '%i/proto' % (rtk[2]) 
                     self._ips[rtk[1]] = None			# Add the Blackhole IP to list of unique IP Addresses
                     if not rtk[1] in self._blackholes:		# If new, append blackhole IP and port
-                        self._blackholes[rtk[1]] = bh
+                        self._blackholes[rtk[1]] = [bha]
                     else:					# Try to append blackhole port only
                         cbh = self._blackholes[rtk[1]]
-                        if (cbh.find(bha) == -1):		# Only append blackhole port if not already done
-                            self._blackholes[rtk[1]] = cbh + " " + bha
-                    bh = '"%s"' % bh
+                        if not bha in self._blackholes[rtk[1]]:	# Only append blackhole port if not already done
+                            self._blackholes[rtk[1]].append(bha)
+                    #
+                    # Update trace with Blackhole info...
+                    bh = '"{bh:s}"'.format(bh = bh)
                     trace[max(k)+1] = bh
 
     #
@@ -1398,9 +1401,16 @@ class MTR:
             for rtk in self._rt[t]:
                 trace = self._rt[t][rtk]
                 k = trace.keys()
-                hoplist = self._hops.get(rtk[1],[])     	# Get previous hop value
-                hoplist.append([n, min(k), max(k)])		# Append trace hop range for this trace
-                self._hops[rtk[1]] = hoplist			# Update mtr Hop value
+                #
+                # Detect Blackhole Endpoints...
+                h = rtk[1]
+                mt = max(k)
+                if not ':' in trace[max(k)]:
+                    h = trace[max(k)].replace('"','')	# Add a Blackhole Endpoint (':' Char does not exist)
+                    mt = max(k) - 1			# Blackhole - remove Hop for Blackhole -> Host never reached
+                hoplist = self._hops.get(h,[])     	# Get previous hop value
+                hoplist.append([n, min(k), mt])		# Append trace hop range for this trace
+                self._hops[h] = hoplist			# Update mtr Hop value
                 n += 1
 
     #
@@ -1522,7 +1532,7 @@ class MTR:
 
     #
     # Make the DOT graph...
-    def make_dot_graph(self, ASres = None, padding = 0, vspread = 0.75, title = "Multi-Traceroute Probe (MTR)", timestamp = ""):
+    def make_dot_graph(self, ASres = None, padding = 0, vspread = 0.75, title = "Multi-Traceroute Probe (MTR)", timestamp = "", rtt = 1):
         import datetime
         if ASres is None:
             self._asres = conf.AS_resolver
@@ -1548,17 +1558,29 @@ class MTR:
 
         #
         # Create Endpoint Target Clusters...
-        epc = {}			# Endpoint Cluster Distionary
-        epip = []			# Endpoint IP array
+        epc = {}			# Endpoint Target Cluster Dictionary
+        epip = []			# Endpoint IPs array
+        oip = []			# Only Endpoint IParray
         for d in self._tlblid:		# Spin thru Target IDs
             for k,v in d.items():	# Get access to Target Endpoints
-                epip.append(k)
+                h = k
+                if (v[6] == 'BH'):	# Add a Blackhole Endpoint Target
+                    h = '{bh:s} {bhp:d}/{bht:s}'.format(bh = k, bhp = v[4], bht = v[3])
+                epip.append(h)
+                oip.append(k)
         uepip = set(epip)		# Get a unique set of Endpoint IPs
+        uepipo = set(oip)		# Get a unique set of Only Endpoint IPs
         #
         for ep in uepip:
             #
             # Build Traceroute Hop Range label...
             hr = self._hops[ep]
+            #
+            # Get Host only string...
+            eph = ep
+            f = ep.find(' ')
+            if (f >= 0):
+                eph = ep[0:f]
             l = len(hr)
             if (l == 1):
                 hrs = "Hop Range ("
@@ -1573,8 +1595,10 @@ class MTR:
             hrs += ')'
             ecs = "\t\t### Endpoint (Target) Cluster ###\n"
             uep = ep.replace('.', '_')
+            uep = uep.replace(' ', '_')
+            uep = uep.replace('/', '_')
             ecs += '\t\tsubgraph cluster_{ep:s} {{\n'.format(ep = uep)
-            ecs += '\t\t\ttooltip="Endpoint Host Target: {trg:s}";\n'.format(trg = self._ip2host[ep])
+            ecs += '\t\t\ttooltip="Endpoint Host Target: {trg:s}";\n'.format(trg = self._ip2host[eph])
             ecs += '\t\t\tcolor="green";\n'
             ecs += '\t\t\tfontsize=11;\n'
             ecs += '\t\t\tfontname="Sans-Serif";\n'
@@ -1582,7 +1606,7 @@ class MTR:
             ecs += '\t\t\tfillcolor="white:#a0a0a0";\n'
             ecs += '\t\t\tstyle="filled";\n'
             ecs += '\t\t\tpenwidth=2;\n'
-            ecs += '\t\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="center"><B>Target: {h:s}</B></TD></TR><TR><TD><FONT POINT-SIZE="9">{hr:s}</FONT></TD></TR></TABLE>>;\n'.format(h = self._ip2host[ep], hr = hrs)
+            ecs += '\t\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="center"><B>Target: {h:s}</B></TD></TR><TR><TD><FONT POINT-SIZE="9">{hr:s}</FONT></TD></TR></TABLE>>;\n'.format(h = self._ip2host[eph], hr = hrs)
             ecs += '\t\t\tlabelloc="b";\n'
             ecs += '\t\t\t"{ep:s}";\n'.format(ep = ep)
             ecs += "\t\t}\n"
@@ -1595,7 +1619,7 @@ class MTR:
         s += "\n\t### ASN Clusters ###\n"
         cipall = []			# Array of IP Endpoints (Targets) consumed by All ASN Cluster
         for asn in self._asns:
-            cipcur = []			# Array of IP Endpoints (Targets) consumed by the Current ASN Cluster
+            cipcur = []
             s += '\tsubgraph cluster_{asn:d} {{\n'.format(asn = asn)
             s += '\t\ttooltip="AS: {asn:d} - [{asnd:s}]";\n'.format(asn = asn, asnd = self._asds[asn])
             col = next(backcolorlist)
@@ -1609,8 +1633,8 @@ class MTR:
             for ip in self._asns[asn]:
                 #
                 # Only add IP if not an Endpoint Target...
-                if not ip in uepip:
-                    s += '\t\t"%s";\n'%ip
+                if not ip in uepipo:
+                    s += '\t\t"{ip:s}";\n'.format(ip = ip)
                 else:
                     cipcur.append(ip)	# Current list of Endpoints consumed by this ASN Cluster
                     cipall.append(ip)	# Accumulated list of Endpoints consumed by all ASN Clusters
@@ -1618,7 +1642,13 @@ class MTR:
             # Add Endpoint Cluster(s) if part of this ASN Cluster (Nested Clusters)...
             if (len(cipcur) > 0):
                 for ip in cipcur:
-                    s += epc[ip]
+                    for e in epc:	# Lopp thru each Endpoint Target Clusters
+                        h = e
+                        f = e.find(' ')	# Strip off 'port/proto'
+                        if (f >= 0):
+                            h = e[0:f]
+                        if (h == ip):
+                            s += epc[e]
             s += "\t}\n"
         #
         # Add any Endpoint Target Clusters not consumed by an ASN Cluster (Stand-alone Cluster)...
@@ -1786,8 +1816,9 @@ class MTR:
         # Blackholes...
         s += "\n\t### Blackholes ###\n"
         for bh in self._blackholes:
-            lb = 'label=<{b:s}<BR/><FONT POINT-SIZE="8">Failed Target</FONT>>'.format(b = self._blackholes[bh])
-            s += '\t"{b:s}" [{l:s},shape=octagon,color="black",gradientangle=270,fillcolor="white:red",style=filled];\n'.format(b = bh, l = lb)
+            for bhp in self._blackholes[bh]:
+                lb = 'label=<{b:s} {bp:s}<BR/><FONT POINT-SIZE="8">Failed Target</FONT>>'.format(b = bh, bp = bhp)
+                s += '\t"{b:s} {bp:s}" [{l:s},shape=octagon,color="black",gradientangle=270,fillcolor="white:red",style=filled];\n'.format(b = bh, bp = bhp, l = lb)
         #
         # Padding check...
         if self._graphpadding:
@@ -1823,28 +1854,53 @@ class MTR:
                 tk = trace.keys()
                 ntr = trace[min(tk)]
                 lb = 'Trace: {tr:d}:{tn:d} {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = min(tk), lbp = ptr, lbn = ntr.replace('"',''))
-                s += '{ntr:s} [tooltip="{lb:s}"];\n'.format(ntr = ntr, lb = lb)
+                if not 'Unk' in ntr:
+                    lb += ' (RTT: {rtt:s}ms)'.format(rtt = self._rtt[t + 1][min(tk)])
+                if rtt:
+                    if not 'Unk' in ntr:
+                        s += '{ntr:s} [label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,tooltip="{lb:s}"];\n'.format(ntr = ntr, rtt = self._rtt[t + 1][min(tk)], lb = lb)
+                    else:
+                        s += '{ntr:s} [tooltip="{lb:s}"];\n'.format(ntr = ntr, lb = lb)
+                else:
+                    s += '{ntr:s} [tooltip="{lb:s}"];\n'.format(ntr = ntr, lb = lb)
                 for n in range(min(tk) + 1, max(tk)):
                     ptr = ntr
                     ntr = trace[n]
                     lb = 'Trace: {tr:d}:{tn:d} {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = n, lbp = ptr.replace('"',''), lbn = ntr.replace('"',''))
-                    s += '\t{ptr:s} -> {ntr:s} [tooltip="{lb:s}"];\n'.format(ptr = ptr, ntr = ntr, lb = lb)
+                    if not 'Unk' in ntr:
+                        lb += ' (RTT: {rtt:s}ms)'.format(rtt = self._rtt[t + 1][n])
+                    if rtt:
+                        if not 'Unk' in ntr:
+                            s += '\t{ptr:s} -> {ntr:s} [label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,tooltip="{lb:s}"];\n'.format(ptr = ptr, ntr = ntr, rtt = self._rtt[t + 1][n], lb = lb)
+                        else:
+                            s += '\t{ptr:s} -> {ntr:s} [tooltip="{lb:s}"];\n'.format(ptr = ptr, ntr = ntr, lb = lb)
+                    else:
+                        s += '\t{ptr:s} -> {ntr:s} [tooltip="{lb:s}"];\n'.format(ptr = ptr, ntr = ntr, lb = lb)
                 #
                 # Enhance target Endpoint replacement...
                 s += '\t{ptr:s} -> '.format(ptr = ntr)
                 for k,v in self._tlblid[t].items():
                     if (v[6] == 'BH'):		# Blackhole detection - do not create Enhanced Endpoint
-                        s += '"{tr:s}";\n'.format(tr = k)
+                        lb = 'Trace: {tr:d}'.format(tr = (t + 1))
+                        s += '"{bh:s} {bhp:d}/{bht:s}" [tooltip="{lb:s}"];\n'.format(bh = k, bhp = v[4], bht = v[3], lb = lb)
                     else:
-                        lb = 'Trace: {tr:d}:{tn:d} {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = n + 1, lbp = ptr.replace('"',''), lbn = k)
-                        s += '"{ep:s}":E{tr:s}:n [tooltip="{lb:s}"];\n'.format(ep = k, tr = v[0], lb = lb)
-                t += 1				# Next trace
+                        lb = 'Trace: {tr:d}:{tn:d} {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = n + 1, lbp = ntr.replace('"',''), lbn = k)
+                        if not 'Unk' in k:
+                            lb += ' (RTT: {rtt:s}ms)'.format(rtt = self._rtt[t + 1][n + 1])
+                        if rtt:
+                            if not 'Unk' in k:
+                                s += '"{ep:s}":E{tr:s}:n [label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,tooltip="{lb:s}"];\n'.format(ep = k, tr = v[0], rtt = self._rtt[t + 1][n + 1], lb = lb)
+                            else:
+                                s += '"{ep:s}":E{tr:s}:n [tooltip="{lb:s}"];\n'.format(ep = k, tr = v[0], lb = lb)
+                        else:
+                            s += '"{ep:s}":E{tr:s}:n [tooltip="{lb:s}"];\n'.format(ep = k, tr = v[0], lb = lb)
+                t += 1				# Next trace out of total traces
  
         #
         # Decorate Unknown ('Unkn') Nodes...
         s += "\n\t### Decoration For Unknown (Unkn) Node Hops ###\n"
         for u in self._unks:
-            s += '\t{u:s} [shape=ellipse,fontname="Sans-Serif",fontsize=11,color="black",gradientangle=270,fillcolor="white:#d0d0d0",style=filled];\n'.format(u = u)
+            s += '\t{u:s} [tooltip="Unknown Hop: {u2:s}",shape=ellipse,fontname="Sans-Serif",fontsize=11,color="black",gradientangle=270,fillcolor="white:#d0d0d0",style=filled];\n'.format(u = u, u2 = u.replace('"',''))
         #
         # End the DOT Digraph...
         s += "}\n";
@@ -1854,7 +1910,7 @@ class MTR:
 
     #
     # Graph the Multi-Traceroute...
-    def graph(self, ASres = None, padding = 0, vspread = 0.75, title = "Multi-Traceroute Probe (MTR)", timestamp = "", **kargs):
+    def graph(self, ASres = None, padding = 0, vspread = 0.75, title = "Multi-Traceroute Probe (MTR)", timestamp = "", rrt = 1, **kargs):
         """x.graph(ASres=conf.AS_resolver, other args):
         ASres = None          : Use AS default resolver => 'conf.AS_resolver'
         ASres = AS_resolver() : default whois AS resolver (riswhois.ripe.net)
@@ -1864,6 +1920,7 @@ class MTR:
         vspread: Vertical separation between nodes on graph.
         title: Title text for the rendering graphic.
         timestamp: Title Time Stamp text to appear below the Title text.
+        rrt: Enable Round Trip Times to be displayed on trace edges.
         format: Output type (svg, ps, gif, jpg, etc.), passed to dot's "-T" option.
         figsize: w,h tuple in inches. See matplotlib documentation.
         target: filename. If None, uses matplotlib to display.
@@ -1897,6 +1954,8 @@ class MTracerouteResult(SndRcvList):
     def get_trace_components(self, mtrc):
         ips = {}
         rt = {}
+        rtt = {}
+        trtt = {}
         ports = {}
         portsdone = {}
         for s,r in self.res:
@@ -1937,16 +1996,29 @@ class MTracerouteResult(SndRcvList):
             else:
                 trace[ttl] = r.sprintf('"%r,src%"')
             rt[trace_id] = trace
+            #
+            # Compute the Round Trip Time for this trace packet in (msec)...
+            rtrace = rtt.get(trace_id, {})
+            crtt = (r.time - s.sent_time) * 1000
+            rtrace[ttl] = "{crtt:.3f}".format(crtt = crtt)
+            rtt[trace_id] = rtrace
         #
         # Store each trace component...
-        mtrc._ips.update(ips)
-        mtrc._rt.append(rt)
-        mtrc._ports.update(ports)
-        mtrc._portsdone.update(portsdone)
+        mtrc._ips.update(ips)			# Add unique IP Addresses
+        mtrc._rt.append(rt)			# Append a new Traceroute
+        mtrc._ports.update(ports)		# Append completed Traceroute target and port info
+        mtrc._portsdone.update(portsdone)	# Append completed Traceroute with associated target and port
+        #
+        # Create Round Trip Times Trace lookup dictionary...
+        tcnt = mtrc._tcnt
+        for rttk in rtt:
+            tcnt += 1
+            trtt[tcnt] = rtt[rttk]
+            mtrc._rtt.update(trtt)	# Update Round Trip Times for Trace Nodes
         #
         # Update the Trace Label IDs...
         for rtk in rt:
-            mtrc._tcnt += 1
+            mtrc._tcnt += 1		# Compute the total trace count
             #
             # Derive flags from ports:
             # Ex: {'63.117.14.247': ['<T80> http SA', '<T443> https SA']}
@@ -1971,7 +2043,15 @@ class MTracerouteResult(SndRcvList):
             #
             # Update the Trace Label ID:
             # Ex: {'63.117.14.247': ('T2', '10.222.222.10', '162.144.22.87', 6, 443, 'https', 'SA')}
-            tlid = {rtk[1]: ('T' + str(mtrc._tcnt), rtk[0], rtk[1], rtk[2], rtk[3], pn, fl)}
+            if (rtk[2] == 6):
+                pt = 'tcp'
+            elif (rtk[2] == 17):
+                pt = 'udp'
+            elif (rtk[2] == 17):
+                pt = 'icmp'
+            else:
+                pt = str(rtk[2])
+            tlid = {rtk[1]: ('T' + str(mtrc._tcnt), rtk[0], rtk[1], pt, rtk[3], pn, fl)}
             mtrc._tlblid.append(tlid)
 
 ######################
@@ -2034,7 +2114,7 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
                 a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl,maxttl))/TCP(seq=RandInt(),sport=sport, dport=dport),
                          timeout=timeout, filter=filter, verbose=verbose, **kargs)
                 trace.append(MTracerouteResult(a.res))
-                mtrc._res.append(a)		# Store Response pckets
+                mtrc._res.append(a)		# Store Response packets
                 mtrc._ures.append(b)		# Store Unresponse packets
                 if verbose:
                     trace[ntraces].show(ntrace = (ntraces + 1))
@@ -2056,7 +2136,7 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
                     print()
                 ntraces += 1
     #
-    # Store total trace count...
+    # Store total trace run count...
     mtrc._ntraces = ntraces
     #
     # Get the trace components...
@@ -2079,16 +2159,16 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
     #
     # Debug: Print object vars at verbose level 8...
     if (verbose == 8):
-        print("\nmtrc._target (User Target(s)):")
+        print("mtrc._target (User Target(s)):")
         print("=======================================================")
         print(mtrc._target)
-        print("\nmtrc._target (Resolved and Expanded Target(s)):")
+        print("\nmtrc._exptrg (Resolved and Expanded Target(s)):")
         print("=======================================================")
         print(mtrc._exptrg)
         print("\nmtrc._host2ip (Target Host Name to IP Address):")
         print("=======================================================")
         print(mtrc._host2ip)
-        print("\nmtrc._host2ip (Target IP Address to Host Name):")
+        print("\nmtrc._ip2host (Target IP Address to Host Name):")
         print("=======================================================")
         print(mtrc._ip2host)
         print("\nmtrc._res (Trace Response Packets):")
@@ -2103,6 +2183,9 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
         print("\nmtrc._rt (Individual Route Traces):")
         print("=======================================================")
         print(mtrc._rt)
+        print("\nmtrc._rtt (Round Trip Times (msecs) for Trace Nodes):")
+        print("=======================================================")
+        print(mtrc._rtt)
         print("\nmtrc._hops (Traceroute Hop Ranges):")
         print("=======================================================")
         print(mtrc._hops)
