@@ -1910,7 +1910,7 @@ class MTR:
 
     #
     # Graph the Multi-Traceroute...
-    def graph(self, ASres = None, padding = 0, vspread = 0.75, title = "Multi-Traceroute Probe (MTR)", timestamp = "", rrt = 1, **kargs):
+    def graph(self, ASres = None, padding = 0, vspread = 0.75, title = "Multi-Traceroute Probe (MTR)", timestamp = "", rtt = 1, **kargs):
         """x.graph(ASres=conf.AS_resolver, other args):
         ASres = None          : Use AS default resolver => 'conf.AS_resolver'
         ASres = AS_resolver() : default whois AS resolver (riswhois.ripe.net)
@@ -1920,7 +1920,7 @@ class MTR:
         vspread: Vertical separation between nodes on graph.
         title: Title text for the rendering graphic.
         timestamp: Title Time Stamp text to appear below the Title text.
-        rrt: Enable Round Trip Times to be displayed on trace edges.
+        rtt: Display Round-Trip Times (msec) for Hops along trace edges.
         format: Output type (svg, ps, gif, jpg, etc.), passed to dot's "-T" option.
         figsize: w,h tuple in inches. See matplotlib documentation.
         target: filename. If None, uses matplotlib to display.
@@ -1930,7 +1930,7 @@ class MTR:
         if (self._graphdef is None or		# Remake the graph if there are any changes
             self._graphasres != self._asres or
             self._graphpadding != padding):
-            self.make_dot_graph(ASres, padding, vspread, title, timestamp)
+            self.make_dot_graph(ASres, padding, vspread, title, timestamp, rtt)
 
         return do_graph(self._graphdef, **kargs)
 
