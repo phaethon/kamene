@@ -1349,7 +1349,6 @@ class MTR:
         self._portsdone = {}
         self._rtt = {}
         self._unknownlabel = incremental_label('"Unk%i"')
-        self._blackholes = {}
         self._asres = conf.AS_resolver
         self._asns = {}
         self._asds = {}
@@ -1382,12 +1381,6 @@ class MTR:
                         bh = '%s %i/proto' % (rtk[1],rtk[2]) 
                         bha = '%i/proto' % (rtk[2]) 
                     self._ips[rtk[1]] = None			# Add the Blackhole IP to list of unique IP Addresses
-                    if not rtk[1] in self._blackholes:		# If new, append blackhole IP and port
-                        self._blackholes[rtk[1]] = [bha]
-                    else:					# Try to append blackhole port only
-                        cbh = self._blackholes[rtk[1]]
-                        if not bha in self._blackholes[rtk[1]]:	# Only append blackhole port if not already done
-                            self._blackholes[rtk[1]].append(bha)
                     #
                     # Update trace with Blackhole info...
                     bh = '"{bh:s}"'.format(bh = bh)
@@ -1573,14 +1566,20 @@ class MTR:
         #
         for ep in uepip:
             #
-            # Build Traceroute Hop Range label...
-            hr = self._hops[ep]
-            #
             # Get Host only string...
             eph = ep
             f = ep.find(' ')
             if (f >= 0):
                 eph = ep[0:f]
+            #
+            # Build Traceroute Hop Range label...
+            if ep in self._hops:	# Is Endpoint IP in the Hops dictionary
+                hr = self._hops[ep]
+            elif eph in self._hops:	# Is Host only endpoint in the Hops dictionary
+                hr = self._hops[eph]
+            else:
+                continue		# Not found in the Hops dictionary
+
             l = len(hr)
             if (l == 1):
                 hrs = "Hop Range ("
@@ -1815,10 +1814,12 @@ class MTR:
         #
         # Blackholes...
         s += "\n\t### Blackholes ###\n"
-        for bh in self._blackholes:
-            for bhp in self._blackholes[bh]:
-                lb = 'label=<{b:s} {bp:s}<BR/><FONT POINT-SIZE="8">Failed Target</FONT>>'.format(b = bh, bp = bhp)
-                s += '\t"{b:s} {bp:s}" [{l:s},shape=octagon,color="black",gradientangle=270,fillcolor="white:red",style=filled];\n'.format(b = bh, bp = bhp, l = lb)
+        for d in self._tlblid:          #              k             v0         v1               v2           v3    v4     v5     v6
+            for k,v in d.items():	# Ex: k:  162.144.22.87 v: ('T1', '10.222.222.10', '162.144.22.87', 'tcp', 443, 'https', 'SA')
+                if (v[6] == 'BH'):	# Blackhole detection
+                    lb = 'label=<{b:s} {prt:d}/{pro:s}<BR/><FONT POINT-SIZE="8">Failed Target</FONT>>'.format(b = v[2], prt = v[4], pro = v[3])
+                    s += '\t"{b:s} {prt:d}/{pro:s}" [{l:s},shape=octagon,color="black",gradientangle=270,fillcolor="white:red",style=filled];\n'.format(b = v[2], prt = v[4], pro = v[3], l = lb)
+
         #
         # Padding check...
         if self._graphpadding:
@@ -2198,9 +2199,6 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
         print("\nmtrc._portsdone (Completed Trace Routes & Ports):")
         print("=======================================================")
         print(mtrc._portsdone)
-        print("\nmtrc._blackholes (Failed Targets):")
-        print("=======================================================")
-        print(mtrc._blackholes)
         print("\nmtrc._asres Resolver (AS Resolver Method):")
         print("=======================================================")
         print(mtrc._asres)
