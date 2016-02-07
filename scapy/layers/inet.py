@@ -1818,8 +1818,16 @@ class MTR:
             for k,v in d.items():	# Ex: k:  162.144.22.87 v: ('T1', '10.222.222.10', '162.144.22.87', 'tcp', 443, 'https', 'SA')
                 if (v[6] == 'BH'):	# Blackhole detection
                     lb = 'label=<{b:s} {prt:d}/{pro:s}<BR/><FONT POINT-SIZE="8">Failed Target</FONT>>'.format(b = v[2], prt = v[4], pro = v[3])
-                    s += '\t"{b:s} {prt:d}/{pro:s}" [{l:s},shape=octagon,color="black",gradientangle=270,fillcolor="white:red",style=filled];\n'.format(b = v[2], prt = v[4], pro = v[3], l = lb)
+                    s += '\t"{b:s} {prt:d}/{pro:s}" [{l:s},shape=doubleoctagon,color="black",gradientangle=270,fillcolor="white:red",style=filled];\n'.format(b = v[2], prt = v[4], pro = v[3], l = lb)
 
+        #
+        # ICMP Destination Unreachable Hops...
+        s += "\n\t### ICMP Destination Unreachable Hops ###\n"
+        for d in self._ports:
+            for p in self._ports[d]:
+                if (p.find('ICMP dest-unreach') >=0):
+                    lb = 'label=<{lh:s}<BR/><FONT POINT-SIZE="8">ICMP(3): Destination Unreachable</FONT>>'.format(lh = d)
+                    s += '\t"{lh:s}" [{lb:s},shape=doubleoctagon,color="black",gradientangle=270,fillcolor="white:yellow",style=filled];\n'.format(lh = d, lb = lb)
         #
         # Padding check...
         if self._graphpadding:
@@ -1879,12 +1887,36 @@ class MTR:
                         s += '\t{ptr:s} -> {ntr:s} [tooltip="{lb:s}"];\n'.format(ptr = ptr, ntr = ntr, lb = lb)
                 #
                 # Enhance target Endpoint replacement...
-                s += '\t{ptr:s} -> '.format(ptr = ntr)
                 for k,v in self._tlblid[t].items():
                     if (v[6] == 'BH'):		# Blackhole detection - do not create Enhanced Endpoint
-                        lb = 'Trace: {tr:d}'.format(tr = (t + 1))
-                        s += '"{bh:s} {bhp:d}/{bht:s}" [label=<<FONT POINT-SIZE="8">&nbsp; T{tr:d}</FONT>>,tooltip="{lb:s}"];\n'.format(bh = k, bhp = v[4], bht = v[3], tr = (t + 1), lb = lb)
+                        #
+                        # Check for Last Hop / Backhole (Failed Target) match:
+                        lh = trace[max(tk)]
+                        f = lh.find(' ')		# Strip off 'port/proto' ''"100.41.207.244":I3'
+                        if (f >= 0):
+                            lh = lh[0:f]
+                        f = lh.find(':')		# Strip off 'proto:port' -> '"100.41.207.244 801/tcp"'
+                        if (f >= 0):
+                            lh = lh[0:f]
+                        lh = lh.replace('"','')		# Remove surrounding double quotes ("")
+                        if (k == lh):
+                            #
+                            # Backhole matched:
+                            s += '\t{ptr:s} -> '.format(ptr = ntr)
+                            lb = 'Trace: {tr:d}'.format(tr = (t + 1))
+                            s += '"{bh:s} {bhp:d}/{bht:s}" [style="dashed",label=<<FONT POINT-SIZE="8">&nbsp; T{tr:d}</FONT>>,tooltip="{lb:s}"];\n'.format(bh = k, bhp = v[4], bht = v[3], tr = (t + 1), lb = lb)
+                        else:
+                            #
+                            # Backhole not matched (Most likely: 'ICMP (3) destination-unreached':
+                            s += '\t{ptr:s} -> '.format(ptr = ntr)
+                            lb += ' (RTT: {rtt:s}ms)'.format(rtt = self._rtt[t + 1][max(tk)])
+                            s += '"{lh:s}" [label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,tooltip="{lb:s}"];\n'.format(lh = lh, rtt = self._rtt[t + 1][max(tk)], lb = lb)
+                            s += '\t"{lh:s}" -> '.format(lh = lh)
+                            lb = 'Trace: {tr:d}'.format(tr = (t + 1))
+                            s += '"{bh:s} {bhp:d}/{bht:s}" [style="dashed",label=<<FONT POINT-SIZE="8">&nbsp; T{tr:d}</FONT>>,tooltip="{lb:s}"];\n'.format(bh = k, bhp = v[4], bht = v[3], tr = (t + 1), lb = lb)
+
                     else:			# Enhanced Target Endpoint
+                        s += '\t{ptr:s} -> '.format(ptr = ntr)
                         lb = 'Trace: {tr:d}:{tn:d} {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = n + 1, lbp = ntr.replace('"',''), lbn = k)
                         if not 'Unk' in k:
                             lb += ' (RTT: {rtt:s}ms)'.format(rtt = self._rtt[t + 1][n + 1])
@@ -2017,7 +2049,7 @@ class MTracerouteResult(SndRcvList):
             trtt[tcnt] = rtt[rttk]
             mtrc._rtt.update(trtt)	# Update Round Trip Times for Trace Nodes
         #
-        # Update the Trace Label IDs...
+        # Update the Trace Label IDs and Blackhole (Failed Target) detection...
         for rtk in rt:
             mtrc._tcnt += 1		# Compute the total trace count
             #
