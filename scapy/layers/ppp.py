@@ -30,13 +30,49 @@ class PPPoE(Packet):
             p = p[:4]+struct.pack("!H", l)+p[6:]
         return p
 
+
+_PPPoED_opttypes = {0x0000: "End-Of-List",
+                    0x0101: "Service-Name",
+                    0x0102: "AC-Name",
+                    0x0103: "Host-Uniq",
+                    0x0104: "AC-Cookie",
+                    0x0105: "Vendor-Specific",
+                    0x0110: "Relay-Session-Id",
+                    0x0201: "Service-Name-Error",
+                    0x0202: "AC-System-Error"}
+
+
+class PPPoED_Option(Packet):
+    name = "PPPoED Option"
+    fields_desc = [ShortEnumField("type", None, _PPPoED_opttypes),
+                   FieldLenField("len", None, length_of="data", fmt="H"),
+                   StrLenField("data", b"", length_from=lambda p:max(0, p.len))]
+    def extract_padding(self, pay):
+        return b"", pay
+
+    registered_options = {}
+
+    @classmethod
+    def register_variant(cls):
+        cls.registered_options[cls.type.default] = cls
+
+    @classmethod
+    def dispatch_hook(cls, _pkt=None, *args, **kargs):
+        if _pkt:
+            #o = ord(_pkt[0])
+            o = (_pkt[0])
+            return cls.registered_options.get(o, cls)
+        return cls
+
+
 class PPPoED(PPPoE):
     name = "PPP over Ethernet Discovery"
     fields_desc = [ BitField("version", 1, 4),
                     BitField("type", 1, 4),
                     ByteEnumField("code", 0x09, {0x09:"PADI",0x07:"PADO",0x19:"PADR",0x65:"PADS",0xa7:"PADT"}),
                     XShortField("sessionid", 0x0),
-                    ShortField("len", None) ]
+                    ShortField("len", None),
+                    PacketListField("options", [],  PPPoED_Option)]
 
 
 _PPP_proto = { 0x0001: "Padding Protocol",
