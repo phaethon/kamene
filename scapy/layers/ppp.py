@@ -31,7 +31,7 @@ class PPPoE(Packet):
         return p
 
 
-_PPPoED_opttypes = {0x0000: "End-Of-List",
+_PPPoE_tagtypes = { 0x0000: "End-Of-List",
                     0x0101: "Service-Name",
                     0x0102: "AC-Name",
                     0x0103: "Host-Uniq",
@@ -42,9 +42,9 @@ _PPPoED_opttypes = {0x0000: "End-Of-List",
                     0x0202: "AC-System-Error"}
 
 
-class PPPoED_Option(Packet):
-    name = "PPPoED Option"
-    fields_desc = [ShortEnumField("type", None, _PPPoED_opttypes),
+class PPPoE_Tag(Packet):
+    name = "PPPoE Tag"
+    fields_desc = [ShortEnumField("type", None, _PPPoE_tagtypes),
                    FieldLenField("len", None, length_of="data", fmt="H"),
                    StrLenField("data", b"", length_from=lambda p:max(0, p.len))]
     def extract_padding(self, pay):
@@ -72,7 +72,7 @@ class PPPoED(PPPoE):
                     ByteEnumField("code", 0x09, {0x09:"PADI",0x07:"PADO",0x19:"PADR",0x65:"PADS",0xa7:"PADT"}),
                     XShortField("sessionid", 0x0),
                     ShortField("len", None),
-                    PacketListField("options", [],  PPPoED_Option)]
+                    PacketListField("tags", [],  PPPoE_Tag)]
 
 
 _PPP_proto = { 0x0001: "Padding Protocol",
