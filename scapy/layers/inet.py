@@ -1370,16 +1370,32 @@ class MTR:
                 if not rtk in self._portsdone:
                     if rtk[2] == 1:	#ICMP
                         bh = "%s %i/icmp" % (rtk[1],rtk[3])
-                        bha = "%i/icmp" % (rtk[3])
                     elif rtk[2] == 6:	#TCP
                         bh = "{ip:s} {dp:d}/tcp".format(ip = rtk[1], dp = rtk[3])
-                        bha = "{dp:d}/tcp".format(dp = rtk[3])
                     elif rtk[2] == 17:	#UDP                    
                         bh = '%s %i/udp' % (rtk[1],rtk[3])
-                        bha = '%i/udp' % (rtk[3])
                     else:
                         bh = '%s %i/proto' % (rtk[1],rtk[2]) 
-                        bha = '%i/proto' % (rtk[2]) 
+                    self._ips[rtk[1]] = None			# Add the Blackhole IP to list of unique IP Addresses
+                    #
+                    # Update trace with Blackhole info...
+                    bh = '"{bh:s}"'.format(bh = bh)
+                    trace[max(k)+1] = bh
+        #
+        # Detection for Blackhole - fail target not set in last Hop...
+        for t in range(0, self._ntraces):
+            for rtk in self._rt[t]:
+                trace = self._rt[t][rtk]
+                k = trace.keys()
+                if ((' ' not in trace[max(k)]) and (':' not in trace[max(k)])):
+                    if rtk[2] == 1:	#ICMP
+                        bh = "%s %i/icmp" % (rtk[1],rtk[3])
+                    elif rtk[2] == 6:	#TCP
+                        bh = "{ip:s} {dp:d}/tcp".format(ip = rtk[1], dp = rtk[3])
+                    elif rtk[2] == 17:	#UDP                    
+                        bh = '%s %i/udp' % (rtk[1],rtk[3])
+                    else:
+                        bh = '%s %i/proto' % (rtk[1],rtk[2]) 
                     self._ips[rtk[1]] = None			# Add the Blackhole IP to list of unique IP Addresses
                     #
                     # Update trace with Blackhole info...
@@ -1623,6 +1639,10 @@ class MTR:
             s += '\t\ttooltip="AS: {asn:d} - [{asnd:s}]";\n'.format(asn = asn, asnd = self._asds[asn])
             col = next(backcolorlist)
             s += '\t\tcolor="#{s0:s}{s1:s}{s2:s}";\n'.format(s0 = col[0], s1 = col[1], s2 = col[2])
+            #
+            # Fill in ASN Cluster the associated generated color using an 11.7% alpha channel value (30/256)...
+            s += '\t\tfillcolor="#{s0:s}{s1:s}{s2:s}30";\n'.format(s0 = col[0], s1 = col[1], s2 = col[2])
+            s += '\t\tstyle="filled";\n'
             s += '\t\tnode [color="#{s0:s}{s1:s}{s2:s}",gradientangle=270,fillcolor="white:#{s0:s}{s1:s}{s2:s}",style=filled];\n'.format(s0 = col[0], s1 = col[1], s2 = col[2])
             s += '\t\tfontsize=10;\n'
             s += '\t\tfontname="Sans-Serif";\n'
@@ -1633,7 +1653,23 @@ class MTR:
                 #
                 # Only add IP if not an Endpoint Target...
                 if not ip in uepipo:
-                    s += '\t\t"{ip:s}";\n'.format(ip = ip)
+                    #
+                    # Spin thru all traces and only Add IP if not an ICMP Destination Unreachable node...
+                    for tr in range(0, self._ntraces):
+                        for rtk in self._rt[tr]:
+                            trace = self._rt[tr][rtk]
+                            k = trace.keys()
+                            for n in range(min(k), (max(k) + 1)):
+                                if ('"{ip:s}"'.format(ip = ip) == trace[n]):
+                                    #
+                                    # Add IP Hop - found in trace and not an ICMP Destination Unreachable node...
+                                    s += '\t\t"{ip:s}";\n'.format(ip = ip)
+                    #
+                    # Special check for ICMP Destination Unreachable nodes...
+                    if ip in self._ports:
+                        for p in self._ports[ip]:
+                            if (p.find('ICMP dest-unreach') >=0):
+                                s += '\t\t"{ip:s} 3/icmp";\n'.format(ip = ip)
                 else:
                     cipcur.append(ip)	# Current list of Endpoints consumed by this ASN Cluster
                     cipall.append(ip)	# Accumulated list of Endpoints consumed by all ASN Clusters
@@ -1826,8 +1862,8 @@ class MTR:
         for d in self._ports:
             for p in self._ports[d]:
                 if (p.find('ICMP dest-unreach') >=0):
-                    lb = 'label=<{lh:s}<BR/><FONT POINT-SIZE="8">ICMP(3): Destination Unreachable</FONT>>'.format(lh = d)
-                    s += '\t"{lh:s}" [{lb:s},shape=doubleoctagon,color="black",gradientangle=270,fillcolor="white:yellow",style=filled];\n'.format(lh = d, lb = lb)
+                    lb = 'label=<{lh:s} 3/icmp<BR/><FONT POINT-SIZE="8">ICMP(3): Destination Unreachable</FONT>>'.format(lh = d)
+                    s += '\t"{lh:s} 3/icmp" [{lb:s},shape=doubleoctagon,color="black",gradientangle=270,fillcolor="white:yellow",style=filled];\n'.format(lh = d, lb = lb)
         #
         # Padding check...
         if self._graphpadding:
@@ -1901,7 +1937,7 @@ class MTR:
                         if (f >= 0):
                             lh = lh[0:f]
                         lh = lh.replace('"','')		# Remove surrounding double quotes ("")
-                        if (k == lh):
+                        if (k == lh):			# Does Hop match finally Target?
                             #
                             # Backhole matched:
                             s += '\t{ptr:s} -> '.format(ptr = ntr)
@@ -1913,16 +1949,16 @@ class MTR:
                             #
                             # Add last Hop (This Hop is not the Target)
                             s += '\t{ptr:s} -> '.format(ptr = ntr)
-                            lb = 'Trace: {tr:d}:{tn:d} {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = max(tk), lbp = ptr.replace('"',''), lbn = lh)
+                            lb = 'Trace: {tr:d}:{tn:d} {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = max(tk), lbp = ntr.replace('"',''), lbn = lh)
                             lb += ' (RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms))'.format(prb = v[1], lbn = lh, rtt = self._rtt[t + 1][max(tk)])
-                            llb = 'Trace: {tr:d}:{tn:d} RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = max(tk), prb = v[1], lbn = k, rtt = self._rtt[t + 1][max(tk)])
+                            llb = 'Trace: {tr:d}:{tn:d} RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = max(tk), prb = v[1], lbn = lh, rtt = self._rtt[t + 1][max(tk)])
                             if rtt:
-                                s += '"{lh:s}" [label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(lh = lh, rtt = self._rtt[t + 1][max(tk)], lb = lb, llb = llb)
+                                s += '"{lh:s} 3/icmp" [label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(lh = lh, rtt = self._rtt[t + 1][max(tk)], lb = lb, llb = llb)
                             else:
-                                s += '"{lh:s}" [edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(lh = lh, lb = lb, llb = llb)
+                                s += '"{lh:s} 3/icmp" [edgetooltip="{lb:s} 3/icmp",labeltooltip="{llb:s}"];\n'.format(lh = lh, lb = lb, llb = llb)
                             #
                             # Add the Failed Target (Blackhole)...
-                            s += '\t"{lh:s}" -> '.format(lh = lh)
+                            s += '\t"{lh:s} 3/icmp" -> '.format(lh = lh)
                             lb = 'Trace: {tr:d} - Failed Target: {bh:s} {bhp:d}/{bht:s}'.format(tr = (t + 1), bh = k, bhp = v[4], bht = v[3])
                             s += '"{bh:s} {bhp:d}/{bht:s}" [style="dashed",label=<<FONT POINT-SIZE="8">&nbsp; T{tr:d}</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(bh = k, bhp = v[4], bht = v[3], tr = (t + 1), lb = lb, llb = lb)
 
