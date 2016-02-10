@@ -1382,7 +1382,7 @@ class MTR:
                     bh = '"{bh:s}"'.format(bh = bh)
                     trace[max(k)+1] = bh
         #
-        # Detection for Blackhole - failed target not set as last Hop in trace...
+        # Detection for Blackhole - Failed target not set as last Hop in trace...
         for t in range(0, self._ntraces):
             for rtk in self._rt[t]:
                 trace = self._rt[t][rtk]
