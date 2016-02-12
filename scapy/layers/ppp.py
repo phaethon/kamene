@@ -30,13 +30,49 @@ class PPPoE(Packet):
             p = p[:4]+struct.pack("!H", l)+p[6:]
         return p
 
+
+_PPPoE_tagtypes = { 0x0000: "End-Of-List",
+                    0x0101: "Service-Name",
+                    0x0102: "AC-Name",
+                    0x0103: "Host-Uniq",
+                    0x0104: "AC-Cookie",
+                    0x0105: "Vendor-Specific",
+                    0x0110: "Relay-Session-Id",
+                    0x0201: "Service-Name-Error",
+                    0x0202: "AC-System-Error"}
+
+
+class PPPoE_Tag(Packet):
+    name = "PPPoE Tag"
+    fields_desc = [ShortEnumField("type", None, _PPPoE_tagtypes),
+                   FieldLenField("len", None, length_of="data", fmt="H"),
+                   StrLenField("data", b"", length_from=lambda p:max(0, p.len))]
+    def extract_padding(self, pay):
+        return b"", pay
+
+    registered_options = {}
+
+    @classmethod
+    def register_variant(cls):
+        cls.registered_options[cls.type.default] = cls
+
+    @classmethod
+    def dispatch_hook(cls, _pkt=None, *args, **kargs):
+        if _pkt:
+            #o = ord(_pkt[0])
+            o = (_pkt[0])
+            return cls.registered_options.get(o, cls)
+        return cls
+
+
 class PPPoED(PPPoE):
     name = "PPP over Ethernet Discovery"
     fields_desc = [ BitField("version", 1, 4),
                     BitField("type", 1, 4),
                     ByteEnumField("code", 0x09, {0x09:"PADI",0x07:"PADO",0x19:"PADR",0x65:"PADS",0xa7:"PADT"}),
                     XShortField("sessionid", 0x0),
-                    ShortField("len", None) ]
+                    ShortField("len", None),
+                    PacketListField("tags", [],  PPPoE_Tag)]
 
 
 _PPP_proto = { 0x0001: "Padding Protocol",
@@ -214,9 +250,76 @@ _PPP_conftypes = { 1:"Configure-Request",
                    9:"Echo-Request",
                    10:"Echo-Reply",
                    11:"Discard-Request",
+                   12:"Identification",  # RFC 1570
+                   13:"Time-Remaining",  # RFC 1570
                    14:"Reset-Request",
                    15:"Reset-Ack",
                    }
+
+
+### PPP LCP (RFC 1661)
+
+_PPP_lcpopttypes = {1: "Maximum-Receive-Unit",
+                    2: "Async-Control-Character-Map",  # RFC 1548
+                    3: "Authentication-Protocol",
+                    4: "Quality-Protocol",
+                    5: "Magic-Number",
+                    7: "Protocol-Field-Compression",
+                    8: "Address-and-Control-Field-Compression"}
+
+
+class PPP_LCP_Option(Packet):
+    name = "PPP LCP Option"
+    fields_desc = [ByteEnumField("type", None, _PPP_lcpopttypes),
+                   FieldLenField("len", None, length_of="data", fmt="B", adjust=lambda p, x:x+2),
+                   StrLenField("data", b"", length_from=lambda p:max(0, p.len-2))]
+    def extract_padding(self, pay):
+        return b"", pay
+
+    registered_options = {}
+
+    @classmethod
+    def register_variant(cls):
+        cls.registered_options[cls.type.default] = cls
+
+    @classmethod
+    def dispatch_hook(cls, _pkt=None, *args, **kargs):
+        if _pkt:
+            #o = ord(_pkt[0])
+            o = (_pkt[0])
+            return cls.registered_options.get(o, cls)
+        return cls
+
+
+class PPP_LCP_Option_MRU(PPP_LCP_Option):
+    name = "PPP LCP Option: Maximum Receive Unit"
+    fields_desc = [ByteEnumField("type", 1, _PPP_lcpopttypes),
+                   FieldLenField("len", None, length_of="data", fmt="B", adjust=lambda p, x:x+2),
+                   ShortField("data", 1500)]
+
+
+class PPP_LCP_Option_AUTH(PPP_LCP_Option):
+    name = "PPP LCP Option: Authentication Protocol"
+    fields_desc = [ByteEnumField("type", 3, _PPP_lcpopttypes),
+                   FieldLenField("len", None, length_of="data", fmt="B", adjust=lambda p, x:x+2),
+                   ShortEnumField("data", None, {0xc023: "PAP", 0xc223: "CHAP"})]
+
+
+class PPP_LCP_Option_MAGIC(PPP_LCP_Option):
+    name = "PPP LCP Option: Magic Number"
+    fields_desc = [ByteEnumField("type", 5, _PPP_lcpopttypes),
+                   ByteField("len", 6),
+                   XIntField("data", None)]
+
+
+class PPP_LCP(Packet):
+    fields_desc = [ByteEnumField("code", 1, _PPP_conftypes),
+                   XByteField("id", 0),
+                   FieldLenField("len", None, fmt="H", length_of="options", adjust=lambda p, x:x+4),
+                   ConditionalField(PacketListField("options", [],  PPP_LCP_Option, length_from=lambda p:p.len-4), lambda p:(p.code<5 or p.code==7)),
+                   ConditionalField(ShortEnumField("rejected_proto", None, _PPP_proto), lambda p:p.code==8),
+                   ConditionalField(XIntField("magic_number", None), lambda p:p.code>8)]
+
 
 
 ### PPP IPCP stuff (RFC 1332)
@@ -291,7 +394,7 @@ class PPP_IPCP_Option_NBNS2(PPP_IPCP_Option):
 
 class PPP_IPCP(Packet):
     fields_desc = [ ByteEnumField("code" , 1, _PPP_conftypes),
-		    XByteField("id", 0 ),
+                    XByteField("id", 0 ),
                     FieldLenField("len" , None, fmt="H", length_of="options", adjust=lambda p,x:x+4 ),
                     PacketListField("options", [],  PPP_IPCP_Option, length_from=lambda p:p.len-4,) ]
 
@@ -332,7 +435,7 @@ class PPP_ECP_Option_OUI(PPP_ECP_Option):
 
 class PPP_ECP(Packet):
     fields_desc = [ ByteEnumField("code" , 1, _PPP_conftypes),
-		    XByteField("id", 0 ),
+                    XByteField("id", 0 ),
                     FieldLenField("len" , None, fmt="H", length_of="options", adjust=lambda p,x:x+4 ),
                     PacketListField("options", [],  PPP_ECP_Option, length_from=lambda p:p.len-4,) ]
 
@@ -343,7 +446,9 @@ bind_layers( CookedLinux,   PPPoE,         proto=0x8864)
 bind_layers( PPPoE,         PPP,           code=0)
 bind_layers( HDLC,          PPP,           )
 bind_layers( PPP,           IP,            proto=33)
+bind_layers( PPP,           PPP_LCP,       proto=0xc021)
 bind_layers( PPP,           PPP_IPCP,      proto=0x8021)
 bind_layers( PPP,           PPP_ECP,       proto=0x8053)
+bind_layers( Ether,         PPP_LCP,       type=0xc021)
 bind_layers( Ether,         PPP_IPCP,      type=0x8021)
 bind_layers( Ether,         PPP_ECP,       type=0x8053)
