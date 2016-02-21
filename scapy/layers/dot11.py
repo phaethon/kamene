@@ -40,7 +40,7 @@ class Dot11AddrMACField(MACField):
 class Dot11Addr2MACField(Dot11AddrMACField):
     def is_applicable(self, pkt):
         if pkt.type == 1:
-            return pkt.subtype in [ 0xb, 0xa, 0xe, 0xf] # RTS, PS-Poll, CF-End, CF-End+CF-Ack
+            return pkt.subtype in [ 0xb, 0xa, 0xe, 0xf, 0x9, 0x8 ] # RTS, PS-Poll, CF-End, CF-End+CF-Ack, BACK, BAR
         return 1
 
 class Dot11Addr3MACField(Dot11AddrMACField):
@@ -202,8 +202,11 @@ class Dot11(Packet):
                     ]
     def mysummary(self):
         return self.sprintf("802.11 %Dot11.type% %Dot11.subtype% %Dot11.addr2% > %Dot11.addr1%")
+
     def guess_payload_class(self, payload):
         if self.type == 0x02 and (self.subtype >= 0x08 and self.subtype <=0xF and self.subtype != 0xD):
+            if self.subtype == 12:
+                return Dot11QoSNULL
             return Dot11QoS
         elif self.FCfield & 0x40:
             return Dot11WEP
@@ -243,10 +246,10 @@ class Dot11(Packet):
 
 class Dot11QoS(Packet):
     name = "802.11 QoS"
-    fields_desc = [ BitField("TID",None,4),
+    fields_desc = [ BitField("A-MSDU present",None,1),
+                    BitField("AckPolicy",None,2),
                     BitField("EOSP",None,1),
-                    BitField("Ack Policy",None,2),
-                    BitField("Reserved",None,1),
+                    BitField("TID",None,4),
                     ByteField("TXOP",None) ]
     def guess_payload_class(self, payload):
         if isinstance(self.underlayer, Dot11):
@@ -270,6 +273,17 @@ status_code = {0:"success", 1:"failure", 10:"cannot-support-all-cap",
                11:"inexist-asso", 12:"asso-denied", 13:"algo-unsupported",
                14:"bad-seq-num", 15:"challenge-failure",
                16:"timeout", 17:"AP-full",18:"rate-unsupported" }
+
+class Dot11NULL(Packet):
+    name = "802.11 NULL data"
+
+class Dot11QoSNULL(Packet):
+    name = "802.11 QoS NULL data"
+    fields_desc = [ BitField("Reserved",None,1),
+                    BitField("AckPolicy",None,2),
+                    BitField("EOSP",None,1),
+                    BitField("TID",None,4),
+                    ByteField("TXOP",None) ]
 
 class Dot11Beacon(Packet):
     name = "802.11 Beacon"
@@ -342,7 +356,57 @@ class Dot11Deauth(Packet):
     name = "802.11 Deauthentication"
     fields_desc = [ LEShortEnumField("reason", 1, reason_code) ]
 
+class Dot11Action(Packet):
+    name = "802.11 Action"
+    fields_desc = [ ByteEnumField("category", 0, {0:"SpectrumMgmt", 1:"QoS", 2:"DLS", 3:"BlockAck", 4:"Public",
+                                                  5:"RM", 6:"FastBSS", 7:"HT", 8:"SAQuery", 9:"ProtPublic", 10:"WNM",
+                                                  11:"UnprotWNM", 12:"TDLS", 13:"Mesh", 14:"Multihop", 15:"SelfProt",
+                                                  21:"VHT", 126:"VendorProt", 127:"Vendor"}) ]
 
+class Dot11ActionNoACK(Packet):
+    name = "802.11 Action - no ACK"
+
+class Dot11CtrlWrap(Packet):
+    name = "802.11 Control wrapper"
+
+class Dot11BAR(Packet):
+    name = "802.11 BAR"
+    fields_desc = [ BitField("Reserved1", None, 5),
+                    BitField("Compressed", None, 1),
+                    BitField("MultiTID", None, 1),
+                    BitField("BACKPolicy", None, 1),
+                    BitField("TID", None, 4),
+                    BitField("Reserved", None, 4),
+                    LEShortField("SSN", 0) ]
+
+class Dot11BACK(Packet):
+    name = "802.11 BACK"
+    fields_desc = [ BitField("Reserved1", None, 5),
+                    BitField("Compressed", None, 1),
+                    BitField("MultiTID", None, 1),
+                    BitField("BACKPolicy", None, 1),
+                    BitField("TID", None, 4),
+                    BitField("Reserved", None, 4),
+                    LEShortField("SSN", 0),
+                    StrFixedLenField("Bitmap", b"\0\0\0\0\0\0\0\0", 8) ]
+
+class Dot11PSPoll(Packet):
+    name = "802.11 PS-Poll"
+
+class Dot11RTS(Packet):
+    name = "802.11 RTS"
+
+class Dot11CTS(Packet):
+    name = "802.11 CTS"
+
+class Dot11ACK(Packet):
+    name = "802.11 ACK"
+
+class Dot11CFEnd(Packet):
+    name = "802.11 CF-end"
+
+class Dot11CFEndACK(Packet):
+    name = "802.11 CF-end+ACK"
 
 class Dot11WEP(Packet):
     name = "802.11 WEP packet"
@@ -388,8 +452,10 @@ class Dot11WEP(Packet):
 bind_layers( PrismHeader,   Dot11,         )
 bind_layers( RadioTap,      Dot11,         )
 bind_layers( PPI,           Dot11,         dlt=105)
+bind_layers( Dot11,         Dot11NULL,       subtype=4, type=2)
 bind_layers( Dot11,         LLC,           type=2)
 bind_layers( Dot11QoS,      LLC,           )
+bind_layers( Dot11,         Dot11QoSNULL,    subtype=12, type=2)
 bind_layers( Dot11,         Dot11AssoReq,    subtype=0, type=0)
 bind_layers( Dot11,         Dot11AssoResp,   subtype=1, type=0)
 bind_layers( Dot11,         Dot11ReassoReq,  subtype=2, type=0)
@@ -401,6 +467,17 @@ bind_layers( Dot11,         Dot11ATIM,       subtype=9, type=0)
 bind_layers( Dot11,         Dot11Disas,      subtype=10, type=0)
 bind_layers( Dot11,         Dot11Auth,       subtype=11, type=0)
 bind_layers( Dot11,         Dot11Deauth,     subtype=12, type=0)
+bind_layers( Dot11,         Dot11Action,     subtype=13, type=0)
+bind_layers( Dot11,         Dot11ActionNoACK, subtype=14, type=0)
+bind_layers( Dot11,         Dot11CtrlWrap,   subtype=7, type=1)
+bind_layers( Dot11,         Dot11BAR,        subtype=8, type=1)
+bind_layers( Dot11,         Dot11BACK,       subtype=9, type=1)
+bind_layers( Dot11,         Dot11PSPoll,     subtype=10, type=1)
+bind_layers( Dot11,         Dot11RTS,        subtype=11, type=1)
+bind_layers( Dot11,         Dot11CTS,        subtype=12, type=1)
+bind_layers( Dot11,         Dot11ACK,        subtype=13, type=1)
+bind_layers( Dot11,         Dot11CFEnd,      subtype=14, type=1)
+bind_layers( Dot11,         Dot11CFEndACK,   subtype=15, type=1)
 bind_layers( Dot11Beacon,     Dot11Elt,    )
 bind_layers( Dot11AssoReq,    Dot11Elt,    )
 bind_layers( Dot11AssoResp,   Dot11Elt,    )
