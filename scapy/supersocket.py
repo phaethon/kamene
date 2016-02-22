@@ -91,13 +91,13 @@ class L3RawSocket(SuperSocket):
             pkt = pkt.payload
             
         if pkt is not None:
-            from arch import get_last_packet_timestamp
+            from .arch import get_last_packet_timestamp
             pkt.time = get_last_packet_timestamp(self.ins)
         return pkt
     def send(self, x):
         try:
             #sx = str(x)
-            sx = x
+            sx = bytes(x)
             x.sent_time = time.time()
             self.outs.sendto(sx,(x.dst,0))
         except socket.error as msg:
