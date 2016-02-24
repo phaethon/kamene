@@ -1898,31 +1898,34 @@ class MTR:
                 trace = self._rt[q][rtk]
                 tk = trace.keys()
                 ntr = trace[min(tk)]
-                lb = 'Trace: {tr:d}:{tn:d} {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = min(tk), lbp = ptr, lbn = ntr.replace('"',''))
-                if not 'Unk' in ntr:
-                    lb += ' (RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms))'.format(prb = probe, lbn = ntr.replace('"',''), rtt = self._rtt[t + 1][min(tk)])
-                if rtt:
+                #
+                # Skip in between traces if there are none...
+                if (len(trace) > 1):
+                    lb = 'Trace: {tr:d}:{tn:d} {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = min(tk), lbp = ptr, lbn = ntr.replace('"',''))
                     if not 'Unk' in ntr:
-                        llb = 'Trace: {tr:d}:{tn:d} RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = min(tk), prb = probe, lbn = ntr.replace('"',''), rtt = self._rtt[t + 1][min(tk)])
-                        s += '{ntr:s} [label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(ntr = ntr, rtt = self._rtt[t + 1][min(tk)], lb = lb, llb = llb)
-                    else:
-                        s += '{ntr:s} [edgetooltip="{lb:s}"];\n'.format(ntr = ntr, lb = lb)
-                else:
-                    s += '{ntr:s} [edgetooltip="{lb:s}"];\n'.format(ntr = ntr, lb = lb)
-                for n in range(min(tk) + 1, max(tk)):
-                    ptr = ntr
-                    ntr = trace[n]
-                    lb = 'Trace: {tr:d}:{tn:d} {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = n, lbp = ptr.replace('"',''), lbn = ntr.replace('"',''))
-                    if not 'Unk' in ntr:
-                        lb += ' (RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms))'.format(prb = probe, lbn = ntr.replace('"',''), rtt = self._rtt[t + 1][n])
+                        lb += ' (RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms))'.format(prb = probe, lbn = ntr.replace('"',''), rtt = self._rtt[t + 1][min(tk)])
                     if rtt:
                         if not 'Unk' in ntr:
-                            llb = 'Trace: {tr:d}:{tn:d} RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = n, prb = probe, lbn = ntr.replace('"',''), rtt = self._rtt[t + 1][n])
-                            s += '\t{ptr:s} -> {ntr:s} [label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(ptr = ptr, ntr = ntr, rtt = self._rtt[t + 1][n], lb = lb, llb = llb)
+                            llb = 'Trace: {tr:d}:{tn:d} RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = min(tk), prb = probe, lbn = ntr.replace('"',''), rtt = self._rtt[t + 1][min(tk)])
+                            s += '{ntr:s} [label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(ntr = ntr, rtt = self._rtt[t + 1][min(tk)], lb = lb, llb = llb)
+                        else:
+                            s += '{ntr:s} [edgetooltip="{lb:s}"];\n'.format(ntr = ntr, lb = lb)
+                    else:
+                        s += '{ntr:s} [edgetooltip="{lb:s}"];\n'.format(ntr = ntr, lb = lb)
+                    for n in range(min(tk) + 1, max(tk)):
+                        ptr = ntr
+                        ntr = trace[n]
+                        lb = 'Trace: {tr:d}:{tn:d} {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = n, lbp = ptr.replace('"',''), lbn = ntr.replace('"',''))
+                        if not 'Unk' in ntr:
+                            lb += ' (RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms))'.format(prb = probe, lbn = ntr.replace('"',''), rtt = self._rtt[t + 1][n])
+                        if rtt:
+                            if not 'Unk' in ntr:
+                                llb = 'Trace: {tr:d}:{tn:d} RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = n, prb = probe, lbn = ntr.replace('"',''), rtt = self._rtt[t + 1][n])
+                                s += '\t{ptr:s} -> {ntr:s} [label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(ptr = ptr, ntr = ntr, rtt = self._rtt[t + 1][n], lb = lb, llb = llb)
+                            else:
+                                s += '\t{ptr:s} -> {ntr:s} [edgetooltip="{lb:s}"];\n'.format(ptr = ptr, ntr = ntr, lb = lb)
                         else:
                             s += '\t{ptr:s} -> {ntr:s} [edgetooltip="{lb:s}"];\n'.format(ptr = ptr, ntr = ntr, lb = lb)
-                    else:
-                        s += '\t{ptr:s} -> {ntr:s} [edgetooltip="{lb:s}"];\n'.format(ptr = ptr, ntr = ntr, lb = lb)
                 #
                 # Enhance target Endpoint replacement...
                 for k,v in self._tlblid[t].items():
@@ -1940,7 +1943,10 @@ class MTR:
                         if (k == lh):			# Does Hop match finally Target?
                             #
                             # Backhole matched:
-                            s += '\t{ptr:s} -> '.format(ptr = ntr)
+                            #
+                            # Check to skip in between traces...
+                            if (len(trace) > 1):
+                                s += '\t{ptr:s} -> '.format(ptr = ntr)
                             lb = 'Trace: {tr:d} - Failed Target: {bh:s} {bhp:d}/{bht:s}'.format(tr = (t + 1), bh = k, bhp = v[4], bht = v[3])
                             s += '"{bh:s} {bhp:d}/{bht:s}" [style="dashed",label=<<FONT POINT-SIZE="8">&nbsp; T{tr:d}</FONT>>,edgetooltip="{lb:s}",labeltooltip="{lb:s}"];\n'.format(bh = k, bhp = v[4], bht = v[3], tr = (t + 1), lb = lb)
                         else:
@@ -1948,22 +1954,28 @@ class MTR:
                             # Backhole not matched (Most likely: 'ICMP (3) destination-unreached':
                             #
                             # Add last Hop (This Hop is not the Target)
-                            s += '\t{ptr:s} -> '.format(ptr = ntr)
-                            lb = 'Trace: {tr:d}:{tn:d} {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = max(tk), lbp = ntr.replace('"',''), lbn = lh)
-                            lb += ' (RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms))'.format(prb = v[1], lbn = lh, rtt = self._rtt[t + 1][max(tk)])
-                            llb = 'Trace: {tr:d}:{tn:d} RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = max(tk), prb = v[1], lbn = lh, rtt = self._rtt[t + 1][max(tk)])
-                            if rtt:
-                                s += '"{lh:s} 3/icmp" [label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(lh = lh, rtt = self._rtt[t + 1][max(tk)], lb = lb, llb = llb)
-                            else:
-                                s += '"{lh:s} 3/icmp" [edgetooltip="{lb:s} 3/icmp",labeltooltip="{llb:s}"];\n'.format(lh = lh, lb = lb, llb = llb)
                             #
-                            # Add the Failed Target (Blackhole)...
-                            s += '\t"{lh:s} 3/icmp" -> '.format(lh = lh)
+                            # Check to skip in between traces...
+                            if (len(trace) > 1):
+                                s += '\t{ptr:s} -> '.format(ptr = ntr)
+                                lb = 'Trace: {tr:d}:{tn:d} {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = max(tk), lbp = ntr.replace('"',''), lbn = lh)
+                                lb += ' (RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms))'.format(prb = v[1], lbn = lh, rtt = self._rtt[t + 1][max(tk)])
+                                llb = 'Trace: {tr:d}:{tn:d} RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = max(tk), prb = v[1], lbn = lh, rtt = self._rtt[t + 1][max(tk)])
+                                if rtt:
+                                    s += '"{lh:s} 3/icmp" [label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(lh = lh, rtt = self._rtt[t + 1][max(tk)], lb = lb, llb = llb)
+                                else:
+                                    s += '"{lh:s} 3/icmp" [edgetooltip="{lb:s} 3/icmp",labeltooltip="{llb:s}"];\n'.format(lh = lh, lb = lb, llb = llb)
+                                #
+                                # Add the Failed Target (Blackhole)...
+                                s += '\t"{lh:s} 3/icmp" -> '.format(lh = lh)
                             lb = 'Trace: {tr:d} - Failed Target: {bh:s} {bhp:d}/{bht:s}'.format(tr = (t + 1), bh = k, bhp = v[4], bht = v[3])
                             s += '"{bh:s} {bhp:d}/{bht:s}" [style="dashed",label=<<FONT POINT-SIZE="8">&nbsp; T{tr:d}</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(bh = k, bhp = v[4], bht = v[3], tr = (t + 1), lb = lb, llb = lb)
 
                     else:			# Enhanced Target Endpoint
-                        s += '\t{ptr:s} -> '.format(ptr = ntr)
+                        #
+                        # Check to skip in between traces...
+                        if (len(trace) > 1):
+                            s += '\t{ptr:s} -> '.format(ptr = ntr)
                         lb = 'Trace: {tr:d}:{tn:d} {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = max(tk), lbp = ntr.replace('"',''), lbn = k)
                         if not 'Unk' in k:
                             lb += ' (RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms))'.format(prb = v[1], lbn = k, rtt = self._rtt[t + 1][max(tk)])
