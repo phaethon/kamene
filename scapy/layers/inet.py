@@ -1679,7 +1679,7 @@ class MTR:
             ecs += '\t\t\tlabelloc="b";\n'
             pre = ''
             if ep in uepprb:		# Special Case: Separate Endpoint Target from Probe
-              pre = 'E'			# when they are the same
+              pre = '_'			# when they are the same -> Prepend an underscore char: '_'
             ecs += '\t\t\t"{pre:s}{ep:s}";\n'.format(pre = pre, ep = ep)
             ecs += "\t\t}\n"
             #
@@ -1723,8 +1723,9 @@ class MTR:
                                 if not ip in cipall:
                                     #
                                     # Add IP Hop - found in trace and not an ICMP Destination Unreachable node...
-                                    s += '\t\t"{ip:s}";\n'.format(ip = ip)
-                                    cipall.append(ip)
+                                    if ('"{ip:s}"'.format(ip = ip) == trace[n]):
+                                        s += '\t\t"{ip:s}";\n'.format(ip = ip)
+                                        cipall.append(ip)
                     #
                     # Special check for ICMP Destination Unreachable nodes...
                     if ip in self._ports:
@@ -1732,9 +1733,10 @@ class MTR:
                             if (p.find('ICMP dest-unreach') >=0):
                                 #
                                 # Check for not already added...
-                                if not ip in cipall:
-                                    s += '\t\t"{ip:s} 3/icmp";\n'.format(ip = ip)
-                                    cipall.append(ip)
+                                uip = '{uip:s} 3/icmp'.format(uip = ip)
+                                if not uip in cipall:
+                                    s += '\t\t"{uip:s}";\n'.format(uip = uip)
+                                    cipall.append(uip)
                 else:
                     cipcur.append(ip)	# Current list of Endpoints consumed by this ASN Cluster
                     cepipall.append(ip)	# Accumulated list of Endpoints consumed by all ASN Clusters
@@ -1895,9 +1897,9 @@ class MTR:
                     tr += '|{{{{{t:s}}}|{p:s} {f:s}}}'.format(t = sv[0], p = sv[1], f = sv[2])
             pre = ''
             if k in uepprb:		# Special Case: Separate Endpoint Target from Probe
-              pre = 'E'			# when they are the same
+              pre = '_'			# when they are the same
             eps1 = '\t"{pre:s}{ip:s}" [shape=record,color="black",gradientangle=270,fillcolor="lightgreen:green",style=filled,'.format(pre = pre, ip = k)
-            eps2 = 'label="{ip:s}\\nTarget|{tr:s}"];\n'.format(ip = k, tr = tr)
+            eps2 = 'label="{ip:s}\\nTarget|{tr:s}",tooltip="Host Target: {ip:s}"];\n'.format(ip = k, tr = tr)
             s += eps1 + eps2 
 
         #
@@ -1907,7 +1909,7 @@ class MTR:
             for k,v in d.items():	# Ex: k:  162.144.22.87 v: ('T1', '10.222.222.10', '162.144.22.87', 'tcp', 443, 'https', 'SA')
                 if (v[6] == 'BH'):	# Blackhole detection
                     lb = 'label=<{b:s} {prt:d}/{pro:s}<BR/><FONT POINT-SIZE="8">Failed Target</FONT>>'.format(b = v[2], prt = v[4], pro = v[3])
-                    s += '\t"{b:s} {prt:d}/{pro:s}" [{l:s},shape=doubleoctagon,color="black",gradientangle=270,fillcolor="white:red",style=filled];\n'.format(b = v[2], prt = v[4], pro = v[3], l = lb)
+                    s += '\t"{b:s} {prt:d}/{pro:s}" [{l:s},shape=doubleoctagon,color="black",gradientangle=270,fillcolor="white:red",style=filled,tooltip="Failed Host Target: {b:s}"];\n'.format(b = v[2], prt = v[4], pro = v[3], l = lb)
 
         #
         # ICMP Destination Unreachable Hops...
@@ -1915,8 +1917,17 @@ class MTR:
         for d in self._ports:
             for p in self._ports[d]:
                 if (p.find('ICMP dest-unreach') >=0):
-                    lb = 'label=<{lh:s} 3/icmp<BR/><FONT POINT-SIZE="8">ICMP(3): Destination Unreachable</FONT>>'.format(lh = d)
-                    s += '\t"{lh:s} 3/icmp" [{lb:s},shape=doubleoctagon,color="black",gradientangle=270,fillcolor="white:yellow",style=filled];\n'.format(lh = d, lb = lb)
+                    unreach = 'Destination'
+                    if (p.find('network-unreachable') >=0):
+                        unreach += '/Network'
+                    elif (p.find('host-unreachable') >=0):
+                        unreach += '/Host'
+                    elif (p.find('protocol-unreachable') >=0):
+                        unreach += '/Protocol'
+                    elif (p.find('port-unreachable') >=0):
+                        unreach += '/Port'
+                    lb = 'label=<{lh:s} 3/icmp<BR/><FONT POINT-SIZE="8">ICMP(3): {u:s} Unreachable</FONT>>'.format(lh = d, u = unreach)
+                    s += '\t"{lh:s} 3/icmp" [{lb:s},shape=doubleoctagon,color="black",gradientangle=270,fillcolor="white:yellow",style=filled,tooltip="{u:s} Unreachable, Host: {lh:s}"];\n'.format(lb = lb, lh = d, u = unreach)
         #
         # Padding check...
         if self._graphpadding:
@@ -2034,7 +2045,7 @@ class MTR:
                             lb += ' (RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms))'.format(prb = v[1], lbn = k, rtt = self._rtt[t + 1][max(tk)])
                         pre = ''
                         if k in uepprb:		# Special Case: Separate Endpoint Target from Probe
-                            pre = 'E'		# when they are the same
+                            pre = '_'		# when they are the same
                         if rtt:
                             if not 'Unk' in k:
                                 llb = 'Trace: {tr:d}:{tn:d} RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = max(tk), prb = v[1], lbn = k, rtt = self._rtt[t + 1][max(tk)])
@@ -2158,7 +2169,7 @@ class MTracerouteResult(SndRcvList):
                         p.append(r.sprintf("<U%ir,UDP.sport%> %UDP.sport%"))
                         trace[ttl] = r.sprintf('"%r,src%":U%ir,UDP.sport%')
                     elif ICMP in r:
-                        p.append(r.sprintf("<I%ir,ICMP.type%> ICMP %ICMP.type%"))
+                        p.append(r.sprintf("<I%ir,ICMP.type%> ICMP %ICMP.type% %ICMP.code%"))
                         trace[ttl] = r.sprintf('"%r,src%":I%ir,ICMP.type%')
                     else:
                         p.append(r.sprintf("{IP:<P%ir,proto%> IP %proto%}{IPv6:<P%ir,nh%> IPv6 %nh%}"))
@@ -2204,6 +2215,9 @@ class MTracerouteResult(SndRcvList):
             mtrc._rtt.update(trtt)	# Update Round Trip Times for Trace Nodes
         #
         # Update the Trace Label IDs and Blackhole (Failed Target) detection...
+        #
+        #           rtk0               rtk1   rtk2  rtk3
+        # Ex: {('10.222.222.10', '10.222.222.1', 6, 9980): {1: '"10.222.222.10":T9980'}}
         for rtk in rt:
             mtrc._tcnt += 1		# Compute the total trace count
             #
@@ -2212,7 +2226,9 @@ class MTracerouteResult(SndRcvList):
             prtflgs = ports.get(rtk[1],[])
             found = False
             for pf in prtflgs:
-                if (pf.find(str(rtk[3])) != -1):
+                pat = '<[TUI]{p:d}>'.format(p = rtk[3])		# Create reg exp pattern
+                match = re.search(pat, pf)			# Search for port match
+                if match:
                     found = True
                     s = pf.split(' ')
                     if (len(s) == 3):
@@ -2224,6 +2240,7 @@ class MTracerouteResult(SndRcvList):
                     else:
                         pn = ''
                         fl = ''
+                    break
             if not found:		# Set Blackhole found - (fl -> 'BH')
                 pn = ''
                 fl = 'BH'
