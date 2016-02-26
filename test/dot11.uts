@@ -1,0 +1,199 @@
+# dot11 unit tests
+#
+# Includes testing of RadioTap headers
+#
+# Type the following command to launch start the tests:
+# $ test/run_tests -t test/dot11.uts -f html -o /tmp/scapy_dot11_test_$(date +%Y%M%d-%H%H%S).html
+
++ Test dot11
+
+
++ Test different frame types
+
+= Basic dot11 ACK frame
+
+b = b'\xd4\x00\x00\x00\x00&\x86\xf03f\x8b\xa6\xbd\xd6'
+p = Dot11(b)
+p_ack = p.getlayer(Dot11ACK)
+assert(bytes(p) == b)
+assert(p.subtype == 13)
+assert(p.type == 1)
+assert(p.proto == 0)
+assert(p.FCfield == 0)
+assert(p.ID == 0)
+assert(p.addr1 == '00:26:86:f0:33:66')
+
+= Basic dot11 BACK frame
+
+b = b'\x94\x00\x00\x00\x00&\x86\xf0Dl\x00&\x86\xf02\xac\x05\x00@\xb8\xff\xff\xff?\x00\x00\x00\x00\x9f9@\xf4'
+p = Dot11(b)
+p_back = p.getlayer(Dot11BACK)
+assert(bytes(p) == b)
+assert(p.subtype == 9)
+assert(p.type == 1)
+assert(p.proto == 0)
+assert(p.FCfield == 0)
+assert(p.ID == 0)
+assert(p.addr1 == '00:26:86:f0:44:6c')
+assert(p.addr2 == '00:26:86:f0:32:ac')
+assert(p_back.Compressed == 1)
+assert(p_back.MultiTID == 0)
+assert(p_back.BACKPolicy == 1)
+assert(p_back.TID == 0)
+assert(p_back.SSN == 47168)
+assert(p_back.Bitmap == b'\xff\xff\xff?\x00\x00\x00\x00')
+# FIXME: test BACK specific functions once implemented
+
+= Basic dot11 RTS frame
+
+b = b'\xb4\x00 \x02\x00&\x86\xf0Dl\x00&\x86\xf02\xac\xb9\x8c5\xcb'
+p = Dot11(b)
+p_rts = p.getlayer(Dot11RTS)
+assert(bytes(p) == b)
+assert(p.subtype == 11)
+assert(p.type == 1)
+assert(p.proto == 0)
+assert(p.FCfield == 0)
+assert(p.ID == 8194)
+assert(p.addr1 == '00:26:86:f0:44:6c')
+assert(p.addr2 == '00:26:86:f0:32:ac')
+
+= Basic dot11 CTS frame
+
+b = b'\xc4\x00\xd4\x00\x00&\x86\xf02\xacjE\xee\x11'
+p = Dot11(b)
+p_cts = p.getlayer(Dot11CTS)
+assert(bytes(p) == b)
+assert(p.subtype == 12)
+assert(p.type == 1)
+assert(p.proto == 0)
+assert(p.FCfield == 0)
+assert(p.ID == 54272)
+assert(p.addr1 == '00:26:86:f0:32:ac')
+
+= Action no ACK frame
+
+b = b'\xe0\x00\x00\x00\x00&\x86\xf02\xac\x00&\x86\xf0Dl\x00&\x86\xf02\xac\x00\x00\x15\x00[\x85\xcc\x07\xf3\xdd\xb7\x9c\xd1p\x1c\xc8\xe2\x11\xfc\x1d\x06\x87y\xf3e\xe2b\x82t\x90\xd6Z\xbe^*\x85\x0bu\xb4\xa5\xfa\xebR\xf8\x107\x1b\xa6\x9b2\x86\x0f\x81\xf2]\xa3"s8\x15Z\'.\x152\x88W\x95\xb4\x1e\x11&\xa3x\xd5F\xef\xd5\x912K\x97m5\x1f/\xeb\x92\xf0\xe1v\xeb\x05\xc4\x1e\x88"\x8e\xbb\x15\x80/\x91\xe0\xe1\xfb\x8b\xfd\x1d\x07\xc9\x1d\xb6]\x18\xcf\xb3\xcf\xd8\xdd\xda\xcd\xf1:\xeb\x8d\x19\xaaZ\x99qs\x1dY\x9d\x8b\xdd\x1c,\xd3H\x8e\x9d\xd9\xd1\xa7p\x0c\xac\x0c\n\x1aq\x1b\xc7\xc1\x86\xa0\xa1\x11\xd52-,\x80:Z\x1d\xcd\xf7\x81\x02\x90h\xd5\xdf\xcbr(@\x05\xd2\xd2\x9c]T\x06$\xc2\xb1N\xdbEa\x88\x10\xf0\xbe\xe2e\x16\x8a\xa0{\xe7\x7f^u\xe1L\xaa+\x06\xd8M\x17\xd2\xa4\xb9\xda\x91\xdf\x84a\xcd\x9ak\x15\xf8E\xa0\x95\xad7\xdbpb\x04Z\x1dz\xf3\x19\x18:`\x15\xae8\xe3qb\x02V\xa5\x8bk&7\x1e_\x99\xba9\xa6Sb\xf1\xe5%\xcd[F7\x0e\x9fb\xd6{]ea\x11.&\xee\xd3U5\x16\xe3f\xd68\x95XdQf\xe6l\xdf\xa4\xc7\x02\xa6j\x86\xa3\x8d\x9fu\x8f*\xe2d\x910\x9a\xff\xa8^"\x12Us>\xa0\xa6]\x11\x91-\x14\x04l\x96\t\xd2\\!\x8b\x11#\xd1~\x8d\xc9\xf2$\xf3\x15\xe9\xdf\xd8:\xd0bc\x95p\x8c1\xc2,:\x9a)}\x96eL\xc3_\x99\x93kI\xe74}\x95E\xf6\x9at\x8e\xe2\x93\xd9U\xb7Q\x19)=\xd9}t\x97\xe2\x95\xa2\x97\xa1H7\xadn)\xb7\x1d\x92t\xcb\xca\x93ac\x1e\x1a\xf7\xa0\x8a5v\xda\xb5\xb4G\xb9\x1b\x14\'Yn\xb8X\xb8A\xb5\x96\xd9\xc0G\xb8\xe5\x93\x17B'
+p = Dot11(b)
+p_ana = p.getlayer(Dot11ActionNoACK)
+assert(bytes(p) == b)
+assert(p.subtype == 14)
+assert(p.type == 0)
+assert(p.proto == 0)
+assert(p.FCfield == 0)
+assert(p.ID == 0)
+assert(p.addr1 == '00:26:86:f0:32:ac')
+assert(p.addr2 == '00:26:86:f0:44:6c')
+assert(p.addr3 == '00:26:86:f0:32:ac')
+assert(p.SC == 0)
+# FIXME: extend parsing as frame processing is fleshed out
+
+= Single NULL data
+b = b'H\x010\x00\x00&u\xea\xb6\xd6\xf0\x99\xbf\xed\xa4\xe5\x00&u\xea\xb6\xd6p\xe6\x8fN\x94\x1e'
+p = Dot11(b)
+p_n = p.getlayer(Dot11NULL)
+assert(p_n != None)
+assert(bytes(p) == b)
+assert(p.subtype == 4)
+assert(p.type == 2)
+assert(p.proto == 0)
+assert(p.FCfield == 1)
+assert(p.ID == 12288)
+assert(p.addr1 == '00:26:75:ea:b6:d6')
+assert(p.addr2 == 'f0:99:bf:ed:a4:e5')
+assert(p.addr3 == '00:26:75:ea:b6:d6')
+assert(p.SC == 58992)
+
+= Single QoS NULL
+b = b"\xc8\x02<\x00\x14\xdd\xa9;\xe6\xd1@\x16~X\xae\\@\x16~X\xae\\\x80'\x00\x002\xd2\x8c\x0f"
+p = Dot11(b)
+p_n = p.getlayer(Dot11QoSNULL)
+assert(p_n != None)
+assert(bytes(p) == b)
+assert(p.subtype == 12)
+assert(p.type == 2)
+assert(p.proto == 0)
+assert(p.FCfield == 2)
+assert(p.ID == 15360)
+assert(p.addr1 == '14:dd:a9:3b:e6:d1')
+assert(p.addr2 == '40:16:7e:58:ae:5c')
+assert(p.addr3 == '40:16:7e:58:ae:5c')
+assert(p.SC == 10112)
+assert(p_n.TID == 0)
+assert(p_n.EOSP == 0)
+assert(p_n.AckPolicy == 0)
+assert(p_n.TXOP == 0)
+
+= Single QoS NULL with extra padding bytes, TID 4
+b = b'\xc8\x02L\x00\x14\xdd\xa99\xe7\xf9x$\xaf\x90T\x84x$\xaf\x90T\x84\xe0 \x04\x00\x00\x00\x00\x01\xbb\x08\xaa\x02'
+p = Dot11(b)
+p_n = p.getlayer(Dot11QoSNULL)
+assert(p_n != None)
+assert(bytes(p) == b)
+assert(p.subtype == 12)
+assert(p.type == 2)
+assert(p.proto == 0)
+assert(p.FCfield == 2)
+assert(p.ID == 19456)
+assert(p.addr1 == '14:dd:a9:39:e7:f9')
+assert(p.addr2 == '78:24:af:90:54:84')
+assert(p.addr3 == '78:24:af:90:54:84')
+assert(p.SC == 8416)
+assert(p_n.TID == 4)
+assert(p_n.EOSP == 0)
+assert(p_n.AckPolicy == 0)
+assert(p_n.TXOP == 0)
+
+= Single Action ADDBA Request
+b = b'\xd0\x00<\x00 \xcf0\xb7\x9f\xb8\x00"\xfb\x89\xf2V \xcf0\xb7\x9f\xb80\x13\x03\x01\x01\x00\x00\x02\x10\x88\x13|\x8b\xc9\x9a'
+p = Dot11(b)
+p_a = p.getlayer(Dot11Action)
+assert(p_a != None)
+assert(bytes(p) == b)
+assert(p.subtype == 13)
+assert(p.type == 0)
+assert(p.proto == 0)
+assert(p.FCfield == 0)
+assert(p.ID == 15360)
+assert(p.addr1 == '20:cf:30:b7:9f:b8')
+assert(p.addr2 == '00:22:fb:89:f2:56')
+assert(p.addr3 == '20:cf:30:b7:9f:b8')
+assert(p.SC == 4912)
+assert(p_a.category == 3)
+# FIXME: add more confirmation once parsing of the ADDBA REQ is fleshed out
+
+= Single Action ADDBA Response
+b = b'\xd0\x002\x00\x00"\xfb\x89\xf2V \xcf0\xb7\x9f\xb8 \xcf0\xb7\x9f\xb8\x90\xc7\x03\x00\x01\x02\x10\x00\x00@\x06\x1b\xb1j\x0e'
+p = Dot11(b)
+p_a = p.getlayer(Dot11Action)
+assert(p_a != None)
+assert(bytes(p) == b)
+assert(p.subtype == 13)
+assert(p.type == 0)
+assert(p.proto == 0)
+assert(p.FCfield == 0)
+assert(p.ID == 12800)
+assert(p.addr1 == '00:22:fb:89:f2:56')
+assert(p.addr2 == '20:cf:30:b7:9f:b8')
+assert(p.addr3 == '20:cf:30:b7:9f:b8')
+assert(p.SC == 51088)
+assert(p_a.category == 3)
+# FIXME: add more confirmation once parsing of the ADDBA RESP is fleshed out
+
+= Single Action DELBA
+b = b'\xd0\x00<\x00T\xa0P\xb4\xf8\x84x$\xaf\x91\xfbl\x00\x00\x00\x00\x00\x00`\x98\x03\x02\x00\x00\x01\x00\x1c\xbe\xd4\xcf'
+p = Dot11(b)
+p_a = p.getlayer(Dot11Action)
+assert(p_a != None)
+assert(bytes(p) == b)
+assert(p.subtype == 13)
+assert(p.type == 0)
+assert(p.proto == 0)
+assert(p.FCfield == 0)
+assert(p.ID == 15360)
+assert(p.addr1 == '54:a0:50:b4:f8:84')
+assert(p.addr2 == '78:24:af:91:fb:6c')
+assert(p.addr3 == '00:00:00:00:00:00')
+assert(p.SC == 39008)
+assert(p_a.category == 3)
+# FIXME: add more confirmation once parsing of the DELBA is fleshed out
