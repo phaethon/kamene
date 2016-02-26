@@ -75,7 +75,7 @@ class PcapNameNotFoundError(Scapy_Exception):
 def get_windows_if_list():
     # This works only starting from Windows 8/2012 and up. For older Windows another solution is needed
     # Get-WmiObject Win32_NetworkAdapter possibly could be used on Windows 7
-    ps = sp.Popen(['powershell', 'Get-NetAdapter', '|', 'select Name, InterfaceIndex, InterfaceDescription, InterfaceGuid, MacAddress', '|', 'fl'], stdout = sp.PIPE, universal_newlines = True)
+    ps = sp.Popen(['powershell', '-NoProfile', 'Get-NetAdapter', '|', 'select Name, InterfaceIndex, InterfaceDescription, InterfaceGuid, MacAddress', '|', 'fl'], stdout = sp.PIPE, universal_newlines = True)
     stdout, stdin = ps.communicate(timeout = 10)
     current_interface = None
     interface_list = []
