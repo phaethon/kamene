@@ -2184,13 +2184,13 @@ class MTracerouteResult(SndRcvList):
                 trace = rt.get(trace_id, {})
                 ttl = conf.ipv6_enabled and scapy.layers.inet6.IPv6 in s and s.hlim or s.ttl
                 #
-                # Check for packet resonse types:
+                # Check for packet response types:
                 if not (ICMP in r and r[ICMP].type == 11) and not (conf.ipv6_enabled and scapy.layers.inet6.IPv6 in r and scapy.layers.inet6.ICMPv6TimeExceeded in r):
                     #
                     # Mostly ICMP Time-Exceeded...
                     if trace_id in portsdone:
                         #
-                        # Special check for out or order resonse packets: If previous trace was determined
+                        # Special check for out or order response packets: If previous trace was determined
                         # done, but a ttl arrives with a lower value then process this response packet as the
                         # final ttl target packet.
                         if (ttl >= trgttl[trace_id]):
