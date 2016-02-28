@@ -2076,7 +2076,7 @@ class MTR:
         # Decorate Unknown ('Unkn') Nodes...
         s += "\n\t### Decoration For Unknown (Unkn) Node Hops ###\n"
         for u in self._unks:
-            s += '\t{u:s} [tooltip="Trace: {t:s}, Unknown Hop: {u2:s}",shape=egg,fontname="Sans-Serif",fontsize=11,color="black",gradientangle=270,fillcolor="white:#d8d8d8",style=filled];\n'.format(u = u, t = self._unks[u][2], u2 = u.replace('"',''))
+            s += '\t{u:s} [tooltip="Trace: {t:s}, Unknown Hop: {u2:s}",shape=egg,fontname="Sans-Serif",fontsize=9,height=0.2,width=0.2,color="black",gradientangle=270,fillcolor="white:#d8d8d8",style=filled];\n'.format(u = u, t = self._unks[u][2], u2 = u.replace('"',''))
 
         #
         # Create tooltip for standalone nodes...
