@@ -2302,11 +2302,12 @@ class MTracerouteResult(SndRcvList):
 ## Multi-Traceroute ##
 ######################
 @conf.commands.register
-def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filter=None, timeout=2, verbose=None, nquery=1, privaddr=0, rasn=1, **kargs):
+def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filter=None, timeout=2, verbose=None, netproto="TCP", nquery=1, privaddr=0, rasn=1, **kargs):
     """A Multi-Traceroute (mtr) command:
          mtr(target, [maxttl=30,] [dport=80,] [sport=80,] [minttl=1,] [maxttl=1,]
              [l4=None,] [filter=None,] [nquery=1,] [privaddr=0,] [rasn=1,] [verbose=conf.verb])
 
+           netproto: Network Protocol (One of: "TCP", "UDP" or "ICMP")
              nquery: Number of Traceroute queries to perform.
            privaddr: 0 - Default: Normal display of all resolved AS numbers,
                      1 - Do not show an associated AS Number bound box (cluster) on graph for a private IPv4 Address.
@@ -2315,16 +2316,27 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
     #
     # Initialize vars...
     trace = []			# Individual trace array
-    if (nquery < 1):		# Range check number of query traces
+    #
+    # Default to network protocol: "TCP" if not found in list...
+    plist = ["TCP", "UDP", "ICMP"]
+    netproto = netproto.upper()
+    if not netproto in plist:
+        netproto = "TCP"
+    #
+    # Range check number of query traces
+    if (nquery < 1):
         nquery = 1
     #
     # Create instance of an MTR class...
     mtrc = MTR(nquery = nquery, target = target)
+    #
+    # Set default verbosity if no override...
     if verbose is None:
         verbose = conf.verb
+    #
+    # Only consider ICMP error packets and TCP packets with at
+    # least the ACK flag set *and* either the SYN or the RST flag set...
     if filter is None:
-        # Only consider ICMP error packets and TCP packets with at
-        # least the ACK flag set *and* either the SYN or the RST flag set...
         filter="(icmp and (icmp[0]=3 or icmp[0]=4 or icmp[0]=5 or icmp[0]=11 or icmp[0]=12)) or (tcp and (tcp[13] & 0x16 > 0x10))"
     #
     # Resolve and expand each target...
@@ -2354,9 +2366,16 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
         for n in range(0, nquery):
             for t in exptrg:
                 #
-                # Run traceroute...
-                a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl,maxttl))/TCP(seq=RandInt(),sport=sport, dport=dport),
-                         timeout=timeout, filter=filter, verbose=verbose, **kargs)
+                # Execute a traceroute based on network protocol setting...
+                if (netproto == "TCP"):
+                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/TCP(seq=RandInt(), sport=sport, dport=dport),
+                            timeout=timeout, filter=filter, verbose=verbose, **kargs)
+                elif (netproto == "UDP"):
+                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/UDP(sport=sport, dport=dport),
+                            timeout=timeout, filter=filter, verbose=verbose, **kargs)
+                else:
+                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/ICMP(type=8),
+                            timeout=timeout, filter=filter, verbose=verbose, **kargs)
                 trace.append(MTracerouteResult(res = a.res))
                 mtrc._res.append(a)		# Store Response packets
                 mtrc._ures.append(b)		# Store Unresponse packets
