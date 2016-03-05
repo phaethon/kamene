@@ -1617,8 +1617,8 @@ class MTR:
         #                   k0       k1   k2       v0   v1           k0         k1    k2       v0   v1
         # Ex: bp = {('192.168.43.48',5555,''): ['T1','T3'], ('192.168.43.48',443,'https'): ['T2','T4']}
         bp = {}				# ep -> A single services label for a given IP
-        for d in self._tlblid:          #                 k            v0          v1               v2       v3   v4    v5      v6
-            for k,v in d.items():	# Ex: k:  '162.144.22.87' v: ('T1', '192.168.43.48', '162.144.22.87', 6, 443, 'https', 'SA')
+        for d in self._tlblid:          #                 k            v0          v1               v2       v3   v4    v5      v6   v7
+            for k,v in d.items():	# Ex: k:  '162.144.22.87' v: ('T1', '192.168.43.48', '162.144.22.87', 6, 443, 'https', 'SA', '')
                 p = bp.get((v[1], v[4], v[5]))
                 if (p == None):
                     bp[(v[1], v[4], v[5])] = [v[0]]	# Add new (TCP Flags / ICMP / Proto) and initial trace ID
@@ -1887,8 +1887,8 @@ class MTR:
         #                   k0       k1   k2       v0   v1   v2           k0     k1     k2       v0   v1   v2
         # Ex: ep = {('162.144.22.87',80,'http'): ['SA','T1','T3'], ('10.14.22.8',443,'https'): ['SA','T2','T4']}
         ep = {}				# ep -> A single services label for a given IP
-        for d in self._tlblid:          #               k            v0          v1               v2       v3   v4    v5      v6
-            for k,v in d.items():	# Ex: k:  162.144.22.87 v: ('T1', '10.222.222.10', '162.144.22.87', 6, 443, 'https', 'SA')
+        for d in self._tlblid:          #               k            v0          v1               v2       v3   v4    v5      v6  v7
+            for k,v in d.items():	# Ex: k:  162.144.22.87 v: ('T1', '10.222.222.10', '162.144.22.87', 6, 443, 'https', 'SA', '')
                 if not (v[6] == 'BH'):	# Blackhole detection - do not create Endpoint
                     p = ep.get((k, v[4], v[5]))
                     if (p == None):
@@ -1937,26 +1937,30 @@ class MTR:
 
         #
         # Blackholes...
+        #
+        # ***Note: Order matters: If a hop is both a Blackhole on one trace and
+        #                         a ICMP destination unreachable hop on another,
+        #                         it will appear in the dot file as two nodes in
+        #                         both sections. The ICMP destination unreachable
+        #                         hop node will take precedents and appear only
+        #                         since it is defined last.
         s += "\n\t### Blackholes ###\n"
-        for d in self._tlblid:          #              k             v0         v1               v2           v3    v4     v5     v6
-            for k,v in d.items():	# Ex: k:  162.144.22.87 v: ('T1', '10.222.222.10', '162.144.22.87', 'tcp', 443, 'https', 'SA')
+        bhhops = []
+        for d in self._tlblid:          #              k             v0         v1               v2           v3    v4   v5   v6    v7
+            for k,v in d.items():	# Ex: k:  162.144.22.87 v: ('T1', '10.222.222.10', '162.144.22.87', 'tcp', 5555, '', 'BH', 'I3')
                 if (v[6] == 'BH'):	# Blackhole detection
                     #
-                    # Check to see if target is a Blackhole and an ICMP final hop...
-                    for trg in self._ports:
-                        nxtport = False
-                        for p in self._ports[trg]:
-                            #
-                            # If both a target blackhole and an ICMP packet hop, then skip creating this
-                            # node we be created in the 'ICMP Destination Unreachable Hops' section.
-                            if ((k == trg) and (p.find('ICMP dest-unreach') >= 0)):
-                                nxtPort = True
-                                break
-                            else:
-                                lb = 'label=<{b:s} {prt:d}/{pro:s}<BR/><FONT POINT-SIZE="8">Failed Target</FONT>>'.format(b = v[2], prt = v[4], pro = v[3])
-                                s += '\t"{b:s} {prt:d}/{pro:s}" [{l:s},shape=doubleoctagon,color="black",gradientangle=270,fillcolor="white:red",style=filled,tooltip="Failed Host Target: {b:s}"];\n'.format(b = v[2], prt = v[4], pro = v[3], l = lb)
-                        if nxtport:
-                            break
+                    # If both a target blackhole and an ICMP packet hop, then skip creating this
+                    # node we be created in the 'ICMP Destination Unreachable Hops' section.
+                    if (v[7] != 'I3'):	# ICMP destination not reached detection
+                        bhh = '{b:s} {prt:d}/{pro:s}'.format(b = v[2], prt = v[4], pro = v[3])
+                        #
+                        # If not already added...
+                        if not bhh in bhhops:
+                            lb = 'label=<{bh:s}<BR/><FONT POINT-SIZE="8">Failed Target</FONT>>'.format(bh = bhh)
+                            s += '\t"{bh:s}" [{l:s},shape=doubleoctagon,color="black",gradientangle=270,fillcolor="white:red",style=filled,tooltip="Failed Host Target: {b:s}"];\n'.format(bh = bhh, l = lb, b = v[2])
+                            bhhops.append(bhh)
+
         #
         # ICMP Destination Unreachable Hops...
         s += "\n\t### ICMP Destination Unreachable Hops ###\n"
@@ -2349,14 +2353,26 @@ class MTracerouteResult(SndRcvList):
                         pn = ''
                         fl = ''
                     break
+            ic = ''			# ICMP Destination not reachable flag
             if not found:		# Set Blackhole found - (fl -> 'BH')
+                #
+                # Set flag for last hop is a target and ICMP destination not reached flag set...
+                trace = rt[rtk]
+                tk = trace.keys()
+                lh = trace[max(tk)]
+                f = lh.find(':I3')		# Is hop an ICMP destination not reached node?
+                if (f >= 0):
+                    lh = lh[0:f] 		# Strip off 'proto:port' -> '"100.41.207.244":I3'
+                    lh = lh.replace('"','')	# Remove surrounding double quotes ("")
+                    if lh in mtrc._exptrg:	# Is last hop a target?
+                        ic = 'I3'
                 pn = ''
                 fl = 'BH'
             #
             # Update the Target Trace Label ID:
-            # Ex: {'63.117.14.247': ('T2', '10.222.222.10', '162.144.22.87', 6, 443, 'https', 'SA')}
+            # Ex: {'63.117.14.247': ('T2', '10.222.222.10', '162.144.22.87', 6, 443, 'https', 'SA', '')}
             pt = mtrc.get_proto_name(rtk[2])
-            tlid = {rtk[1]: ('T' + str(mtrc._tcnt), rtk[0], rtk[1], pt, rtk[3], pn, fl)}
+            tlid = {rtk[1]: ('T' + str(mtrc._tcnt), rtk[0], rtk[1], pt, rtk[3], pn, fl, ic)}
             mtrc._tlblid.append(tlid)
 
 ######################
