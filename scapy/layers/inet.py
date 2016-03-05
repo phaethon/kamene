@@ -1334,6 +1334,8 @@ class MTR:
     def __init__(self, nquery = 1, target = ''):
         self._nquery = nquery		# Number or traceroute queries
         self._ntraces = 1		# Number of trace runs 
+        self._iface = ''		# Interface to use for trace
+        self._gw = ''			# Default Gateway IPv4 Address for trace
         self._netprotocol = 'TCP'	# MTR network protocol to use for trace
         self._target = target		# Session targets
         self._exptrg = []		# Expanded Session targets
@@ -1609,7 +1611,7 @@ class MTR:
         s += '\tgraph [bgcolor=transparent,ranksep={vs:.2f}];\n'.format(vs = vspread)
         #
         # Define the default node shape and drawing color...
-        s += '\tnode [shape=ellipse,fontname="Sans-Serif",fontsize=11,color="black",gradientangle=270,fillcolor="white:#a0a0a0",style=filled];\n'
+        s += '\tnode [shape="ellipse",fontname="Sans-Serif",fontsize=11,color="black",gradientangle=270,fillcolor="white:#a0a0a0",style="filled"];\n'
 
         #
         # Combine Trace Probe Begin Points...
@@ -1735,7 +1737,7 @@ class MTR:
             # Fill in ASN Cluster the associated generated color using an 11.7% alpha channel value (30/256)...
             s += '\t\tfillcolor="#{s0:s}{s1:s}{s2:s}30";\n'.format(s0 = col[0], s1 = col[1], s2 = col[2])
             s += '\t\tstyle="filled,rounded";\n'
-            s += '\t\tnode [color="#{s0:s}{s1:s}{s2:s}",gradientangle=270,fillcolor="white:#{s0:s}{s1:s}{s2:s}",style=filled];\n'.format(s0 = col[0], s1 = col[1], s2 = col[2])
+            s += '\t\tnode [color="#{s0:s}{s1:s}{s2:s}",gradientangle=270,fillcolor="white:#{s0:s}{s1:s}{s2:s}",style="filled"];\n'.format(s0 = col[0], s1 = col[1], s2 = col[2])
             s += '\t\tfontsize=10;\n'
             s += '\t\tfontname="Sans-Serif";\n'
             s += '\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="center"><B><FONT POINT-SIZE="11">AS: {asn:d}</FONT></B></TD></TR><TR><TD>[{des:s}]</TD></TR></TABLE>>;\n'.format(asn = asn, des = self._asds[asn])
@@ -1864,9 +1866,26 @@ class MTR:
         s += "\t}\n"
 
         #
+        # Default Gateway Cluster...
+        s += "\n\t### Default Gateway Cluster ###\n"
+        if (self._gw != ''):
+            s += '\tsubgraph cluster_default_gateway {\n'
+            s += '\t\ttooltip="Default Gateway Host: {gw:s}";\n'.format(gw = self._gw)
+            s += '\t\tcolor="goldenrod";\n'
+            s += '\t\tgradientangle=270;\n'
+            s += '\t\tfillcolor="white:#b8860b30";\n'
+            s += '\t\tstyle="filled,rounded";\n'
+            s += '\t\tpenwidth=3;\n'
+            s += '\t\tfontsize=11;\n'
+            s += '\t\tfontname="Sans-Serif";\n'
+            s += '\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" ALIGN="center"><TR><TD><B><FONT POINT-SIZE="9">Default Gateway</FONT></B></TD></TR></TABLE>>;\n'
+            s += '\t\t"{gw:s}" [shape="diamond",fontname="Sans-Serif",fontsize=11,color="black",gradientangle=270,fillcolor="white:goldenrod",style="rounded,filled",tooltip="Default Gateway Host: {gw:s}"];\n'.format(gw = self._gw)
+            s += "\t}\n"
+
+        #
         # Build Begin Point strings...
-        # Ex bps = "192.168.43.48" [shape=record,color="black",gradientangle=270,fillcolor="white:darkorange",style=filled,"
-        #        + "label="192.168.43.48\nProbe|{http|{<BT1>T1|<BT3>T3}}|{https:{<BT2>T4|<BT3>T4}}"];
+        # Ex bps = '192.168.43.48" [shape="record",color="black",gradientangle=270,fillcolor="white:darkorange",style="filled",'
+        #        + 'label="192.168.43.48\nProbe|{http|{<BT1>T1|<BT3>T3}}|{https:{<BT2>T4|<BT3>T4}}"];'
         s += "\n\t### Probe Begin Traces ###\n"
         for k,v in bpip.items():
             tr = ''
@@ -1875,8 +1894,11 @@ class MTR:
                     tr += '{{{pr:s}: {p:s}|{{{t:s}}}}}'.format(pr = self._netprotocol, p = sv[1], t = sv[0])
                 else:
                     tr += '|{{{pr:s}: {p:s}|{{{t:s}}}}}'.format(pr = self._netprotocol, p = sv[1], t = sv[0])
-            bps1 = '\t"{ip:s}" [shape=record,color="black",gradientangle=270,fillcolor="white:darkorange",style=filled,'.format(ip = k)
-            bps2 = 'label="{ip:s}\\nProbe|{tr:s}",tooltip="Begin Host Probe: {ip:s}"];\n'.format(ip = k, tr = tr)
+            bps1 = '\t"{ip:s}" [shape="record",color="black",gradientangle=270,fillcolor="white:darkorange",style="filled,rounded",'.format(ip = k)
+            if (self._iface != ''):
+                bps2 = 'label="Probe: {ip:s}\\nInterface: {ifc:s}|{tr:s}",tooltip="Begin Host Probe: {ip:s}"];\n'.format(ip = k, ifc = self._iface, tr = tr)
+            else:
+                bps2 = 'label="Probe: {ip:s}|{tr:s}",tooltip="Begin Host Probe: {ip:s}"];\n'.format(ip = k, tr = tr)
             s += bps1 + bps2
 
         #
@@ -1919,8 +1941,8 @@ class MTR:
                 epip[k[0]] = [(tr, p, v[0])]
         #
         # Build Endpoint strings...
-        # Ex eps = "162.144.22.87" [shape=record,color="black",gradientangle=270,fillcolor="lightgreen:green",style=filled,"
-        #        + "label="162.144.22.87\nTarget|{{<ET1>T1|<ET3>T3}|https SA}|{{<ET2>T4|<ET3>T4}|http SA}"];
+        # Ex eps = '162.144.22.87" [shape=record,color="black",gradientangle=270,fillcolor="lightgreen:green",style=i"filled,rounded",'
+        #        + 'label="162.144.22.87\nTarget|{{<ET1>T1|<ET3>T3}|https SA}|{{<ET2>T4|<ET3>T4}|http SA}"];'
         for k,v in epip.items():
             tr = ''
             for sv in v:
@@ -1931,7 +1953,7 @@ class MTR:
             pre = ''
             if k in uepprb:		# Special Case: Separate Endpoint Target from Probe
               pre = '_'			# when they are the same
-            eps1 = '\t"{pre:s}{ip:s}" [shape=record,color="black",gradientangle=270,fillcolor="lightgreen:green",style=filled,'.format(pre = pre, ip = k)
+            eps1 = '\t"{pre:s}{ip:s}" [shape="record",color="black",gradientangle=270,fillcolor="lightgreen:green",style="filled,rounded",'.format(pre = pre, ip = k)
             eps2 = 'label="{ip:s}\\nTarget|{tr:s}",tooltip="Host Target: {ip:s}"];\n'.format(ip = k, tr = tr)
             s += eps1 + eps2 
 
@@ -1958,7 +1980,7 @@ class MTR:
                         # If not already added...
                         if not bhh in bhhops:
                             lb = 'label=<{bh:s}<BR/><FONT POINT-SIZE="8">Failed Target</FONT>>'.format(bh = bhh)
-                            s += '\t"{bh:s}" [{l:s},shape=doubleoctagon,color="black",gradientangle=270,fillcolor="white:red",style=filled,tooltip="Failed Host Target: {b:s}"];\n'.format(bh = bhh, l = lb, b = v[2])
+                            s += '\t"{bh:s}" [{l:s},shape="doubleoctagon",color="black",gradientangle=270,fillcolor="white:red",style="filled,rounded",tooltip="Failed Host Target: {b:s}"];\n'.format(bh = bhh, l = lb, b = v[2])
                             bhhops.append(bhh)
 
         #
@@ -1985,7 +2007,7 @@ class MTR:
                         protoname = self.get_proto_name(icmpparts[4])
                         protoport = '{pr:s}/{pt:s}'.format(pr = icmpparts[5], pt = protoname)
                         lb = 'label=<{lh:s} {pp:s}<BR/><FONT POINT-SIZE="8">{u:s} Unreachable</FONT><BR/><FONT POINT-SIZE="8">Failed Target</FONT>>'.format(lh = d, pp = protoport, u = unreach)
-                        s += '\t"{lh:s} {pp:s}" [{lb:s},shape=doubleoctagon,color="black",gradientangle=270,fillcolor="yellow:red",style=filled,tooltip="{u:s} Unreachable, Failed Target, Host: {lh:s} {pp:s}"];\n'.format(lb = lb, pp = protoport, lh = d, u = unreach)
+                        s += '\t"{lh:s} {pp:s}" [{lb:s},shape="doubleoctagon",color="black",gradientangle=270,fillcolor="yellow:red",style="filled,rounded",tooltip="{u:s} Unreachable, Failed Target, Host: {lh:s} {pp:s}"];\n'.format(lb = lb, pp = protoport, lh = d, u = unreach)
                 else:
                     #
                     # Create Node: Target not same as node that returns an ICMP packet...
@@ -2000,7 +2022,7 @@ class MTR:
                         elif (p.find('port-unreachable') >= 0):
                             unreach += '/Port'
                         lb = 'label=<{lh:s} 3/icmp<BR/><FONT POINT-SIZE="8">{u:s} Unreachable</FONT>>'.format(lh = d, u = unreach)
-                        s += '\t"{lh:s} 3/icmp" [{lb:s},shape=doubleoctagon,color="black",gradientangle=270,fillcolor="white:yellow",style=filled,tooltip="{u:s} Unreachable, Host: {lh:s}"];\n'.format(lb = lb, lh = d, u = unreach)
+                        s += '\t"{lh:s} 3/icmp" [{lb:s},shape="doubleoctagon",color="black",gradientangle=270,fillcolor="white:yellow",style="filled,rounded",tooltip="{u:s} Unreachable, Host: {lh:s}"];\n'.format(lb = lb, lh = d, u = unreach)
         #
         # Padding check...
         if self._graphpadding:
@@ -2014,7 +2036,7 @@ class MTR:
                             pad[rcv.src] = None
             for sr in pad:
                 lb = 'label=<<BR/>{r:s}<BR/><FONT POINT-SIZE="8">Padding</FONT>>'.format(r = sr)
-                s += '\t"{r:s}" [{l:s},shape=box3d,color="black",gradientangle=270,fillcolor="white:red",style=filled];\n'.format(r = sr, l = lb)
+                s += '\t"{r:s}" [{l:s},shape="box3d",color="black",gradientangle=270,fillcolor="white:red",style="filled,rounded"];\n'.format(r = sr, l = lb)
 
         #
         # Draw each trace for each number of queries... 
@@ -2150,22 +2172,23 @@ class MTR:
         # Decorate Unknown ('Unkn') Nodes...
         s += "\n\t### Decoration For Unknown (Unkn) Node Hops ###\n"
         for u in self._unks:
-            s += '\t{u:s} [tooltip="Trace: {t:s}, Unknown Hop: {u2:s}",shape=egg,fontname="Sans-Serif",fontsize=9,height=0.2,width=0.2,color="black",gradientangle=270,fillcolor="white:#d8d8d8",style=filled];\n'.format(u = u, t = self._unks[u][2], u2 = u.replace('"',''))
+            s += '\t{u:s} [tooltip="Trace: {t:s}, Unknown Hop: {u2:s}",shape="egg",fontname="Sans-Serif",fontsize=9,height=0.2,width=0.2,color="black",gradientangle=270,fillcolor="white:#d8d8d8",style="filled"];\n'.format(u = u, t = self._unks[u][2], u2 = u.replace('"',''))
 
         #
         # Create tooltip for standalone nodes...
         s += "\n\t### Tooltip for Standalone Node Hops ###\n"
         for k,v in self._ips.items():
             if not k in cipall:
-                if not k in cepipall:
-                    if not k in self._ports:
-                        found = False
-                        for tid in self._tlblid:
-                            if k in tid:
-                                found = True
-                                break
-                        if not found:
-                            s += '\t"{ip:s}" [tooltip="Hop Host: {ip:s}"];\n'.format(ip = k)
+                if (k != self._gw):
+                    if not k in cepipall:
+                        if not k in self._ports:
+                            found = False
+                            for tid in self._tlblid:
+                                if k in tid:
+                                    found = True
+                                    break
+                            if not found:
+                                s += '\t"{ip:s}" [tooltip="Hop Host: {ip:s}"];\n'.format(ip = k)
         #
         # End the DOT Digraph...
         s += "}\n";
@@ -2379,14 +2402,15 @@ class MTracerouteResult(SndRcvList):
 ## Multi-Traceroute ##
 ######################
 @conf.commands.register
-def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filter=None, timeout=2, verbose=None, netproto="TCP", nquery=1, privaddr=0, rasn=1, **kargs):
+def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), iface=None, l4=None, filter=None, timeout=2, verbose=None, gw=None, netproto="TCP", nquery=1, privaddr=0, rasn=1, **kargs):
     """A Multi-Traceroute (mtr) command:
-         mtr(target, [maxttl=30,] [dport=80,] [sport=80,] [minttl=1,] [maxttl=1,]
+         mtr(target, [maxttl=30,] [dport=80,] [sport=80,] [minttl=1,] [maxttl=1,] [iface=None]
              [l4=None,] [filter=None,] [nquery=1,] [privaddr=0,] [rasn=1,] [verbose=conf.verb])
 
-           netproto: Network Protocol (One of: "TCP", "UDP" or "ICMP")
+                 gw: IPv4 Address of the Default Gateway.
+           netproto: Network Protocol (One of: "TCP", "UDP" or "ICMP").
              nquery: Number of Traceroute queries to perform.
-           privaddr: 0 - Default: Normal display of all resolved AS numbers,
+           privaddr: 0 - Default: Normal display of all resolved AS numbers.
                      1 - Do not show an associated AS Number bound box (cluster) on graph for a private IPv4 Address.
                rasn: 0 - Do not resolve AS Numbers - No graph clustering.
                      1 - Default: Resolve all AS numbers."""
@@ -2407,6 +2431,16 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
     if not netproto in plist:
         netproto = "TCP"
     mtrc._netprotocol = netproto
+    #
+    # Set trace interface...
+    if not iface is None:
+        mtrc._iface = iface
+    else:
+        mtrc._iface = conf.iface
+    #
+    # Set Default Gateway...
+    if not gw is None:
+        mtrc._gw = gw
     #
     # Set default verbosity if no override...
     if verbose is None:
@@ -2557,6 +2591,12 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
         print("\nmtrc._unks (Unknown Hops IP Boundary for AS Numbers):")
         print("=======================================================")
         print(mtrc._unks)
+        print("\nmtrc._iface (Trace Interface):")
+        print("=======================================================")
+        print(mtrc._iface)
+        print("\nmtrc._gw (Trace Default Gateway IPv4 Address):")
+        print("=======================================================")
+        print(mtrc._gw)
        
     return mtrc
 
