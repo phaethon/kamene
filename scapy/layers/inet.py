@@ -1703,7 +1703,7 @@ class MTR:
             uep = uep.replace(' ', '_')
             uep = uep.replace('/', '_')
             ecs += '\t\tsubgraph cluster_{ep:s} {{\n'.format(ep = uep)
-            ecs += '\t\t\ttooltip="Endpoint Host Target: {trg:s}";\n'.format(trg = self._ip2host[eph])
+            ecs += '\t\t\ttooltip="MTR Target: {trg:s}";\n'.format(trg = self._ip2host[eph])
             ecs += '\t\t\tcolor="green";\n'
             ecs += '\t\t\tfontsize=11;\n'
             ecs += '\t\t\tfontname="Sans-Serif";\n'
@@ -1896,7 +1896,7 @@ class MTR:
                     tr += '|{{{pr:s}: {p:s}|{{{t:s}}}}}'.format(pr = self._netprotocol, p = sv[1], t = sv[0])
             bps1 = '\t"{ip:s}" [shape="record",color="black",gradientangle=270,fillcolor="white:darkorange",style="filled,rounded",'.format(ip = k)
             if (self._iface != ''):
-                bps2 = 'label="Probe: {ip:s}\\nInterface: {ifc:s}|{tr:s}",tooltip="Begin Host Probe: {ip:s}"];\n'.format(ip = k, ifc = self._iface, tr = tr)
+                bps2 = 'label="Probe: {ip:s}\\nNetwork Interface: {ifc:s}|{tr:s}",tooltip="Begin Host Probe: {ip:s}"];\n'.format(ip = k, ifc = self._iface, tr = tr)
             else:
                 bps2 = 'label="Probe: {ip:s}|{tr:s}",tooltip="Begin Host Probe: {ip:s}"];\n'.format(ip = k, tr = tr)
             s += bps1 + bps2
@@ -1954,7 +1954,7 @@ class MTR:
             if k in uepprb:		# Special Case: Separate Endpoint Target from Probe
               pre = '_'			# when they are the same
             eps1 = '\t"{pre:s}{ip:s}" [shape="record",color="black",gradientangle=270,fillcolor="lightgreen:green",style="filled,rounded",'.format(pre = pre, ip = k)
-            eps2 = 'label="{ip:s}\\nTarget|{tr:s}",tooltip="Host Target: {ip:s}"];\n'.format(ip = k, tr = tr)
+            eps2 = 'label="Resolved Target\\n{ip:s}|{tr:s}",tooltip="MTR Resolved Target: {ip:s}"];\n'.format(ip = k, tr = tr)
             s += eps1 + eps2 
 
         #
@@ -1980,7 +1980,7 @@ class MTR:
                         # If not already added...
                         if not bhh in bhhops:
                             lb = 'label=<{bh:s}<BR/><FONT POINT-SIZE="8">Failed Target</FONT>>'.format(bh = bhh)
-                            s += '\t"{bh:s}" [{l:s},shape="doubleoctagon",color="black",gradientangle=270,fillcolor="white:red",style="filled,rounded",tooltip="Failed Host Target: {b:s}"];\n'.format(bh = bhh, l = lb, b = v[2])
+                            s += '\t"{bh:s}" [{l:s},shape="doubleoctagon",color="black",gradientangle=270,fillcolor="white:red",style="filled,rounded",tooltip="Failed MTR Resolved Target: {b:s}"];\n'.format(bh = bhh, l = lb, b = v[2])
                             bhhops.append(bhh)
 
         #
@@ -2007,7 +2007,7 @@ class MTR:
                         protoname = self.get_proto_name(icmpparts[4])
                         protoport = '{pr:s}/{pt:s}'.format(pr = icmpparts[5], pt = protoname)
                         lb = 'label=<{lh:s} {pp:s}<BR/><FONT POINT-SIZE="8">{u:s} Unreachable</FONT><BR/><FONT POINT-SIZE="8">Failed Target</FONT>>'.format(lh = d, pp = protoport, u = unreach)
-                        s += '\t"{lh:s} {pp:s}" [{lb:s},shape="doubleoctagon",color="black",gradientangle=270,fillcolor="yellow:red",style="filled,rounded",tooltip="{u:s} Unreachable, Failed Target, Host: {lh:s} {pp:s}"];\n'.format(lb = lb, pp = protoport, lh = d, u = unreach)
+                        s += '\t"{lh:s} {pp:s}" [{lb:s},shape="doubleoctagon",color="black",gradientangle=270,fillcolor="yellow:red",style="filled,rounded",tooltip="{u:s} Unreachable, Failed Resolved Target: {lh:s} {pp:s}"];\n'.format(lb = lb, pp = protoport, lh = d, u = unreach)
                 else:
                     #
                     # Create Node: Target not same as node that returns an ICMP packet...
@@ -2022,7 +2022,7 @@ class MTR:
                         elif (p.find('port-unreachable') >= 0):
                             unreach += '/Port'
                         lb = 'label=<{lh:s} 3/icmp<BR/><FONT POINT-SIZE="8">{u:s} Unreachable</FONT>>'.format(lh = d, u = unreach)
-                        s += '\t"{lh:s} 3/icmp" [{lb:s},shape="doubleoctagon",color="black",gradientangle=270,fillcolor="white:yellow",style="filled,rounded",tooltip="{u:s} Unreachable, Host: {lh:s}"];\n'.format(lb = lb, lh = d, u = unreach)
+                        s += '\t"{lh:s} 3/icmp" [{lb:s},shape="doubleoctagon",color="black",gradientangle=270,fillcolor="white:yellow",style="filled,rounded",tooltip="{u:s} Unreachable, Hop Host: {lh:s}"];\n'.format(lb = lb, lh = d, u = unreach)
         #
         # Padding check...
         if self._graphpadding:
@@ -2122,7 +2122,7 @@ class MTR:
                             else:
                                 #
                                 # Last hop is not ICMP packet from target (Fake hop - never reached - use dashed trace)...
-                                lb = 'Trace: {tr:d} - Failed Target: {bh:s} {bhp:d}/{bht:s}'.format(tr = (t + 1), bh = k, bhp = v[4], bht = v[3])
+                                lb = 'Trace: {tr:d} - Failed MTR Resolved Target: {bh:s} {bhp:d}/{bht:s}'.format(tr = (t + 1), bh = k, bhp = v[4], bht = v[3])
                                 s += '"{bh:s} {bhp:d}/{bht:s}" [style="dashed",label=<<FONT POINT-SIZE="8">&nbsp; T{tr:d}</FONT>>,edgetooltip="{lb:s}",labeltooltip="{lb:s}"];\n'.format(bh = k, bhp = v[4], bht = v[3], tr = (t + 1), lb = lb)
                         else:
                             #
@@ -2144,7 +2144,7 @@ class MTR:
                                 #
                                 # Add the Failed Target (Blackhole - Fake hop - never reached - use dashed trace)...
                                 s += '\t"{lh:s} 3/icmp" -> '.format(lh = lh)
-                            lb = 'Trace: {tr:d} - Failed Target: {bh:s} {bhp:d}/{bht:s}'.format(tr = (t + 1), bh = k, bhp = v[4], bht = v[3])
+                            lb = 'Trace: {tr:d} - Failed MTR Resolved Target: {bh:s} {bhp:d}/{bht:s}'.format(tr = (t + 1), bh = k, bhp = v[4], bht = v[3])
                             s += '"{bh:s} {bhp:d}/{bht:s}" [style="dashed",label=<<FONT POINT-SIZE="8">&nbsp; T{tr:d}</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(bh = k, bhp = v[4], bht = v[3], tr = (t + 1), lb = lb, llb = lb)
 
                     else:			# Enhanced Target Endpoint
@@ -2480,7 +2480,11 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), iface=None, l4
                 #
                 # Execute a traceroute based on network protocol setting...
                 if (netproto == "TCP"):
-                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/TCP(seq=RandInt(), sport=sport, dport=dport),
+                    #
+                    # Use some TCP options for the trace. Some firewalls will filter
+                    # TCP/IP packets without the 'Timestamp' option set...
+                    opts = [('MSS', 1460), ('NOP', None), ('NOP', None), ('Timestamp', (0, 0)), ('NOP', None), ('WScale', 7)]
+                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/TCP(seq=RandInt(), sport=sport, dport=dport, options=opts),
                             timeout=timeout, filter=filter, verbose=verbose, **kargs)
                 elif (netproto == "UDP"):
                     #
