@@ -1698,12 +1698,15 @@ class MTR:
                 if (c < l):
                     hrs += ', '
             hrs += ')'
-            ecs = "\t\t### Endpoint (Target) Cluster ###\n"
+            ecs = "\t\t### MTR Target Cluster ###\n"
             uep = ep.replace('.', '_')
             uep = uep.replace(' ', '_')
             uep = uep.replace('/', '_')
+            gwl = ''
+            if (self._gw == eph):
+               gwl = ' (Default Gateway)'
             ecs += '\t\tsubgraph cluster_{ep:s} {{\n'.format(ep = uep)
-            ecs += '\t\t\ttooltip="MTR Target: {trg:s}";\n'.format(trg = self._ip2host[eph])
+            ecs += '\t\t\ttooltip="MTR Target: {trg:s}{gwl:s}";\n'.format(trg = self._ip2host[eph], gwl = gwl)
             ecs += '\t\t\tcolor="green";\n'
             ecs += '\t\t\tfontsize=11;\n'
             ecs += '\t\t\tfontname="Sans-Serif";\n'
@@ -1711,7 +1714,7 @@ class MTR:
             ecs += '\t\t\tfillcolor="white:#a0a0a0";\n'
             ecs += '\t\t\tstyle="filled,rounded";\n'
             ecs += '\t\t\tpenwidth=2;\n'
-            ecs += '\t\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="center"><B>Target: {h:s}</B></TD></TR><TR><TD><FONT POINT-SIZE="9">{hr:s}</FONT></TD></TR></TABLE>>;\n'.format(h = self._ip2host[eph], hr = hrs)
+            ecs += '\t\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="center"><B>Target: {h:s}{gwl:s}</B></TD></TR><TR><TD><FONT POINT-SIZE="9">{hr:s}</FONT></TD></TR></TABLE>>;\n'.format(h = self._ip2host[eph], gwl = gwl, hr = hrs)
             ecs += '\t\t\tlabelloc="b";\n'
             pre = ''
             if ep in uepprb:		# Special Case: Separate Endpoint Target from Probe
@@ -1869,18 +1872,19 @@ class MTR:
         # Default Gateway Cluster...
         s += "\n\t### Default Gateway Cluster ###\n"
         if (self._gw != ''):
-            s += '\tsubgraph cluster_default_gateway {\n'
-            s += '\t\ttooltip="Default Gateway Host: {gw:s}";\n'.format(gw = self._gw)
-            s += '\t\tcolor="goldenrod";\n'
-            s += '\t\tgradientangle=270;\n'
-            s += '\t\tfillcolor="white:#b8860b30";\n'
-            s += '\t\tstyle="filled,rounded";\n'
-            s += '\t\tpenwidth=3;\n'
-            s += '\t\tfontsize=11;\n'
-            s += '\t\tfontname="Sans-Serif";\n'
-            s += '\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" ALIGN="center"><TR><TD><B><FONT POINT-SIZE="9">Default Gateway</FONT></B></TD></TR></TABLE>>;\n'
-            s += '\t\t"{gw:s}" [shape="diamond",fontname="Sans-Serif",fontsize=11,color="black",gradientangle=270,fillcolor="white:goldenrod",style="rounded,filled",tooltip="Default Gateway Host: {gw:s}"];\n'.format(gw = self._gw)
-            s += "\t}\n"
+            if not self._gw in self._exptrg:
+                s += '\tsubgraph cluster_default_gateway {\n'
+                s += '\t\ttooltip="Default Gateway Host: {gw:s}";\n'.format(gw = self._gw)
+                s += '\t\tcolor="goldenrod";\n'
+                s += '\t\tgradientangle=270;\n'
+                s += '\t\tfillcolor="white:#b8860b30";\n'
+                s += '\t\tstyle="filled,rounded";\n'
+                s += '\t\tpenwidth=3;\n'
+                s += '\t\tfontsize=11;\n'
+                s += '\t\tfontname="Sans-Serif";\n'
+                s += '\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" ALIGN="center"><TR><TD><B><FONT POINT-SIZE="9">Default Gateway</FONT></B></TD></TR></TABLE>>;\n'
+                s += '\t\t"{gw:s}" [shape="diamond",fontname="Sans-Serif",fontsize=11,color="black",gradientangle=270,fillcolor="white:goldenrod",style="rounded,filled",tooltip="Default Gateway Host: {gw:s}"];\n'.format(gw = self._gw)
+                s += "\t}\n"
 
         #
         # Build Begin Point strings...
