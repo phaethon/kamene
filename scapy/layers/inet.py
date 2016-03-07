@@ -2452,7 +2452,9 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), iface=None, l4
     #
     # Only consider ICMP error packets and TCP packets with at
     # least the ACK flag set *and* either the SYN or the RST flag set...
+    filterundefined = False
     if filter is None:
+        filterundefined = True
         filter="(icmp and (icmp[0]=3 or icmp[0]=4 or icmp[0]=5 or icmp[0]=11 or icmp[0]=12)) or (tcp and (tcp[13] & 0x16 > 0x10))"
     #
     # Resolve and expand each target...
@@ -2479,26 +2481,46 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), iface=None, l4
     #
     # Traceroute each expanded target value...
     if l4 is None:
+        #
+        # Standard Layer: 3 ('TCP', 'UDP' or 'ICMP') tracing...
         for n in range(0, nquery):
             for t in exptrg:
                 #
                 # Execute a traceroute based on network protocol setting...
-                if (netproto == "TCP"):
+                if (netproto == "ICMP"):
                     #
-                    # Use some TCP options for the trace. Some firewalls will filter
-                    # TCP/IP packets without the 'Timestamp' option set...
-                    opts = [('MSS', 1460), ('NOP', None), ('NOP', None), ('Timestamp', (0, 0)), ('NOP', None), ('WScale', 7)]
-                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/TCP(seq=RandInt(), sport=sport, dport=dport, options=opts),
+                    # MTR Network Protocol: 'ICMP'
+                    #
+                    # Use a 'Type: 8 - Echo Request' packet for the trace:
+                    # Use a random payload string to full out a minimum size PDU of 46 bytes for each ICMP packet:
+                    # Length of 'IP()/ICMP()' = 28, Minimum Protocol Data Unit (PDU) is = 46 -> Therefore a PDU of 18 octets is required.
+                    pload = RandString(size = 18)
+                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/ICMP(type=8)/Raw(load = pload),
                             timeout=timeout, filter=filter, verbose=verbose, **kargs)
                 elif (netproto == "UDP"):
                     #
-                    # Use a UDP payload similar to the Linux traceroute command to full out a minimum packet size...
-                    pload = b'@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'
+                    # MTR Network Protocol: 'UDP'
+                    #
+                    # Use a random payload string to full out a minimum size PDU of 46 bytes for each UDP packet:
+                    # Length of 'IP()/UDP()' = 28, Minimum PDU is = 46 -> Therefore a UDP of 18 octets is required.
+                    pload = RandString(size = 18)
+                    if filterundefined:
+                        filter += " or udp"
                     a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/UDP(sport=sport, dport=dport)/Raw(load = pload),
                             timeout=timeout, filter=filter, verbose=verbose, **kargs)
                 else:
-                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/ICMP(type=8),
+                    #
+                    # Default MTR Network Protocol: 'TCP'
+                    #
+                    # Use some TCP options for the trace. Some firewalls will filter
+                    # TCP/IP packets without the 'Timestamp' option set.
+                    #
+                    # Note: The minimum PDU size of 46 is statisfied with the use of TCP options.
+                    opts = [('MSS', 1460), ('NOP', None), ('NOP', None), ('Timestamp', (0, 0)), ('NOP', None), ('WScale', 7)]
+                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/TCP(seq=RandInt(), sport=sport, dport=dport, options=opts),
                             timeout=timeout, filter=filter, verbose=verbose, **kargs)
+                #
+                # Create an 'MTracerouteResult' instance for each result packets...
                 trace.append(MTracerouteResult(res = a.res))
                 mtrc._res.append(a)		# Store Response packets
                 mtrc._ures.append(b)		# Store Unresponse packets
@@ -2507,6 +2529,8 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), iface=None, l4
                     print()
                 ntraces += 1
     else:
+        #
+        # Custom Layer: 4 tracing...
         filter="ip"
         for n in range(0, nquery):
             for t in exptrg:
