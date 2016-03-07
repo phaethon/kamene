@@ -2516,7 +2516,10 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), iface=None, l4
                     # TCP/IP packets without the 'Timestamp' option set.
                     #
                     # Note: The minimum PDU size of 46 is statisfied with the use of TCP options.
-                    opts = [('MSS', 1460), ('NOP', None), ('NOP', None), ('Timestamp', (0, 0)), ('NOP', None), ('WScale', 7)]
+                    #
+                    # Use an integer encoded microsecond timestamp for the TCP option timestamp for each trace sequence.
+                    uts = IntAutoMicroTime()
+                    opts = [('MSS', 1460), ('NOP', None), ('NOP', None), ('Timestamp', (uts, 0)), ('NOP', None), ('WScale', 7)]
                     a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/TCP(seq=RandInt(), sport=sport, dport=dport, options=opts),
                             timeout=timeout, filter=filter, verbose=verbose, **kargs)
                 #
