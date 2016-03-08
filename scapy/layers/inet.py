@@ -1872,19 +1872,20 @@ class MTR:
         # Default Gateway Cluster...
         s += "\n\t### Default Gateway Cluster ###\n"
         if (self._gw != ''):
-            if not self._gw in self._exptrg:
-                s += '\tsubgraph cluster_default_gateway {\n'
-                s += '\t\ttooltip="Default Gateway Host: {gw:s}";\n'.format(gw = self._gw)
-                s += '\t\tcolor="goldenrod";\n'
-                s += '\t\tgradientangle=270;\n'
-                s += '\t\tfillcolor="white:#b8860b30";\n'
-                s += '\t\tstyle="filled,rounded";\n'
-                s += '\t\tpenwidth=3;\n'
-                s += '\t\tfontsize=11;\n'
-                s += '\t\tfontname="Sans-Serif";\n'
-                s += '\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" ALIGN="center"><TR><TD><B><FONT POINT-SIZE="9">Default Gateway</FONT></B></TD></TR></TABLE>>;\n'
-                s += '\t\t"{gw:s}" [shape="diamond",fontname="Sans-Serif",fontsize=11,color="black",gradientangle=270,fillcolor="white:goldenrod",style="rounded,filled",tooltip="Default Gateway Host: {gw:s}"];\n'.format(gw = self._gw)
-                s += "\t}\n"
+            if self._gw in self._ips:
+                if not self._gw in self._exptrg:
+                    s += '\tsubgraph cluster_default_gateway {\n'
+                    s += '\t\ttooltip="Default Gateway Host: {gw:s}";\n'.format(gw = self._gw)
+                    s += '\t\tcolor="goldenrod";\n'
+                    s += '\t\tgradientangle=270;\n'
+                    s += '\t\tfillcolor="white:#b8860b30";\n'
+                    s += '\t\tstyle="filled,rounded";\n'
+                    s += '\t\tpenwidth=3;\n'
+                    s += '\t\tfontsize=11;\n'
+                    s += '\t\tfontname="Sans-Serif";\n'
+                    s += '\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" ALIGN="center"><TR><TD><B><FONT POINT-SIZE="9">Default Gateway</FONT></B></TD></TR></TABLE>>;\n'
+                    s += '\t\t"{gw:s}" [shape="diamond",fontname="Sans-Serif",fontsize=11,color="black",gradientangle=270,fillcolor="white:goldenrod",style="rounded,filled",tooltip="Default Gateway Host: {gw:s}"];\n'.format(gw = self._gw)
+                    s += "\t}\n"
 
         #
         # Build Begin Point strings...
@@ -1894,10 +1895,17 @@ class MTR:
         for k,v in bpip.items():
             tr = ''
             for sv in v:
-                if (tr == ''):
-                    tr += '{{{pr:s}: {p:s}|{{{t:s}}}}}'.format(pr = self._netprotocol, p = sv[1], t = sv[0])
+                if (self._netprotocol == 'ICMP'):
+                    if (sv[1].find('ICMP') >= 0):
+                       ps = '{p:s} echo-request'.format(p = sv[1])
+                    else:
+                       ps = 'ICMP({p:s}) echo-request'.format(p = sv[1])
                 else:
-                    tr += '|{{{pr:s}: {p:s}|{{{t:s}}}}}'.format(pr = self._netprotocol, p = sv[1], t = sv[0])
+                    ps = '{pr:s}: {p:s}'.format(pr = self._netprotocol, p = sv[1])
+                if (tr == ''):
+                    tr += '{{{ps:s}|{{{t:s}}}}}'.format(ps = ps, t = sv[0])
+                else:
+                    tr += '|{{{ps:s}|{{{t:s}}}}}'.format(ps = ps, t = sv[0])
             bps1 = '\t"{ip:s}" [shape="record",color="black",gradientangle=270,fillcolor="white:darkorange",style="filled,rounded",'.format(ip = k)
             if (self._iface != ''):
                 bps2 = 'label="Probe: {ip:s}\\nNetwork Interface: {ifc:s}|{tr:s}",tooltip="Begin Host Probe: {ip:s}"];\n'.format(ip = k, ifc = self._iface, tr = tr)
@@ -1918,7 +1926,7 @@ class MTR:
                 if not (v[6] == 'BH'):	# Blackhole detection - do not create Endpoint
                     p = ep.get((k, v[4], v[5]))
                     if (p == None):
-                        ep[(k, v[4], v[5])] = [v[6], v[0]]	# Add new (TCP Flags / ICMP / Proto) and initial trace ID
+                        ep[(k, v[4], v[5])] = [v[6], v[0]]	# Add new (TCP Flags / ICMP type / Proto) and initial trace ID
                     else:
                         ep[(k, v[4], v[5])].append(v[0])	# Append additional trace IDs
         #
@@ -1950,10 +1958,14 @@ class MTR:
         for k,v in epip.items():
             tr = ''
             for sv in v:
-                if (tr == ''):
-                    tr += '{{{{{t:s}}}|{p:s} {f:s}}}'.format(t = sv[0], p = sv[1], f = sv[2])
+                if (self._netprotocol == 'ICMP'):
+                    ps = 'ICMP(0) echo-reply'
                 else:
-                    tr += '|{{{{{t:s}}}|{p:s} {f:s}}}'.format(t = sv[0], p = sv[1], f = sv[2])
+                    ps = '{p:s} {f:s}'.format(p = sv[1], f = sv[2])
+                if (tr == ''):
+                    tr += '{{{{{t:s}}}|{ps:s}}}'.format(t = sv[0], ps = ps)
+                else:
+                    tr += '|{{{{{t:s}}}|{ps:s}}}'.format(t = sv[0], ps = ps)
             pre = ''
             if k in uepprb:		# Special Case: Separate Endpoint Target from Probe
               pre = '_'			# when they are the same
@@ -1979,12 +1991,16 @@ class MTR:
                     # If both a target blackhole and an ICMP packet hop, then skip creating this
                     # node we be created in the 'ICMP Destination Unreachable Hops' section.
                     if (v[7] != 'I3'):	# ICMP destination not reached detection
-                        bhh = '{b:s} {prt:d}/{pro:s}'.format(b = v[2], prt = v[4], pro = v[3])
+                        nd = '{b:s} {prt:d}/{pro:s}'.format(b = v[2], prt = v[4], pro = v[3])
+                        if (self._netprotocol == 'ICMP'):
+                            bhh = '{b:s}<BR/><FONT POINT-SIZE="9">ICMP(0) echo-reply</FONT>'.format(b = v[2])
+                        else:
+                            bhh = nd
                         #
                         # If not already added...
                         if not bhh in bhhops:
-                            lb = 'label=<{bh:s}<BR/><FONT POINT-SIZE="8">Failed Target</FONT>>'.format(bh = bhh)
-                            s += '\t"{bh:s}" [{l:s},shape="doubleoctagon",color="black",gradientangle=270,fillcolor="white:red",style="filled,rounded",tooltip="Failed MTR Resolved Target: {b:s}"];\n'.format(bh = bhh, l = lb, b = v[2])
+                            lb = 'label=<{lh:s}<BR/><FONT POINT-SIZE="8">Failed Target</FONT>>'.format(lh = bhh)
+                            s += '\t"{bh:s}" [{l:s},shape="doubleoctagon",color="black",gradientangle=270,fillcolor="white:red",style="filled,rounded",tooltip="Failed MTR Resolved Target: {b:s}"];\n'.format(bh = nd, l = lb, b = v[2])
                             bhhops.append(bhh)
 
         #
@@ -2202,7 +2218,7 @@ class MTR:
 
     #
     # Graph the Multi-Traceroute...
-    def graph(self, ASres = None, padding = 0, vspread = 0.75, title = "Multi-Traceroute Probe (MTR)", timestamp = "", rtt = 1, **kargs):
+    def graph(self, ASres=None, padding=0, vspread=0.75, title="Multi-Traceroute Probe (MTR)", timestamp="", rtt=1, **kargs):
         """x.graph(ASres=conf.AS_resolver, other args):
         ASres = None          : Use AS default resolver => 'conf.AS_resolver'
         ASres = AS_resolver() : default whois AS resolver (riswhois.ripe.net)
@@ -2230,7 +2246,7 @@ class MTR:
 ## Multi-Traceroute Results Class ##
 ####################################
 class MTracerouteResult(SndRcvList):
-    def __init__(self, res = None, name = "MTraceroute", stats = None):
+    def __init__(self, res=None, name="MTraceroute", stats=None):
         PacketList.__init__(self, res, name, stats, vector_index = 1)
 
     def show(self, ntrace):
@@ -2277,7 +2293,7 @@ class MTracerouteResult(SndRcvList):
                 # Check for packet response types:
                 if not (ICMP in r and r[ICMP].type == 11) and not (conf.ipv6_enabled and scapy.layers.inet6.IPv6 in r and scapy.layers.inet6.ICMPv6TimeExceeded in r):
                     #
-                    # Mostly ICMP Time-Exceeded...
+                    # Mostly: Process target reached or ICMP Unreachable...
                     if trace_id in portsdone:
                         #
                         # Special check for out or order response packets: If previous trace was determined
@@ -2304,17 +2320,23 @@ class MTracerouteResult(SndRcvList):
                         p.append(r.sprintf("<U%ir,UDP.sport%> %UDP.sport%"))
                         trace[ttl] = r.sprintf('"%r,src%":U%ir,UDP.sport%')
                     elif ICMP in r:
-                        #
-                        # Format Ex: '<I3> ICMP dest-unreach port-unreachable 17 53'
-                        p.append(r.sprintf("<I%ir,ICMP.type%> ICMP %ICMP.type% %ICMP.code% %ICMP.proto% %r,ICMP.dport%"))
-                        trace[ttl] = r.sprintf('"%r,src%":I%ir,ICMP.type%')
+                        if (r[ICMP].type == 0):
+                            #
+                            # Process echo-reply...
+                            p.append(r.sprintf("<I%ir,ICMP.type%> ICMP %ICMP.type%"))
+                            trace[ttl] = r.sprintf('"%r,src%":I%ir,ICMP.type%')
+                        else:
+                            #
+                            # Format Ex: '<I3> ICMP dest-unreach port-unreachable 17 53'
+                            p.append(r.sprintf("<I%ir,ICMP.type%> ICMP %ICMP.type% %ICMP.code% %ICMP.proto% %r,ICMP.dport%"))
+                            trace[ttl] = r.sprintf('"%r,src%":I%ir,ICMP.type%')
                     else:
                         p.append(r.sprintf("{IP:<P%ir,proto%> IP %proto%}{IPv6:<P%ir,nh%> IPv6 %nh%}"))
                         trace[ttl] = r.sprintf('"%r,src%":{IP:P%ir,proto%}{IPv6:P%ir,nh%}')
                     ports[r.src] = p
                 else:
                     #
-                    # Non-ICMP Time-Exceeded packet - Save Hop Host IP Address...
+                    # Mostly ICMP Time-Exceeded packet - Save Hop Host IP Address...
                     trace[ttl] = r.sprintf('"%r,src%"')
                 rt[trace_id] = trace
                 #
@@ -2365,14 +2387,17 @@ class MTracerouteResult(SndRcvList):
             prtflgs = ports.get(rtk[1],[])
             found = False
             for pf in prtflgs:
-                pat = '<[TUI]{p:d}>'.format(p = rtk[3])		# Create reg exp pattern
+                if (mtrc._netprotocol == 'ICMP'):
+                    pat = '<I0>'				# ICMP: Create reg exp pattern
+                else:
+                    pat = '<[TU]{p:d}>'.format(p = rtk[3])	# TCP/UDP: Create reg exp pattern
                 match = re.search(pat, pf)			# Search for port match
                 if match:
                     found = True
                     s = pf.split(' ')
                     if (len(s) == 3):
-                        pn = s[1]	# Service Port name
-                        fl = s[2]	# TCP Flags / ICMP / Proto
+                        pn = s[1]	# Service Port name / ICMP
+                        fl = s[2]	# TCP Flags / ICMP Type / Proto
                     elif (len(s) == 2):
                         pn = s[1]	# Service Port name
                         fl = ''
@@ -2455,7 +2480,7 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), iface=None, l4
     filterundefined = False
     if filter is None:
         filterundefined = True
-        filter="(icmp and (icmp[0]=3 or icmp[0]=4 or icmp[0]=5 or icmp[0]=11 or icmp[0]=12)) or (tcp and (tcp[13] & 0x16 > 0x10))"
+        filter = "(icmp and (icmp[0]=3 or icmp[0]=4 or icmp[0]=5 or icmp[0]=11 or icmp[0]=12)) or (tcp and (tcp[13] & 0x16 > 0x10))"
     #
     # Resolve and expand each target...
     ntraces = 0		# Total trace count
@@ -2495,7 +2520,13 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), iface=None, l4
                     # Use a random payload string to full out a minimum size PDU of 46 bytes for each ICMP packet:
                     # Length of 'IP()/ICMP()' = 28, Minimum Protocol Data Unit (PDU) is = 46 -> Therefore a PDU of 18 octets is required.
                     pload = RandString(size = 18)
-                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/ICMP(type=8)/Raw(load = pload),
+                    id = 0x8888								# MTR ICMP identifier: '0x8888'
+                    seq = IncrementalValue(start=(minttl - 2), step=1, restart=-10)	# Use a Sequence number in step with TTL value
+                    if filterundefined:
+                        #
+                        # Allow for ICMP echo-request (8) and ICMP echo-reply (0) packet to be processed...
+                        filter = "(icmp and (icmp[0]=8 or icmp[0]=0 or icmp[0]=3 or icmp[0]=4 or icmp[0]=5 or icmp[0]=11 or icmp[0]=12))"
+                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/ICMP(type=8, id=id, seq=seq)/Raw(load=pload),
                             timeout=timeout, filter=filter, verbose=verbose, **kargs)
                 elif (netproto == "UDP"):
                     #
@@ -2505,8 +2536,8 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), iface=None, l4
                     # Length of 'IP()/UDP()' = 28, Minimum PDU is = 46 -> Therefore a UDP of 18 octets is required.
                     pload = RandString(size = 18)
                     if filterundefined:
-                        filter += " or udp"
-                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/UDP(sport=sport, dport=dport)/Raw(load = pload),
+                        filter += " or udp"			# Allow for processing UDP packets
+                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/UDP(sport=sport, dport=dport)/Raw(load=pload),
                             timeout=timeout, filter=filter, verbose=verbose, **kargs)
                 else:
                     #
@@ -2520,7 +2551,8 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), iface=None, l4
                     # Use an integer encoded microsecond timestamp for the TCP option timestamp for each trace sequence.
                     uts = IntAutoMicroTime()
                     opts = [('MSS', 1460), ('NOP', None), ('NOP', None), ('Timestamp', (uts, 0)), ('NOP', None), ('WScale', 7)]
-                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/TCP(seq=RandInt(), sport=sport, dport=dport, options=opts),
+                    seq = RandInt()		# Use a random TCP sequence number
+                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/TCP(seq=seq, sport=sport, dport=dport, options=opts),
                             timeout=timeout, filter=filter, verbose=verbose, **kargs)
                 #
                 # Create an 'MTracerouteResult' instance for each result packets...
