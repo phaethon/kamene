@@ -221,11 +221,17 @@ class RandString(RandField):
             s.append(random.choice(self.chars))
         return bytes(s)
 
+class RandStringTerm(RandString):
+    def __init__(self, size, term = b''):
+        RandString.__init__(self, size)
+        self.term = term
+    def _fix(self):
+        return RandString._fix(self) + self.term    
+
 class RandBin(RandString):
     def __init__(self, size=None):
         #RandString.__init__(self, size, b"".join(map(chr,range(256))))
         RandString.__init__(self, size, b"".join([bytes([i]) for i in range(256)]))
-
 
 class RandTermString(RandString):
     def __init__(self, size, term):
@@ -234,7 +240,6 @@ class RandTermString(RandString):
         self.term = term
     def _fix(self):
         return RandString._fix(self)+self.term    
-    
 
 class RandIP(RandString):
     def __init__(self, iptemplate="0.0.0.0/0"):

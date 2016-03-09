@@ -2534,7 +2534,7 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), iface=None, l4
                     #
                     # Use a random payload string to full out a minimum size PDU of 46 bytes for each UDP packet:
                     # Length of 'IP()/UDP()' = 28, Minimum PDU is = 46 -> Therefore a UDP of 18 octets is required.
-                    pload = RandString(size = 18)
+                    pload = RandStringTerm(size = 17, term = b'\n')
                     if filterundefined:
                         filter += " or udp"			# Allow for processing UDP packets
                     a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/UDP(sport=sport, dport=dport)/Raw(load=pload),
