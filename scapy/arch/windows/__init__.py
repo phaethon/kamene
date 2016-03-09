@@ -74,8 +74,19 @@ class PcapNameNotFoundError(Scapy_Exception):
 
 def get_windows_if_list():
     # This works only starting from Windows 8/2012 and up. For older Windows another solution is needed
-    # Get-WmiObject Win32_NetworkAdapter possibly could be used on Windows 7
-    ps = sp.Popen(['powershell', '-NoProfile', 'Get-NetAdapter', '|', 'select Name, InterfaceIndex, InterfaceDescription, InterfaceGuid, MacAddress', '|', 'fl'], stdout = sp.PIPE, universal_newlines = True)
+    # Get-WmiObject Win32_NetworkAdapter is used for Windows 7
+
+    #Get the OS version number
+    ps = sp.Popen(['powershell', '-NoProfile', '(Get-WmiObject -Class Win32_OperatingSystem).Version'], stdout = sp.PIPE, universal_newlines = True)
+    stdout, stdin = ps.communicate(timeout = 10)
+    
+   
+    if stdout > '6.2.0000':     #Windows 8/2012
+        ps = sp.Popen(['powershell', '-NoProfile', 'Get-NetAdapter', '|', 'select Name, InterfaceIndex, InterfaceDescription, InterfaceGuid, MacAddress,', '|', 'fl'], stdout = sp.PIPE, universal_newlines = True)
+    else:                       #Windows 7
+        log_loading.info("Pre-Windows 8/2012, using WMI method for interfaces")
+        ps = sp.Popen(['powershell', '-NoProfile', 'Get-WMIObject -class Win32_NetworkAdapter', '|', 'select Name, @{Name="InterfaceIndex";Expression={$_.Index}}, @{Name="InterfaceDescription";Expression={$_.Description}},@{Name="InterfaceGuid";Expression={$_.GUID}}, @{Name="MacAddress";Expression={$_.MacAddress.Replace(":","-")}}', '|', 'fl'], stdout = sp.PIPE, universal_newlines = True)
+    
     stdout, stdin = ps.communicate(timeout = 10)
     current_interface = None
     interface_list = []
