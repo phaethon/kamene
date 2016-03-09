@@ -79,8 +79,7 @@ def get_windows_if_list():
     #Get the OS version number
     ps = sp.Popen(['powershell', '-NoProfile', '(Get-WmiObject -Class Win32_OperatingSystem).Version'], stdout = sp.PIPE, universal_newlines = True)
     stdout, stdin = ps.communicate(timeout = 10)
-    
-   
+       
     if stdout > '6.2.0000':     #Windows 8/2012
         ps = sp.Popen(['powershell', '-NoProfile', 'Get-NetAdapter', '|', 'select Name, InterfaceIndex, InterfaceDescription, InterfaceGuid, MacAddress,', '|', 'fl'], stdout = sp.PIPE, universal_newlines = True)
     else:                       #Windows 7
