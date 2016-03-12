@@ -221,11 +221,17 @@ class RandString(RandField):
             s.append(random.choice(self.chars))
         return bytes(s)
 
+class RandStringTerm(RandString):
+    def __init__(self, size, term = b''):
+        RandString.__init__(self, size)
+        self.term = term
+    def _fix(self):
+        return RandString._fix(self) + self.term    
+
 class RandBin(RandString):
     def __init__(self, size=None):
         #RandString.__init__(self, size, b"".join(map(chr,range(256))))
         RandString.__init__(self, size, b"".join([bytes([i]) for i in range(256)]))
-
 
 class RandTermString(RandString):
     def __init__(self, size, term):
@@ -234,7 +240,6 @@ class RandTermString(RandString):
         self.term = term
     def _fix(self):
         return RandString._fix(self)+self.term    
-    
 
 class RandIP(RandString):
     def __init__(self, iptemplate="0.0.0.0/0"):
@@ -642,6 +647,19 @@ class IntAutoTime(AutoTime):
     def _fix(self):
         return int(time.time()-self.diff)
 
+class IntAutoMicroTime(VolatileValue):
+    """Instance returns integer encoded microsecond since instantiated."""
+    def __init__(self):
+        self.init = True
+        self.initts = time.time()
+    def _fix(self):
+        if self.init:
+            self.init = False
+            return 0
+        else:
+            uts = time.time() - self.initts
+            uts = int(uts * 10**6)
+            return uts
 
 class ZuluTime(AutoTime):
     def __init__(self, diff=0):
@@ -651,7 +669,7 @@ class ZuluTime(AutoTime):
 
 
 class DelayedEval(VolatileValue):
-    """ Example of usage: DelayedEval("time.time()") """
+    """Example of usage: DelayedEval("time.time()")"""
     def __init__(self, expr):
         self.expr = expr
     def _fix(self):

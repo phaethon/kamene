@@ -76,24 +76,27 @@ class AS_resolver_cymru(AS_resolver):
     options = None
     def resolve(self, *ips):
         ASNlist = []
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((self.server,self.port))
-        s.send(b"begin\r\n"+b"\r\n".join([ i.encode('ascii') for i in ips])+b"\r\nend\r\n")
-        r = b""
-        while 1:
-            l = s.recv(8192)
-            if l == b"":
-                break
-            r += l
-        s.close()
-        for l in r.splitlines()[1:]:
-            if b"|" not in l:
-                continue
-            asn,ip,desc = [ i.decode('ascii') for i in map(bytes.strip, l.split(b"|")) ]
-            if asn == "NA":
-                continue
-            asn = int(asn)
-            ASNlist.append((ip,asn,desc))
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect((self.server,self.port))
+            s.send(b"begin\r\n"+b"\r\n".join([ i.encode('ascii') for i in ips])+b"\r\nend\r\n")
+            r = b""
+            while 1:
+                l = s.recv(8192)
+                if l == b"":
+                    break
+                r += l
+            s.close()
+            for l in r.splitlines()[1:]:
+                if b"|" not in l:
+                    continue
+                asn,ip,desc = [ i.decode('ascii') for i in map(bytes.strip, l.split(b"|")) ]
+                if asn == "NA":
+                    continue
+                asn = int(asn)
+                ASNlist.append((ip,asn,desc))
+        except:
+            pass
         return ASNlist
 
 class AS_resolver_multi(AS_resolver):

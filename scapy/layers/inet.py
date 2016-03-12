@@ -1334,6 +1334,9 @@ class MTR:
     def __init__(self, nquery = 1, target = ''):
         self._nquery = nquery		# Number or traceroute queries
         self._ntraces = 1		# Number of trace runs 
+        self._iface = ''		# Interface to use for trace
+        self._gw = ''			# Default Gateway IPv4 Address for trace
+        self._netprotocol = 'TCP'	# MTR network protocol to use for trace
         self._target = target		# Session targets
         self._exptrg = []		# Expanded Session targets
         self._host2ip = {}		# Target Host Name to IP Address
@@ -1356,6 +1359,24 @@ class MTR:
         self._graphdef = None
         self._graphasres = 0
         self._graphpadding = 0
+
+    #
+    # Get the protocol name from protocol integer value.
+    #
+    #  proto - Protocol integer value.
+    #
+    #   Returns a string value representing the given integer protocol.
+    def get_proto_name(self, proto):
+        ps = str(proto)
+        if (ps == '6'):
+            pt = 'tcp'
+        elif (ps == '17'):
+            pt = 'udp'
+        elif (ps == '1'):
+            pt = 'icmp'
+        else:
+           pt = str(proto)
+        return pt
 
     #
     # Compute Black Holes...
@@ -1590,16 +1611,16 @@ class MTR:
         s += '\tgraph [bgcolor=transparent,ranksep={vs:.2f}];\n'.format(vs = vspread)
         #
         # Define the default node shape and drawing color...
-        s += '\tnode [shape=ellipse,fontname="Sans-Serif",fontsize=11,color="black",gradientangle=270,fillcolor="white:#a0a0a0",style=filled];\n'
+        s += '\tnode [shape="ellipse",fontname="Sans-Serif",fontsize=11,color="black",gradientangle=270,fillcolor="white:#a0a0a0",style="filled"];\n'
 
         #
         # Combine Trace Probe Begin Points...
         #
         #                   k0       k1   k2       v0   v1           k0         k1    k2       v0   v1
-        # Ex: bp = {('192.168.43.48',80,'http'): ['T1','T3'], ('192.168.43.48',443,'https'): ['T2','T4']}
+        # Ex: bp = {('192.168.43.48',5555,''): ['T1','T3'], ('192.168.43.48',443,'https'): ['T2','T4']}
         bp = {}				# ep -> A single services label for a given IP
-        for d in self._tlblid:          #                 k            v0          v1               v2       v3   v4    v5      v6
-            for k,v in d.items():	# Ex: k:  '162.144.22.87' v: ('T1', '192.168.43.48', '162.144.22.87', 6, 443, 'https', 'SA')
+        for d in self._tlblid:          #                 k            v0          v1               v2       v3   v4    v5      v6   v7
+            for k,v in d.items():	# Ex: k:  '162.144.22.87' v: ('T1', '192.168.43.48', '162.144.22.87', 6, 443, 'https', 'SA', '')
                 p = bp.get((v[1], v[4], v[5]))
                 if (p == None):
                     bp[(v[1], v[4], v[5])] = [v[0]]	# Add new (TCP Flags / ICMP / Proto) and initial trace ID
@@ -1607,9 +1628,8 @@ class MTR:
                     bp[(v[1], v[4], v[5])].append(v[0])	# Append additional trace IDs
         #
         # Combine Begin Point services...
-        #                   k                         v                            v
         #                   k                 sv0           sv1            sv0          sv1
-        # Ex bpip = {'192.168.43.48': [('<BT2>T2|<BT4>T4', 'https'), ('<BB1>T1|<BT3>T3', 'http')]}
+        # Ex bpip = {'192.168.43.48': [('<BT2>T2|<BT4>T4', 'https(443)'), ('<BB1>T1|<BT3>T3', '5555')]}
         bpip = {}			# epip -> Combined Endpoint services label for a given IP
         for k,v in bp.items():
             tr = ''
@@ -1624,9 +1644,9 @@ class MTR:
             else:
                 p += '(' + str(k[1]) + ')'	# Use both name and port
             if k[0] in bpip:
-                bpip[k[0]].append((tr, p, v[0]))
+                bpip[k[0]].append((tr, p))
             else:
-                bpip[k[0]] = [(tr, p, v[0])]
+                bpip[k[0]] = [(tr, p)]
 
         #
         # Create Endpoint Target Clusters...
@@ -1678,20 +1698,23 @@ class MTR:
                 if (c < l):
                     hrs += ', '
             hrs += ')'
-            ecs = "\t\t### Endpoint (Target) Cluster ###\n"
+            ecs = "\t\t### MTR Target Cluster ###\n"
             uep = ep.replace('.', '_')
             uep = uep.replace(' ', '_')
             uep = uep.replace('/', '_')
+            gwl = ''
+            if (self._gw == eph):
+               gwl = ' (Default Gateway)'
             ecs += '\t\tsubgraph cluster_{ep:s} {{\n'.format(ep = uep)
-            ecs += '\t\t\ttooltip="Endpoint Host Target: {trg:s}";\n'.format(trg = self._ip2host[eph])
+            ecs += '\t\t\ttooltip="MTR Target: {trg:s}{gwl:s}";\n'.format(trg = self._ip2host[eph], gwl = gwl)
             ecs += '\t\t\tcolor="green";\n'
             ecs += '\t\t\tfontsize=11;\n'
             ecs += '\t\t\tfontname="Sans-Serif";\n'
             ecs += '\t\t\tgradientangle=270;\n'
             ecs += '\t\t\tfillcolor="white:#a0a0a0";\n'
-            ecs += '\t\t\tstyle="filled";\n'
+            ecs += '\t\t\tstyle="filled,rounded";\n'
             ecs += '\t\t\tpenwidth=2;\n'
-            ecs += '\t\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="center"><B>Target: {h:s}</B></TD></TR><TR><TD><FONT POINT-SIZE="9">{hr:s}</FONT></TD></TR></TABLE>>;\n'.format(h = self._ip2host[eph], hr = hrs)
+            ecs += '\t\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="center"><B>Target: {h:s}{gwl:s}</B></TD></TR><TR><TD><FONT POINT-SIZE="9">{hr:s}</FONT></TD></TR></TABLE>>;\n'.format(h = self._ip2host[eph], gwl = gwl, hr = hrs)
             ecs += '\t\t\tlabelloc="b";\n'
             pre = ''
             if ep in uepprb:		# Special Case: Separate Endpoint Target from Probe
@@ -1716,8 +1739,8 @@ class MTR:
             #
             # Fill in ASN Cluster the associated generated color using an 11.7% alpha channel value (30/256)...
             s += '\t\tfillcolor="#{s0:s}{s1:s}{s2:s}30";\n'.format(s0 = col[0], s1 = col[1], s2 = col[2])
-            s += '\t\tstyle="filled";\n'
-            s += '\t\tnode [color="#{s0:s}{s1:s}{s2:s}",gradientangle=270,fillcolor="white:#{s0:s}{s1:s}{s2:s}",style=filled];\n'.format(s0 = col[0], s1 = col[1], s2 = col[2])
+            s += '\t\tstyle="filled,rounded";\n'
+            s += '\t\tnode [color="#{s0:s}{s1:s}{s2:s}",gradientangle=270,fillcolor="white:#{s0:s}{s1:s}{s2:s}",style="filled"];\n'.format(s0 = col[0], s1 = col[1], s2 = col[2])
             s += '\t\tfontsize=10;\n'
             s += '\t\tfontname="Sans-Serif";\n'
             s += '\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="center"><B><FONT POINT-SIZE="11">AS: {asn:d}</FONT></B></TD></TR><TR><TD>[{des:s}]</TD></TR></TABLE>>;\n'.format(asn = asn, des = self._asds[asn])
@@ -1793,7 +1816,7 @@ class MTR:
         s += '\t\tcolor="darkorange";\n'
         s += '\t\tgradientangle=270;\n'
         s += '\t\tfillcolor="white:#a0a0a0";\n'
-        s += '\t\tstyle="filled";\n'
+        s += '\t\tstyle="filled,rounded";\n'
         s += '\t\tpenwidth=3;\n'
         s += '\t\tfontsize=11;\n'
         s += '\t\tfontname="Sans-Serif";\n'
@@ -1846,20 +1869,48 @@ class MTR:
         s += "\t}\n"
 
         #
-        # Build Begin Point strings...
-        # Ex bps = "192.168.43.48" [shape=record,color="black",gradientangle=270,fillcolor="white:darkorange",style=filled,"
-        #        + "label="192.168.43.48\nProbe|{http|{<BT1>T1|<BT3>T3}}|{https:{<BT2>T4|<BT3>T4}}"];
+        # Default Gateway Cluster...
+        s += "\n\t### Default Gateway Cluster ###\n"
+        if (self._gw != ''):
+            if self._gw in self._ips:
+                if not self._gw in self._exptrg:
+                    s += '\tsubgraph cluster_default_gateway {\n'
+                    s += '\t\ttooltip="Default Gateway Host: {gw:s}";\n'.format(gw = self._gw)
+                    s += '\t\tcolor="goldenrod";\n'
+                    s += '\t\tgradientangle=270;\n'
+                    s += '\t\tfillcolor="white:#b8860b30";\n'
+                    s += '\t\tstyle="filled,rounded";\n'
+                    s += '\t\tpenwidth=3;\n'
+                    s += '\t\tfontsize=11;\n'
+                    s += '\t\tfontname="Sans-Serif";\n'
+                    s += '\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" ALIGN="center"><TR><TD><B><FONT POINT-SIZE="9">Default Gateway</FONT></B></TD></TR></TABLE>>;\n'
+                    s += '\t\t"{gw:s}" [shape="diamond",fontname="Sans-Serif",fontsize=11,color="black",gradientangle=270,fillcolor="white:goldenrod",style="rounded,filled",tooltip="Default Gateway Host: {gw:s}"];\n'.format(gw = self._gw)
+                    s += "\t}\n"
+
         #
+        # Build Begin Point strings...
+        # Ex bps = '192.168.43.48" [shape="record",color="black",gradientangle=270,fillcolor="white:darkorange",style="filled",'
+        #        + 'label="192.168.43.48\nProbe|{http|{<BT1>T1|<BT3>T3}}|{https:{<BT2>T4|<BT3>T4}}"];'
         s += "\n\t### Probe Begin Traces ###\n"
         for k,v in bpip.items():
             tr = ''
             for sv in v:
-                if (tr == ''):
-                    tr += '{{{p:s}|{{{t:s}}}}}'.format(p = sv[1], t = sv[0])
+                if (self._netprotocol == 'ICMP'):
+                    if (sv[1].find('ICMP') >= 0):
+                       ps = '{p:s} echo-request'.format(p = sv[1])
+                    else:
+                       ps = 'ICMP({p:s}) echo-request'.format(p = sv[1])
                 else:
-                    tr += '|{{{p:s}|{{{t:s}}}}}'.format(p = sv[1], t = sv[0])
-            bps1 = '\t"{ip:s}" [shape=record,color="black",gradientangle=270,fillcolor="white:darkorange",style=filled,'.format(ip = k)
-            bps2 = 'label="{ip:s}\\nProbe|{tr:s}",tooltip="Begin Host Probe: {ip:s}"];\n'.format(ip = k, tr = tr)
+                    ps = '{pr:s}: {p:s}'.format(pr = self._netprotocol, p = sv[1])
+                if (tr == ''):
+                    tr += '{{{ps:s}|{{{t:s}}}}}'.format(ps = ps, t = sv[0])
+                else:
+                    tr += '|{{{ps:s}|{{{t:s}}}}}'.format(ps = ps, t = sv[0])
+            bps1 = '\t"{ip:s}" [shape="record",color="black",gradientangle=270,fillcolor="white:darkorange",style="filled,rounded",'.format(ip = k)
+            if (self._iface != ''):
+                bps2 = 'label="Probe: {ip:s}\\nNetwork Interface: {ifc:s}|{tr:s}",tooltip="Begin Host Probe: {ip:s}"];\n'.format(ip = k, ifc = self._iface, tr = tr)
+            else:
+                bps2 = 'label="Probe: {ip:s}|{tr:s}",tooltip="Begin Host Probe: {ip:s}"];\n'.format(ip = k, tr = tr)
             s += bps1 + bps2
 
         #
@@ -1870,12 +1921,12 @@ class MTR:
         #                   k0       k1   k2       v0   v1   v2           k0     k1     k2       v0   v1   v2
         # Ex: ep = {('162.144.22.87',80,'http'): ['SA','T1','T3'], ('10.14.22.8',443,'https'): ['SA','T2','T4']}
         ep = {}				# ep -> A single services label for a given IP
-        for d in self._tlblid:          #               k            v0          v1               v2       v3   v4    v5      v6
-            for k,v in d.items():	# Ex: k:  162.144.22.87 v: ('T1', '10.222.222.10', '162.144.22.87', 6, 443, 'https', 'SA')
+        for d in self._tlblid:          #               k            v0          v1               v2       v3   v4    v5      v6  v7
+            for k,v in d.items():	# Ex: k:  162.144.22.87 v: ('T1', '10.222.222.10', '162.144.22.87', 6, 443, 'https', 'SA', '')
                 if not (v[6] == 'BH'):	# Blackhole detection - do not create Endpoint
                     p = ep.get((k, v[4], v[5]))
                     if (p == None):
-                        ep[(k, v[4], v[5])] = [v[6], v[0]]	# Add new (TCP Flags / ICMP / Proto) and initial trace ID
+                        ep[(k, v[4], v[5])] = [v[6], v[0]]	# Add new (TCP Flags / ICMP type / Proto) and initial trace ID
                     else:
                         ep[(k, v[4], v[5])].append(v[0])	# Append additional trace IDs
         #
@@ -1902,48 +1953,96 @@ class MTR:
                 epip[k[0]] = [(tr, p, v[0])]
         #
         # Build Endpoint strings...
-        # Ex eps = "162.144.22.87" [shape=record,color="black",gradientangle=270,fillcolor="lightgreen:green",style=filled,"
-        #        + "label="162.144.22.87\nTarget|{{<ET1>T1|<ET3>T3}|https SA}|{{<ET2>T4|<ET3>T4}|http SA}"];
+        # Ex eps = '162.144.22.87" [shape=record,color="black",gradientangle=270,fillcolor="lightgreen:green",style=i"filled,rounded",'
+        #        + 'label="162.144.22.87\nTarget|{{<ET1>T1|<ET3>T3}|https SA}|{{<ET2>T4|<ET3>T4}|http SA}"];'
         for k,v in epip.items():
             tr = ''
             for sv in v:
-                if (tr == ''):
-                    tr += '{{{{{t:s}}}|{p:s} {f:s}}}'.format(t = sv[0], p = sv[1], f = sv[2])
+                if (self._netprotocol == 'ICMP'):
+                    ps = 'ICMP(0) echo-reply'
                 else:
-                    tr += '|{{{{{t:s}}}|{p:s} {f:s}}}'.format(t = sv[0], p = sv[1], f = sv[2])
+                    ps = '{p:s} {f:s}'.format(p = sv[1], f = sv[2])
+                if (tr == ''):
+                    tr += '{{{{{t:s}}}|{ps:s}}}'.format(t = sv[0], ps = ps)
+                else:
+                    tr += '|{{{{{t:s}}}|{ps:s}}}'.format(t = sv[0], ps = ps)
             pre = ''
             if k in uepprb:		# Special Case: Separate Endpoint Target from Probe
               pre = '_'			# when they are the same
-            eps1 = '\t"{pre:s}{ip:s}" [shape=record,color="black",gradientangle=270,fillcolor="lightgreen:green",style=filled,'.format(pre = pre, ip = k)
-            eps2 = 'label="{ip:s}\\nTarget|{tr:s}",tooltip="Host Target: {ip:s}"];\n'.format(ip = k, tr = tr)
+            eps1 = '\t"{pre:s}{ip:s}" [shape="record",color="black",gradientangle=270,fillcolor="lightgreen:green",style="filled,rounded",'.format(pre = pre, ip = k)
+            eps2 = 'label="Resolved Target\\n{ip:s}|{tr:s}",tooltip="MTR Resolved Target: {ip:s}"];\n'.format(ip = k, tr = tr)
             s += eps1 + eps2 
 
         #
         # Blackholes...
+        #
+        # ***Note: Order matters: If a hop is both a Blackhole on one trace and
+        #                         a ICMP destination unreachable hop on another,
+        #                         it will appear in the dot file as two nodes in
+        #                         both sections. The ICMP destination unreachable
+        #                         hop node will take precedents and appear only
+        #                         since it is defined last.
         s += "\n\t### Blackholes ###\n"
-        for d in self._tlblid:          #              k             v0         v1               v2           v3    v4     v5     v6
-            for k,v in d.items():	# Ex: k:  162.144.22.87 v: ('T1', '10.222.222.10', '162.144.22.87', 'tcp', 443, 'https', 'SA')
+        bhhops = []
+        for d in self._tlblid:          #              k             v0         v1               v2           v3    v4   v5   v6    v7
+            for k,v in d.items():	# Ex: k:  162.144.22.87 v: ('T1', '10.222.222.10', '162.144.22.87', 'tcp', 5555, '', 'BH', 'I3')
                 if (v[6] == 'BH'):	# Blackhole detection
-                    lb = 'label=<{b:s} {prt:d}/{pro:s}<BR/><FONT POINT-SIZE="8">Failed Target</FONT>>'.format(b = v[2], prt = v[4], pro = v[3])
-                    s += '\t"{b:s} {prt:d}/{pro:s}" [{l:s},shape=doubleoctagon,color="black",gradientangle=270,fillcolor="white:red",style=filled,tooltip="Failed Host Target: {b:s}"];\n'.format(b = v[2], prt = v[4], pro = v[3], l = lb)
+                    #
+                    # If both a target blackhole and an ICMP packet hop, then skip creating this
+                    # node we be created in the 'ICMP Destination Unreachable Hops' section.
+                    if (v[7] != 'I3'):	# ICMP destination not reached detection
+                        nd = '{b:s} {prt:d}/{pro:s}'.format(b = v[2], prt = v[4], pro = v[3])
+                        if (self._netprotocol == 'ICMP'):
+                            bhh = '{b:s}<BR/><FONT POINT-SIZE="9">ICMP(0) echo-reply</FONT>'.format(b = v[2])
+                        else:
+                            bhh = nd
+                        #
+                        # If not already added...
+                        if not bhh in bhhops:
+                            lb = 'label=<{lh:s}<BR/><FONT POINT-SIZE="8">Failed Target</FONT>>'.format(lh = bhh)
+                            s += '\t"{bh:s}" [{l:s},shape="doubleoctagon",color="black",gradientangle=270,fillcolor="white:red",style="filled,rounded",tooltip="Failed MTR Resolved Target: {b:s}"];\n'.format(bh = nd, l = lb, b = v[2])
+                            bhhops.append(bhh)
 
         #
         # ICMP Destination Unreachable Hops...
         s += "\n\t### ICMP Destination Unreachable Hops ###\n"
         for d in self._ports:
             for p in self._ports[d]:
-                if (p.find('ICMP dest-unreach') >=0):
-                    unreach = 'Destination'
-                    if (p.find('network-unreachable') >=0):
-                        unreach += '/Network'
-                    elif (p.find('host-unreachable') >=0):
-                        unreach += '/Host'
-                    elif (p.find('protocol-unreachable') >=0):
-                        unreach += '/Protocol'
-                    elif (p.find('port-unreachable') >=0):
-                        unreach += '/Port'
-                    lb = 'label=<{lh:s} 3/icmp<BR/><FONT POINT-SIZE="8">ICMP(3): {u:s} Unreachable</FONT>>'.format(lh = d, u = unreach)
-                    s += '\t"{lh:s} 3/icmp" [{lb:s},shape=doubleoctagon,color="black",gradientangle=270,fillcolor="white:yellow",style=filled,tooltip="{u:s} Unreachable, Host: {lh:s}"];\n'.format(lb = lb, lh = d, u = unreach)
+                if d in self._exptrg:
+                    #
+                    # Create Node: Target same as node that returns an ICMP packet...
+                    if (p.find('ICMP dest-unreach') >=0 ):
+                        unreach = 'ICMP(3): Destination'
+                        #                   0    1        2             3          4  5
+                        # Ex ICMP ports: '<I3> ICMP dest-unreach port-unreachable 17 53'
+                        icmpparts = p.split(' ')
+                        if (icmpparts[3] == 'network-unreachable'):
+                            unreach += '/Network'
+                        elif (icmpparts[3] == 'host-unreachable'):
+                            unreach += '/Host'
+                        elif (icmpparts[3] == 'protocol-unreachable'):
+                            unreach += '/Protocol'
+                        elif (icmpparts[3] == 'port-unreachable'):
+                            unreach += '/Port'
+                        protoname = self.get_proto_name(icmpparts[4])
+                        protoport = '{pr:s}/{pt:s}'.format(pr = icmpparts[5], pt = protoname)
+                        lb = 'label=<{lh:s} {pp:s}<BR/><FONT POINT-SIZE="8">{u:s} Unreachable</FONT><BR/><FONT POINT-SIZE="8">Failed Target</FONT>>'.format(lh = d, pp = protoport, u = unreach)
+                        s += '\t"{lh:s} {pp:s}" [{lb:s},shape="doubleoctagon",color="black",gradientangle=270,fillcolor="yellow:red",style="filled,rounded",tooltip="{u:s} Unreachable, Failed Resolved Target: {lh:s} {pp:s}"];\n'.format(lb = lb, pp = protoport, lh = d, u = unreach)
+                else:
+                    #
+                    # Create Node: Target not same as node that returns an ICMP packet...
+                    if (p.find('ICMP dest-unreach') >= 0):
+                        unreach = 'ICMP(3): Destination'
+                        if (p.find('network-unreachable') >= 0):
+                            unreach += '/Network'
+                        elif (p.find('host-unreachable') >= 0):
+                            unreach += '/Host'
+                        elif (p.find('protocol-unreachable') >= 0):
+                            unreach += '/Protocol'
+                        elif (p.find('port-unreachable') >= 0):
+                            unreach += '/Port'
+                        lb = 'label=<{lh:s} 3/icmp<BR/><FONT POINT-SIZE="8">{u:s} Unreachable</FONT>>'.format(lh = d, u = unreach)
+                        s += '\t"{lh:s} 3/icmp" [{lb:s},shape="doubleoctagon",color="black",gradientangle=270,fillcolor="white:yellow",style="filled,rounded",tooltip="{u:s} Unreachable, Hop Host: {lh:s}"];\n'.format(lb = lb, lh = d, u = unreach)
         #
         # Padding check...
         if self._graphpadding:
@@ -1957,7 +2056,7 @@ class MTR:
                             pad[rcv.src] = None
             for sr in pad:
                 lb = 'label=<<BR/>{r:s}<BR/><FONT POINT-SIZE="8">Padding</FONT>>'.format(r = sr)
-                s += '\t"{r:s}" [{l:s},shape=box3d,color="black",gradientangle=270,fillcolor="white:red",style=filled];\n'.format(r = sr, l = lb)
+                s += '\t"{r:s}" [{l:s},shape="box3d",color="black",gradientangle=270,fillcolor="white:red",style="filled,rounded"];\n'.format(r = sr, l = lb)
 
         #
         # Draw each trace for each number of queries... 
@@ -2013,6 +2112,9 @@ class MTR:
                         #
                         # Check for Last Hop / Backhole (Failed Target) match:
                         lh = trace[max(tk)]
+                        lhicmp = False
+                        if (lh.find(':I3') >= 0):	# Is last hop and ICMP packet from target?
+                            lhicmp = True
                         f = lh.find(' ')		# Strip off 'port/proto' ''"100.41.207.244":I3'
                         if (f >= 0):
                             lh = lh[0:f]
@@ -2022,18 +2124,32 @@ class MTR:
                         lh = lh.replace('"','')		# Remove surrounding double quotes ("")
                         if (k == lh):			# Does Hop match finally Target?
                             #
-                            # Backhole matched:
+                            # Backhole last hop matched target:
                             #
                             # Check to skip in between traces...
                             if (len(trace) > 1):
                                 s += '\t{ptr:s} -> '.format(ptr = ntr)
-                            lb = 'Trace: {tr:d} - Failed Target: {bh:s} {bhp:d}/{bht:s}'.format(tr = (t + 1), bh = k, bhp = v[4], bht = v[3])
-                            s += '"{bh:s} {bhp:d}/{bht:s}" [style="dashed",label=<<FONT POINT-SIZE="8">&nbsp; T{tr:d}</FONT>>,edgetooltip="{lb:s}",labeltooltip="{lb:s}"];\n'.format(bh = k, bhp = v[4], bht = v[3], tr = (t + 1), lb = lb)
+                            if lhicmp:
+                                #
+                                # Last hop is an ICMP packet from target and was reached...
+                                lb = 'Trace: {tr:d}:{tn:d}, {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = max(tk), lbp = ntr.replace('"',''), lbn = k)
+                                lb += ' (RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms))'.format(prb = v[1], lbn = lh, rtt = self._rtt[t + 1][max(tk)])
+                                if rtt:
+                                    llb = 'Trace: {tr:d}:{tn:d}, RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = max(tk), prb = v[1], lbn = k, rtt = self._rtt[t + 1][max(tk)])
+                                    s += '"{bh:s} {bhp:d}/{bht:s}" [style="solid",label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(bh = k, bhp = v[4], bht = v[3], rtt = self._rtt[t + 1][max(tk)], lb = lb, llb = llb)
+                                else:
+                                    s += '"{bh:s} {bhp:d}/{bht:s}" [style="solid",edgetooltip="{lb:s}"];\n'.format(bh = k, bhp = v[4], bht = v[3], lb = lb)
+                            else:
+                                #
+                                # Last hop is not ICMP packet from target (Fake hop - never reached - use dashed trace)...
+                                lb = 'Trace: {tr:d} - Failed MTR Resolved Target: {bh:s} {bhp:d}/{bht:s}'.format(tr = (t + 1), bh = k, bhp = v[4], bht = v[3])
+                                s += '"{bh:s} {bhp:d}/{bht:s}" [style="dashed",label=<<FONT POINT-SIZE="8">&nbsp; T{tr:d}</FONT>>,edgetooltip="{lb:s}",labeltooltip="{lb:s}"];\n'.format(bh = k, bhp = v[4], bht = v[3], tr = (t + 1), lb = lb)
                         else:
                             #
-                            # Backhole not matched (Most likely: 'ICMP (3) destination-unreached':
+                            # Backhole not matched (Most likely: 'ICMP (3) destination-unreached'
+                            # but last hop not equal to the target:
                             #
-                            # Add last Hop (This Hop is not the Target)
+                            # Add this last Hop (This Hop is not the Target)...
                             #
                             # Check to skip in between traces...
                             if (len(trace) > 1):
@@ -2042,13 +2158,13 @@ class MTR:
                                 lb += ' (RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms))'.format(prb = v[1], lbn = lh, rtt = self._rtt[t + 1][max(tk)])
                                 llb = 'Trace: {tr:d}:{tn:d}, RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = max(tk), prb = v[1], lbn = lh, rtt = self._rtt[t + 1][max(tk)])
                                 if rtt:
-                                    s += '"{lh:s} 3/icmp" [label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(lh = lh, rtt = self._rtt[t + 1][max(tk)], lb = lb, llb = llb)
+                                    s += '"{lh:s} 3/icmp" [style="solid",label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(lh = lh, rtt = self._rtt[t + 1][max(tk)], lb = lb, llb = llb)
                                 else:
-                                    s += '"{lh:s} 3/icmp" [edgetooltip="{lb:s} 3/icmp",labeltooltip="{llb:s}"];\n'.format(lh = lh, lb = lb, llb = llb)
+                                    s += '"{lh:s} 3/icmp" [style="solid",edgetooltip="{lb:s} 3/icmp",labeltooltip="{llb:s}"];\n'.format(lh = lh, lb = lb, llb = llb)
                                 #
-                                # Add the Failed Target (Blackhole)...
+                                # Add the Failed Target (Blackhole - Fake hop - never reached - use dashed trace)...
                                 s += '\t"{lh:s} 3/icmp" -> '.format(lh = lh)
-                            lb = 'Trace: {tr:d} - Failed Target: {bh:s} {bhp:d}/{bht:s}'.format(tr = (t + 1), bh = k, bhp = v[4], bht = v[3])
+                            lb = 'Trace: {tr:d} - Failed MTR Resolved Target: {bh:s} {bhp:d}/{bht:s}'.format(tr = (t + 1), bh = k, bhp = v[4], bht = v[3])
                             s += '"{bh:s} {bhp:d}/{bht:s}" [style="dashed",label=<<FONT POINT-SIZE="8">&nbsp; T{tr:d}</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(bh = k, bhp = v[4], bht = v[3], tr = (t + 1), lb = lb, llb = lb)
 
                     else:			# Enhanced Target Endpoint
@@ -2061,31 +2177,38 @@ class MTR:
                             lb += ' (RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms))'.format(prb = v[1], lbn = k, rtt = self._rtt[t + 1][max(tk)])
                         pre = ''
                         if k in uepprb:		# Special Case: Separate Endpoint Target from Probe
-                            pre = '_'		# when they are the same
+                            pre = '_'		# when they are the same using the underscore char: '_'.
                         if rtt:
                             if not 'Unk' in k:
                                 llb = 'Trace: {tr:d}:{tn:d}, RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = max(tk), prb = v[1], lbn = k, rtt = self._rtt[t + 1][max(tk)])
-                                s += '"{pre:s}{ep:s}":E{tr:s}:n [label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(pre = pre, ep = k, tr = v[0], rtt = self._rtt[t + 1][max(tk)], lb = lb, llb = llb)
+                                s += '"{pre:s}{ep:s}":E{tr:s}:n [style="solid",label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(pre = pre, ep = k, tr = v[0], rtt = self._rtt[t + 1][max(tk)], lb = lb, llb = llb)
                             else:
-                                s += '"{pre:s}{ep:s}":E{tr:s}:n [edgetooltip="{lb:s}"];\n'.format(pre = pre, ep = k, tr = v[0], lb = lb)
+                                s += '"{pre:s}{ep:s}":E{tr:s}:n [style="solid",edgetooltip="{lb:s}"];\n'.format(pre = pre, ep = k, tr = v[0], lb = lb)
                         else:
-                            s += '"{pre:s}{ep:s}":E{tr:s}:n [edgetooltip="{lb:s}"];\n'.format(pre = pre, ep = k, tr = v[0], lb = lb)
+                            s += '"{pre:s}{ep:s}":E{tr:s}:n [style="solid",edgetooltip="{lb:s}"];\n'.format(pre = pre, ep = k, tr = v[0], lb = lb)
                 t += 1				# Next trace out of total traces
  
         #
         # Decorate Unknown ('Unkn') Nodes...
         s += "\n\t### Decoration For Unknown (Unkn) Node Hops ###\n"
         for u in self._unks:
-            s += '\t{u:s} [tooltip="Trace: {t:s}, Unknown Hop: {u2:s}",shape=egg,fontname="Sans-Serif",fontsize=9,height=0.2,width=0.2,color="black",gradientangle=270,fillcolor="white:#d8d8d8",style=filled];\n'.format(u = u, t = self._unks[u][2], u2 = u.replace('"',''))
+            s += '\t{u:s} [tooltip="Trace: {t:s}, Unknown Hop: {u2:s}",shape="egg",fontname="Sans-Serif",fontsize=9,height=0.2,width=0.2,color="black",gradientangle=270,fillcolor="white:#d8d8d8",style="filled"];\n'.format(u = u, t = self._unks[u][2], u2 = u.replace('"',''))
 
         #
         # Create tooltip for standalone nodes...
         s += "\n\t### Tooltip for Standalone Node Hops ###\n"
         for k,v in self._ips.items():
             if not k in cipall:
-                if not k in cepipall:
-                    s += '\t"{ip:s}" [tooltip="Hop Host: {ip:s}"];\n'.format(ip = k)
-
+                if (k != self._gw):
+                    if not k in cepipall:
+                        if not k in self._ports:
+                            found = False
+                            for tid in self._tlblid:
+                                if k in tid:
+                                    found = True
+                                    break
+                            if not found:
+                                s += '\t"{ip:s}" [tooltip="Hop Host: {ip:s}"];\n'.format(ip = k)
         #
         # End the DOT Digraph...
         s += "}\n";
@@ -2095,7 +2218,7 @@ class MTR:
 
     #
     # Graph the Multi-Traceroute...
-    def graph(self, ASres = None, padding = 0, vspread = 0.75, title = "Multi-Traceroute Probe (MTR)", timestamp = "", rtt = 1, **kargs):
+    def graph(self, ASres=None, padding=0, vspread=0.75, title="Multi-Traceroute Probe (MTR)", timestamp="", rtt=1, **kargs):
         """x.graph(ASres=conf.AS_resolver, other args):
         ASres = None          : Use AS default resolver => 'conf.AS_resolver'
         ASres = AS_resolver() : default whois AS resolver (riswhois.ripe.net)
@@ -2123,7 +2246,7 @@ class MTR:
 ## Multi-Traceroute Results Class ##
 ####################################
 class MTracerouteResult(SndRcvList):
-    def __init__(self, res = None, name = "MTraceroute", stats = None):
+    def __init__(self, res=None, name="MTraceroute", stats=None):
         PacketList.__init__(self, res, name, stats, vector_index = 1)
 
     def show(self, ntrace):
@@ -2131,23 +2254,6 @@ class MTracerouteResult(SndRcvList):
           (s.sprintf("Trace: " + str(ntrace) + " - %IP.dst%:{TCP:tcp%ir,TCP.dport%}{UDP:udp%ir,UDP.dport%}{ICMP:ICMP}"),
            s.ttl,
            r.sprintf("%-15s,IP.src% {TCP:%TCP.flags%}{ICMP:%ir,ICMP.type%}")))
-
-    #
-    # Get the protocol name from protocol integer value.
-    #
-    #  proto - Protocol integer value.
-    #
-    #   Returns a string value representing the given integer protocol.
-    def get_proto_name(self, proto):
-        if (proto == 6):
-            pt = 'tcp'
-        elif (proto == 17):
-            pt = 'udp'
-        elif (proto == 1):
-            pt = 'icmp'
-        else:
-           pt = str(proto)
-        return pt
 
     #
     # Get trace components...
@@ -2187,7 +2293,7 @@ class MTracerouteResult(SndRcvList):
                 # Check for packet response types:
                 if not (ICMP in r and r[ICMP].type == 11) and not (conf.ipv6_enabled and scapy.layers.inet6.IPv6 in r and scapy.layers.inet6.ICMPv6TimeExceeded in r):
                     #
-                    # Mostly ICMP Time-Exceeded...
+                    # Mostly: Process target reached or ICMP Unreachable...
                     if trace_id in portsdone:
                         #
                         # Special check for out or order response packets: If previous trace was determined
@@ -2214,15 +2320,23 @@ class MTracerouteResult(SndRcvList):
                         p.append(r.sprintf("<U%ir,UDP.sport%> %UDP.sport%"))
                         trace[ttl] = r.sprintf('"%r,src%":U%ir,UDP.sport%')
                     elif ICMP in r:
-                        p.append(r.sprintf("<I%ir,ICMP.type%> ICMP %ICMP.type% %ICMP.code%"))
-                        trace[ttl] = r.sprintf('"%r,src%":I%ir,ICMP.type%')
+                        if (r[ICMP].type == 0):
+                            #
+                            # Process echo-reply...
+                            p.append(r.sprintf("<I%ir,ICMP.type%> ICMP %ICMP.type%"))
+                            trace[ttl] = r.sprintf('"%r,src%":I%ir,ICMP.type%')
+                        else:
+                            #
+                            # Format Ex: '<I3> ICMP dest-unreach port-unreachable 17 53'
+                            p.append(r.sprintf("<I%ir,ICMP.type%> ICMP %ICMP.type% %ICMP.code% %ICMP.proto% %r,ICMP.dport%"))
+                            trace[ttl] = r.sprintf('"%r,src%":I%ir,ICMP.type%')
                     else:
                         p.append(r.sprintf("{IP:<P%ir,proto%> IP %proto%}{IPv6:<P%ir,nh%> IPv6 %nh%}"))
                         trace[ttl] = r.sprintf('"%r,src%":{IP:P%ir,proto%}{IPv6:P%ir,nh%}')
                     ports[r.src] = p
                 else:
                     #
-                    # Non-ICMP Time-Exceeded packet - Save Hop Host IP Address...
+                    # Mostly ICMP Time-Exceeded packet - Save Hop Host IP Address...
                     trace[ttl] = r.sprintf('"%r,src%"')
                 rt[trace_id] = trace
                 #
@@ -2242,7 +2356,7 @@ class MTracerouteResult(SndRcvList):
                 trace_id = (p.src, p.dst, p.proto, p.dport)
                 portsdone[trace_id] = None
                 if trace_id not in rt:
-                    pt = self.get_proto_name(p.proto)
+                    pt = mtrc.get_proto_name(p.proto)
                     #
                     # Set trace number to zero (0) (i.e., ttl = 0) for this special case:
                     # target = mtr session host - 'fake' failed target...
@@ -2273,14 +2387,17 @@ class MTracerouteResult(SndRcvList):
             prtflgs = ports.get(rtk[1],[])
             found = False
             for pf in prtflgs:
-                pat = '<[TUI]{p:d}>'.format(p = rtk[3])		# Create reg exp pattern
+                if (mtrc._netprotocol == 'ICMP'):
+                    pat = '<I0>'				# ICMP: Create reg exp pattern
+                else:
+                    pat = '<[TU]{p:d}>'.format(p = rtk[3])	# TCP/UDP: Create reg exp pattern
                 match = re.search(pat, pf)			# Search for port match
                 if match:
                     found = True
                     s = pf.split(' ')
                     if (len(s) == 3):
-                        pn = s[1]	# Service Port name
-                        fl = s[2]	# TCP Flags / ICMP / Proto
+                        pn = s[1]	# Service Port name / ICMP
+                        fl = s[2]	# TCP Flags / ICMP Type / Proto
                     elif (len(s) == 2):
                         pn = s[1]	# Service Port name
                         fl = ''
@@ -2288,40 +2405,47 @@ class MTracerouteResult(SndRcvList):
                         pn = ''
                         fl = ''
                     break
+            ic = ''			# ICMP Destination not reachable flag
             if not found:		# Set Blackhole found - (fl -> 'BH')
+                #
+                # Set flag for last hop is a target and ICMP destination not reached flag set...
+                trace = rt[rtk]
+                tk = trace.keys()
+                lh = trace[max(tk)]
+                f = lh.find(':I3')		# Is hop an ICMP destination not reached node?
+                if (f >= 0):
+                    lh = lh[0:f] 		# Strip off 'proto:port' -> '"100.41.207.244":I3'
+                    lh = lh.replace('"','')	# Remove surrounding double quotes ("")
+                    if lh in mtrc._exptrg:	# Is last hop a target?
+                        ic = 'I3'
                 pn = ''
                 fl = 'BH'
             #
             # Update the Target Trace Label ID:
-            # Ex: {'63.117.14.247': ('T2', '10.222.222.10', '162.144.22.87', 6, 443, 'https', 'SA')}
-            pt = self.get_proto_name(rtk[2])
-            tlid = {rtk[1]: ('T' + str(mtrc._tcnt), rtk[0], rtk[1], pt, rtk[3], pn, fl)}
+            # Ex: {'63.117.14.247': ('T2', '10.222.222.10', '162.144.22.87', 6, 443, 'https', 'SA', '')}
+            pt = mtrc.get_proto_name(rtk[2])
+            tlid = {rtk[1]: ('T' + str(mtrc._tcnt), rtk[0], rtk[1], pt, rtk[3], pn, fl, ic)}
             mtrc._tlblid.append(tlid)
 
 ######################
 ## Multi-Traceroute ##
 ######################
 @conf.commands.register
-def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filter=None, timeout=2, verbose=None, netproto="TCP", nquery=1, privaddr=0, rasn=1, **kargs):
+def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), iface=None, l4=None, filter=None, timeout=2, verbose=None, gw=None, netproto="TCP", nquery=1, privaddr=0, rasn=1, **kargs):
     """A Multi-Traceroute (mtr) command:
-         mtr(target, [maxttl=30,] [dport=80,] [sport=80,] [minttl=1,] [maxttl=1,]
+         mtr(target, [maxttl=30,] [dport=80,] [sport=80,] [minttl=1,] [maxttl=1,] [iface=None]
              [l4=None,] [filter=None,] [nquery=1,] [privaddr=0,] [rasn=1,] [verbose=conf.verb])
 
-           netproto: Network Protocol (One of: "TCP", "UDP" or "ICMP")
+                 gw: IPv4 Address of the Default Gateway.
+           netproto: Network Protocol (One of: "TCP", "UDP" or "ICMP").
              nquery: Number of Traceroute queries to perform.
-           privaddr: 0 - Default: Normal display of all resolved AS numbers,
+           privaddr: 0 - Default: Normal display of all resolved AS numbers.
                      1 - Do not show an associated AS Number bound box (cluster) on graph for a private IPv4 Address.
                rasn: 0 - Do not resolve AS Numbers - No graph clustering.
                      1 - Default: Resolve all AS numbers."""
     #
     # Initialize vars...
     trace = []			# Individual trace array
-    #
-    # Default to network protocol: "TCP" if not found in list...
-    plist = ["TCP", "UDP", "ICMP"]
-    netproto = netproto.upper()
-    if not netproto in plist:
-        netproto = "TCP"
     #
     # Range check number of query traces
     if (nquery < 1):
@@ -2330,14 +2454,33 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
     # Create instance of an MTR class...
     mtrc = MTR(nquery = nquery, target = target)
     #
+    # Default to network protocol: "TCP" if not found in list...
+    plist = ["TCP", "UDP", "ICMP"]
+    netproto = netproto.upper()
+    if not netproto in plist:
+        netproto = "TCP"
+    mtrc._netprotocol = netproto
+    #
+    # Set trace interface...
+    if not iface is None:
+        mtrc._iface = iface
+    else:
+        mtrc._iface = conf.iface
+    #
+    # Set Default Gateway...
+    if not gw is None:
+        mtrc._gw = gw
+    #
     # Set default verbosity if no override...
     if verbose is None:
         verbose = conf.verb
     #
     # Only consider ICMP error packets and TCP packets with at
     # least the ACK flag set *and* either the SYN or the RST flag set...
+    filterundefined = False
     if filter is None:
-        filter="(icmp and (icmp[0]=3 or icmp[0]=4 or icmp[0]=5 or icmp[0]=11 or icmp[0]=12)) or (tcp and (tcp[13] & 0x16 > 0x10))"
+        filterundefined = True
+        filter = "(icmp and (icmp[0]=3 or icmp[0]=4 or icmp[0]=5 or icmp[0]=11 or icmp[0]=12)) or (tcp and (tcp[13] & 0x16 > 0x10))"
     #
     # Resolve and expand each target...
     ntraces = 0		# Total trace count
@@ -2363,19 +2506,56 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
     #
     # Traceroute each expanded target value...
     if l4 is None:
+        #
+        # Standard Layer: 3 ('TCP', 'UDP' or 'ICMP') tracing...
         for n in range(0, nquery):
             for t in exptrg:
                 #
                 # Execute a traceroute based on network protocol setting...
-                if (netproto == "TCP"):
-                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/TCP(seq=RandInt(), sport=sport, dport=dport),
+                if (netproto == "ICMP"):
+                    #
+                    # MTR Network Protocol: 'ICMP'
+                    #
+                    # Use a 'Type: 8 - Echo Request' packet for the trace:
+                    # Use a random payload string to full out a minimum size PDU of 46 bytes for each ICMP packet:
+                    # Length of 'IP()/ICMP()' = 28, Minimum Protocol Data Unit (PDU) is = 46 -> Therefore a PDU of 18 octets is required.
+                    pload = RandString(size = 18)
+                    id = 0x8888								# MTR ICMP identifier: '0x8888'
+                    seq = IncrementalValue(start=(minttl - 2), step=1, restart=-10)	# Use a Sequence number in step with TTL value
+                    if filterundefined:
+                        #
+                        # Allow for ICMP echo-request (8) and ICMP echo-reply (0) packet to be processed...
+                        filter = "(icmp and (icmp[0]=8 or icmp[0]=0 or icmp[0]=3 or icmp[0]=4 or icmp[0]=5 or icmp[0]=11 or icmp[0]=12))"
+                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/ICMP(type=8, id=id, seq=seq)/Raw(load=pload),
                             timeout=timeout, filter=filter, verbose=verbose, **kargs)
                 elif (netproto == "UDP"):
-                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/UDP(sport=sport, dport=dport),
+                    #
+                    # MTR Network Protocol: 'UDP'
+                    #
+                    # Use a random payload string to full out a minimum size PDU of 46 bytes for each UDP packet:
+                    # Length of 'IP()/UDP()' = 28, Minimum PDU is = 46 -> Therefore a UDP of 18 octets is required.
+                    pload = RandStringTerm(size = 17, term = b'\n')
+                    if filterundefined:
+                        filter += " or udp"			# Allow for processing UDP packets
+                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/UDP(sport=sport, dport=dport)/Raw(load=pload),
                             timeout=timeout, filter=filter, verbose=verbose, **kargs)
                 else:
-                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/ICMP(type=8),
+                    #
+                    # Default MTR Network Protocol: 'TCP'
+                    #
+                    # Use some TCP options for the trace. Some firewalls will filter
+                    # TCP/IP packets without the 'Timestamp' option set.
+                    #
+                    # Note: The minimum PDU size of 46 is statisfied with the use of TCP options.
+                    #
+                    # Use an integer encoded microsecond timestamp for the TCP option timestamp for each trace sequence.
+                    uts = IntAutoMicroTime()
+                    opts = [('MSS', 1460), ('NOP', None), ('NOP', None), ('Timestamp', (uts, 0)), ('NOP', None), ('WScale', 7)]
+                    seq = RandInt()		# Use a random TCP sequence number
+                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/TCP(seq=seq, sport=sport, dport=dport, options=opts),
                             timeout=timeout, filter=filter, verbose=verbose, **kargs)
+                #
+                # Create an 'MTracerouteResult' instance for each result packets...
                 trace.append(MTracerouteResult(res = a.res))
                 mtrc._res.append(a)		# Store Response packets
                 mtrc._ures.append(b)		# Store Unresponse packets
@@ -2384,6 +2564,8 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
                     print()
                 ntraces += 1
     else:
+        #
+        # Custom Layer: 4 tracing...
         filter="ip"
         for n in range(0, nquery):
             for t in exptrg:
@@ -2476,6 +2658,12 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), l4=None, filte
         print("\nmtrc._unks (Unknown Hops IP Boundary for AS Numbers):")
         print("=======================================================")
         print(mtrc._unks)
+        print("\nmtrc._iface (Trace Interface):")
+        print("=======================================================")
+        print(mtrc._iface)
+        print("\nmtrc._gw (Trace Default Gateway IPv4 Address):")
+        print("=======================================================")
+        print(mtrc._gw)
        
     return mtrc
 
