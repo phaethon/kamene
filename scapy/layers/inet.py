@@ -2431,11 +2431,13 @@ class MTracerouteResult(SndRcvList):
 ## Multi-Traceroute ##
 ######################
 @conf.commands.register
-def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), iface=None, l4=None, filter=None, timeout=2, verbose=None, gw=None, netproto="TCP", nquery=1, privaddr=0, rasn=1, **kargs):
+def mtr(target, dport=80, minttl=1, maxttl=30, stype="Random", srcport=50000, iface=None, l4=None, filter=None, timeout=2, verbose=None, gw=None, netproto="TCP", nquery=1, privaddr=0, rasn=1, **kargs):
     """A Multi-Traceroute (mtr) command:
          mtr(target, [maxttl=30,] [dport=80,] [sport=80,] [minttl=1,] [maxttl=1,] [iface=None]
              [l4=None,] [filter=None,] [nquery=1,] [privaddr=0,] [rasn=1,] [verbose=conf.verb])
 
+              stype: Source Port Type: "Random" or "Increment".
+            srcport: Source Port. Default: 50000.
                  gw: IPv4 Address of the Default Gateway.
            netproto: Network Protocol (One of: "TCP", "UDP" or "ICMP").
              nquery: Number of Traceroute queries to perform.
@@ -2460,6 +2462,17 @@ def mtr(target, dport=80, minttl=1, maxttl=30, sport=RandShort(), iface=None, l4
     if not netproto in plist:
         netproto = "TCP"
     mtrc._netprotocol = netproto
+    #
+    # Default to source type: "Random" if not found in list...
+    slist = ["Random", "Increment"]
+    stype = stype.title()
+    if not stype in slist:
+        stype = "Random"
+    if (stype == "Random"):
+        sport = RandShort()	# Random
+    elif (stype == "Increment"):
+        if (srcport != None):
+            sport = IncrementalValue(start = (srcport - 1), step = 1, restart = 65535)	# Increment
     #
     # Set trace interface...
     if not iface is None:
