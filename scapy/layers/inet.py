@@ -2431,7 +2431,7 @@ class MTracerouteResult(SndRcvList):
 ## Multi-Traceroute ##
 ######################
 @conf.commands.register
-def mtr(target, dport=80, minttl=1, maxttl=30, stype="Random", srcport=50000, iface=None, l4=None, filter=None, timeout=2, verbose=None, gw=None, netproto="TCP", nquery=1, privaddr=0, rasn=1, **kargs):
+def mtr(target, dport=80, minttl=1, maxttl=30, stype="Random", srcport=50000, iface=None, l4=None, filter=None, timeout=2, verbose=None, gw=None, netproto="TCP", nquery=1, ptype=None, payload=b'', privaddr=0, rasn=1, **kargs):
     """A Multi-Traceroute (mtr) command:
          mtr(target, [maxttl=30,] [dport=80,] [sport=80,] [minttl=1,] [maxttl=1,] [iface=None]
              [l4=None,] [filter=None,] [nquery=1,] [privaddr=0,] [rasn=1,] [verbose=conf.verb])
@@ -2441,6 +2441,8 @@ def mtr(target, dport=80, minttl=1, maxttl=30, stype="Random", srcport=50000, if
                  gw: IPv4 Address of the Default Gateway.
            netproto: Network Protocol (One of: "TCP", "UDP" or "ICMP").
              nquery: Number of Traceroute queries to perform.
+              ptype: Payload Type: "Disable", "RandStr", "RandStrTerm" or "Custom".
+            payload: A byte object for each packet payload (e.g., b'\x01A\x0f\xff\x00') for ptype: 'Custom'. 
            privaddr: 0 - Default: Normal display of all resolved AS numbers.
                      1 - Do not show an associated AS Number bound box (cluster) on graph for a private IPv4 Address.
                rasn: 0 - Do not resolve AS Numbers - No graph clustering.
@@ -2473,6 +2475,16 @@ def mtr(target, dport=80, minttl=1, maxttl=30, stype="Random", srcport=50000, if
     elif (stype == "Increment"):
         if (srcport != None):
             sport = IncrementalValue(start = (srcport - 1), step = 1, restart = 65535)	# Increment
+    #
+    # Default to payload type to it's default network protocol value if not found in list...
+    pllist = ["Disabled", "RandStr", "RandStrTerm", "Custom"]
+    if ptype is None or (not ptype in pllist):
+         if (netproto == "ICMP"):
+             ptype = "RandStr"		# ICMP: A random string payload to fill out the minimum packet size
+         elif (netproto == "UDP"):
+             ptype = "RandStrTerm"	# UDP: A random string terminated payload to fill out the minimum packet size
+         elif (netproto == "TCP"):
+             ptype = "Disabled"		# TCP: Disabled -> The minimum packet size satisfied - no payload required
     #
     # Set trace interface...
     if not iface is None:
@@ -2528,30 +2540,57 @@ def mtr(target, dport=80, minttl=1, maxttl=30, stype="Random", srcport=50000, if
                 if (netproto == "ICMP"):
                     #
                     # MTR Network Protocol: 'ICMP'
-                    #
-                    # Use a 'Type: 8 - Echo Request' packet for the trace:
-                    # Use a random payload string to full out a minimum size PDU of 46 bytes for each ICMP packet:
-                    # Length of 'IP()/ICMP()' = 28, Minimum Protocol Data Unit (PDU) is = 46 -> Therefore a PDU of 18 octets is required.
-                    pload = RandString(size = 18)
-                    id = 0x8888								# MTR ICMP identifier: '0x8888'
+                    tid = 8				        # Use a 'Type: 8 - Echo Request' packet for the trace:
+                    id = 0x8888					# MTR ICMP identifier: '0x8888'
                     seq = IncrementalValue(start=(minttl - 2), step=1, restart=-10)	# Use a Sequence number in step with TTL value
                     if filterundefined:
                         #
-                        # Allow for ICMP echo-request (8) and ICMP echo-reply (0) packet to be processed...
+                        # Update Filter -> Allow for ICMP echo-request (8) and ICMP echo-reply (0) packet to be processed...
                         filter = "(icmp and (icmp[0]=8 or icmp[0]=0 or icmp[0]=3 or icmp[0]=4 or icmp[0]=5 or icmp[0]=11 or icmp[0]=12))"
-                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/ICMP(type=8, id=id, seq=seq)/Raw(load=pload),
-                            timeout=timeout, filter=filter, verbose=verbose, **kargs)
+                    #
+                    # Check payload types:
+                    if (ptype == 'Disabled'):
+                        a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/ICMP(type=tid, id=id, seq=seq),
+                                timeout=timeout, filter=filter, verbose=verbose, **kargs)
+                    else:
+                        if (ptype == 'RandStr'):
+                            #
+                            # Use a random payload string to full out a minimum size PDU of 46 bytes for each ICMP packet:
+                            # Length of 'IP()/ICMP()' = 28, Minimum Protocol Data Unit (PDU) is = 46 -> Therefore a
+                            # payload of 18 octets is required.
+                            pload = RandString(size = 18)
+                        elif (ptype == 'RandStrTerm'):
+                            pload = RandStringTerm(size = 17, term = b'\n')	# Random string terminated
+                        elif (ptype == 'Custom'):
+                            pload = payload
+                        #
+                        # ICMP trace with payload...
+                        a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/ICMP(type=tid, id=id, seq=seq)/Raw(load=pload),
+                                timeout=timeout, filter=filter, verbose=verbose, **kargs)
                 elif (netproto == "UDP"):
                     #
                     # MTR Network Protocol: 'UDP'
-                    #
-                    # Use a random payload string to full out a minimum size PDU of 46 bytes for each UDP packet:
-                    # Length of 'IP()/UDP()' = 28, Minimum PDU is = 46 -> Therefore a UDP of 18 octets is required.
-                    pload = RandStringTerm(size = 17, term = b'\n')
                     if filterundefined:
-                        filter += " or udp"			# Allow for processing UDP packets
-                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/UDP(sport=sport, dport=dport)/Raw(load=pload),
-                            timeout=timeout, filter=filter, verbose=verbose, **kargs)
+                        filter += " or udp"			# Update Filter -> Allow for processing UDP packets
+                    #
+                    # Check payload types:
+                    if (ptype == 'Disabled'):
+                        a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/UDP(sport=sport, dport=dport),
+                                timeout=timeout, filter=filter, verbose=verbose, **kargs)
+                    else:
+                        if (ptype == 'RandStr'):
+                            #
+                            # Use a random payload string to full out a minimum size PDU of 46 bytes for each UDP packet:
+                            # Length of 'IP()/UDP()' = 28, Minimum PDU is = 46 -> Therefore a payload of 18 octets is required.
+                            pload = RandString(size = 18)
+                        elif (ptype == 'RandStrTerm'):
+                            pload = RandStringTerm(size = 17, term = b'\n')	# Random string terminated
+                        elif (ptype == 'Custom'):
+                            pload = payload
+                        #
+                        # UDP trace with payload...
+                        a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/UDP(sport=sport, dport=dport)/Raw(load=pload),
+                                timeout=timeout, filter=filter, verbose=verbose, **kargs)
                 else:
                     #
                     # Default MTR Network Protocol: 'TCP'
@@ -2565,8 +2604,23 @@ def mtr(target, dport=80, minttl=1, maxttl=30, stype="Random", srcport=50000, if
                     uts = IntAutoMicroTime()
                     opts = [('MSS', 1460), ('NOP', None), ('NOP', None), ('Timestamp', (uts, 0)), ('NOP', None), ('WScale', 7)]
                     seq = RandInt()		# Use a random TCP sequence number
-                    a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/TCP(seq=seq, sport=sport, dport=dport, options=opts),
-                            timeout=timeout, filter=filter, verbose=verbose, **kargs)
+                    #
+                    # Check payload types:
+                    if (ptype == 'Disabled'):
+                        a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/TCP(seq=seq, sport=sport, dport=dport, options=opts),
+                                timeout=timeout, filter=filter, verbose=verbose, **kargs)
+                    else:
+                        if (ptype == 'RandStr'):
+                            pload = RandString(size = 32)			# Use a 32 byte random string
+                        elif (ptype == 'RandStrTerm'):
+                            pload = RandStringTerm(size = 32, term = b'\n')	# Use a 32 byte random string terminated
+                        elif (ptype == 'Custom'):
+                            pload = payload
+                        #
+                        # TCP trace with payload...
+                        a,b = sr(IP(dst=[t], id=RandShort(),
+                                ttl=(minttl, maxttl))/TCP(seq=seq, sport=sport, dport=dport, options=opts)/Raw(load=pload),
+                                timeout=timeout, filter=filter, verbose=verbose, **kargs)
                 #
                 # Create an 'MTracerouteResult' instance for each result packets...
                 trace.append(MTracerouteResult(res = a.res))
