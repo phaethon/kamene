@@ -28,6 +28,21 @@ class SniffSource(Source):
     def deliver(self):
         self._send(self.s.recv())
 
+
+class ConsolePacketSink(Sink):
+    """Show packets on low and high entries
+     +-------+
+  >>-|--.    |->>
+     | show  |
+   >-|--'    |->
+     +-------+
+"""
+    def push(self, msg):
+        print(">%r" % msg.show())
+    def high_push(self, msg):
+        print(">>%r" % msg.show())
+
+
 class RdpcapSource(Source):
     """Read packets from a PCAP file send them to low exit.
      +----------+
