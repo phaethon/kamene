@@ -772,7 +772,7 @@ class EnumField(Field):
 class CharEnumField(EnumField):
     def __init__(self, name, default, enum, fmt = "1s"):
         EnumField.__init__(self, name, default, enum, fmt)
-        k = self.i2s.keys()
+        k = list(self.i2s.keys())
         if k and len(k[0]) != 1:
             self.i2s,self.s2i = self.s2i,self.i2s
     def any2i_one(self, pkt, x):
