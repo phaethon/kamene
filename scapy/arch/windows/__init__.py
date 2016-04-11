@@ -121,7 +121,8 @@ class NetworkInterface(object):
         self.description = data['description']
         self.win_index = data['win_index']
         # Other attributes are optional
-        self._update_pcapdata()
+        if conf.use_winpcapy:
+            self._update_pcapdata()
         try:
             self.ip = socket.inet_ntoa(get_if_raw_addr(data['guid']))
         except (KeyError, AttributeError, NameError):
@@ -220,8 +221,11 @@ def show_interfaces(resolve_mac=True):
     """Print list of available network interfaces"""
     return ifaces.show(resolve_mac)
 
-_orig_open_pcap = pcapdnet.open_pcap
-pcapdnet.open_pcap = lambda iface,*args,**kargs: _orig_open_pcap(pcap_name(iface),*args,**kargs)
+try:
+    _orig_open_pcap = pcapdnet.open_pcap
+    pcapdnet.open_pcap = lambda iface,*args,**kargs: _orig_open_pcap(pcap_name(iface),*args,**kargs)
+except AttributeError:
+    pass
 
 _orig_get_if_raw_hwaddr = pcapdnet.get_if_raw_hwaddr
 pcapdnet.get_if_raw_hwaddr = lambda iface,*args,**kargs: [ int(i, 16) for i in ifaces[iface].mac.split(':') ]

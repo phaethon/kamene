@@ -18,23 +18,29 @@ try:
     if scapy.config.conf.interactive:
         plt.ion()
 except ImportError:
-    log_loading.info("Can't import matplotlib. Not critical, but won't be able to plot.")
+    log_loading.debug("Can't import matplotlib. Not critical, but won't be able to plot.")
     MATPLOTLIB = False
 
 try:
     import networkx as nx
     NETWORKX = True
 except ImportError:
-    log_loading.info("Can't import networkx. Not criticial, but won't be able to draw network graphs.")
+    log_loading.degub("Can't import networkx. Not criticial, but won't be able to draw network graphs.")
     NETWORKX = False
 
 try:
     import pyx
     PYX=1
 except ImportError:
-    log_loading.info("Can't import PyX. Won't be able to use psdump() or pdfdump().")
+    log_loading.debug("Can't import PyX. Won't be able to use psdump() or pdfdump().")
     PYX=0
 
+if scapy.config.conf.use_netifaces:
+  try:
+    import netifaces
+  except ImportError as e:
+    log_loading.warning("Could not load module netifaces: %s" % e)
+    scapy.config.conf.use_netifaces = False
 
 def str2mac(s):
     #return ("%02x:"*6)[:-1] % tuple(map(ord, s)) 
@@ -61,7 +67,8 @@ WINDOWS=sys.platform.startswith("win32")
 X86_64 = not WINDOWS and (os.uname()[4] == 'x86_64')
 
 if WINDOWS:
-  log_loading.warning("Windows support for scapy3k is currently in testing. Sniffing/sending/receiving packets should be working with WinPcap driver and Powershell. Create issues at https://github.com/phaethon/scapy")
+    pass
+#  log_loading.warning("Windows support for scapy3k is currently in testing. Sniffing/sending/receiving packets should be working with WinPcap driver and Powershell. Create issues at https://github.com/phaethon/scapy")
 
 # Next step is to import following architecture specific functions:
 # def get_if_raw_hwaddr(iff)
