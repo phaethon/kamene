@@ -25,7 +25,7 @@ try:
     import networkx as nx
     NETWORKX = True
 except ImportError:
-    log_loading.degub("Can't import networkx. Not criticial, but won't be able to draw network graphs.")
+    log_loading.debug("Can't import networkx. Not criticial, but won't be able to draw network graphs.")
     NETWORKX = False
 
 try:
