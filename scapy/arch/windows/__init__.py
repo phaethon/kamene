@@ -500,7 +500,7 @@ def get_working_if():
         elif 'Wi-Fi' in ifaces and ifaces['Wi-Fi'].ip != '0.0.0.0':
             return 'Wi-Fi'
         elif len(ifaces) > 0:
-            return ifaces[list(ifaces.keys())[0]]
+            return ifaces[list(ifaces.keys())[0]].name
         else:
             return LOOPBACK_NAME
     except:
