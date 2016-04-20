@@ -86,7 +86,7 @@ if WINDOWS:
 if LINUX:
     from .linux import *
     if scapy.config.conf.use_winpcapy or scapy.config.conf.use_netifaces:
-        from pcapdnet import *
+        from .pcapdnet import *
 elif OPENBSD or FREEBSD or NETBSD or DARWIN:
     from .bsd import *
 elif SOLARIS:
