@@ -8,7 +8,7 @@ Overview
 ========
 
  0. Install *Python 3.x*.
- 1. Download and install *Scapy*.
+ 1. Install *Scapy* using pip or by cloning/installing from git.
  2. (For non-Linux platforms): Install *libpcap and libdnet* and their Python wrappers.
  3. (Optional): Install *additional software* for special features.
  4. Run Scapy with root priviledges.
@@ -92,7 +92,13 @@ Optional software for special features
       >>> dec.show()
       >>> dec[0]
 
-* ipython. For interactive sessions using ipython can be great advantage. Install using pip3
+* ipython. For interactive sessions using ipython can be great advantage. Install using pip3 or from your package manager
+
+* Graphviz. For some visualizations, e.g. traceroute graph, dot is required on the PATH
+
+* Matplotlib. Required for interactive plot/graph viewing.
+
+* Networkx. Conversations can be converted to Networkx graph if library is present.
  
 Platform-specific instructions
 ==============================
@@ -100,9 +106,9 @@ Platform-specific instructions
 Linux native
 ------------
 
-Scapy can run natively on Linux, without libdnet and libpcap.
+Scapy can run natively on Linux. I does not require libdnet and libpcap.
 
-* Install `Python 3.x <http://www.python.org>`_.
+* Install python3 from your package manager if it is not already present
 * Install `tcpdump <http://www.tcpdump.org>`_ and make sure it is in the $PATH. (It's only used to compile BPF filters (``-ddd option``))
 * Make sure your kernel has Packet sockets selected (``CONFIG_PACKET``)
 * If your kernel is < 2.6, make sure that Socket filtering is selected ``CONFIG_FILTER``) 
@@ -124,7 +130,6 @@ This section needs updating. In general installing python3, pip for python3, lib
 Windows
 -------
 
-Scapy is primarily being developed for Unix-like systems and works best on those platforms. scapy3k has not yet been ported to Windows. Use at your own risk. 
+Scapy works on Windows 8/2012 and newer version. Unlike earlier versions libdnet is not required. Testing is being done on following configuration: Windows 10/Anaconda 3.5/WinPcap 4.1.3
  
-
-
+On Windows 7 (and possibly earlier) scapy can be used for offline packet crafting/dissection. Sniffing and sending requires manual setting of network interface information and routing as corresponding powershell cmdlets used to gather this information are not working on Windows 7.

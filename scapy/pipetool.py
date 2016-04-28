@@ -99,7 +99,7 @@ class PipeEngine:
                 fds,fdo,fde=select.select(sources,[],[])
                 for fd in fds:
                     if fd is self.__fdr:
-                        cmd = os.read(self.__fdr,1)
+                        cmd = os.read(self.__fdr,1).decode(encoding='UTF-8')
                         if cmd == "X":
                             RUN=False
                             break
@@ -135,12 +135,12 @@ class PipeEngine:
         else:
             warning("Pipe engine already running")
     def wait_and_stop(self):
-        self.stop(_cmd="B")
+        self.stop(_cmd="B".encode(encoding='UTF-8'))
     def stop(self, _cmd="X"):
         try:
             with self.command_lock:
                 if self.threadid is not None:
-                    os.write(self.__fdw, _cmd)
+                    os.write(self.__fdw, _cmd.encode(encoding='UTF-8'))
                     while not self.thread_lock.acquire(0):
                         time.sleep(0.01) # interruptible wait for thread to terminate
                     self.thread_lock.release() # (not using .join() because it needs 'threading' module)
@@ -155,7 +155,7 @@ class PipeEngine:
             if self.threadid is not None:
                 for p in pipes:
                     p.start()
-                os.write(self.__fdw, "A")
+                os.write(self.__fdw, "A".encode(encoding='UTF-8'))
     
     def graph(self,**kargs):
         g=['digraph "pipe" {',"\tnode [shape=rectangle];",]
@@ -208,6 +208,12 @@ class _ConnectorLogic(object):
         self >> other
         other >> self
         return other
+
+    def __hash__(self):
+        return hash(str(self))
+
+    def __cmp__(self, other):
+        return hash(str(self)) == hash(str(other))
 
 
 class Pipe(_ConnectorLogic):
@@ -318,9 +324,9 @@ class AutoSource(Source):
         self._queue.append((msg,True))
         self._wake_up()
     def _wake_up(self):
-        os.write(self.__fdw,"x")
+        os.write(self.__fdw,"x".encode(encoding='UTF-8'))
     def deliver(self):
-        os.read(self.__fdr,1)
+        os.read(self.__fdr,1).decode(encoding='UTF-8')
         try:
             msg,high = self._queue.popleft()
         except IndexError: #empty queue. Exhausted source
@@ -372,11 +378,11 @@ class RawConsoleSink(Sink):
     def push(self, msg):
         if self.newlines:
             msg += "\n"
-        os.write(1, str(msg))
+        os.write(1, str(msg).encode(encoding='UTF-8'))
     def high_push(self, msg):
         if self.newlines:
             msg += "\n"
-        os.write(1, str(msg))
+        os.write(1, str(msg).encode(encoding='UTF-8'))
 
 class CLIFeeder(AutoSource):
     """Send messages from python command line
@@ -468,7 +474,7 @@ class TermSink(Sink):
     def _print(self, s):
         if self.newlines:
             s+="\n"
-        os.write(self.__w, s)
+        os.write(self.__w, s.encode(encoding='UTF-8'))
             
     def push(self, msg):
         self._print(str(msg))

@@ -74,7 +74,7 @@ class PcapNameNotFoundError(Scapy_Exception):
 
 def get_windows_if_list():
     # Windows 8+ way: ps = sp.Popen(['powershell', 'Get-NetAdapter', '|', 'select Name, InterfaceIndex, InterfaceDescription, InterfaceGuid, MacAddress', '|', 'fl'], stdout = sp.PIPE, universal_newlines = True)
-    ps = sp.Popen(['powershell', '-NoProfile', 'Get-WMIObject -class Win32_NetworkAdapter', '|', 'select Name, @{Name="InterfaceIndex";Expression={$_.Index}}, @{Name="InterfaceDescription";Expression={$_.Description}},@{Name="InterfaceGuid";Expression={$_.GUID}}, @{Name="MacAddress";Expression={$_.MacAddress.Replace(":","-")}}', '|', 'fl'], stdout = sp.PIPE, universal_newlines = True)
+    ps = sp.Popen(['powershell', '-NoProfile', 'Get-WMIObject -class Win32_NetworkAdapter', '|', 'select Name, @{Name="InterfaceIndex";Expression={$_.Index}}, @{Name="InterfaceDescription";Expression={$_.Description}},@{Name="InterfaceGuid";Expression={$_.GUID}}, @{Name="MacAddress";Expression={$_.MacAddress.Replace(":","-")}} | where InterfaceGuid -ne $null', '|', 'fl'], stdout = sp.PIPE, universal_newlines = True)
     stdout, stdin = ps.communicate(timeout = 10)
     current_interface = None
     interface_list = []
@@ -120,7 +120,8 @@ class NetworkInterface(object):
         self.description = data['description']
         self.win_index = data['win_index']
         # Other attributes are optional
-        self._update_pcapdata()
+        if conf.use_winpcapy:
+            self._update_pcapdata()
         try:
             self.ip = socket.inet_ntoa(get_if_raw_addr(data['guid']))
         except (KeyError, AttributeError, NameError):
@@ -219,8 +220,11 @@ def show_interfaces(resolve_mac=True):
     """Print list of available network interfaces"""
     return ifaces.show(resolve_mac)
 
-_orig_open_pcap = pcapdnet.open_pcap
-pcapdnet.open_pcap = lambda iface,*args,**kargs: _orig_open_pcap(pcap_name(iface),*args,**kargs)
+try:
+    _orig_open_pcap = pcapdnet.open_pcap
+    pcapdnet.open_pcap = lambda iface,*args,**kargs: _orig_open_pcap(pcap_name(iface),*args,**kargs)
+except AttributeError:
+    pass
 
 _orig_get_if_raw_hwaddr = pcapdnet.get_if_raw_hwaddr
 pcapdnet.get_if_raw_hwaddr = lambda iface,*args,**kargs: [ int(i, 16) for i in ifaces[iface].mac.split(':') ]
@@ -235,6 +239,7 @@ def read_routes():
     delim = "\s+"        # The columns are separated by whitespace
     netstat_line = delim.join([if_index, dest, next_hop, metric_pattern])
     pattern = re.compile(netstat_line)
+    # This works only starting from Windows 8/2012 and up. For older Windows another solution is needed
     ps = sp.Popen(['powershell', 'Get-NetRoute', '-AddressFamily IPV4', '|', 'select ifIndex, DestinationPrefix, NextHop, RouteMetric'], stdout = sp.PIPE, universal_newlines = True)
     stdout, stdin = ps.communicate(timeout = 10)
     for l in stdout.split('\n'):
@@ -494,7 +499,7 @@ def get_working_if():
         elif 'Wi-Fi' in ifaces and ifaces['Wi-Fi'].ip != '0.0.0.0':
             return 'Wi-Fi'
         elif len(ifaces) > 0:
-            return ifaces[list(ifaces.keys())[0]]
+            return ifaces[list(ifaces.keys())[0]].name
         else:
             return LOOPBACK_NAME
     except:

@@ -12,6 +12,7 @@ import random,time
 import gzip,zlib
 import re,struct,array,stat
 import subprocess
+import ipaddress
 
 import warnings
 warnings.filterwarnings("ignore","tempnam",RuntimeWarning, __name__)
@@ -89,6 +90,20 @@ def sane(x):
         else:
             r=r+chb(i)
     return r
+
+@conf.commands.register
+def is_private_addr(x):
+    """Returns True if the IPv4 Address is an RFC 1918 private address."""
+    paddrs = ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16']
+    found = False
+    for ipr in paddrs:
+        try:
+            if ipaddress.ip_address(x) in ipaddress.ip_network(ipr):
+                found = True
+                continue
+        except:
+            break
+    return found
 
 def lhex(x):
     if type(x) is int:
@@ -374,9 +389,10 @@ def do_graph(graph,prog=None,format='png',target=None,string=False,options=None,
             try:
                 import matplotlib.image as mpimg
                 import matplotlib.pyplot as plt
-                plt.figure(figsize = figsize)                
+                figure = plt.figure(figsize = figsize)                
                 plt.axis('off')
-                return plt.imshow(mpimg.imread(r, format = format), **kargs)
+                plt.imshow(mpimg.imread(r, format = format), **kargs)
+                return figure
 
             except ImportError:
                 warning('matplotlib.image required for interactive graph viewing. Use target option to write to a file')
@@ -919,15 +935,26 @@ class PcapWriter(RawPcapWriter):
                 self.linktype = 1
         RawPcapWriter._write_header(self, pkt)
 
+    def get_packet_time(self, pkt):
+        """Return the second and micro-second timestamp components for a packet."""
+        if pkt.sent_time:
+          t = pkt.sent_time
+          sec = int(t)
+        else:
+          t = pkt.time
+          sec = int(t)
+        usec = int(round((t-sec)*1000000))
+        return (sec,usec)
+
     def _write_packet(self, packet):        
         try:
-          sec = int(packet.time)
-          usec = int(round((packet.time-sec)*1000000))
+          t = self.get_packet_time(packet)
           s = bytes(packet)
           caplen = len(s)
-          RawPcapWriter._write_packet(self, s, sec, usec, caplen, caplen)
+          RawPcapWriter._write_packet(self, s, t[0], t[1], caplen, caplen)
         except Exception as e:
           log_interactive.error(e)
+
     def write(self, pkt):
         """accepts a either a single packet or a list of packets
         to be written to the dumpfile
