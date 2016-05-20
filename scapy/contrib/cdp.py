@@ -110,8 +110,8 @@ class CDPMsgDeviceID(CDPMsgGeneric):
     type = 0x0001
 
 _cdp_addr_record_ptype = {0x01: "NLPID", 0x02: "802.2"}
-_cdp_addrrecord_proto_ip = "\xcc"
-_cdp_addrrecord_proto_ipv6 = "\xaa\xaa\x03\x00\x00\x00\x86\xdd"
+_cdp_addrrecord_proto_ip = b"\xcc"
+_cdp_addrrecord_proto_ipv6 = b"\xaa\xaa\x03\x00\x00\x00\x86\xdd"
 
 class CDPAddrRecord(Packet):
     name = "CDP Address"
@@ -143,9 +143,8 @@ class CDPAddrRecordIPv6(CDPAddrRecord):
 def _CDPGuessAddrRecord(p, **kargs):
     cls = conf.raw_layer
     if len(p) >= 2:
-        plen = struct.unpack("B", p[1])[0]
-        proto = ''.join(struct.unpack("s" * plen, p[2:plen + 2])[0:plen])
-
+        plen = p[1]
+        proto = b''.join(struct.unpack("s" * plen, p[2:plen + 2])[0:plen])
         if proto == _cdp_addrrecord_proto_ip:
             clsname = "CDPAddrRecordIPv4"
         elif proto == _cdp_addrrecord_proto_ipv6:
