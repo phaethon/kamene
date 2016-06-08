@@ -67,7 +67,7 @@ def sndrcv(pks, pkt, timeout = None, inter = 0, verbose=None, chainCC=0, retry=0
     while retry >= 0:
         found=0
     
-        if timeout < 0:
+        if timeout is not None and timeout < 0:
             timeout = None
             
         rdpipe,wrpipe = os.pipe()
