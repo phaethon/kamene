@@ -1726,7 +1726,7 @@ class MTR:
             epc[ep] = ecs
 
         #
-        # Create ASN Clusters
+        # Create ASN Clusters (i.e. DOT subgraph and nodes)
         s += "\n\t### ASN Clusters ###\n"
         cipall = []			# Array of IPs consumed by all ASN Cluster
         cepipall = []			# Array of IP Endpoints (Targets) consumed by all ASN Cluster
@@ -2059,7 +2059,7 @@ class MTR:
                 s += '\t"{r:s}" [{l:s},shape="box3d",color="black",gradientangle=270,fillcolor="white:red",style="filled,rounded"];\n'.format(r = sr, l = lb)
 
         #
-        # Draw each trace for each number of queries... 
+        # Draw each trace (i.e., DOT edge) for each number of queries... 
         s += "\n\t### Traces ###\n"
         t = 0
         for q in range(0, self._ntraces):
@@ -2068,12 +2068,12 @@ class MTR:
                 col = next(forecolorlist)
                 s += '\tedge [color="#{s0:s}{s1:s}{s2:s}"];\n'.format(s0 = col[0], s1 = col[1], s2 = col[2])
                 #
-                # Probe Begin Point...
+                # Probe Begin Point (i.e., Begining of a trace)...
                 for k,v in self._tlblid[t].items():
                     ptr = probe = v[1]
                     s += '\t"{bp:s}":B{tr:s}:s -> '.format(bp = ptr, tr = v[0])
                 #
-                # In between traces...
+                # In between traces (i.e., Not at the begining or end of a trace)...
                 trace = self._rt[q][rtk]
                 tk = trace.keys()
                 ntr = trace[min(tk)]
@@ -2100,13 +2100,20 @@ class MTR:
                         if rtt:
                             if not 'Unk' in ntr:
                                 llb = 'Trace: {tr:d}:{tn:d}, RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = n, prb = probe, lbn = ntr.replace('"',''), rtt = self._rtt[t + 1][n])
-                                s += '\t{ptr:s} -> {ntr:s} [label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(ptr = ptr, ntr = ntr, rtt = self._rtt[t + 1][n], lb = lb, llb = llb)
+                                #
+                                # Special check to see if the next and previous nodes are the same.
+                                # If yes use the DOT 'xlabel' attribute to spread out labels so that they 
+                                # do not clash and 'forcelabel' so that they are placed.
+                                if ((self._ntraces > 1) and (ptr == ntr)):
+                                    s += '\t{ptr:s} -> {ntr:s} [xlabel=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,forcelabel=True,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(ptr = ptr, ntr = ntr, rtt = self._rtt[t + 1][n], lb = lb, llb = llb)
+                                else:
+                                    s += '\t{ptr:s} -> {ntr:s} [label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(ptr = ptr, ntr = ntr, rtt = self._rtt[t + 1][n], lb = lb, llb = llb)
                             else:
                                 s += '\t{ptr:s} -> {ntr:s} [edgetooltip="{lb:s}"];\n'.format(ptr = ptr, ntr = ntr, lb = lb)
                         else:
                             s += '\t{ptr:s} -> {ntr:s} [edgetooltip="{lb:s}"];\n'.format(ptr = ptr, ntr = ntr, lb = lb)
                 #
-                # Enhance target Endpoint replacement...
+                # Enhance target Endpoint (i.e., End of a trace) replacement...
                 for k,v in self._tlblid[t].items():
                     if (v[6] == 'BH'):		# Blackhole detection - do not create Enhanced Endpoint
                         #
@@ -2122,7 +2129,7 @@ class MTR:
                         if (f >= 0):
                             lh = lh[0:f]
                         lh = lh.replace('"','')		# Remove surrounding double quotes ("")
-                        if (k == lh):			# Does Hop match finally Target?
+                        if (k == lh):			# Does Hop match final Target?
                             #
                             # Backhole last hop matched target:
                             #
@@ -2176,12 +2183,18 @@ class MTR:
                         if not 'Unk' in k:
                             lb += ' (RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms))'.format(prb = v[1], lbn = k, rtt = self._rtt[t + 1][max(tk)])
                         pre = ''
-                        if k in uepprb:		# Special Case: Separate Endpoint Target from Probe
+                        if k in uepprb:		# Special Case: Distinguish the Endpoint Target from Probe
                             pre = '_'		# when they are the same using the underscore char: '_'.
                         if rtt:
                             if not 'Unk' in k:
                                 llb = 'Trace: {tr:d}:{tn:d}, RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = max(tk), prb = v[1], lbn = k, rtt = self._rtt[t + 1][max(tk)])
-                                s += '"{pre:s}{ep:s}":E{tr:s}:n [style="solid",label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(pre = pre, ep = k, tr = v[0], rtt = self._rtt[t + 1][max(tk)], lb = lb, llb = llb)
+                                #
+                                # Check to remove label clashing...
+                                ntrs = ntr.replace('"','')		# Remove surrounding double quotes ("")
+                                if ((self._ntraces > 1) and (ntrs == k)):
+                                    s += '"{pre:s}{ep:s}":E{tr:s}:n [style="solid",xlabel=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,forcelabel=True,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(pre = pre, ep = k, tr = v[0], rtt = self._rtt[t + 1][max(tk)], lb = lb, llb = llb)
+                                else:
+                                    s += '"{pre:s}{ep:s}":E{tr:s}:n [style="solid",label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(pre = pre, ep = k, tr = v[0], rtt = self._rtt[t + 1][max(tk)], lb = lb, llb = llb)
                             else:
                                 s += '"{pre:s}{ep:s}":E{tr:s}:n [style="solid",edgetooltip="{lb:s}"];\n'.format(pre = pre, ep = k, tr = v[0], lb = lb)
                         else:
