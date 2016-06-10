@@ -2104,7 +2104,7 @@ class MTR:
                                 # Special check to see if the next and previous nodes are the same.
                                 # If yes use the DOT 'xlabel' attribute to spread out labels so that they 
                                 # do not clash and 'forcelabel' so that they are placed.
-                                if ((self._ntraces > 1) and (ptr == ntr)):
+                                if (ptr == ntr):
                                     s += '\t{ptr:s} -> {ntr:s} [xlabel=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,forcelabel=True,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(ptr = ptr, ntr = ntr, rtt = self._rtt[t + 1][n], lb = lb, llb = llb)
                                 else:
                                     s += '\t{ptr:s} -> {ntr:s} [label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(ptr = ptr, ntr = ntr, rtt = self._rtt[t + 1][n], lb = lb, llb = llb)
@@ -2191,7 +2191,7 @@ class MTR:
                                 #
                                 # Check to remove label clashing...
                                 ntrs = ntr.replace('"','')		# Remove surrounding double quotes ("")
-                                if ((self._ntraces > 1) and (ntrs == k)):
+                                if (ntrs == k):
                                     s += '"{pre:s}{ep:s}":E{tr:s}:n [style="solid",xlabel=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,forcelabel=True,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(pre = pre, ep = k, tr = v[0], rtt = self._rtt[t + 1][max(tk)], lb = lb, llb = llb)
                                 else:
                                     s += '"{pre:s}{ep:s}":E{tr:s}:n [style="solid",label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(pre = pre, ep = k, tr = v[0], rtt = self._rtt[t + 1][max(tk)], lb = lb, llb = llb)
