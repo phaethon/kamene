@@ -66,7 +66,7 @@ def _vbs_exec_code(code):
     ps = sp.Popen([conf.prog.cscript, tmpfile.name],
                   stdout=sp.PIPE, stderr=open(os.devnull),
                   universal_newlines=True)
-    for _ in xrange(3):
+    for _ in range(3):
         # skip 3 first lines
         ps.stdout.readline()
     for line in ps.stdout:
@@ -409,7 +409,6 @@ def read_routes_xp():
         if ifidx in iface_indexes:
             iface = iface_indexes[ifidx]
             routes.append((dst, mask, gw, iface, iface.ip))
-    print(routes)
     return routes
 
 
@@ -422,7 +421,6 @@ def read_routes_7():
         except ValueError:
             continue
         routes.append((atol(line[0]), atol(line[1]), line[2], iface, iface.ip))
-    print(routes)
     return routes
 
 
@@ -640,7 +638,6 @@ import scapy.sendrecv
 
 scapy.sendrecv.sndrcv = sndrcv
 
-
 def sniff(count=0, store=1, offline=None, prn=None, lfilter=None, L2socket=None, timeout=None, *arg, **karg):
     """Sniff packets
 sniff([count=0,] [prn=None,] [store=1,] [offline=None,] [lfilter=None,] + L2ListenSocket args) -> list of packets
@@ -705,18 +702,18 @@ import scapy.sendrecv
 
 scapy.sendrecv.sniff = sniff
 
-
 def get_working_if():
     try:
-        if 'Ethernet' in ifaces and ifaces['Ethernet'].ip != '0.0.0.0':
+        if 'Ethernet' in IFACES and IFACES['Ethernet'].ip != '0.0.0.0':
             return 'Ethernet'
-        elif 'Wi-Fi' in ifaces and ifaces['Wi-Fi'].ip != '0.0.0.0':
+        elif 'Wi-Fi' in IFACES and IFACES['Wi-Fi'].ip != '0.0.0.0':
             return 'Wi-Fi'
-        elif len(ifaces) > 0:
-            return ifaces[list(ifaces.keys())[0]].name
+        elif len(IFACES) > 0:
+            return IFACES[list(IFACES.keys())[0]].name
         else:
             return LOOPBACK_NAME
-    except:
+    except Exception as e:
+        print("Exception trying to get_working_if under windows: "+str(e.msg))
         return LOOPBACK_NAME
 
 
