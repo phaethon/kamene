@@ -376,9 +376,10 @@ try:
 except AttributeError:
     pass
 
+import codecs
 _orig_get_if_raw_hwaddr = pcapdnet.get_if_raw_hwaddr
 pcapdnet.get_if_raw_hwaddr = lambda iface, *args, **kargs: (
-    ARPHDR_ETHER, IFACES.dev_from_pcapname(iface.pcapname).mac.replace(':', '').decode('hex')
+    codecs.decode(IFACES.dev_from_pcapname(iface.pcap_name).mac.replace(':', ''), 'hex')
 )
 get_if_raw_hwaddr = pcapdnet.get_if_raw_hwaddr
 
@@ -494,146 +495,6 @@ if conf.interactive_shell != 'ipython':
             orig_stdout = sys.stdout
             sys.stdout = console
 
-"""
-def sndrcv(pks, pkt, timeout=2, inter=0, verbose=None, chainCC=0, retry=0, multi=0):
-    if not isinstance(pkt, Gen):
-        pkt = SetGen(pkt)
-
-    if verbose is None:
-        verbose = conf.verb
-    debug.recv = plist.PacketList([], "Unanswered")
-    debug.sent = plist.PacketList([], "Sent")
-    debug.match = plist.SndRcvList([])
-    nbrecv = 0
-    ans = []
-    # do it here to fix random fields, so that parent and child have the same
-    all_stimuli = tobesent = [p for p in pkt]
-    notans = len(tobesent)
-
-    hsent = {}
-    for i in tobesent:
-        h = i.hashret()
-        if h in hsent:
-            hsent[h].append(i)
-        else:
-            hsent[h] = [i]
-    if retry < 0:
-        retry = -retry
-        autostop = retry
-    else:
-        autostop = 0
-
-    while retry >= 0:
-        found = 0
-
-        if timeout < 0:
-            timeout = None
-
-        pid = 1
-        try:
-            if WINDOWS or pid == 0:
-                try:
-                    try:
-                        i = 0
-                        if verbose:
-                            print ("Begin emission:")
-                        for p in tobesent:
-                            pks.send(p)
-                            i += 1
-                            time.sleep(inter)
-                        if verbose:
-                            print ("Finished to send %i packets." % i)
-                    except SystemExit:
-                        pass
-                    except KeyboardInterrupt:
-                        pass
-                    except:
-                        log_runtime.exception("--- Error sending packets")
-                        log_runtime.info("--- Error sending packets")
-                finally:
-                    try:
-                        sent_times = [p.sent_time for p in all_stimuli if p.sent_time]
-                    except:
-                        pass
-            if WINDOWS or pid > 0:
-                # Timeout starts after last packet is sent (as in Unix version)
-                if timeout:
-                    stoptime = time.time() + timeout
-                else:
-                    stoptime = 0
-                remaintime = None
-                try:
-                    try:
-                        while 1:
-                            if stoptime:
-                                remaintime = stoptime - time.time()
-                                if remaintime <= 0:
-                                    break
-                            r = pks.recv(MTU)
-                            if r is None:
-                                continue
-                            ok = 0
-                            h = r.hashret()
-                            if h in hsent:
-                                hlst = hsent[h]
-                                for i, sentpkt in enumerate(hlst):
-                                    if r.answers(sentpkt):
-                                        ans.append((sentpkt, r))
-                                        if verbose > 1:
-                                            os.write(1, b"*")
-                                        ok = 1
-                                        if not multi:
-                                            del hlst[i]
-                                            notans -= 1
-                                        else:
-                                            if not hasattr(sentpkt, '_answered'):
-                                                notans -= 1
-                                            sentpkt._answered = 1
-                                        break
-                            if notans == 0 and not multi:
-                                break
-                            if not ok:
-                                if verbose > 1:
-                                    os.write(1, b".")
-                                nbrecv += 1
-                                if conf.debug_match:
-                                    debug.recv.append(r)
-                    except KeyboardInterrupt:
-                        if chainCC:
-                            raise
-                finally:
-                    if WINDOWS:
-                        for p, t in zip(all_stimuli, sent_times):
-                            p.sent_time = t
-        finally:
-            pass
-
-        remain = list(itertools.chain(*hsent.itervalues()))
-        if multi:
-            remain = [p for p in remain if not hasattr(p, '_answered')]
-
-        if autostop and len(remain) > 0 and len(remain) != len(tobesent):
-            retry = autostop
-
-        tobesent = remain
-        if len(tobesent) == 0:
-            break
-        retry -= 1
-
-    if conf.debug_match:
-        debug.sent = plist.PacketList(remain[:], "Sent")
-        debug.match = plist.SndRcvList(ans[:])
-
-    # clean the ans list to delete the field _answered
-    if (multi):
-        for s, r in ans:
-            if hasattr(s, '_answered'):
-                del (s._answered)
-
-    if verbose:
-        print ("\nReceived %i packets, got %i answers, remaining %i packets" % (nbrecv + len(ans), len(ans), notans))
-    return plist.SndRcvList(ans), plist.PacketList(remain, "Unanswered")
-"""
 
 def sndrcv(pks, pkt, timeout=2, inter=0, verbose=None, chainCC=0, retry=0, multi=0):
     if not isinstance(pkt, Gen):
