@@ -7,10 +7,10 @@
 Packet class. Binding mechanism. fuzz() method.
 """
 
-import time,itertools,os
+import time,itertools,os,random
 import sys,traceback
 import copy
-from .fields import StrField,ConditionalField,Emph,PacketListField
+from .fields import StrField,ConditionalField,Emph,PacketListField,FlagsField
 from .config import conf
 from .base_classes import BasePacket,Gen,SetGen,Packet_metaclass,NewDefaultValues
 from .volatile import VolatileValue
@@ -1288,6 +1288,9 @@ def fuzz(p, _inplace=0):
                 for r in getattr(q, f.name):
                     print("fuzzing", repr(r))
                     fuzz(r, _inplace=1)
+            elif isinstance(f, FlagsField):
+                rnd = random.randint(0, (2 ^ f.size) - 1)
+                q.default_fields[f.name] = rnd
             elif f.default is not None:
                 rnd = f.randval()
                 if rnd is not None:
