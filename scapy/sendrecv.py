@@ -602,7 +602,7 @@ stop_filter: python function applied to each packet to determine
                 if count > 0 and c >= count:
                     break
     except KeyboardInterrupt:
-        pass
+        raise
     if opened_socket is None:
         s.close()
     return plist.PacketList(lst,"Sniffed")
