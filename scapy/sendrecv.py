@@ -603,8 +603,10 @@ stop_filter: python function applied to each packet to determine
                     break
     except KeyboardInterrupt:
         pass
-    if opened_socket is None:
-        s.close()
+    finally:
+        if opened_socket is None:
+            s.close()
+
     return plist.PacketList(lst,"Sniffed")
 
 
