@@ -541,7 +541,7 @@ iface:    listen answers only on the given interface"""
 
 @conf.commands.register
 def sniff(count=0, store=1, offline=None, prn = None, lfilter=None, L2socket=None, timeout=None,
-          opened_socket=None, stop_filter=None, *arg, **karg):
+          opened_socket=None, stop_filter=None, exceptions=False, *arg, **karg):
     """Sniff packets
 sniff([count=0,] [prn=None,] [store=1,] [offline=None,] [lfilter=None,] + L2ListenSocket args) -> list of packets
 
@@ -560,6 +560,8 @@ opened_socket: provide an object ready to use .recv() on
 stop_filter: python function applied to each packet to determine
              if we have to stop the capture after this packet
              ex: stop_filter = lambda x: x.haslayer(TCP)
+exceptions: reraise caught exceptions such as KeyboardInterrupt
+            when a user interrupts sniffing
     """
     c = 0
     
@@ -602,7 +604,11 @@ stop_filter: python function applied to each packet to determine
                 if count > 0 and c >= count:
                     break
     except KeyboardInterrupt:
-        raise
+        if exceptions:
+            raise
+        else:
+            pass
+
     if opened_socket is None:
         s.close()
     return plist.PacketList(lst,"Sniffed")
