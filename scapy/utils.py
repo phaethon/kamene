@@ -727,7 +727,7 @@ class _RawPcapNGReader:
     
     def parse_sec(self, t):
         if self.tsresol & 0b10000000:
-            return t >> self.tsresol
+            return t >> (self.tsresol & ~0b10000000)
         else:
             if self.tsresol == 0:
                 return t // pow(10, 6)
@@ -736,7 +736,7 @@ class _RawPcapNGReader:
 
     def parse_usec(self, t):
         if self.tsresol & 0b10000000:            
-            return (t & (1 << self.tsresol) - 1) / pow(2, (self.tsresol & ~0b10000000)) * pow(10, 6)
+            return (t & (1 << (self.tsresol & ~0b10000000)) - 1) / pow(2, (self.tsresol & ~0b10000000)) * pow(10, 6)
         else:
             if self.tsresol == 0:
                 return (t % pow(10, 6))
