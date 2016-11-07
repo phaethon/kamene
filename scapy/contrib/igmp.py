@@ -62,10 +62,7 @@ IGMPv2 message format   http://www.faqs.org/rfcs/rfc2236.html
     p += pay
     if self.chksum is None:
       ck = checksum(p)
-      if(sys.version_info < (3,0)):
-        p = p[:2]+chr(ck>>8)+chr(ck&0xff)+p[4:]
-      else:
-        p = p[:2]+bytes(ck>>8)+bytes(ck&0xff)+p[4:]
+      p = p[:2]+bytes(ck>>8)+bytes(ck&0xff)+p[4:]
     return p
 
 #--------------------------------------------------------------------------
