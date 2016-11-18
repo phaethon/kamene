@@ -106,7 +106,7 @@ def load_services(filename):
     tdct=DADict(_name="%s-tcp"%filename)
     udct=DADict(_name="%s-udp"%filename)
     try:
-        f=open(filename)
+        f=open(filename, errors='ignore')
         for l in f:
             try:
                 shrp = l.find("#")
