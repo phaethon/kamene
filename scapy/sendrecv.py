@@ -608,9 +608,10 @@ exceptions: reraise caught exceptions such as KeyboardInterrupt
             raise
         else:
             pass
+    finally:
+        if opened_socket is None:
+            s.close()
 
-    if opened_socket is None:
-        s.close()
     return plist.PacketList(lst,"Sniffed")
 
 
