@@ -658,6 +658,19 @@ x is not None and ICMP in x and x[ICMP].type == 0
 dns_ans = sr1(IP(dst="resolver1.opendns.com")/UDP()/DNS(rd=1,qd=DNSQR(qname="www.slashdot.com")),timeout=5)
 DNS in dns_ans
 
+= TCP DNS request
+~ netaccess IP TCP DNS
+syn = IP(dst="resolver1.opendns.com") / TCP(dport=53, sport=random.randint(1024,65535), flags="S")
+synack = sr1(syn, timeout=5)
+synack_ack = IP(dst="resolver1.opendns.com") / TCP(dport=53, sport=syn.sport, flags="A", seq=synack.ack, ack=synack.seq + 1)
+send(synack_ack)
+dnsq = IP(dst="resolver1.opendns.com") / TCP(dport=53, sport=syn.sport, flags="PA", seq=synack.ack, ack=synack.seq + 1) / DNS(rd=1,qd=DNSQR(qname="www.slashdot.com", qtype="A"))
+dnsr = sr1(dnsq, filter='tcp[13] & 8 != 0', timeout=5)
+dnsr_ack = IP(dst="resolver1.opendns.com") / TCP(dport=53, sport=syn.sport, flags="A", seq=dnsr.ack, ack=dnsr.seq + len(dnsr[DNS]))
+finack = sr1(dnsr_ack)
+final_ack = IP(dst="resolver1.opendns.com") / TCP(dport=53, sport=syn.sport, flags="A", seq=finack.ack + 1, ack=finack.seq + 1)
+send(final_ack)
+DNS in dnsr
 
 
 ############
