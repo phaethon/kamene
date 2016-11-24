@@ -12,7 +12,7 @@ import socket,struct
 from scapy.packet import *
 from scapy.fields import *
 from scapy.ansmachine import *
-from scapy.layers.inet import IP, UDP
+from scapy.layers.inet import IP, UDP, TCP
 from scapy.utils import str2bytes
 
 class DNSStrField(StrField):
@@ -245,7 +245,8 @@ class RDLenField(Field):
 
 class DNS(Packet):
     name = "DNS"
-    fields_desc = [ ShortField("id", 0),
+    fields_desc = [ ConditionalField(ShortField("length", None), lambda pkt:isinstance(pkt.underlayer, TCP)),
+                    ShortField("id", 0),
                     BitField("qr", 0, 1),
                     BitEnumField("opcode", 0, 4, {0:"QUERY",1:"IQUERY",2:"STATUS"}),
                     BitField("aa", 0, 1),
@@ -265,6 +266,15 @@ class DNS(Packet):
                     DNSRRField("an", "ancount"),
                     DNSRRField("ns", "nscount"),
                     DNSRRField("ar", "arcount",0) ]
+
+    def post_build(self, pkt, pay):
+        if isinstance(self.underlayer, TCP) and self.length is None:
+            l = len(pkt) - 2
+            pkt = struct.pack("!H", l) + pkt[2:]
+            return pkt + pay
+        else:
+            return pkt + pay
+
     def answers(self, other):
         return (isinstance(other, DNS)
                 and self.id == other.id
@@ -289,7 +299,8 @@ dnstypes = { 0:"ANY", 255:"ALL",
              9:"MR",10:"NULL",11:"WKS",12:"PTR",13:"HINFO",14:"MINFO",15:"MX",16:"TXT",
              17:"RP",18:"AFSDB",28:"AAAA", 33:"SRV",38:"A6",39:"DNAME",
              41:"OPT", 43:"DS", 46:"RRSIG", 47:"NSEC", 48:"DNSKEY",
-             50: "NSEC3", 51: "NSEC3PARAM", 32769:"DLV" }
+             50: "NSEC3", 51: "NSEC3PARAM", 32769:"DLV",
+             35:"NAPTR", 44:"SSHFP", 29:"LOC", 52:"TLSA"}
 
 dnsqtypes = {251:"IXFR",252:"AXFR",253:"MAILB",254:"MAILA",255:"ALL"}
 dnsqtypes.update(dnstypes)
@@ -642,6 +653,8 @@ class DNSRR(Packet):
 
 bind_layers( UDP,           DNS,           dport=53)
 bind_layers( UDP,           DNS,           sport=53)
+bind_layers( TCP,           DNS,           dport=53)
+bind_layers( TCP,           DNS,           sport=53)
 
 
 @conf.commands.register
