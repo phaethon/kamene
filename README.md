@@ -9,7 +9,6 @@ Please, submit all issues https://github.com/phaethon/scapy preferrably with .pc
 [winpcapy.py by Massimo Ciani] (https://code.google.com/p/winpcapy/) integrated inside code.
 
 ## Supporting scapy3k
-Please, vote for scapy3k at [Best security tool 2015 survey](http://www.toolswatch.org/2015/11/vote-for-2015-best-security-tool/).
 
 Support scapy3k inclusion in Kali linux by commenting on the [issue at Kali bug tracker](https://bugs.kali.org/view.php?id=2336).
 
@@ -19,7 +18,8 @@ Support scapy3k inclusion in Kali linux by commenting on the [issue at Kali bug 
 
 Scapy3k is included in the [Network Security Toolkit] (http://www.networksecuritytoolkit.org/nst/index.html) Release 22. 
 
-There are several new features compared to classic scapy:
+Classic scapy has been trying to catch up with the improvements in scapy3k. These features were first implemented in scapy3k and some of them might have been reimplemented in scapy or not:
+* replaced PyCrypto with cryptography.io
 * Windows support without a need for libdnet
 * option to return Networkx graphs instead of image, e.g. for conversations
 * replaced gnuplot with Matplotlib
