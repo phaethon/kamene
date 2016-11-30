@@ -152,10 +152,11 @@ class BERcodec_Object( metaclass = BERcodec_metaclass):
             context = cls.tag.context
         cls.check_string(s)
         p = (s[0])
+        print(context, type(context))
         if p not in context:
             t = s
             if len(t) > 18:
-                t = t[:15]+"..."
+                t = t[:15]+b"..."
             raise BER_Decoding_Error("Unknown prefix [%02x] for [%r]" % (p,t), remaining=s)
         codec = context[p].get_codec(ASN1_Codecs.BER)
         return codec.dec(s,context,safe)
