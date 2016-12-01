@@ -1,5 +1,5 @@
 #############################################################################
-## ipsec.py --- IPSec support for Scapy                                    ##
+## ipsec.py --- IPsec support for Scapy                                    ##
 ##                                                                         ##
 ## Copyright (C) 2014  6WIND                                               ##
 ##                                                                         ##
@@ -13,7 +13,7 @@
 ## General Public License for more details.                                ##
 #############################################################################
 """
-IPSec layer
+IPsec layer
 ===========
 
 Example of use:
@@ -39,7 +39,9 @@ Example of use:
 True
 """
 
+import os
 import socket
+import struct
 
 if not hasattr(socket, 'IPPROTO_AH'):
     socket.IPPROTO_AH = 51
@@ -47,9 +49,10 @@ if not hasattr(socket, 'IPPROTO_ESP'):
     socket.IPPROTO_ESP = 50
 
     
-import fractions
+from fractions import gcd
 
 from scapy.data import IP_PROTOS
+from scapy.error import log_loading
 
 from scapy.fields import ByteEnumField, ByteField, StrField, XIntField, IntField, \
     ShortField, PacketField
@@ -145,21 +148,20 @@ class _ESPPlain(Packet):
 
 #------------------------------------------------------------------------------
 try:
-    from Crypto.Cipher import AES
-    from Crypto.Cipher import DES
-    from Crypto.Cipher import DES3
-    from Crypto.Cipher import CAST
-    from Crypto.Cipher import Blowfish
-    from Crypto.Util import Counter
-    from Crypto import Random
+    from cryptography.exceptions import InvalidTag
+    from cryptography.hazmat.backends import default_backend
+    from cryptography.hazmat.primitives.ciphers import (
+        Cipher,
+        algorithms,
+        modes,
+    )
 except ImportError:
     # no error if pycrypto is not available but encryption won't be supported
-    AES = None
-    DES = None
-    DES3 = None
-    CAST = None
-    Blowfish = None
-    Random = None
+    log_loading.info("Can't import python cryptography lib. "
+                     "Disabled IPsec encryption/authentication.")
+    algorithms = None
+    Cipher = None
+    modes = None
 
 #------------------------------------------------------------------------------
 def _lcm(a, b):
@@ -169,14 +171,14 @@ def _lcm(a, b):
     if a == 0 or b == 0:
         return 0
     else:
-        return abs(a * b) // fractions.gcd(a, b)
+        return abs(a * b) // gcd(a, b)
 
 class CryptAlgo(object):
     """
-    IPSec encryption algorithm
+    IPsec encryption algorithm
     """
 
-    def __init__(self, name, cipher, mode, block_size=None, iv_size=None, key_size=None):
+    def __init__(self, name, cipher, mode, block_size=None, iv_size=None, key_size=None, icv_size=None, salt_size=None):
         """
         @param name: the name of this encryption algorithm
         @param cipher: a Cipher module
@@ -188,15 +190,25 @@ class CryptAlgo(object):
         @param key_size: an integer or list/tuple of integers. If specified,
                          force the secret keys length to one of the values.
                          Defaults to the `key_size` of the cipher.
+        @param icv_size: the length of the Integrity Check Value of this algo.
+                         Used by Combined Mode Algorithms, e.g. GCM
+        @param salt_size: the length of the salt to use as the IV prefix.
+                         Usually used by Counter modes e.g. CTR
         """
         self.name = name
         self.cipher = cipher
         self.mode = mode
+        self.icv_size = icv_size
+
+        if self.mode is not None:
+            self.is_aead = issubclass(self.mode, modes.ModeWithAuthenticationTag)
+        else:
+            self.is_aead = False
 
         if block_size is not None:
             self.block_size = block_size
         elif cipher is not None:
-            self.block_size = cipher.block_size
+            self.block_size = cipher.block_size // 8
         else:
             self.block_size = 1
 
@@ -208,9 +220,14 @@ class CryptAlgo(object):
         if key_size is not None:
             self.key_size = key_size
         elif cipher is not None:
-            self.key_size = cipher.key_size
+            self.key_size = tuple(i // 8 for i in cipher.key_sizes)
         else:
             self.key_size = None
+
+        if salt_size is None:
+            self.salt_size = 0
+        else:
+            self.salt_size = salt_size
 
     def check_key(self, key):
         """
@@ -224,57 +241,51 @@ class CryptAlgo(object):
 
     def generate_iv(self):
         """
-        Generate a random initialization vector. If pycrypto is not available,
-        return a buffer of the correct length filled with only '\x00'.
+        Generate a random initialization vector.
         """
-        if Random:
-            return Random.get_random_bytes(self.iv_size)
-        else:
-            return chr(0) * self.iv_size
+        # XXX: Handle counter modes with real counters? RFCs allow the use of
+        # XXX: random bytes for counters, so it is not wrong to do it that way
+        return os.urandom(self.iv_size - self.salt_size)
 
-    def new_cipher(self, key, iv):
+    def new_cipher(self, key, iv, digest=None):
         """
         @param key:    the secret key, a byte string
-        @param iv:     the initialization vector, a byte string
+        @param iv:     the initialization vector, a byte string. Used as the
+                       initial nonce in counter mode
+        @param digest: also known as tag or icv. A byte string containing the
+                       digest of the encrypted data. Only use this during
+                       decryption!
+
         @return:    an initialized cipher object for this algo
         """
         if type(key) is str:
             key = key.encode('ascii')
-        if (hasattr(self.cipher, 'MODE_CTR') and self.mode == self.cipher.MODE_CTR
-            or hasattr(self.cipher, 'MODE_GCM') and self.mode == self.cipher.MODE_GCM):
-            # in counter mode, the "iv" must be incremented for each block
-            # it is calculated like this:
-            # +---------+------------------+---------+
-            # |  nonce  |        IV        | counter |
-            # +---------+------------------+---------+
-            #   m bytes       n bytes        4 bytes
-            # <-------------------------------------->
-            #               block_size
-            nonce_size = self.cipher.block_size - self.iv_size - 4
-
-            # instead of asking for an extra parameter, we extract the last
-            # nonce_size bytes of the key and use them as the nonce.
-            # +----------------------------+---------+
-            # |        cipher key          |  nonce  |
-            # +----------------------------+---------+
-            #                              <--------->
-            #                               nonce_size
-            cipher_key, nonce = key[:-nonce_size], key[-nonce_size:]
-
-            return self.cipher.new(cipher_key, self.mode,
-                                   counter=Counter.new(4 * 8, prefix=nonce + iv))
+        if self.is_aead and digest is not None:
+            # With AEAD, the mode needs the digest during decryption.
+            return Cipher(
+                self.cipher(key),
+                self.mode(iv, digest, len(digest)),
+                default_backend(),
+            )
         else:
-            return self.cipher.new(key, self.mode, iv)
+            return Cipher(
+                self.cipher(key),
+                self.mode(iv),
+                default_backend(),
+            )
+
 
     def pad(self, esp):
         """
         Add the correct amount of padding so that the data to encrypt is
         exactly a multiple of the algorithm's block size.
 
-        Also, make sure that the total ESP packet length is a multiple of 4 or
-        8 bytes with IP or IPv6 respectively.
+        Also, make sure that the total ESP packet length is a multiple of 4
+        bytes.
 
         @param esp:    an unencrypted _ESPPlain packet
+
+        @return:    an unencrypted _ESPPlain packet with valid padding
         """
         # 2 extra bytes for padlen and nh
         data_len = len(esp.data) + 2
@@ -311,13 +322,20 @@ class CryptAlgo(object):
         data = esp.data_for_encryption()
 
         if self.cipher:
-            self.check_key(key)
             cipher = self.new_cipher(key, esp.iv)
-            data = cipher.encrypt(data)
+            encryptor = cipher.encryptor()
+
+            if self.is_aead:
+                aad = struct.pack('!LL', esp.spi, esp.seq)
+                encryptor.authenticate_additional_data(aad)
+                data = encryptor.update(data) + encryptor.finalize()
+                data += encryptor.tag[:self.icv_size]
+            else:
+                data = encryptor.update(data) + encryptor.finalize()
 
         return ESP(spi=esp.spi, seq=esp.seq, data=esp.iv + data)
 
-    def decrypt(self, esp, key, icv_size=0):
+    def decrypt(self, esp, key, icv_size=None):
         """
         Decrypt an ESP packet
 
@@ -326,22 +344,34 @@ class CryptAlgo(object):
         @param icv_size:   the length of the icv used for integrity check
 
         @return:    a valid ESP packet encrypted with this algorithm
+        @raise IPSecIntegrityError: if the integrity check fails with an AEAD
+                                    algorithm
         """
-        self.check_key(key)
+        if icv_size is None:
+            icv_size = self.icv_size if self.is_aead else 0
 
         iv = esp.data[:self.iv_size]
         data = esp.data[self.iv_size:len(esp.data) - icv_size]
         icv = esp.data[len(esp.data) - icv_size:]
 
         if self.cipher:
-            cipher = self.new_cipher(key, iv)
-            data = cipher.decrypt(data)
+            cipher = self.new_cipher(key, iv, icv)
+            decryptor = cipher.decryptor()
+
+            if self.is_aead:
+                # Tag value check is done during the finalize method
+                decryptor.authenticate_additional_data(
+                    struct.pack('!LL', esp.spi, esp.seq)
+                )
+
+            try:
+                data = decryptor.update(data) + decryptor.finalize()
+            except InvalidTag as err:
+                raise IPSecIntegrityError(err)
 
         # extract padlen and nh
-        #padlen = ord(data[-2])
         padlen = (data[-2])
-        #nh = ord(data[-1])
-        nh = (data[-1])
+        nh = data[-1]
 
         # then use padlen to determine data and padding
         data = data[:len(data) - padlen - 2]
@@ -364,54 +394,53 @@ CRYPT_ALGOS = {
     'NULL': CryptAlgo('NULL', cipher=None, mode=None, iv_size=0),
 }
 
-if AES:
+if algorithms:
     CRYPT_ALGOS['AES-CBC'] = CryptAlgo('AES-CBC',
-                                       cipher=AES,
-                                       mode=AES.MODE_CBC)
-    # specific case for counter mode:
-    # the last 4 bytes of the key are used to carry the nonce of the counter
+                                       cipher=algorithms.AES,
+                                       mode=modes.CBC)
     CRYPT_ALGOS['AES-CTR'] = CryptAlgo('AES-CTR',
-                                       cipher=AES,
-                                       mode=AES.MODE_CTR,
-                                       block_size=1,
-                                       iv_size=8,
-                                       key_size=(16 + 4, 24 + 4, 32 + 4))
-if DES:
-    CRYPT_ALGOS['DES'] = CryptAlgo('DES',
-                                   cipher=DES,
-                                   mode=DES.MODE_CBC)
-if Blowfish:
+                                       cipher=algorithms.AES,
+                                       mode=modes.CTR,
+                                       salt_size=4)
+    CRYPT_ALGOS['AES-GCM'] = CryptAlgo('AES-GCM',
+                                       cipher=algorithms.AES,
+                                       mode=modes.GCM,
+                                       salt_size=4,
+                                       icv_size=16)
+    if hasattr(modes, 'CCM'):
+        CRYPT_ALGOS['AES-CCM'] = CryptAlgo('AES-CCM',
+                                           cipher=algorithms.AES,
+                                           mode=modes.CCM,
+                                           icv_size=16)
+    # XXX: Flagged as weak by 'cryptography'. Kept for backward compatibility
     CRYPT_ALGOS['Blowfish'] = CryptAlgo('Blowfish',
-                                        cipher=Blowfish,
-                                        mode=Blowfish.MODE_CBC)
-if DES3:
+                                        cipher=algorithms.Blowfish,
+                                        mode=modes.CBC)
+    # XXX: RFC7321 states that DES *MUST NOT* be implemented.
+    # XXX: Keep for backward compatibility?
+    # Using a TripleDES cipher algorithm for DES is done by using the same 64
+    # bits key 3 times (done by cryptography when given a 64 bits key)
+    CRYPT_ALGOS['DES'] = CryptAlgo('DES',
+                                   cipher=algorithms.TripleDES,
+                                   mode=modes.CBC,
+                                   key_size=(8,))
     CRYPT_ALGOS['3DES'] = CryptAlgo('3DES',
-                                    cipher=DES3,
-                                    mode=DES3.MODE_CBC)
-if CAST:
+                                    cipher=algorithms.TripleDES,
+                                    mode=modes.CBC)
     CRYPT_ALGOS['CAST'] = CryptAlgo('CAST',
-                                    cipher=CAST,
-                                    mode=CAST.MODE_CBC)
+                                    cipher=algorithms.CAST5,
+                                    mode=modes.CBC)
 
 #------------------------------------------------------------------------------
 try:
-    from Crypto.Hash import HMAC
-    from Crypto.Hash import SHA
-    from Crypto.Hash import MD5
-    from Crypto.Hash import SHA256
-    from Crypto.Hash import SHA384
-    from Crypto.Hash import SHA512
+    from cryptography.hazmat.primitives.hmac import HMAC
+    from cryptography.hazmat.primitives.cmac import CMAC
+    from cryptography.hazmat.primitives import hashes
 except ImportError:
-    # no error if pycrypto is not available but authentication won't be supported
+    # no error if cryptography is not available but authentication won't be supported
     HMAC = None
-    SHA = None
-    MD5 = None
-    SHA256 = None
-    SHA384 = None
-try:
-    from Crypto.Hash import XCBCMAC
-except ImportError:
-    XCBCMAC = None
+    CMAC = None
+    hashes = None
 
 #------------------------------------------------------------------------------
 class IPSecIntegrityError(Exception):
@@ -422,7 +451,7 @@ class IPSecIntegrityError(Exception):
 
 class AuthAlgo(object):
     """
-    IPSec integrity algorithm
+    IPsec integrity algorithm
     """
 
     def __init__(self, name, mac, digestmod, icv_size, key_size=None):
@@ -458,16 +487,14 @@ class AuthAlgo(object):
         """
         if type(key) is str:
             key = key.encode('ascii')
-        if self.mac is XCBCMAC:
-            # specific case here, ciphermod instead of digestmod
-            return self.mac.new(key, ciphermod=self.digestmod)
+        if self.mac is CMAC:
+            return self.mac(self.digestmod(key), default_backend())
         else:
-            print(self.mac)
-            return self.mac.new(key, digestmod=self.digestmod)
+            return self.mac(key, self.digestmod(), default_backend())
 
     def sign(self, pkt, key):
         """
-        Sign an IPSec (ESP or AH) packet with this algo.
+        Sign an IPsec (ESP or AH) packet with this algo.
 
         @param pkt:    a packet that contains a valid encrypted ESP or AH layer
         @param key:    the authentication key, a byte string
@@ -477,18 +504,16 @@ class AuthAlgo(object):
         if not self.mac:
             return pkt
 
-        self.check_key(key)
-
         mac = self.new_mac(key)
 
         if pkt.haslayer(ESP):
             mac.update(bytes(pkt[ESP]))
-            pkt[ESP].data += mac.digest()[:self.icv_size]
+            pkt[ESP].data += mac.finalize()[:self.icv_size]
 
         elif pkt.haslayer(AH):
             clone = zero_mutable_fields(pkt.copy(), sending=True)
             mac.update(bytes(clone))
-            pkt[AH].icv = mac.digest()[:self.icv_size]
+            pkt[AH].icv = mac.finalize()[:self.icv_size]
 
         return pkt
 
@@ -504,8 +529,6 @@ class AuthAlgo(object):
         if not self.mac or self.icv_size == 0:
             return
 
-        self.check_key(key)
-
         mac = self.new_mac(key)
 
         pkt_icv = 'not found'
@@ -513,19 +536,18 @@ class AuthAlgo(object):
 
         if isinstance(pkt, ESP):
             pkt_icv = pkt.data[len(pkt.data) - self.icv_size:]
-
-            pkt = pkt.copy()
-            pkt.data = pkt.data[:len(pkt.data) - self.icv_size]
-            mac.update(bytes(pkt))
-            computed_icv = mac.digest()[:self.icv_size]
+            clone = pkt.copy()
+            clone.data = clone.data[:len(clone.data) - self.icv_size]
 
         elif pkt.haslayer(AH):
             pkt_icv = pkt[AH].icv[:self.icv_size]
-
             clone = zero_mutable_fields(pkt.copy(), sending=False)
-            mac.update(bytes(clone))
-            computed_icv = mac.digest()[:self.icv_size]
 
+        mac.update(bytes(clone))
+        computed_icv = mac.finalize()[:self.icv_size]
+
+
+        # XXX: Cannot use mac.verify because the ICV can be truncated
         if pkt_icv != computed_icv:
             raise IPSecIntegrityError('pkt_icv=%r, computed_icv=%r' %
                                       (pkt_icv, computed_icv))
@@ -538,38 +560,35 @@ AUTH_ALGOS = {
     'NULL': AuthAlgo('NULL', mac=None, digestmod=None, icv_size=0),
 }
 
-if HMAC:
-    if SHA:
-        AUTH_ALGOS['HMAC-SHA1-96'] = AuthAlgo('HMAC-SHA1-96',
-                                              mac=HMAC,
-                                              digestmod=SHA,
-                                              icv_size=12)
-    if SHA256:
-        AUTH_ALGOS['SHA2-256-128'] = AuthAlgo('SHA2-256-128',
-                                              mac=HMAC,
-                                              digestmod=SHA256,
-                                              icv_size=16)
-    if SHA384:
-        AUTH_ALGOS['SHA2-384-192'] = AuthAlgo('SHA2-384-192',
-                                              mac=HMAC,
-                                              digestmod=SHA384,
-                                              icv_size=24)
-    if SHA512:
-        AUTH_ALGOS['SHA2-512-256'] = AuthAlgo('SHA2-512-256',
-                                              mac=HMAC,
-                                              digestmod=SHA512,
-                                              icv_size=32)
-    if MD5:
-        AUTH_ALGOS['HMAC-MD5-96'] = AuthAlgo('HMAC-MD5-96',
-                                             mac=HMAC,
-                                             digestmod=MD5,
-                                             icv_size=12)
-if AES and XCBCMAC:
-    AUTH_ALGOS['AES-XCBC-96'] = AuthAlgo('AES-XCBC-96',
-                                         mac=XCBCMAC,
-                                         digestmod=AES,
-                                         icv_size=12,
-                                         key_size=(16,))
+if HMAC and hashes:
+    # XXX: NIST has deprecated SHA1 but is required by RFC7321
+    AUTH_ALGOS['HMAC-SHA1-96'] = AuthAlgo('HMAC-SHA1-96',
+                                          mac=HMAC,
+                                          digestmod=hashes.SHA1,
+                                          icv_size=12)
+    AUTH_ALGOS['SHA2-256-128'] = AuthAlgo('SHA2-256-128',
+                                          mac=HMAC,
+                                          digestmod=hashes.SHA256,
+                                          icv_size=16)
+    AUTH_ALGOS['SHA2-384-192'] = AuthAlgo('SHA2-384-192',
+                                          mac=HMAC,
+                                          digestmod=hashes.SHA384,
+                                          icv_size=24)
+    AUTH_ALGOS['SHA2-512-256'] = AuthAlgo('SHA2-512-256',
+                                          mac=HMAC,
+                                          digestmod=hashes.SHA512,
+                                          icv_size=32)
+    # XXX:Flagged as deprecated by 'cryptography'. Kept for backward compat
+    AUTH_ALGOS['HMAC-MD5-96'] = AuthAlgo('HMAC-MD5-96',
+                                         mac=HMAC,
+                                         digestmod=hashes.MD5,
+                                         icv_size=12)
+if CMAC and algorithms:
+    AUTH_ALGOS['AES-CMAC-96'] = AuthAlgo('AES-CMAC-96',
+                                      mac=CMAC,
+                                      digestmod=algorithms.AES,
+                                      icv_size=12,
+                                      key_size=(16,))
 
 #------------------------------------------------------------------------------
 
@@ -581,7 +600,7 @@ def split_for_transport(orig_pkt, transport_proto):
     header.
 
     @param orig_pkt: the packet to split. Must be an IP or IPv6 packet
-    @param transport_proto: the IPSec protocol number that will be inserted
+    @param transport_proto: the IPsec protocol number that will be inserted
                             at the split position.
     @return: a tuple (header, nh, payload) where nh is the protocol number of
              payload.
@@ -705,7 +724,7 @@ def zero_mutable_fields(pkt, sending=False):
 #------------------------------------------------------------------------------
 class SecurityAssociation(object):
     """
-    This class is responsible of "encryption" and "decryption" of IPSec packets.
+    This class is responsible of "encryption" and "decryption" of IPsec packets.
     """
 
     SUPPORTED_PROTOS = (IP, IPv6)
@@ -713,7 +732,7 @@ class SecurityAssociation(object):
     def __init__(self, proto, spi, seq_num=1, crypt_algo=None, crypt_key=None,
                  auth_algo=None, auth_key=None, tunnel_header=None, nat_t_header=None):
         """
-        @param proto: the IPSec proto to use (ESP or AH)
+        @param proto: the IPsec proto to use (ESP or AH)
         @param spi: the Security Parameters Index of this SA
         @param seq_num: the initial value for the sequence number on encrypted
                         packets
@@ -729,7 +748,7 @@ class SecurityAssociation(object):
 
         if proto not in (ESP, AH, ESP.name, AH.name):
             raise ValueError("proto must be either ESP or AH")
-        if isinstance(proto, str):
+        if isinstance(proto, (str, bytes)):
             self.proto = eval(proto)
         else:
             self.proto = proto
@@ -742,8 +761,15 @@ class SecurityAssociation(object):
                 raise TypeError('unsupported encryption algo %r, try %r' %
                                 (crypt_algo, CRYPT_ALGOS.keys()))
             self.crypt_algo = CRYPT_ALGOS[crypt_algo]
-            self.crypt_algo.check_key(crypt_key)
-            self.crypt_key = crypt_key
+
+            if crypt_key:
+                salt_size = self.crypt_algo.salt_size
+                self.crypt_key = (crypt_key[:len(crypt_key) - salt_size]).encode('ascii')
+                self.crypt_salt = (crypt_key[len(crypt_key) - salt_size:]).encode('ascii')
+            else:
+                self.crypt_key = None
+                self.crypt_salt = None
+
         else:
             self.crypt_algo = CRYPT_ALGOS['NULL']
             self.crypt_key = None
@@ -753,7 +779,6 @@ class SecurityAssociation(object):
                 raise TypeError('unsupported integrity algo %r, try %r' %
                                 (auth_algo, AUTH_ALGOS.keys()))
             self.auth_algo = AUTH_ALGOS[auth_algo]
-            self.auth_algo.check_key(auth_key)
             self.auth_key = auth_key
         else:
             self.auth_algo = AUTH_ALGOS['NULL']
@@ -779,6 +804,8 @@ class SecurityAssociation(object):
 
         if iv is None:
             iv = self.crypt_algo.generate_iv()
+            if self.crypt_salt:
+                iv = self.crypt_salt + iv
         else:
             if len(iv) != self.crypt_algo.iv_size:
                 raise TypeError('iv length must be %s' % self.crypt_algo.iv_size)
@@ -910,6 +937,7 @@ class SecurityAssociation(object):
             self.auth_algo.verify(encrypted, self.auth_key)
 
         esp = self.crypt_algo.decrypt(encrypted, self.crypt_key,
+                                      self.crypt_algo.icv_size or
                                       self.auth_algo.icv_size)
 
         if self.tunnel_header:

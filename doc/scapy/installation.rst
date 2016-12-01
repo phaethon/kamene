@@ -80,7 +80,7 @@ $ sudo python3 setup.py install
 Optional software for special features
 ======================================
 
-* WEP decryption. ``unwep()`` needs `PyCrypto <http://www.dlitz.net/software/pycrypto/>`_. Example using a `Weplap test file <http://weplab.sourceforge.net/caps/weplab-64bit-AA-managed.pcap>`_:
+* WEP decryption. ``unwep()`` needs `cryptography <https://cryptography.io>`_. Example using a `Weplap test file <http://weplab.sourceforge.net/caps/weplab-64bit-AA-managed.pcap>`_:
 
   .. code-block:: python
 
