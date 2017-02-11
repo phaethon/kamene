@@ -5,3 +5,4 @@ __pycache__
 *.sublime-project
 *.sublime-workspace
 scapy_python3.egg-info
+.idea
