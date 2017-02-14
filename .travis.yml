@@ -1,7 +1,6 @@
 language: python
 
 python:
-  - 3.3
   - 3.4
   - 3.5
   - 3.6
@@ -12,5 +11,5 @@ install:
   - pip install cryptography
 
 script:
-  cd test
-  sudo ./run_tests
+  - cd test
+  - sudo ./run_tests
