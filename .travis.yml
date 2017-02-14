@@ -6,9 +6,11 @@ python:
   - 3.5
   - 3.6
 
+sudo: required
+
 install:
   - pip install cryptography
 
 script:
   cd test
-  ./run_tests
+  sudo ./run_tests
