@@ -39,7 +39,7 @@ Make sure you have Python installed before you go on. Depending on your system y
 Latest release
 --------------
 
-Easiest way to install latest scapy3k package is using pip.
+The easiest way to install the latest scapy3k package is using pip.
 
 $ pip3 install scapy-python3
  
