@@ -94,7 +94,7 @@ Optional software for special features
 
 * `ipython <http://ipython.org/>`_. For interactive sessions using ipython can be great advantage. Install using pip3 or from your package manager
 
-* Graphviz. For some visualizations, e.g. traceroute graph, dot is required on the PATH
+* `Graphviz <http://graphviz.org/>`_. For some visualizations, e.g. traceroute graph, dot is required on the PATH
 
 * Matplotlib. Required for interactive plot/graph viewing.
 
