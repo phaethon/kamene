@@ -34,7 +34,7 @@ So please also have a look at the platform specific chapters on how to install t
    The following steps apply to Unix-like operating systems (Linux, BSD, Mac OS X). 
    Windows, currently is under development.
 
-Make sure you have Python installed before you go on. Depending on your system you may have to use python3 and pip3 or python and pip for python version 3.x.
+Make sure you have `Python <https://www.python.org/>`_ installed before you go on. Depending on your system you may have to use python3 and pip3 or python and pip for python version 3.x.
 
 Latest release
 --------------
