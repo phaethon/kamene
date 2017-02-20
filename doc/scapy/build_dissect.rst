@@ -23,7 +23,7 @@ of a field class::
     from scapy.packet import *
 
     class Disney(Packet): 
-        name = "DisneyPacket " 
+        name = "DisneyPacket" 
         fields_desc=[ ShortField("mickey",5), 
                      XByteField("minnie",3) , 
                      IntEnumField("donald" , 1 , 
