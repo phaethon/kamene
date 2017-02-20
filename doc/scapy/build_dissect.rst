@@ -20,6 +20,8 @@ when assembling the layer or dissected one by one when disassembling a string.
 The list of fields is held in an attribute named ``fields_desc``. Each field is an instance 
 of a field class:: 
 
+    from scapy.packet import *
+
     class Disney(Packet): 
         name = "DisneyPacket " 
         fields_desc=[ ShortField("mickey",5), 
