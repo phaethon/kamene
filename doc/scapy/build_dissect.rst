@@ -22,12 +22,13 @@ of a field class::
 
     from scapy.packet import *
 
+
     class Disney(Packet): 
         name = "DisneyPacket" 
-        fields_desc=[ ShortField("mickey",5), 
-                     XByteField("minnie",3) , 
-                     IntEnumField("donald" , 1 , 
-                          { 1: "happy", 2: "cool" , 3: "angry" } ) ]
+        fields_desc=[ShortField("mickey", 5),
+                     XByteField("minnie", 3),
+                     IntEnumField("donald", 1,
+                          {1: "happy", 2: "cool" , 3: "angry"})]
                        
 In this example, our layer has three fields. The first one is an 2 byte integer 
 field named ``mickey`` and whose default value is 5. The second one is a 1 byte 
