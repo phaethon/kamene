@@ -98,7 +98,7 @@ Optional software for special features
 
 * `Matplotlib <http://matplotlib.org/>`_. Required for interactive plot/graph viewing.
 
-* Networkx. Conversations can be converted to Networkx graph if library is present.
+* `Networkx <https://networkx.github.io/>`_. Conversations can be converted to Networkx graph if library is present.
  
 Platform-specific instructions
 ==============================
