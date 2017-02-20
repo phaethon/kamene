@@ -96,7 +96,7 @@ Optional software for special features
 
 * `Graphviz <http://graphviz.org/>`_. For some visualizations, e.g. traceroute graph, dot is required on the PATH
 
-* Matplotlib. Required for interactive plot/graph viewing.
+* `Matplotlib <http://matplotlib.org/>`_. Required for interactive plot/graph viewing.
 
 * Networkx. Conversations can be converted to Networkx graph if library is present.
  
