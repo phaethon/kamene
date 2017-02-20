@@ -41,6 +41,11 @@ example, if it is worth 3, the value will be displayed as angry. Moreover, if th
 "cool" value is assigned to this field, it will understand that it has to take the 
 value 2. 
 
+If you saved your class into a file called "disney.py", import it for testing::
+
+    >>> sys.path.append('.')
+    >>> from disney import *
+
 If your protocol is as simple as this, it is ready to use:: 
 
     >>> d=Disney(mickey=1) 
