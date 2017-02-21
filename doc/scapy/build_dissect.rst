@@ -258,7 +258,7 @@ And now, define a layer using this kind of field::
         >>> f = FOO(data="A"*129)
         >>> f.show()
         ###[ FOO ]###
-          len= 0
+          len= None
           data=    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 
 Here, ``len``  is  not  yet  computed  and only  the  default  value  are
