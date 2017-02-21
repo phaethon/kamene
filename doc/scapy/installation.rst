@@ -34,12 +34,12 @@ So please also have a look at the platform specific chapters on how to install t
    The following steps apply to Unix-like operating systems (Linux, BSD, Mac OS X). 
    Windows, currently is under development.
 
-Make sure you have Python installed before you go on. Depending on your system you may have to use python3 and pip3 or python and pip for python version 3.x.
+Make sure you have `Python <https://www.python.org/>`_ installed before you go on. Depending on your system you may have to use python3 and pip3 or python and pip for python version 3.x.
 
 Latest release
 --------------
 
-Easiest way to install latest scapy3k package is using pip.
+The easiest way to install the latest scapy3k package is using `pip <https://pip.pypa.io/en/stable/>`_.
 
 $ pip3 install scapy-python3
  
@@ -92,13 +92,13 @@ Optional software for special features
       >>> dec.show()
       >>> dec[0]
 
-* ipython. For interactive sessions using ipython can be great advantage. Install using pip3 or from your package manager
+* `ipython <http://ipython.org/>`_. For interactive sessions using ipython can be great advantage. Install using pip3 or from your package manager
 
-* Graphviz. For some visualizations, e.g. traceroute graph, dot is required on the PATH
+* `Graphviz <http://graphviz.org/>`_. For some visualizations, e.g. traceroute graph, dot is required on the PATH
 
-* Matplotlib. Required for interactive plot/graph viewing.
+* `Matplotlib <http://matplotlib.org/>`_. Required for interactive plot/graph viewing.
 
-* Networkx. Conversations can be converted to Networkx graph if library is present.
+* `Networkx <https://networkx.github.io/>`_. Conversations can be converted to Networkx graph if library is present.
  
 Platform-specific instructions
 ==============================
