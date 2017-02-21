@@ -501,7 +501,7 @@ Scapy enables you to easily create network automata. Scapy does not stick to a s
 
 An automaton in Scapy is deterministic. It has different states: a start state, some intermediate and some end and error states. There are transitions from one state to another. Transitions can be tied to specific conditions, the reception of a specific packet or a timeout. When a transition is taken, one or more actions can be run. An action can be bound to many transitions. Parameters can be passed from states to transitions and from transitions to states and actions.
 
-From a programmer's point of view, states, transitions and actions are methods from an automaton subclass. They are decorated to provide meta-information needed in order for the automaton to work.
+From a programmer's point of view, states, transitions and actions are methods from an automaton subclass. They are decorated to provide some meta-information needed in order for the automaton to work.
 
 First example
 -------------
