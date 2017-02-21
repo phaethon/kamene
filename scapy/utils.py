@@ -980,7 +980,7 @@ def import_hexcap():
     p = ""
     try:
         while 1:
-            l = raw_input().strip()
+            l = input().strip()
             try:
                 p += re_extract_hexcap.match(l).groups()[2]
             except:
