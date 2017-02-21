@@ -864,16 +864,16 @@ Legend:
 
 ::
 
-    ByteField           
+    ByteField           # one byte
     XByteField    
     
-    ShortField
+    ShortField          # two bytes
     LEShortField
     XShortField
     
     X3BytesField        # three bytes (in hexadecimal)
     
-    IntField
+    IntField            # four bytes
     SignedIntField
     LEIntField
     LESignedIntField
