@@ -499,7 +499,7 @@ Automata
 
 Scapy enables you to easily create network automata. Scapy does not stick to a specific model like `Moore <https://en.wikipedia.org/wiki/Moore_machine>`_ or `Mealy <https://en.wikipedia.org/wiki/Mealy_machine>`_ automata. It provides a flexible way for you to choose your way to go.
 
-An automaton in Scapy is deterministic. It has different states. A start state and some end and error states. There are transitions from one state to another. Transitions can be transitions on a specific condition, transitions on the reception of a specific packet or transitions on a timeout. When a transition is taken, one or more actions can be run. An action can be bound to many transitions. Parameters can be passed from states to transitions and from transitions to states and actions.
+An automaton in Scapy is deterministic. It has different states: a start state, some intermediate and some end and error states. There are transitions from one state to another. Transitions can be transitions on a specific condition, transitions on the reception of a specific packet or transitions on a timeout. When a transition is taken, one or more actions can be run. An action can be bound to many transitions. Parameters can be passed from states to transitions and from transitions to states and actions.
 
 From a programmer's point of view, states, transitions and actions are methods from an Automaton subclass. They are decorated to provide meta-information needed in order for the automaton to work.
 
