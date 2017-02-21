@@ -205,7 +205,7 @@ last byte. For instance, 0x123456 will be coded as 0xC8E856::
             s.append( hex(0x80 | (l & 0x7F) ) )
             l = l >> 7
         s.reverse()
-        return "".join(map( lambda(x) : chr(int(x, 16)) , s))
+        return "".join(map(lambda x: chr(int(x, 16)) , s))
     
     def str2vlenq(s=""):
         i = l = 0
