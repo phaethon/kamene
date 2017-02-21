@@ -133,7 +133,8 @@ user does not have to give them when he builds a packet.
 
 The main  mechanism  is based on  the ``Field`` structure.  Always keep in
 mind that a layer is just a little more than a list of fields, but not
-much more. 
+much more. Avoid whitespace in the name of any field. Whitespace will
+complicate assigning and reading values significantly down the road.
 
 So, to understanding how layers are working, one needs to look quickly
 at how the fields are handled.
