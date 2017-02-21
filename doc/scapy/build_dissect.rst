@@ -975,9 +975,9 @@ or if the length is in 16bits words::
 The variable length field
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A varfield can be: ``StrLenField``, ``PacketLenField``, ``PacketListField``, ``FieldListField``, ...
+A varfield can be of type ``StrLenField``, ``PacketLenField``, ``PacketListField``, ``FieldListField``, ...
 
-For the two firsts, whe a packet is being dissected, their lengths are deduced from a lenfield already dissected. The link is done using the ``length_from`` parameter, which takes a function that, applied to the partly dissected packet, returns the length in bytes to take for the field. For instance::
+The lengths of the first two is deduced from a lenfield when dissected. The link is done using the ``length_from`` parameter, which takes a function that, applied to the partly dissected packet, returns the length in bytes to take for the field. For instance::
 
     StrLenField("the_varfield", "the_default_value", length_from = lambda pkt: pkt.the_lenfield)
 
