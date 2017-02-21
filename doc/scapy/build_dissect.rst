@@ -1023,7 +1023,7 @@ Examples
 
 Test the ``FieldListField`` class::
     
-    >>> TestFLF("\x00\x02ABCDEFGHIJKL")
+    >>> TestFLF(b'\x00\x02ABCDEFGHIJKL')
     <TestFLF  the_lenfield=2 the_varfield=['65.66.67.68', '69.70.71.72'] |<Raw  load='IJKL' |>>
 
 
