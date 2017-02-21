@@ -309,7 +309,7 @@ dissected. ``self`` points to the current layer.
  
 ::
 
-    >>> p=IP("A"*20)/TCP("B"*32)
+    >>> p=IP(b'A'*20)/TCP(b'B'*32)
     WARNING: bad dataofs (4). Assuming dataofs=5
     >>> p
     <IP  version=4L ihl=1L tos=0x41 len=16705 id=16705 flags=DF frag=321L ttl=65 proto=65 chksum=0x4141
@@ -318,8 +318,8 @@ dissected. ``self`` points to the current layer.
 
 ``Packet.dissect()`` is called 3 times:
 
-1. to dissect the ``"A"*20`` as an IPv4 header
-2. to dissect the ``"B"*32`` as a TCP header
+1. to dissect the ``b'A'*20`` as an IPv4 header
+2. to dissect the ``b'B'*32`` as a TCP header
 3. and  since  there  are still  12  bytes  in  the packet,  they  are
    dissected as "``Raw``" data (which is some kind of default layer type)
 
