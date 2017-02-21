@@ -871,7 +871,7 @@ Legend:
     LEShortField
     XShortField
     
-    X3BytesField        # three bytes (in hexad 
+    X3BytesField        # three bytes (in hexadecimal)
     
     IntField
     SignedIntField
