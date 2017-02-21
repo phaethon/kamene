@@ -506,7 +506,7 @@ From a programmer's point of view, states, transitions and actions are methods f
 First example
 -------------
 
-Let's begin with a simple example. I take the convention to write states with capitals, but anything valid with Python syntax would work as well.
+Let's begin with a simple example. I take the convention to write states with capitals, but any valid Python syntax would work as well.
 
 ::
 
