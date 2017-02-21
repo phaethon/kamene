@@ -236,6 +236,14 @@ duid_cls = { 1: "DUID_LLT",
              2: "DUID_EN",
              3: "DUID_LL"}
 
+class _DHCP6GuessPayload(Packet):
+    def guess_payload_class(self, payload):
+        cls = conf.raw_layer
+        if len(payload) > 2:
+            dhcp6_type = struct.unpack("!B", payload[:1])[0]
+            cls = get_cls(dhcp6_cls_by_type.get(dhcp6_type, "DHCP6"), DHCP6)
+        return cls
+
 #####################################################################
 ###                   DHCPv6 Options classes                      ###
 #####################################################################
@@ -243,13 +251,13 @@ duid_cls = { 1: "DUID_LLT",
 class _DHCP6OptGuessPayload(Packet):
     def guess_payload_class(self, payload):
         cls = conf.raw_layer
-        if len(payload) > 2 :
+        if len(payload) > 2:
             opt = struct.unpack("!H", payload[:2])[0]
             cls = get_cls(dhcp6opts_by_code.get(opt, "DHCP6OptUnknown"), DHCP6OptUnknown)
         return cls
 
 class DHCP6OptUnknown(_DHCP6OptGuessPayload): # A generic DHCPv6 Option
-    name = "Unknown DHCPv6 OPtion"
+    name = "Unknown DHCPv6 Option"
     fields_desc = [ ShortEnumField("optcode", 0, dhcp6opts), 
                     FieldLenField("optlen", None, length_of="data", fmt="!H"),
                     StrLenField("data", b"",
@@ -426,10 +434,11 @@ class DHCP6OptElapsedTime(_DHCP6OptGuessPayload):# RFC sect 22.9
 #### DHCPv6 Relay Message Option ####################################
 
 # Relayed message is seen as a payload.
-class DHCP6OptRelayMsg(_DHCP6OptGuessPayload):# RFC sect 22.10
+class DHCP6OptRelayMsg(_DHCP6GuessPayload):# RFC sect 22.10
     name = "DHCP6 Relay Message Option"
     fields_desc = [ ShortEnumField("optcode", 9, dhcp6opts), 
-                    ShortField("optlen", None ) ]
+                    ShortField("optlen", None)]
+
     def post_build(self, p, pay):
         if self.optlen is None:
             l = len(pay) 
@@ -890,12 +899,6 @@ DHCP6PrefVal="" # la valeur de preference a utiliser dans
 #            INFORMATION REQUEST
 # - relay  : RELAY-FORW (toward server)
 
-class _DHCP6GuessPayload(Packet):
-    def guess_payload_class(self, payload):
-        if len(payload) > 1 :
-            print((payload[0]))
-            return get_cls(dhcp6opts.get(ord(payload[0]),"DHCP6OptUnknown"), conf.raw_layer)
-        return conf.raw_layer
 
 #####################################################################
 ## DHCPv6 messages sent between Clients and Servers (types 1 to 11)
@@ -1121,38 +1124,38 @@ class DHCP6_InfoRequest(DHCP6):
     msgtype = 11 
     
 #####################################################################
-# sent between Relay Agents and Servers 
-#
-# Normalement, doit inclure une option "Relay Message Option"
-# peut en inclure d'autres.
-# voir section 7.1 de la 3315
-
 # Relay-Forward Message
-# - sent by relay agents to servers
+# sent from Relay Agents to other Relay Agents or Servers
+# MUST include a Relay message option (Section 7.1 of RFC 3315)
+
 # If the relay agent relays messages to the All_DHCP_Servers multicast
 # address or other multicast addresses, it sets the Hop Limit field to
 # 32. 
 
-class DHCP6_RelayForward(_DHCP6GuessPayload,Packet):
+class DHCP6_RelayForward(_DHCP6OptGuessPayload,Packet):
     name = "DHCPv6 Relay Forward Message (Relay Agent/Server Message)"
-    fields_desc = [ ByteEnumField("msgtype", 12, dhcp6types),
-                    ByteField("hopcount", None),
-                    IP6Field("linkaddr", "::"),
-                    IP6Field("peeraddr", "::") ]
+
+    fields_desc = [ByteEnumField("msgtype", 12, dhcp6types),
+                   ByteField("hopcount", 0),
+                   IP6Field("linkaddr", "::"),
+                   IP6Field("peeraddr", "::")]
+
     def hashret(self): # we filter on peer address field
         return inet_pton(socket.AF_INET6, self.peeraddr)
 
+
 #####################################################################
-# sent between Relay Agents and Servers 
-# Normalement, doit inclure une option "Relay Message Option"
-# peut en inclure d'autres.
+# Relay-Reply Message
+# sent from Servers or Relay Agents to Relay Agents
+# MUST include a Relay message option (Section 7.2 of RFC 3315)
+
 # Les valeurs des champs hop-count, link-addr et peer-addr
 # sont copiees du messsage Forward associe. POur le suivi de session.
 # Pour le moment, comme decrit dans le commentaire, le hashret
 # se limite au contenu du champ peer address.
 # Voir section 7.2 de la 3315.
 
-# Relay-Reply Message
+
 # - sent by servers to relay agents
 # - if the solicit message was received in a Relay-Forward message,
 # the server constructs a relay-reply message with the Advertise
@@ -1160,11 +1163,18 @@ class DHCP6_RelayForward(_DHCP6GuessPayload,Packet):
 # ce message en unicast au relay-agent. utilisation de l'adresse ip
 # presente en ip source du paquet recu
 
-class DHCP6_RelayReply(DHCP6_RelayForward):
+
+class DHCP6_RelayReply(_DHCP6OptGuessPayload,Packet):
     name = "DHCPv6 Relay Reply Message (Relay Agent/Server Message)"
-    msgtype = 13
+
+    fields_desc = [ByteEnumField("msgtype", 13, dhcp6types),
+                   ByteField("hopcount", 0),
+                   IP6Field("linkaddr", "::"),
+                   IP6Field("peeraddr", "::")]
+
     def hashret(self): # We filter on peer address field.
         return inet_pton(socket.AF_INET6, self.peeraddr)
+
     def answers(self, other):
         return (isinstance(other, DHCP6_RelayForward) and
                 self.hopcount == other.hopcount and

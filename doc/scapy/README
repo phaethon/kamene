@@ -18,7 +18,4 @@ The following commands produce the file Scapy.pdf (>100 pages):
   $ cd _build/latex
   $ make all-pdf
 
-Following parts are updated for scapy3k
-* index
-* installation
-* backmatter
+Documentation parts are updated for scapy3k
