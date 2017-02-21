@@ -150,8 +150,7 @@ Manipulating packets == manipulating its fields
 A field should be considered in different states:
 
 - ``i`` (nternal) : this is the way Scapy manipulates it.
-- ``m`` (achine) : this is where the truth is, that is the layer as it is
-    on the network.
+- ``m`` (achine) : this is where the truth is, that is the layer as it is on the network.
 - ``h`` (uman) : how the packet is displayed to our human eyes.
 
 This explains  the mysterious  methods ``i2h()``, ``i2m()``,  ``m2i()`` and  so on
