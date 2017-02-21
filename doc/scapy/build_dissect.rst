@@ -304,7 +304,7 @@ The core function for dissection is ``Packet.dissect()``::
         if pad and conf.padding:
             self.add_payload(Padding(pad))
 
-When called, ``s`` is a string containing what is going to be
+When called, ``s`` is a string of bytes containing what is going to be
 dissected. ``self`` points to the current layer.
  
 ::
