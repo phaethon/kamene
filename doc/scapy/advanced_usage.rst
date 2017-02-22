@@ -553,6 +553,11 @@ The graph can be automatically drawn from the code with::
 
     >>> HelloWorld.graph()
 
+The graph can be saved to an image file using::
+
+    >>> HelloWorld.graph().savefig('automaton.png')
+
+
 Changing states
 ---------------
 
