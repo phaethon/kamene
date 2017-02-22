@@ -15,7 +15,7 @@ Using Scapy in your tools
 =========================
 You can easily use Scapy in your own tools. Just import what you need and do it.
 
-This first example take an IP or a name as first parameter, send an ICMP echo request packet and display the completely dissected return packet::
+This first example takes an IP or a name as the first parameter, sends an ICMP echo request packet and displays the completely dissected return packet::
 
     #! /usr/bin/env python
     
