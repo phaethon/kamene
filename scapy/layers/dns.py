@@ -225,7 +225,7 @@ class RDataField(StrLenField):
                 s = ret_s
         elif pkt.type == 28: # AAAA
             if s:
-                s = inet_pton(socket.AF_INET6, s)
+                s = inet_pton(socket.AF_INET6, s.decode("utf-8"))
         return s
 
 class RDLenField(Field):
