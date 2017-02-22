@@ -17,7 +17,7 @@ You can easily use Scapy in your own tools. Just import what you need and do it.
 
 This first example takes an IP or a name as the first parameter, sends an ICMP echo request packet and displays the completely dissected return packet::
 
-    #! /usr/bin/env python
+    #! /usr/bin/env python3
     
     import sys
     from scapy.all import sr1,IP,ICMP
@@ -28,7 +28,7 @@ This first example takes an IP or a name as the first parameter, sends an ICMP e
 
 This is a more complex example which does an ARP ping and reports what it found with LaTeX formating::
 
-    #! /usr/bin/env python
+    #! /usr/bin/env python3
     # arping2tex : arpings a network and outputs a LaTeX table as a result
     
     import sys
@@ -52,7 +52,7 @@ This is a more complex example which does an ARP ping and reports what it found 
 
 Here is another tool that will constantly monitor all interfaces on a machine and print all ARP request it sees, even on 802.11 frames from a Wi-Fi card in monitor mode. Note the store=0 parameter to sniff() to avoid storing all packets in memory for nothing::
 
-    #! /usr/bin/env python
+    #! /usr/bin/env python3
     from scapy.all import *
     
     def arp_monitor_callback(pkt):
@@ -71,7 +71,7 @@ If you need to add some new protocols, new functions, anything, you can write it
 
 Once you've done that, you can launch Scapy and import your file, but this is still not very convenient. Another way to do that is to make your file executable and have it call the Scapy function named interact()::
 
-    #! /usr/bin/env python
+    #! /usr/bin/env python3
     
     # Set log level to benefit from Scapy warnings
     import logging
