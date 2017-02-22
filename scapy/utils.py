@@ -7,6 +7,7 @@
 General utility functions.
 """
 
+import codecs
 import os,sys,socket,types
 import random,time
 import gzip,zlib
@@ -989,8 +990,8 @@ def import_hexcap():
     except EOFError:
         pass
     
-    p = p.replace(" ","")
-    return p.decode("hex")
+    p = p.replace(" ","").encode()
+    return codecs.decode(p, 'hex')
         
 
 
