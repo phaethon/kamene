@@ -690,7 +690,7 @@ Decorators
 Decorator for states
 ~~~~~~~~~~~~~~~~~~~~
 
-States are methods decorated by the result of the ``ATMT.state`` function. It can take 3 optional parameters, ``initial``, ``final`` and ``error``, that, when set to ``True``, indicate that the state is an initial, final or error state.
+States are methods decorated by the result of the ``ATMT.state`` function. It can take 3 optional parameters: ``initial``, ``final`` and ``error``. The set to ``True`` indicates that the state is an initial, final or error state.
 
 ::
 
