@@ -530,9 +530,9 @@ Let's begin with a simple example. I take the convention to write states with ca
 
 In this example, we can see 3 decorators:
 
-* ``ATMT.state`` that is used to indicate that a method is a state, and that can
+* ``ATMT.state`` is used to indicate that a method is a state, and that can
   have initial, final and error optional arguments set to non-zero for special states.
-* ``ATMT.condition`` that indicate a method to be run when the automaton state 
+* ``ATMT.condition`` indicates a method to be run when the automaton state 
   reaches the indicated state. The argument is the name of the method representing that state
 * ``ATMT.action`` binds a method to a transition and is run when the transition is taken. 
 
