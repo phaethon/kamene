@@ -102,6 +102,8 @@ Optional software for special features
 
 * `PyX <http://pyx.sourceforge.net/>`_. To create PostScript, PDF and SVG files.
 
+* `LaTeX <http://www.latex-project.org/>`_. To create PostScript and PDF files.
+
 Platform-specific instructions
 ==============================
 
