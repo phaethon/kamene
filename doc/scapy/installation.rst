@@ -99,7 +99,9 @@ Optional software for special features
 * `Matplotlib <http://matplotlib.org/>`_. Required for interactive plot/graph viewing.
 
 * `Networkx <https://networkx.github.io/>`_. Conversations can be converted to Networkx graph if library is present.
- 
+
+* `PyX <http://pyx.sourceforge.net/>`_. To create PostScript, PDF and SVG files.
+
 Platform-specific instructions
 ==============================
 
