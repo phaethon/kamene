@@ -7,18 +7,18 @@
 IPv4 (Internet Protocol v4).
 """
 
-import os,time,struct,re,socket,types
+import os, time, struct, re, socket, types
 from select import select
 from collections import defaultdict
-from scapy.utils import checksum,is_private_addr
+from scapy.utils import checksum, is_private_addr
 from scapy.layers.l2 import *
 from scapy.config import conf
 from scapy.fields import *
 from scapy.packet import *
 from scapy.volatile import *
-from scapy.sendrecv import sr,sr1,srp1
-from scapy.plist import PacketList,SndRcvList
-from scapy.automaton import Automaton,ATMT
+from scapy.sendrecv import sr, sr1, srp1
+from scapy.plist import PacketList, SndRcvList
+from scapy.automaton import Automaton, ATMT
 
 import scapy.as_resolvers
 
@@ -32,7 +32,7 @@ class IPTools:
     def whois(self):
         os.system("whois %s" % self.src)
     def ottl(self):
-        t = [32,64,128,255]+[self.ttl]
+        t = [32, 64, 128, 255]+[self.ttl]
         t.sort()
         return t[t.index(self.ttl)+1]
     def hops(self):
@@ -70,19 +70,19 @@ _ip_options_names = { 0: "end_of_list",
 
 
 class _IPOption_HDR(Packet):
-    fields_desc = [ BitField("copy_flag",0, 1),
-                    BitEnumField("optclass",0,2,{0:"control",2:"debug"}),
-                    BitEnumField("option",0,5, _ip_options_names) ]
+    fields_desc = [ BitField("copy_flag", 0, 1),
+                    BitEnumField("optclass", 0, 2, {0: "control", 2: "debug"}),
+                    BitEnumField("option", 0, 5, _ip_options_names) ]
 
 class IPOption(Packet):
     name = "IP Option"
     fields_desc = [ _IPOption_HDR,
                     FieldLenField("length", None, fmt="B",  # Only option 0 and 1 have no length and value
-                                  length_of="value", adjust=lambda pkt,l:l+2),
-                    StrLenField("value", "",length_from=lambda pkt:pkt.length-2) ]
+                                  length_of="value", adjust=lambda pkt, l:l+2),
+                    StrLenField("value", "", length_from=lambda pkt:pkt.length-2) ]
 
     def extract_padding(self, p):
-        return b"",p
+        return b"", p
 
     registered_ip_options = {}
     @classmethod
