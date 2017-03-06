@@ -73,7 +73,7 @@ _ip_options_names = { 0: "end_of_list",
                       23: "dynamic_packet_state",
                       24: "upstream_multicast_packet",
                       25: "quick_start",
-                      30: "rfc4727_experiment", 
+                      30: "rfc4727_experiment",
                       }
 
 
@@ -434,7 +434,7 @@ class IP(Packet, IPTools):
         for p in fl:
             s = bytes(p[fnb].payload)
             nb = (len(s)+fragsize-1)//fragsize
-            for i in range(nb):            
+            for i in range(nb):
                 q = p.copy()
                 del(q[fnb].payload)
                 del(q[fnb].chksum)
@@ -442,7 +442,7 @@ class IP(Packet, IPTools):
                 if i == nb-1:
                     q[IP].flags &= ~1
                 else:
-                    q[IP].flags |= 1 
+                    q[IP].flags |= 1
                 q[IP].frag = i*fragsize//8
                 r = conf.raw_layer(load=s[i*fragsize:(i+1)*fragsize])
                 r.overload_fields = p[IP].payload.overload_fields.copy()
@@ -570,7 +570,7 @@ class UDP(Packet):
         elif isinstance(self.underlayer, scapy.layers.inet6.IPv6):
             return self.underlayer.sprintf("UDP %IPv6.src%:%UDP.sport% > %IPv6.dst%:%UDP.dport%")
         else:
-            return self.sprintf("UDP %UDP.sport% > %UDP.dport%")    
+            return self.sprintf("UDP %UDP.sport% > %UDP.dport%")
 
 icmptypes = { 0 : "echo-reply",
               3 : "dest-unreach",
@@ -794,7 +794,7 @@ def fragment(pkt, fragsize=1480):
     for p in pkt:
         s = bytes(p[IP].payload)
         nb = (len(s)+fragsize-1)//fragsize
-        for i in range(nb):            
+        for i in range(nb):
             q = p.copy()
             del(q[IP].payload)
             del(q[IP].chksum)
@@ -802,7 +802,7 @@ def fragment(pkt, fragsize=1480):
             if i == nb-1:
                 q[IP].flags &= ~1
             else:
-                q[IP].flags |= 1 
+                q[IP].flags |= 1
             q[IP].frag = i*fragsize//8
             r = conf.raw_layer(load=s[i*fragsize:(i+1)*fragsize])
             r.overload_fields = p[IP].payload.overload_fields.copy()
@@ -1127,7 +1127,7 @@ class TracerouteResult(SndRcvList):
                 visual.scene.center -= visual.scene.mouse.pos-movcenter
                 movcenter = visual.scene.mouse.pos
 
-# # world_trace needs to be reimplemented as gnuplot dependency is removed                
+# # world_trace needs to be reimplemented as gnuplot dependency is removed
 #    def world_trace(self):
 #        from modules.geo import locate_ip
 #        ips = {}
@@ -1231,10 +1231,10 @@ class TracerouteResult(SndRcvList):
                     bh = "%s %i/icmp" % (rtk[1], rtk[3])
                 elif rtk[2] == 6: #TCP
                     bh = "%s %i/tcp" % (rtk[1], rtk[3])
-                elif rtk[2] == 17: #UDP                    
+                elif rtk[2] == 17: #UDP
                     bh = '%s %i/udp' % (rtk[1], rtk[3])
                 else:
-                    bh = '%s %i/proto' % (rtk[1], rtk[2]) 
+                    bh = '%s %i/proto' % (rtk[1], rtk[2])
                 ips[bh] = None
                 bhip[rtk[1]] = bh
                 bh = '"%s"' % bh
@@ -1243,7 +1243,7 @@ class TracerouteResult(SndRcvList):
 
         # Find AS numbers
         ASN_query_list = dict.fromkeys(map(lambda x: x.rsplit(" ", 1)[0], ips)).keys()
-        if ASres is None:            
+        if ASres is None:
             ASNlist = []
         else:
             ASNlist = ASres.resolve(*ASN_query_list)
@@ -1378,7 +1378,7 @@ class MTR:
     # Initialize Multi-Traceroute Object Vars...
     def __init__(self, nquery = 1, target = ''):
         self._nquery = nquery		# Number or traceroute queries
-        self._ntraces = 1		# Number of trace runs 
+        self._ntraces = 1		# Number of trace runs
         self._iface = ''		# Interface to use for trace
         self._gw = ''			# Default Gateway IPv4 Address for trace
         self._netprotocol = 'TCP'	# MTR network protocol to use for trace
@@ -1400,7 +1400,7 @@ class MTR:
         self._asres = conf.AS_resolver	# Initial ASN Resolver
         self._asns = {}			# Found AS Numbers for the MTR session
         self._asds = {}			# Associated AS Number descriptions
-        self._unks = {}			# Unknown Hops ASN IP boundaries 
+        self._unks = {}			# Unknown Hops ASN IP boundaries
         self._graphdef = None
         self._graphasres = 0
         self._graphpadding = 0
@@ -1438,10 +1438,10 @@ class MTR:
                         bh = "%s %i/icmp" % (rtk[1], rtk[3])
                     elif rtk[2] == 6:	#TCP
                         bh = "{ip:s} {dp:d}/tcp".format(ip = rtk[1], dp = rtk[3])
-                    elif rtk[2] == 17:	#UDP                    
+                    elif rtk[2] == 17:	#UDP
                         bh = '%s %i/udp' % (rtk[1], rtk[3])
                     else:
-                        bh = '%s %i/proto' % (rtk[1], rtk[2]) 
+                        bh = '%s %i/proto' % (rtk[1], rtk[2])
                     self._ips[rtk[1]] = None			# Add the Blackhole IP to list of unique IP Addresses
                     #
                     # Update trace with Blackhole info...
@@ -1458,10 +1458,10 @@ class MTR:
                         bh = "%s %i/icmp" % (rtk[1], rtk[3])
                     elif rtk[2] == 6:	#TCP
                         bh = "{ip:s} {dp:d}/tcp".format(ip = rtk[1], dp = rtk[3])
-                    elif rtk[2] == 17:	#UDP                    
+                    elif rtk[2] == 17:	#UDP
                         bh = '%s %i/udp' % (rtk[1], rtk[3])
                     else:
-                        bh = '%s %i/proto' % (rtk[1], rtk[2]) 
+                        bh = '%s %i/proto' % (rtk[1], rtk[2])
                     self._ips[rtk[1]] = None			# Add the Blackhole IP to list of unique IP Addresses
                     #
                     # Update trace with Blackhole info...
@@ -1902,7 +1902,7 @@ class MTR:
         for k, v in bpip.items():
             s += '\t\t"{ip:s}";\n'.format(ip = k)
         #
-        # Add in any Endpoint target that is the same as the host running the mtr session... 
+        # Add in any Endpoint target that is the same as the host running the mtr session...
         for ip in epc:
             h = ip
             f = h.find(' ')		# Strip off 'port/proto'
@@ -2016,7 +2016,7 @@ class MTR:
               pre = '_'			# when they are the same
             eps1 = '\t"{pre:s}{ip:s}" [shape="record",color="black",gradientangle=270,fillcolor="lightgreen:green",style="filled,rounded",'.format(pre = pre, ip = k)
             eps2 = 'label="Resolved Target\\n{ip:s}|{tr:s}",tooltip="MTR Resolved Target: {ip:s}"];\n'.format(ip = k, tr = tr)
-            s += eps1 + eps2 
+            s += eps1 + eps2
 
         #
         # Blackholes...
@@ -2104,7 +2104,7 @@ class MTR:
                 s += '\t"{r:s}" [{l:s},shape="box3d",color="black",gradientangle=270,fillcolor="white:red",style="filled,rounded"];\n'.format(r = sr, l = lb)
 
         #
-        # Draw each trace (i.e., DOT edge) for each number of queries... 
+        # Draw each trace (i.e., DOT edge) for each number of queries...
         s += "\n\t### Traces ###\n"
         t = 0
         for q in range(0, self._ntraces):
@@ -2147,7 +2147,7 @@ class MTR:
                                 llb = 'Trace: {tr:d}:{tn:d}, RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = n, prb = probe, lbn = ntr.replace('"', ''), rtt = self._rtt[t + 1][n])
                                 #
                                 # Special check to see if the next and previous nodes are the same.
-                                # If yes use the DOT 'xlabel' attribute to spread out labels so that they 
+                                # If yes use the DOT 'xlabel' attribute to spread out labels so that they
                                 # do not clash and 'forcelabel' so that they are placed.
                                 if (ptr == ntr):
                                     s += '\t{ptr:s} -> {ntr:s} [xlabel=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,forcelabel=True,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(ptr = ptr, ntr = ntr, rtt = self._rtt[t + 1][n], lb = lb, llb = llb)
@@ -2308,7 +2308,7 @@ class MTracerouteResult(SndRcvList):
         PacketList.__init__(self, res, name, stats, vector_index = 1)
 
     def show(self, ntrace):
-        return self.make_table(lambda s, r: 
+        return self.make_table(lambda s, r:
           (s.sprintf("Trace: " + str(ntrace) + " - %IP.dst%:{TCP:tcp%ir,TCP.dport%}{UDP:udp%ir,UDP.dport%}{ICMP:ICMP}"),
            s.ttl,
            r.sprintf("%-15s,IP.src% {TCP:%TCP.flags%}{ICMP:%ir,ICMP.type%}")))
@@ -2329,7 +2329,7 @@ class MTracerouteResult(SndRcvList):
         trgttl = {}
         if (len(self.res) > 0):
             #
-            # Responses found... 
+            # Responses found...
             for s, r in self.res:
                 s = s.getlayer(IP) or (conf.ipv6_enabled and s[scapy.layers.inet6.IPv6]) or s
                 r = r.getlayer(IP) or (conf.ipv6_enabled and r[scapy.layers.inet6.IPv6]) or r
@@ -2500,7 +2500,7 @@ def mtr(target, dport=80, minttl=1, maxttl=30, stype="Random", srcport=50000, if
            netproto: Network Protocol (One of: "TCP", "UDP" or "ICMP").
              nquery: Number of Traceroute queries to perform.
               ptype: Payload Type: "Disable", "RandStr", "RandStrTerm" or "Custom".
-            payload: A byte object for each packet payload (e.g., b'\x01A\x0f\xff\x00') for ptype: 'Custom'. 
+            payload: A byte object for each packet payload (e.g., b'\x01A\x0f\xff\x00') for ptype: 'Custom'.
            privaddr: 0 - Default: Normal display of all resolved AS numbers.
                      1 - Do not show an associated AS Number bound box (cluster) on graph for a private IPv4 Address.
                rasn: 0 - Do not resolve AS Numbers - No graph clustering.
