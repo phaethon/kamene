@@ -147,7 +147,7 @@ class IPOption_Stream_Id(IPOption):
     fields_desc = [ _IPOption_HDR,
                     ByteField("length", 4),
                     ShortField("security",0), ]
-                    
+
 class IPOption_MTU_Probe(IPOption):
     name = "IP Option MTU Probe"
     option = 11
@@ -198,7 +198,7 @@ class IPOption_SDBM(IPOption):
                     FieldListField("addresses",[],IPField("","0.0.0.0"), 
                                    length_from=lambda pkt:pkt.length-2)
                     ]
-    
+
 
 
 TCPOptions = (
@@ -263,7 +263,7 @@ class TCPOptionsField(StrField):
                 opt.append((onum, oval))
             x = x[olen:]
         return opt
-    
+
     def i2m(self, pkt, x):
         opt = b""
         for oname,oval in x:
@@ -295,7 +295,7 @@ class TCPOptionsField(StrField):
         return opt+b"\x00"*(3-((len(opt)+3)%4))
     def randval(self):
         return [] # XXX
-    
+
 
 class ICMPTimeStampField(IntField):
     re_hmsm = re.compile("([0-2]?[0-9])[Hh:](([0-5]?[0-9])([Mm:]([0-5]?[0-9])([sS:.]([0-9]{0,3}))?)?)?$")
@@ -399,7 +399,7 @@ class IP(Packet, IPTools):
         if self.frag:
             s += " frag:%i" % self.frag
         return s
-                 
+
     def fragment(self, fragsize=1480):
         """Fragment IP datagrams"""
         fragsize = (fragsize+7)//8*8
@@ -409,7 +409,7 @@ class IP(Packet, IPTools):
         while fl.underlayer is not None:
             fnb += 1
             fl = fl.underlayer
-        
+
         for p in fl:
             s = bytes(p[fnb].payload)
             nb = (len(s)+fragsize-1)//fragsize
@@ -581,8 +581,8 @@ icmpcodes = { 3 : { 0  : "network-unreachable",
                      1 : "ttl-zero-during-reassembly", },
               12 : { 0 : "ip-header-bad",
                      1 : "required-option-missing", }, }
-                         
-                   
+
+
 
 
 class ICMP(Packet):
@@ -600,7 +600,7 @@ class ICMP(Packet):
                     ConditionalField(X3BytesField("reserved",0), lambda pkt:pkt.type==12),
                     ConditionalField(IPField("addr_mask","0.0.0.0"), lambda pkt:pkt.type in [17,18]),
                     ConditionalField(IntField("unused",0), lambda pkt:pkt.type not in [0,5,8,12,13,14,15,16,17,18]),
-                    
+
                     ]
     def post_build(self, p, pay):
         p += pay
@@ -608,7 +608,7 @@ class ICMP(Packet):
             ck = checksum(p)
             p = p[:2]+bytes([ck>>8, ck&0xff])+p[4:]
         return p
-    
+
     def hashret(self):
         if self.type in [0,8,13,14,15,16,17,18]:
             return struct.pack("HH",self.id,self.seq)+self.payload.hashret()
@@ -632,8 +632,8 @@ class ICMP(Packet):
             return self.underlayer.sprintf("ICMP %IP.src% > %IP.dst% %ICMP.type% %ICMP.code%")
         else:
             return self.sprintf("ICMP %ICMP.type% %ICMP.code%")
-    
-        
+
+
 
 
 
@@ -694,7 +694,7 @@ class UDPerror(UDP):
     def mysummary(self):
         return Packet.mysummary(self)
 
-                    
+
 
 class ICMPerror(ICMP):
     name = "ICMP in ICMP"
@@ -836,7 +836,7 @@ def defrag(plist):
     for p in defrag:
         defrag2.append(p.__class__(bytes(p)))
     return nofrag,defrag2,missfrag
-            
+
 @conf.commands.register
 def defragment(plist):
     """defragment(plist) -> plist defragmented as much as possible """
@@ -909,10 +909,10 @@ def defragment(plist):
         name = "Defragmented %s" % plist.listname
     else:
         name = "Defragmented"
-    
+
     return PacketList(final, name=name)
-            
-        
+
+
 
 ### Add timeskew_graph() method to PacketList
 def _packetlist_timeskew_graph(self, ip, **kargs):
@@ -1029,7 +1029,7 @@ class TracerouteResult(SndRcvList):
                     col = visual.color.green
                 else:
                     col = visual.color.blue
-                
+
                 s = IPsphere(pos=((l-1)*visual.cos(2*i*visual.pi/l),(l-1)*visual.sin(2*i*visual.pi/l),2*t),
                              ip = r[i][0],
                              color = col)
