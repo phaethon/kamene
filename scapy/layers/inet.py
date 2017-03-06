@@ -1044,7 +1044,7 @@ class TracerouteResult(SndRcvList):
             for ip in trlst:
                 visual.cylinder(pos=start,axis=ip.pos-start,color=col,radius=0.2)
                 start = ip.pos
-        
+
         movcenter=None
         while 1:
             visual.rate(50)
@@ -1081,7 +1081,7 @@ class TracerouteResult(SndRcvList):
             if movcenter:
                 visual.scene.center -= visual.scene.mouse.pos-movcenter
                 movcenter = visual.scene.mouse.pos
-                
+
 ## world_trace needs to be reimplemented as gnuplot dependency is removed                
 #    def world_trace(self):
 #        from modules.geo import locate_ip
@@ -1195,14 +1195,14 @@ class TracerouteResult(SndRcvList):
                 bh = '"%s"' % bh
                 trace[max(k)+1] = bh
                 blackholes.append(bh)
-    
+
         # Find AS numbers
         ASN_query_list = dict.fromkeys(map(lambda x:x.rsplit(" ",1)[0],ips)).keys()
         if ASres is None:            
             ASNlist = []
         else:
             ASNlist = ASres.resolve(*ASN_query_list)            
-    
+
         ASNs = {}
         ASDs = {}
         for ip,asn,desc, in ASNlist:
@@ -1217,15 +1217,15 @@ class TracerouteResult(SndRcvList):
                 iplist.append(ip)
             ASNs[asn] = iplist
             ASDs[asn] = desc
-    
-    
+
+
         backcolorlist=colgen("60","86","ba","ff")
         forecolorlist=colgen("a0","70","40","20")
-    
+
         s = "digraph trace {\n"
-    
+
         s += "\n\tnode [shape=ellipse,color=black,style=solid];\n\n"
-    
+
         s += "\n#ASN clustering\n"
         for asn in ASNs:
             s += '\tsubgraph cluster_%s {\n' % asn
@@ -1235,7 +1235,7 @@ class TracerouteResult(SndRcvList):
             s += '\t\tfontsize = 10;'
             s += '\t\tlabel = "%s\\n[%s]"\n' % (asn,ASDs[asn])
             for ip in ASNs[asn]:
-    
+
                 s += '\t\t"%s";\n'%ip
             s += "\t}\n"
     
