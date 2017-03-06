@@ -113,10 +113,10 @@ class IPOption_Security(IPOption):
     option = 2
     fields_desc = [ _IPOption_HDR,
                     ByteField("length", 11),
-                    ShortField("security",0),
-                    ShortField("compartment",0),
-                    ShortField("handling_restrictions",0),
-                    StrFixedLenField("transmission_control_code","xxx",3),
+                    ShortField("security", 0),
+                    ShortField("compartment", 0),
+                    ShortField("handling_restrictions", 0),
+                    StrFixedLenField("transmission_control_code", "xxx", 3),
                     ]
 
 class IPOption_LSRR(IPOption):
@@ -125,9 +125,9 @@ class IPOption_LSRR(IPOption):
     option = 3
     fields_desc = [ _IPOption_HDR,
                     FieldLenField("length", None, fmt="B",
-                                  length_of="routers", adjust=lambda pkt,l:l+3),
-                    ByteField("pointer",4), # 4 is first IP
-                    FieldListField("routers",[],IPField("","0.0.0.0"), 
+                                  length_of="routers", adjust=lambda pkt, l:l+3),
+                    ByteField("pointer", 4), # 4 is first IP
+                    FieldListField("routers", [], IPField("", "0.0.0.0"),
                                    length_from=lambda pkt:pkt.length-3)
                     ]
     def get_current_router(self):
@@ -146,14 +146,14 @@ class IPOption_Stream_Id(IPOption):
     option = 8
     fields_desc = [ _IPOption_HDR,
                     ByteField("length", 4),
-                    ShortField("security",0), ]
+                    ShortField("security", 0), ]
 
 class IPOption_MTU_Probe(IPOption):
     name = "IP Option MTU Probe"
     option = 11
     fields_desc = [ _IPOption_HDR,
                     ByteField("length", 4),
-                    ShortField("mtu",0), ]
+                    ShortField("mtu", 0), ]
 
 class IPOption_MTU_Reply(IPOption_MTU_Probe):
     name = "IP Option MTU Reply"
@@ -165,10 +165,10 @@ class IPOption_Traceroute(IPOption):
     option = 18
     fields_desc = [ _IPOption_HDR,
                     ByteField("length", 12),
-                    ShortField("id",0),
-                    ShortField("outbound_hops",0),
-                    ShortField("return_hops",0),
-                    IPField("originator_ip","0.0.0.0") ]
+                    ShortField("id", 0),
+                    ShortField("outbound_hops", 0),
+                    ShortField("return_hops", 0),
+                    IPField("originator_ip", "0.0.0.0") ]
 
 class IPOption_Address_Extension(IPOption):
     name = "IP Option Address Extension"
@@ -176,8 +176,8 @@ class IPOption_Address_Extension(IPOption):
     option = 19
     fields_desc = [ _IPOption_HDR,
                     ByteField("length", 10),
-                    IPField("src_ext","0.0.0.0"),
-                    IPField("dst_ext","0.0.0.0") ]
+                    IPField("src_ext", "0.0.0.0"),
+                    IPField("dst_ext", "0.0.0.0") ]
 
 class IPOption_Router_Alert(IPOption):
     name = "IP Option Router Alert"
@@ -185,7 +185,7 @@ class IPOption_Router_Alert(IPOption):
     option = 20
     fields_desc = [ _IPOption_HDR,
                     ByteField("length", 4),
-                    ShortEnumField("alert",0, {0:"router_shall_examine_packet"}), ]
+                    ShortEnumField("alert", 0, {0: "router_shall_examine_packet"}), ]
 
 
 class IPOption_SDBM(IPOption):
@@ -194,35 +194,35 @@ class IPOption_SDBM(IPOption):
     option = 21
     fields_desc = [ _IPOption_HDR,
                     FieldLenField("length", None, fmt="B",
-                                  length_of="addresses", adjust=lambda pkt,l:l+2),
-                    FieldListField("addresses",[],IPField("","0.0.0.0"), 
+                                  length_of="addresses", adjust=lambda pkt, l:l+2),
+                    FieldListField("addresses", [], IPField("", "0.0.0.0"),
                                    length_from=lambda pkt:pkt.length-2)
                     ]
 
 
 
 TCPOptions = (
-              { 0 : ("EOL",None),
-                1 : ("NOP",None),
-                2 : ("MSS","!H"),
-                3 : ("WScale","!B"),
-                4 : ("SAckOK",None),
-                5 : ("SAck","!"),
-                8 : ("Timestamp","!II"),
-                14 : ("AltChkSum","!BH"),
-                15 : ("AltChkSumOpt",None),
-                25 : ("Mood","!p")
+              { 0 : ("EOL", None),
+                1 : ("NOP", None),
+                2 : ("MSS", "!H"),
+                3 : ("WScale", "!B"),
+                4 : ("SAckOK", None),
+                5 : ("SAck", "!"),
+                8 : ("Timestamp", "!II"),
+                14 : ("AltChkSum", "!BH"),
+                15 : ("AltChkSumOpt", None),
+                25 : ("Mood", "!p")
                 },
-              { "EOL":0,
-                "NOP":1,
-                "MSS":2,
-                "WScale":3,
-                "SAckOK":4,
-                "SAck":5,
-                "Timestamp":8,
-                "AltChkSum":14,
-                "AltChkSumOpt":15,
-                "Mood":25
+              { "EOL": 0,
+                "NOP": 1,
+                "MSS": 2,
+                "WScale": 3,
+                "SAckOK": 4,
+                "SAck": 5,
+                "Timestamp": 8,
+                "AltChkSum": 14,
+                "AltChkSumOpt": 15,
+                "Mood": 25
                 } )
 
 class TCPOptionsField(StrField):
@@ -232,17 +232,17 @@ class TCPOptionsField(StrField):
         if opsz < 0:
             warning("bad dataofs (%i). Assuming dataofs=5"%pkt.dataofs)
             opsz = 0
-        return s[opsz:],self.m2i(pkt,s[:opsz])
+        return s[opsz:], self.m2i(pkt, s[:opsz])
     def m2i(self, pkt, x):
         opt = []
         while x:
             onum = x[0]
             if onum == 0:
-                opt.append(("EOL",None))
+                opt.append(("EOL", None))
                 x=x[1:]
                 break
             if onum == 1:
-                opt.append(("NOP",None))
+                opt.append(("NOP", None))
                 x=x[1:]
                 continue
             olen = x[1]
@@ -266,7 +266,7 @@ class TCPOptionsField(StrField):
 
     def i2m(self, pkt, x):
         opt = b""
-        for oname,oval in x:
+        for oname, oval in x:
             if type(oname) is str:
                 if oname == "NOP":
                     opt += b"\x01"
@@ -334,7 +334,7 @@ class IP(Packet, IPTools):
                     ByteEnumField("proto", 0, IP_PROTOS),
                     XShortField("chksum", None),
                     #IPField("src", "127.0.0.1"),
-                    Emph(SourceIPField("src","dst")),
+                    Emph(SourceIPField("src", "dst")),
                     Emph(IPField("dst", "127.0.0.1")),
                     PacketListField("options", [], IPOption, length_from=lambda p:p.ihl*4-20) ]
     def post_build(self, p, pay):
