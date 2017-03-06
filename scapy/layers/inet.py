@@ -1238,14 +1238,14 @@ class TracerouteResult(SndRcvList):
 
                 s += '\t\t"%s";\n'%ip
             s += "\t}\n"
-    
-    
-    
-    
+
+
+
+
         s += "#endpoints\n"
         for p in ports:
             s += '\t"%s" [shape=record,color=black,fillcolor=green,style=filled,label="%s|%s"];\n' % (p,p,"|".join(ports[p]))
-    
+
         s += "\n#Blackholes\n"
         for bh in blackholes:
             s += '\t%s [shape=octagon,color=black,fillcolor=red,style=filled];\n' % bh
@@ -1260,12 +1260,12 @@ class TracerouteResult(SndRcvList):
                         pad[rcv.src]=None
             for rcv in pad:
                 s += '\t"%s" [shape=triangle,color=black,fillcolor=red,style=filled];\n' % rcv
-    
-    
-            
+
+
+
         s += "\n\tnode [shape=ellipse,color=black,style=solid];\n\n"
-    
-    
+
+
         for rtk in rt:
             s += "#---[%s\n" % repr(rtk)
             s += '\t\tedge [color="#%s%s%s"];\n' % next(forecolorlist)
@@ -1274,10 +1274,10 @@ class TracerouteResult(SndRcvList):
             for n in range(min(k), max(k)):
                 s += '\t%s ->\n' % trace[n]
             s += '\t%s;\n' % trace[max(k)]
-    
+
         s += "}\n";
         self.graphdef = s
-    
+
     def graph(self, ASres=None, padding=0, **kargs):
         """x.graph(ASres=conf.AS_resolver, other args):
         ASres=None          : no AS resolver => no clustering
@@ -2200,7 +2200,7 @@ class MTR:
                         else:
                             s += '"{pre:s}{ep:s}":E{tr:s}:n [style="solid",edgetooltip="{lb:s}"];\n'.format(pre = pre, ep = k, tr = v[0], lb = lb)
                 t += 1				# Next trace out of total traces
- 
+
         #
         # Decorate Unknown ('Unkn') Nodes...
         s += "\n\t### Decoration For Unknown (Unkn) Node Hops ###\n"
@@ -2744,7 +2744,7 @@ def mtr(target, dport=80, minttl=1, maxttl=30, stype="Random", srcport=50000, if
         print("\nmtrc._gw (Trace Default Gateway IPv4 Address):")
         print("=======================================================")
         print(mtrc._gw)
-       
+
     return mtrc
 
 
@@ -2752,7 +2752,7 @@ def mtr(target, dport=80, minttl=1, maxttl=30, stype="Random", srcport=50000, if
 ## Simple TCP client stack ##
 #############################
 class TCP_client(Automaton):
-    
+
     def parse_args(self, ip, port, *args, **kargs):
         self.dst = next(iter(Net(ip)))
         self.dport = port
@@ -2771,7 +2771,7 @@ class TCP_client(Automaton):
 #        bpf=None
         Automaton.parse_args(self, filter=bpf, **kargs)
 
-    
+
     def master_filter(self, pkt):
         return (IP in pkt and
                 pkt[IP].src == self.dst and
@@ -2790,7 +2790,7 @@ class TCP_client(Automaton):
     @ATMT.state()
     def SYN_SENT(self):
         pass
-    
+
     @ATMT.state()
     def ESTABLISHED(self):
         pass
@@ -2803,7 +2803,7 @@ class TCP_client(Automaton):
     def CLOSED(self):
         pass
 
-    
+
     @ATMT.condition(START)
     def connect(self):
         raise self.SYN_SENT()
@@ -2839,7 +2839,7 @@ class TCP_client(Automaton):
             if pkt[TCP].flags & 8 != 0: #PUSH
                 self.oi.tcp.send(self.rcvbuf)
                 self.rcvbuf = ""
-    
+
     @ATMT.ioevent(ESTABLISHED,name="tcp", as_supersocket="tcplink")
     def outgoing_data_received(self, fd):
         raise self.ESTABLISHED().action_parameters(fd.recv())
@@ -2848,8 +2848,8 @@ class TCP_client(Automaton):
         self.l4[TCP].flags = "PA"
         self.send(self.l4/d)
         self.l4[TCP].seq += len(d)
-        
-    
+
+
     @ATMT.receive_condition(ESTABLISHED)
     def reset_received(self, pkt):
         if pkt[TCP].flags & 4 != 0:
@@ -2911,8 +2911,8 @@ def IPID_count(lst, funcID=lambda x:x[1].id, funcpres=lambda x:x[1].summary()):
     print("Probably %i classes:" % len(classes), classes)
     for id,pr in lst:
         print("%5i" % id, pr)
-    
-    
+
+
 def fragleak(target,sport=123, dport=123, timeout=0.2, onlyasc=0):
     load = "XXXXYYYYYYYYYY"
 #    getmacbyip(target)
@@ -2946,9 +2946,9 @@ def fragleak(target,sport=123, dport=123, timeout=0.2, onlyasc=0):
                 if not ans.haslayer(conf.padding_layer):
                     continue
 
-                
+
 #                print repr(ans.payload.payload.payload.payload)
-                
+
 #                if not isinstance(ans.payload.payload.payload.payload, conf.raw_layer):
 #                    continue
 #                leak = ans.payload.payload.payload.payload.load[len(load):]
@@ -2977,7 +2977,7 @@ def fragleak2(target, timeout=0.4, onlyasc=0):
                     linehexdump(leak,onlyasc=onlyasc)
     except:
         pass
-    
+
 
 conf.stats_classic_protocols += [TCP,UDP,ICMP]
 conf.stats_dot11_protocols += [TCP,UDP,ICMP]
