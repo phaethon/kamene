@@ -31,12 +31,15 @@ class IPTools:
     """Add more powers to a class that have a "src" attribute."""
     def whois(self):
         os.system("whois %s" % self.src)
+
     def ottl(self):
         t = [32, 64, 128, 255]+[self.ttl]
         t.sort()
         return t[t.index(self.ttl)+1]
+
     def hops(self):
         return self.ottl()-self.ttl-1
+
     def is_priv_addr(self):
         return is_private_addr(self.src)
 
@@ -85,9 +88,11 @@ class IPOption(Packet):
         return b"", p
 
     registered_ip_options = {}
+
     @classmethod
     def register_variant(cls):
         cls.registered_ip_options[cls.option.default] = cls
+
     @classmethod
     def dispatch_hook(cls, pkt=None, *args, **kargs):
         if pkt:
@@ -130,6 +135,7 @@ class IPOption_LSRR(IPOption):
                     FieldListField("routers", [], IPField("", "0.0.0.0"),
                                    length_from=lambda pkt:pkt.length-3)
                     ]
+
     def get_current_router(self):
         return self.routers[self.pointer//4-1]
 
@@ -227,12 +233,14 @@ TCPOptions = (
 
 class TCPOptionsField(StrField):
     islist=1
+
     def getfield(self, pkt, s):
         opsz = (pkt.dataofs-5)*4
         if opsz < 0:
             warning("bad dataofs (%i). Assuming dataofs=5"%pkt.dataofs)
             opsz = 0
         return s[opsz:], self.m2i(pkt, s[:opsz])
+
     def m2i(self, pkt, x):
         opt = []
         while x:
@@ -293,12 +301,14 @@ class TCPOptionsField(StrField):
                     continue
             opt += bytes([(onum), (2+len(oval))]) + oval
         return opt+b"\x00"*(3-((len(opt)+3)%4))
+
     def randval(self):
         return [] # XXX
 
 
 class ICMPTimeStampField(IntField):
     re_hmsm = re.compile("([0-2]?[0-9])[Hh:](([0-5]?[0-9])([Mm:]([0-5]?[0-9])([sS:.]([0-9]{0,3}))?)?)?$")
+
     def i2repr(self, pkt, val):
         if val is None:
             return "--"
@@ -307,6 +317,7 @@ class ICMPTimeStampField(IntField):
             min, sec = divmod(sec, 60)
             hour, min = divmod(min, 60)
             return "%d:%d:%d.%d" %(hour, min, sec, int(milli))
+
     def any2i(self, pkt, val):
         if type(val) is str:
             hmsms = self.re_hmsm.match(val)
@@ -337,6 +348,7 @@ class IP(Packet, IPTools):
                     Emph(SourceIPField("src", "dst")),
                     Emph(IPField("dst", "127.0.0.1")),
                     PacketListField("options", [], IPOption, length_from=lambda p:p.ihl*4-20) ]
+
     def post_build(self, p, pay):
         ihl = self.ihl
         p += b"\0"*((-len(p))%4) # pad IP options if needed
@@ -363,11 +375,13 @@ class IP(Packet, IPTools):
                 log_runtime.error(msg)
             if slp:
                 time.sleep(slp)
+
     def route(self):
         dst = self.dst
         if isinstance(dst, Gen):
             dst = next(iter(dst))
         return conf.route.route(dst)
+
     def hashret(self):
         if ( (self.proto == socket.IPPROTO_ICMP)
              and (isinstance(self.payload, ICMP))
@@ -378,6 +392,7 @@ class IP(Packet, IPTools):
                 return strxor(inet_aton(self.src), inet_aton(self.dst))+struct.pack("B", self.proto)+self.payload.hashret()
             else:
                 return struct.pack("B", self.proto)+self.payload.hashret()
+
     def answers(self, other):
         if not isinstance(other, IP):
             return 0
@@ -394,6 +409,7 @@ class IP(Packet, IPTools):
                  (self.proto != other.proto) ):
                 return 0
             return self.payload.answers(other.payload)
+
     def mysummary(self):
         s = self.sprintf("%IP.src% > %IP.dst% %IP.proto%")
         if self.frag:
@@ -443,6 +459,7 @@ class TCP(Packet):
                     XShortField("chksum", None),
                     ShortField("urgptr", 0),
                     TCPOptionsField("options", {}) ]
+
     def post_build(self, p, pay):
         p += pay
         dataofs = self.dataofs
@@ -468,11 +485,13 @@ class TCP(Packet):
             else:
                 warning("No IP underlayer to compute checksum. Leaving null.")
         return p
+
     def hashret(self):
         if conf.checkIPsrc:
             return struct.pack("H", self.sport ^ self.dport)+self.payload.hashret()
         else:
             return self.payload.hashret()
+
     def answers(self, other):
         if not isinstance(other, TCP):
             return 0
@@ -483,6 +502,7 @@ class TCP(Packet):
         if (abs(other.seq-self.ack) > 2+len(other.payload)):
             return 0
         return 1
+
     def mysummary(self):
         if isinstance(self.underlayer, IP):
             return self.underlayer.sprintf("TCP %IP.src%:%TCP.sport% > %IP.dst%:%TCP.dport% %TCP.flags%")
@@ -497,6 +517,7 @@ class UDP(Packet):
                     ShortEnumField("dport", 53, UDP_SERVICES),
                     ShortField("len", None),
                     XShortField("chksum", None), ]
+
     def post_build(self, p, pay):
         p += pay
         l = self.len
@@ -522,11 +543,14 @@ class UDP(Packet):
             else:
                 warning("No IP underlayer to compute checksum. Leaving null.")
         return p
+
     def extract_padding(self, s):
         l = self.len - 8
         return s[:l], s[l:]
+
     def hashret(self):
         return self.payload.hashret()
+
     def answers(self, other):
         if not isinstance(other, UDP):
             return 0
@@ -534,6 +558,7 @@ class UDP(Packet):
             if self.dport != other.sport:
                 return 0
         return self.payload.answers(other.payload)
+
     def mysummary(self):
         if isinstance(self.underlayer, IP):
             return self.underlayer.sprintf("UDP %IP.src%:%UDP.sport% > %IP.dst%:%UDP.dport%")
@@ -602,6 +627,7 @@ class ICMP(Packet):
                     ConditionalField(IntField("unused", 0), lambda pkt:pkt.type not in [0, 5, 8, 12, 13, 14, 15, 16, 17, 18]),
 
                     ]
+
     def post_build(self, p, pay):
         p += pay
         if self.chksum is None:
@@ -613,6 +639,7 @@ class ICMP(Packet):
         if self.type in [0, 8, 13, 14, 15, 16, 17, 18]:
             return struct.pack("HH", self.id, self.seq)+self.payload.hashret()
         return self.payload.hashret()
+
     def answers(self, other):
         if not isinstance(other, ICMP):
             return 0
@@ -627,6 +654,7 @@ class ICMP(Packet):
             return IPerror
         else:
             return None
+
     def mysummary(self):
         if isinstance(self.underlayer, IP):
             return self.underlayer.sprintf("ICMP %IP.src% > %IP.dst% %ICMP.type% %ICMP.code%")
@@ -639,6 +667,7 @@ class ICMP(Packet):
 
 class IPerror(IP):
     name = "IP in ICMP"
+
     def answers(self, other):
         if not isinstance(other, IP):
             return 0
@@ -650,6 +679,7 @@ class IPerror(IP):
                  (self.proto == other.proto) ):
             return 0
         return self.payload.answers(other.payload)
+
     def mysummary(self):
         return Packet.mysummary(self)
 
@@ -659,9 +689,11 @@ class TCPerror(TCP):
                     ShortEnumField("dport", 80, TCP_SERVICES),
                     IntField("seq", 0) ]
     name = "TCP in ICMP"
+
     def post_build(self, p, pay):
         p += pay
         return p
+
     def answers(self, other):
         if not isinstance(other, TCP):
             return 0
@@ -677,12 +709,14 @@ class TCPerror(TCP):
                 if self.ack != other.ack:
                     return 0
         return 1
+
     def mysummary(self):
         return Packet.mysummary(self)
 
 
 class UDPerror(UDP):
     name = "UDP in ICMP"
+
     def answers(self, other):
         if not isinstance(other, UDP):
             return 0
@@ -691,6 +725,7 @@ class UDPerror(UDP):
                     (self.dport == other.dport)):
                 return 0
         return 1
+
     def mysummary(self):
         return Packet.mysummary(self)
 
@@ -698,6 +733,7 @@ class UDPerror(UDP):
 
 class ICMPerror(ICMP):
     name = "ICMP in ICMP"
+
     def answers(self, other):
         if not isinstance(other, ICMP):
             return 0
@@ -712,6 +748,7 @@ class ICMPerror(ICMP):
                 return 0
         else:
             return 1
+
     def mysummary(self):
         return Packet.mysummary(self)
 
@@ -937,6 +974,7 @@ def _packetlist_timeskew_graph(self, ip, **kargs):
 
 # Create a new packet list
 class TracerouteResult(SndRcvList):
+
     def __init__(self, res=None, name="Traceroute", stats=None):
         PacketList.__init__(self, res, name, stats, vector_index = 1)
         self.graphdef = None
@@ -989,6 +1027,7 @@ class TracerouteResult(SndRcvList):
                 self.ip=ip
                 self.label=None
                 self.setlabel(self.ip)
+
             def setlabel(self, txt, visible=None):
                 if self.label is not None:
                     if visible is None:
@@ -997,6 +1036,7 @@ class TracerouteResult(SndRcvList):
                 elif visible is None:
                     visible=0
                 self.label=visual.label(text=txt, pos=self.pos, space=self.radius, xoffset=10, yoffset=20, visible=visible)
+
             def action(self):
                 self.label.visible ^= 1
 
@@ -1587,7 +1627,7 @@ class MTR:
                   if (eip in d):
                       self._asns[easn].append(u.replace('"', ''))
                       break
-    #
+
     # Make the DOT graph...
     def make_dot_graph(self, ASres = None, padding = 0, vspread = 0.75, title = "Multi-Traceroute (MTR) Probe", timestamp = "", rtt = 1):
         import datetime
@@ -2807,6 +2847,7 @@ class TCP_client(Automaton):
     @ATMT.condition(START)
     def connect(self):
         raise self.SYN_SENT()
+
     @ATMT.action(connect)
     def send_syn(self):
         self.l4[TCP].flags = "S"
@@ -2818,6 +2859,7 @@ class TCP_client(Automaton):
     def synack_received(self, pkt):
         if pkt[TCP].flags & 0x3f == 0x12:
             raise self.ESTABLISHED().action_parameters(pkt)
+
     @ATMT.action(synack_received)
     def send_ack_of_synack(self, pkt):
         self.l4[TCP].ack = pkt[TCP].seq+1
@@ -2828,6 +2870,7 @@ class TCP_client(Automaton):
     def incoming_data_received(self, pkt):
         if not isinstance(pkt[TCP].payload, NoPayload) and not isinstance(pkt[TCP].payload, conf.padding_layer):
             raise self.ESTABLISHED().action_parameters(pkt)
+
     @ATMT.action(incoming_data_received)
     def receive_data(self, pkt):
         data = (bytes(pkt[TCP].payload))
@@ -2843,6 +2886,7 @@ class TCP_client(Automaton):
     @ATMT.ioevent(ESTABLISHED, name="tcp", as_supersocket="tcplink")
     def outgoing_data_received(self, fd):
         raise self.ESTABLISHED().action_parameters(fd.recv())
+
     @ATMT.action(outgoing_data_received)
     def send_data(self, d):
         self.l4[TCP].flags = "PA"
@@ -2859,6 +2903,7 @@ class TCP_client(Automaton):
     def fin_received(self, pkt):
         if pkt[TCP].flags & 0x1 == 1:
             raise self.LAST_ACK().action_parameters(pkt)
+
     @ATMT.action(fin_received)
     def send_finack(self, pkt):
         self.l4[TCP].flags = "FA"
