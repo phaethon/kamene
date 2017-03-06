@@ -1800,7 +1800,7 @@ class MTR:
             if (f >= 0):
                 h = ip[0:f]
             if not h in cepipall:
-                for k,v in bpip.items():	# Check for target = host running the mtr session - Try to Add
+                for k, v in bpip.items():	# Check for target = host running the mtr session - Try to Add
                     if (k != h):		# this Endpoint target to the Probe Target Cluster below.
                         s += epc[ip]		# Finally add the Endpoint Cluster if Stand-alone and
 						# not running the mtr session.
@@ -1810,7 +1810,7 @@ class MTR:
         s += "\n\t### Probe Target Cluster ###\n"
         s += '\tsubgraph cluster_probe_Title {\n'
         p = ''
-        for k,v in bpip.items():
+        for k, v in bpip.items():
             p += ' {ip:s}'.format(ip = k)
         s += '\t\ttooltip="Multi-Traceroute (MTR) Probe: {ip:s}";\n'.format(ip = p)
         s += '\t\tcolor="darkorange";\n'
@@ -1835,7 +1835,7 @@ class MTR:
                 # Append all associated Target IDs...
                 ti = []
                 for d in self._tlblid:		# Spin thru Target IDs
-                    for k,v in d.items():	# Get access to Target ID (v[0])
+                    for k, v in d.items():	# Get access to Target ID (v[0])
                         if (k == ip):
                             ti.append(v[0])
                 lt = len(ti)
@@ -1854,7 +1854,7 @@ class MTR:
             s += '<TR><TD ALIGN="center"><FONT POINT-SIZE="9">{s0:s}</FONT></TD></TR>'.format(s0 = timestamp)
         s += '{s0:s}</TABLE>>;\n'.format(s0 = tstr)
         s += '\t\tlabelloc="t";\n'
-        for k,v in bpip.items():
+        for k, v in bpip.items():
             s += '\t\t"{ip:s}";\n'.format(ip = k)
         #
         # Add in any Endpoint target that is the same as the host running the mtr session... 
@@ -1863,7 +1863,7 @@ class MTR:
             f = h.find(' ')		# Strip off 'port/proto'
             if (f >= 0):
                 h = ip[0:f]
-            for k,v in bpip.items():	# Check for target = host running the mtr session - Try to Add
+            for k, v in bpip.items():	# Check for target = host running the mtr session - Try to Add
                 if (k == h):		# this Endpoint target to the Probe Target Cluster.
                     s += epc[ip]
         s += "\t}\n"
@@ -1892,7 +1892,7 @@ class MTR:
         # Ex bps = '192.168.43.48" [shape="record",color="black",gradientangle=270,fillcolor="white:darkorange",style="filled",'
         #        + 'label="192.168.43.48\nProbe|{http|{<BT1>T1|<BT3>T3}}|{https:{<BT2>T4|<BT3>T4}}"];'
         s += "\n\t### Probe Begin Traces ###\n"
-        for k,v in bpip.items():
+        for k, v in bpip.items():
             tr = ''
             for sv in v:
                 if (self._netprotocol == 'ICMP'):
@@ -1922,7 +1922,7 @@ class MTR:
         # Ex: ep = {('162.144.22.87',80,'http'): ['SA','T1','T3'], ('10.14.22.8',443,'https'): ['SA','T2','T4']}
         ep = {}				# ep -> A single services label for a given IP
         for d in self._tlblid:          #               k            v0          v1               v2       v3   v4    v5      v6  v7
-            for k,v in d.items():	# Ex: k:  162.144.22.87 v: ('T1', '10.222.222.10', '162.144.22.87', 6, 443, 'https', 'SA', '')
+            for k, v in d.items():	# Ex: k:  162.144.22.87 v: ('T1', '10.222.222.10', '162.144.22.87', 6, 443, 'https', 'SA', '')
                 if not (v[6] == 'BH'):	# Blackhole detection - do not create Endpoint
                     p = ep.get((k, v[4], v[5]))
                     if (p == None):
@@ -1935,7 +1935,7 @@ class MTR:
         #                   k                 sv0            sv1     sv2          sv0          sv1    sv2
         # Ex epip = {'206.111.13.58': [('<ET8>T8|<ET10>T10', 'https', 'SA'), ('<ET7>T7|<ET6>T6', 'http', 'SA')]}
         epip = {}			# epip -> Combined Endpoint services label for a given IP
-        for k,v in ep.items():
+        for k, v in ep.items():
             tr = ''
             for t in range(1, len(v)):
                 if (tr == ''):
@@ -1955,7 +1955,7 @@ class MTR:
         # Build Endpoint strings...
         # Ex eps = '162.144.22.87" [shape=record,color="black",gradientangle=270,fillcolor="lightgreen:green",style=i"filled,rounded",'
         #        + 'label="162.144.22.87\nTarget|{{<ET1>T1|<ET3>T3}|https SA}|{{<ET2>T4|<ET3>T4}|http SA}"];'
-        for k,v in epip.items():
+        for k, v in epip.items():
             tr = ''
             for sv in v:
                 if (self._netprotocol == 'ICMP'):
@@ -1985,7 +1985,7 @@ class MTR:
         s += "\n\t### Blackholes ###\n"
         bhhops = []
         for d in self._tlblid:          #              k             v0         v1               v2           v3    v4   v5   v6    v7
-            for k,v in d.items():	# Ex: k:  162.144.22.87 v: ('T1', '10.222.222.10', '162.144.22.87', 'tcp', 5555, '', 'BH', 'I3')
+            for k, v in d.items():	# Ex: k:  162.144.22.87 v: ('T1', '10.222.222.10', '162.144.22.87', 'tcp', 5555, '', 'BH', 'I3')
                 if (v[6] == 'BH'):	# Blackhole detection
                     #
                     # If both a target blackhole and an ICMP packet hop, then skip creating this
@@ -2049,7 +2049,7 @@ class MTR:
             s += "\n\t### Nodes With Padding ###\n"
             pad = {}
             for t in range(0, self._ntraces):
-                for snd,rcv in self._res[t]:
+                for snd, rcv in self._res[t]:
                     if rcv.src not in self._ports and rcv.haslayer(conf.padding_layer):
                         p = rcv.getlayer(conf.padding_layer).load
                         if p != "\x00" * len(p):
@@ -2069,7 +2069,7 @@ class MTR:
                 s += '\tedge [color="#{s0:s}{s1:s}{s2:s}"];\n'.format(s0 = col[0], s1 = col[1], s2 = col[2])
                 #
                 # Probe Begin Point (i.e., Begining of a trace)...
-                for k,v in self._tlblid[t].items():
+                for k, v in self._tlblid[t].items():
                     ptr = probe = v[1]
                     s += '\t"{bp:s}":B{tr:s}:s -> '.format(bp = ptr, tr = v[0])
                 #
@@ -2080,12 +2080,12 @@ class MTR:
                 #
                 # Skip in between traces if there are none...
                 if (len(trace) > 1):
-                    lb = 'Trace: {tr:d}:{tn:d}, {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = min(tk), lbp = ptr, lbn = ntr.replace('"',''))
+                    lb = 'Trace: {tr:d}:{tn:d}, {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = min(tk), lbp = ptr, lbn = ntr.replace('"', ''))
                     if not 'Unk' in ntr:
-                        lb += ' (RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms))'.format(prb = probe, lbn = ntr.replace('"',''), rtt = self._rtt[t + 1][min(tk)])
+                        lb += ' (RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms))'.format(prb = probe, lbn = ntr.replace('"', ''), rtt = self._rtt[t + 1][min(tk)])
                     if rtt:
                         if not 'Unk' in ntr:
-                            llb = 'Trace: {tr:d}:{tn:d}, RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = min(tk), prb = probe, lbn = ntr.replace('"',''), rtt = self._rtt[t + 1][min(tk)])
+                            llb = 'Trace: {tr:d}:{tn:d}, RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = min(tk), prb = probe, lbn = ntr.replace('"', ''), rtt = self._rtt[t + 1][min(tk)])
                             s += '{ntr:s} [label=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(ntr = ntr, rtt = self._rtt[t + 1][min(tk)], lb = lb, llb = llb)
                         else:
                             s += '{ntr:s} [edgetooltip="{lb:s}"];\n'.format(ntr = ntr, lb = lb)
@@ -2094,12 +2094,12 @@ class MTR:
                     for n in range(min(tk) + 1, max(tk)):
                         ptr = ntr
                         ntr = trace[n]
-                        lb = 'Trace: {tr:d}:{tn:d}, {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = n, lbp = ptr.replace('"',''), lbn = ntr.replace('"',''))
+                        lb = 'Trace: {tr:d}:{tn:d}, {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = n, lbp = ptr.replace('"', ''), lbn = ntr.replace('"', ''))
                         if not 'Unk' in ntr:
-                            lb += ' (RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms))'.format(prb = probe, lbn = ntr.replace('"',''), rtt = self._rtt[t + 1][n])
+                            lb += ' (RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms))'.format(prb = probe, lbn = ntr.replace('"', ''), rtt = self._rtt[t + 1][n])
                         if rtt:
                             if not 'Unk' in ntr:
-                                llb = 'Trace: {tr:d}:{tn:d}, RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = n, prb = probe, lbn = ntr.replace('"',''), rtt = self._rtt[t + 1][n])
+                                llb = 'Trace: {tr:d}:{tn:d}, RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = n, prb = probe, lbn = ntr.replace('"', ''), rtt = self._rtt[t + 1][n])
                                 #
                                 # Special check to see if the next and previous nodes are the same.
                                 # If yes use the DOT 'xlabel' attribute to spread out labels so that they 
@@ -2114,7 +2114,7 @@ class MTR:
                             s += '\t{ptr:s} -> {ntr:s} [edgetooltip="{lb:s}"];\n'.format(ptr = ptr, ntr = ntr, lb = lb)
                 #
                 # Enhance target Endpoint (i.e., End of a trace) replacement...
-                for k,v in self._tlblid[t].items():
+                for k, v in self._tlblid[t].items():
                     if (v[6] == 'BH'):		# Blackhole detection - do not create Enhanced Endpoint
                         #
                         # Check for Last Hop / Backhole (Failed Target) match:
@@ -2128,7 +2128,7 @@ class MTR:
                         f = lh.find(':')		# Strip off 'proto:port' -> '"100.41.207.244 801/tcp"'
                         if (f >= 0):
                             lh = lh[0:f]
-                        lh = lh.replace('"','')		# Remove surrounding double quotes ("")
+                        lh = lh.replace('"', '')	# Remove surrounding double quotes ("")
                         if (k == lh):			# Does Hop match final Target?
                             #
                             # Backhole last hop matched target:
@@ -2139,7 +2139,7 @@ class MTR:
                             if lhicmp:
                                 #
                                 # Last hop is an ICMP packet from target and was reached...
-                                lb = 'Trace: {tr:d}:{tn:d}, {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = max(tk), lbp = ntr.replace('"',''), lbn = k)
+                                lb = 'Trace: {tr:d}:{tn:d}, {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = max(tk), lbp = ntr.replace('"', ''), lbn = k)
                                 lb += ' (RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms))'.format(prb = v[1], lbn = lh, rtt = self._rtt[t + 1][max(tk)])
                                 if rtt:
                                     llb = 'Trace: {tr:d}:{tn:d}, RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = max(tk), prb = v[1], lbn = k, rtt = self._rtt[t + 1][max(tk)])
@@ -2161,7 +2161,7 @@ class MTR:
                             # Check to skip in between traces...
                             if (len(trace) > 1):
                                 s += '\t{ptr:s} -> '.format(ptr = ntr)
-                                lb = 'Trace: {tr:d}:{tn:d}, {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = max(tk), lbp = ntr.replace('"',''), lbn = lh)
+                                lb = 'Trace: {tr:d}:{tn:d}, {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = max(tk), lbp = ntr.replace('"', ''), lbn = lh)
                                 lb += ' (RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms))'.format(prb = v[1], lbn = lh, rtt = self._rtt[t + 1][max(tk)])
                                 llb = 'Trace: {tr:d}:{tn:d}, RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = max(tk), prb = v[1], lbn = lh, rtt = self._rtt[t + 1][max(tk)])
                                 if rtt:
@@ -2179,7 +2179,7 @@ class MTR:
                         # Check to skip in between traces...
                         if (len(trace) > 1):
                             s += '\t{ptr:s} -> '.format(ptr = ntr)
-                        lb = 'Trace: {tr:d}:{tn:d}, {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = max(tk), lbp = ntr.replace('"',''), lbn = k)
+                        lb = 'Trace: {tr:d}:{tn:d}, {lbp:s} -> {lbn:s}'.format(tr = (t + 1), tn = max(tk), lbp = ntr.replace('"', ''), lbn = k)
                         if not 'Unk' in k:
                             lb += ' (RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms))'.format(prb = v[1], lbn = k, rtt = self._rtt[t + 1][max(tk)])
                         pre = ''
@@ -2190,7 +2190,7 @@ class MTR:
                                 llb = 'Trace: {tr:d}:{tn:d}, RTT: {prb:s} <-> {lbn:s} ({rtt:s}ms)'.format(tr = (t + 1), tn = max(tk), prb = v[1], lbn = k, rtt = self._rtt[t + 1][max(tk)])
                                 #
                                 # Check to remove label clashing...
-                                ntrs = ntr.replace('"','')		# Remove surrounding double quotes ("")
+                                ntrs = ntr.replace('"', '')		# Remove surrounding double quotes ("")
                                 if (ntrs == k):
                                     s += '"{pre:s}{ep:s}":E{tr:s}:n [style="solid",xlabel=<<FONT POINT-SIZE="8">&nbsp; {rtt:s}ms</FONT>>,forcelabel=True,edgetooltip="{lb:s}",labeltooltip="{llb:s}"];\n'.format(pre = pre, ep = k, tr = v[0], rtt = self._rtt[t + 1][max(tk)], lb = lb, llb = llb)
                                 else:
@@ -2205,12 +2205,12 @@ class MTR:
         # Decorate Unknown ('Unkn') Nodes...
         s += "\n\t### Decoration For Unknown (Unkn) Node Hops ###\n"
         for u in self._unks:
-            s += '\t{u:s} [tooltip="Trace: {t:s}, Unknown Hop: {u2:s}",shape="egg",fontname="Sans-Serif",fontsize=9,height=0.2,width=0.2,color="black",gradientangle=270,fillcolor="white:#d8d8d8",style="filled"];\n'.format(u = u, t = self._unks[u][2], u2 = u.replace('"',''))
+            s += '\t{u:s} [tooltip="Trace: {t:s}, Unknown Hop: {u2:s}",shape="egg",fontname="Sans-Serif",fontsize=9,height=0.2,width=0.2,color="black",gradientangle=270,fillcolor="white:#d8d8d8",style="filled"];\n'.format(u = u, t = self._unks[u][2], u2 = u.replace('"', ''))
 
         #
         # Create tooltip for standalone nodes...
         s += "\n\t### Tooltip for Standalone Node Hops ###\n"
-        for k,v in self._ips.items():
+        for k, v in self._ips.items():
             if not k in cipall:
                 if (k != self._gw):
                     if not k in cepipall:
@@ -2263,7 +2263,7 @@ class MTracerouteResult(SndRcvList):
         PacketList.__init__(self, res, name, stats, vector_index = 1)
 
     def show(self, ntrace):
-        return self.make_table(lambda s,r: 
+        return self.make_table(lambda s, r: 
           (s.sprintf("Trace: " + str(ntrace) + " - %IP.dst%:{TCP:tcp%ir,TCP.dport%}{UDP:udp%ir,UDP.dport%}{ICMP:ICMP}"),
            s.ttl,
            r.sprintf("%-15s,IP.src% {TCP:%TCP.flags%}{ICMP:%ir,ICMP.type%}")))
@@ -2285,7 +2285,7 @@ class MTracerouteResult(SndRcvList):
         if (len(self.res) > 0):
             #
             # Responses found... 
-            for s,r in self.res:
+            for s, r in self.res:
                 s = s.getlayer(IP) or (conf.ipv6_enabled and s[scapy.layers.inet6.IPv6]) or s
                 r = r.getlayer(IP) or (conf.ipv6_enabled and r[scapy.layers.inet6.IPv6]) or r
                 #
@@ -2325,7 +2325,7 @@ class MTracerouteResult(SndRcvList):
                                 pass
                     portsdone[trace_id] = None
                     trgttl[trace_id] = ttl		# Save potential target ttl packet
-                    p = ports.get(r.src,[])
+                    p = ports.get(r.src, [])
                     if TCP in r:
                         p.append(r.sprintf("<T%ir,TCP.sport%> %TCP.sport% %TCP.flags%"))
                         trace[ttl] = r.sprintf('"%r,src%":T%ir,TCP.sport%')
@@ -2397,7 +2397,7 @@ class MTracerouteResult(SndRcvList):
             #
             # Derive flags from ports:
             # Ex: {'63.117.14.247': ['<T80> http SA', '<T443> https SA']}
-            prtflgs = ports.get(rtk[1],[])
+            prtflgs = ports.get(rtk[1], [])
             found = False
             for pf in prtflgs:
                 if (mtrc._netprotocol == 'ICMP'):
@@ -2428,7 +2428,7 @@ class MTracerouteResult(SndRcvList):
                 f = lh.find(':I3')		# Is hop an ICMP destination not reached node?
                 if (f >= 0):
                     lh = lh[0:f] 		# Strip off 'proto:port' -> '"100.41.207.244":I3'
-                    lh = lh.replace('"','')	# Remove surrounding double quotes ("")
+                    lh = lh.replace('"', '')	# Remove surrounding double quotes ("")
                     if lh in mtrc._exptrg:	# Is last hop a target?
                         ic = 'I3'
                 pn = ''
@@ -2563,7 +2563,7 @@ def mtr(target, dport=80, minttl=1, maxttl=30, stype="Random", srcport=50000, if
                     #
                     # Check payload types:
                     if (ptype == 'Disabled'):
-                        a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/ICMP(type=tid, id=id, seq=seq),
+                        a, b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/ICMP(type=tid, id=id, seq=seq),
                                 timeout=timeout, filter=filter, verbose=verbose, **kargs)
                     else:
                         if (ptype == 'RandStr'):
@@ -2578,7 +2578,7 @@ def mtr(target, dport=80, minttl=1, maxttl=30, stype="Random", srcport=50000, if
                             pload = payload
                         #
                         # ICMP trace with payload...
-                        a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/ICMP(type=tid, id=id, seq=seq)/Raw(load=pload),
+                        a, b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/ICMP(type=tid, id=id, seq=seq)/Raw(load=pload),
                                 timeout=timeout, filter=filter, verbose=verbose, **kargs)
                 elif (netproto == "UDP"):
                     #
@@ -2588,7 +2588,7 @@ def mtr(target, dport=80, minttl=1, maxttl=30, stype="Random", srcport=50000, if
                     #
                     # Check payload types:
                     if (ptype == 'Disabled'):
-                        a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/UDP(sport=sport, dport=dport),
+                        a, b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/UDP(sport=sport, dport=dport),
                                 timeout=timeout, filter=filter, verbose=verbose, **kargs)
                     else:
                         if (ptype == 'RandStr'):
@@ -2602,7 +2602,7 @@ def mtr(target, dport=80, minttl=1, maxttl=30, stype="Random", srcport=50000, if
                             pload = payload
                         #
                         # UDP trace with payload...
-                        a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/UDP(sport=sport, dport=dport)/Raw(load=pload),
+                        a, b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/UDP(sport=sport, dport=dport)/Raw(load=pload),
                                 timeout=timeout, filter=filter, verbose=verbose, **kargs)
                 else:
                     #
@@ -2620,7 +2620,7 @@ def mtr(target, dport=80, minttl=1, maxttl=30, stype="Random", srcport=50000, if
                     #
                     # Check payload types:
                     if (ptype == 'Disabled'):
-                        a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/TCP(seq=seq, sport=sport, dport=dport, options=opts),
+                        a, b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/TCP(seq=seq, sport=sport, dport=dport, options=opts),
                                 timeout=timeout, filter=filter, verbose=verbose, **kargs)
                     else:
                         if (ptype == 'RandStr'):
@@ -2631,7 +2631,7 @@ def mtr(target, dport=80, minttl=1, maxttl=30, stype="Random", srcport=50000, if
                             pload = payload
                         #
                         # TCP trace with payload...
-                        a,b = sr(IP(dst=[t], id=RandShort(),
+                        a, b = sr(IP(dst=[t], id=RandShort(),
                                 ttl=(minttl, maxttl))/TCP(seq=seq, sport=sport, dport=dport, options=opts)/Raw(load=pload),
                                 timeout=timeout, filter=filter, verbose=verbose, **kargs)
                 #
@@ -2651,7 +2651,7 @@ def mtr(target, dport=80, minttl=1, maxttl=30, stype="Random", srcport=50000, if
             for t in exptrg:
                 #
                 # Run traceroute...
-                a,b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl,maxttl))/l4,
+                a, b = sr(IP(dst=[t], id=RandShort(), ttl=(minttl, maxttl))/l4,
                          timeout=timeout, filter=filter, verbose=verbose, **kargs)
                 trace.append(MTracerouteResult(res = a.res))
                 mtrc._res.append(a)
@@ -2756,9 +2756,9 @@ class TCP_client(Automaton):
     def parse_args(self, ip, port, *args, **kargs):
         self.dst = next(iter(Net(ip)))
         self.dport = port
-        self.sport = random.randrange(0,2**16)
+        self.sport = random.randrange(0, 2**16)
         self.l4 = IP(dst=ip)/TCP(sport=self.sport, dport=self.dport, flags=0,
-                                 seq=random.randrange(0,2**32))
+                                 seq=random.randrange(0, 2**32))
         self.src = self.l4.src
         self.swin=self.l4[TCP].window
         self.dwin=1
@@ -2829,7 +2829,7 @@ class TCP_client(Automaton):
         if not isinstance(pkt[TCP].payload, NoPayload) and not isinstance(pkt[TCP].payload, conf.padding_layer):
             raise self.ESTABLISHED().action_parameters(pkt)
     @ATMT.action(incoming_data_received)
-    def receive_data(self,pkt):
+    def receive_data(self, pkt):
         data = (bytes(pkt[TCP].payload))
         if data and self.l4[TCP].ack == pkt[TCP].seq:
             self.l4[TCP].ack += len(data)
@@ -2840,7 +2840,7 @@ class TCP_client(Automaton):
                 self.oi.tcp.send(self.rcvbuf)
                 self.rcvbuf = ""
 
-    @ATMT.ioevent(ESTABLISHED,name="tcp", as_supersocket="tcplink")
+    @ATMT.ioevent(ESTABLISHED, name="tcp", as_supersocket="tcplink")
     def outgoing_data_received(self, fd):
         raise self.ESTABLISHED().action_parameters(fd.recv())
     @ATMT.action(outgoing_data_received)
@@ -2881,14 +2881,14 @@ class TCP_client(Automaton):
 def report_ports(target, ports):
     """portscan a target and output a LaTeX table
 report_ports(target, ports) -> string"""
-    ans,unans = sr(IP(dst=target)/TCP(dport=ports),timeout=5)
+    ans, unans = sr(IP(dst=target)/TCP(dport=ports), timeout=5)
     rep = "\\begin{tabular}{|r|l|l|}\n\\hline\n"
-    for s,r in ans:
+    for s, r in ans:
         if not r.haslayer(ICMP):
             if r.payload.flags == 0x12:
                 rep += r.sprintf("%TCP.sport% & open & SA \\\\\n")
     rep += "\\hline\n"
-    for s,r in ans:
+    for s, r in ans:
         if r.haslayer(ICMP):
             rep += r.sprintf("%TCPerror.dport% & closed & ICMP type %ICMP.type%/%ICMP.code% from %IP.src% \\\\\n")
         elif r.payload.flags != 0x12:
@@ -2901,19 +2901,19 @@ report_ports(target, ports) -> string"""
 
 
 
-def IPID_count(lst, funcID=lambda x:x[1].id, funcpres=lambda x:x[1].summary()):
+def IPID_count(lst, funcID=lambda x: x[1].id, funcpres=lambda x: x[1].summary()):
     idlst = map(funcID, lst)
     idlst.sort()
     #classes = [idlst[0]]+map(lambda x:x[1],filter(lambda (x,y): abs(x-y)>50, map(lambda x,y: (x,y),idlst[:-1], idlst[1:])))
-    classes = [idlst[0]]+list(map(lambda x:x[1],filter(lambda a: abs(a[0]-a[1])>50, map(lambda x,y: (x,y),idlst[:-1], idlst[1:]))))
-    lst = map(lambda x:(funcID(x), funcpres(x)), lst)
+    classes = [idlst[0]]+list(map(lambda x: x[1], filter(lambda a: abs(a[0]-a[1])>50, map(lambda x, y: (x, y), idlst[:-1], idlst[1:]))))
+    lst = map(lambda x: (funcID(x), funcpres(x)), lst)
     lst.sort()
     print("Probably %i classes:" % len(classes), classes)
-    for id,pr in lst:
+    for id, pr in lst:
         print("%5i" % id, pr)
 
 
-def fragleak(target,sport=123, dport=123, timeout=0.2, onlyasc=0):
+def fragleak(target, sport=123, dport=123, timeout=0.2, onlyasc=0):
     load = "XXXXYYYYYYYYYY"
 #    getmacbyip(target)
 #    pkt = IP(dst=target, id=RandShort(), options="\x22"*40)/UDP()/load
@@ -2926,7 +2926,7 @@ def fragleak(target,sport=123, dport=123, timeout=0.2, onlyasc=0):
             try:
                 if not intr:
                     s.send(pkt)
-                sin,sout,serr = select([s],[],[],timeout)
+                sin, sout, serr = select([s], [], [], timeout)
                 if not sin:
                     continue
                 ans=s.recv(1600)
@@ -2939,7 +2939,7 @@ def fragleak(target,sport=123, dport=123, timeout=0.2, onlyasc=0):
                 if ans.payload.payload.dst != target:
                     continue
                 if ans.src  != target:
-                    print("leak from", ans.src,end=" ")
+                    print("leak from", ans.src, end=" ")
 
 
 #                print repr(ans)
@@ -2967,20 +2967,20 @@ def fragleak2(target, timeout=0.4, onlyasc=0):
     found={}
     try:
         while 1:
-            p = sr1(IP(dst=target, options="\x00"*40, proto=200)/"XXXXYYYYYYYYYYYY",timeout=timeout,verbose=0)
+            p = sr1(IP(dst=target, options="\x00"*40, proto=200)/"XXXXYYYYYYYYYYYY", timeout=timeout, verbose=0)
             if not p:
                 continue
             if conf.padding_layer in p:
                 leak  = p[conf.padding_layer].load
                 if leak not in found:
                     found[leak]=None
-                    linehexdump(leak,onlyasc=onlyasc)
+                    linehexdump(leak, onlyasc=onlyasc)
     except:
         pass
 
 
-conf.stats_classic_protocols += [TCP,UDP,ICMP]
-conf.stats_dot11_protocols += [TCP,UDP,ICMP]
+conf.stats_classic_protocols += [TCP, UDP, ICMP]
+conf.stats_dot11_protocols += [TCP, UDP, ICMP]
 
 if conf.ipv6_enabled:
     import scapy.layers.inet6
