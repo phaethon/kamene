@@ -1,7 +1,7 @@
-## This file is part of Scapy
-## See http://www.secdev.org/projects/scapy for more informations
-## Copyright (C) Philippe Biondi <phil@secdev.org>
-## This program is published under a GPLv2 license
+# This file is part of Scapy
+# See http://www.secdev.org/projects/scapy for more informations
+# Copyright (C) Philippe Biondi <phil@secdev.org>
+# This program is published under a GPLv2 license
 
 """
 IPv4 (Internet Protocol v4).
@@ -23,9 +23,9 @@ from scapy.automaton import Automaton, ATMT
 import scapy.as_resolvers
 
 
-####################
-## IP Tools class ##
-####################
+##################
+# IP Tools class #
+##################
 
 class IPTools:
     """Add more powers to a class that have a "src" attribute."""
@@ -740,9 +740,9 @@ conf.neighbor.register_l3(Ether, IP, lambda l2, l3: getmacbyip(l3.dst))
 conf.neighbor.register_l3(Dot3, IP, lambda l2, l3: getmacbyip(l3.dst))
 
 
-###################
-## Fragmentation ##
-###################
+#################
+# Fragmentation #
+#################
 
 @conf.commands.register
 def fragment(pkt, fragsize=1480):
@@ -914,7 +914,7 @@ def defragment(plist):
 
 
 
-### Add timeskew_graph() method to PacketList
+# Add timeskew_graph() method to PacketList
 def _packetlist_timeskew_graph(self, ip, **kargs):
     """Tries to graph the timeskew between the timestamps and real time for a given ip"""
     res = map(lambda x: self._elt2pkt(x), self.res)
@@ -935,7 +935,7 @@ def _packetlist_timeskew_graph(self, ip, **kargs):
 #PacketList.timeskew_graph = types.MethodType(_packetlist_timeskew_graph, None)
 
 
-### Create a new packet list
+# Create a new packet list
 class TracerouteResult(SndRcvList):
     def __init__(self, res=None, name="Traceroute", stats=None):
         PacketList.__init__(self, res, name, stats, vector_index = 1)
@@ -1082,7 +1082,7 @@ class TracerouteResult(SndRcvList):
                 visual.scene.center -= visual.scene.mouse.pos-movcenter
                 movcenter = visual.scene.mouse.pos
 
-## world_trace needs to be reimplemented as gnuplot dependency is removed                
+# # world_trace needs to be reimplemented as gnuplot dependency is removed                
 #    def world_trace(self):
 #        from modules.geo import locate_ip
 #        ips = {}
@@ -1115,7 +1115,7 @@ class TracerouteResult(SndRcvList):
 #                loc = locate_ip(ip)
 #                if loc is None:
 #                    continue
-##                loctrace.append((ip,loc)) # no labels yet
+# #               loctrace.append((ip,loc)) # no labels yet
 #                loctrace.append(loc)
 #            if loctrace:
 #                trt[trace_id] = loctrace
@@ -1325,9 +1325,9 @@ traceroute(target, [maxttl=30,] [dport=80,] [sport=80,] [verbose=conf.verb]) -> 
     return a, b
 
 
-############################
-## Multi-Traceroute Class ##
-############################
+##########################
+# Multi-Traceroute Class #
+##########################
 class MTR:
     #
     # Initialize Multi-Traceroute Object Vars...
@@ -2255,9 +2255,9 @@ class MTR:
 
         return do_graph(self._graphdef, **kargs)
 
-####################################
-## Multi-Traceroute Results Class ##
-####################################
+##################################
+# Multi-Traceroute Results Class #
+##################################
 class MTracerouteResult(SndRcvList):
     def __init__(self, res=None, name="MTraceroute", stats=None):
         PacketList.__init__(self, res, name, stats, vector_index = 1)
@@ -2440,9 +2440,9 @@ class MTracerouteResult(SndRcvList):
             tlid = {rtk[1]: ('T' + str(mtrc._tcnt), rtk[0], rtk[1], pt, rtk[3], pn, fl, ic)}
             mtrc._tlblid.append(tlid)
 
-######################
-## Multi-Traceroute ##
-######################
+####################
+# Multi-Traceroute #
+####################
 @conf.commands.register
 def mtr(target, dport=80, minttl=1, maxttl=30, stype="Random", srcport=50000, iface=None, l4=None, filter=None, timeout=2, verbose=None, gw=None, netproto="TCP", nquery=1, ptype=None, payload=b'', privaddr=0, rasn=1, **kargs):
     """A Multi-Traceroute (mtr) command:
@@ -2748,9 +2748,9 @@ def mtr(target, dport=80, minttl=1, maxttl=30, stype="Random", srcport=50000, if
     return mtrc
 
 
-#############################
-## Simple TCP client stack ##
-#############################
+###########################
+# Simple TCP client stack #
+###########################
 class TCP_client(Automaton):
 
     def parse_args(self, ip, port, *args, **kargs):
@@ -2874,9 +2874,9 @@ class TCP_client(Automaton):
 
 
 
-#####################
-## Reporting stuff ##
-#####################
+###################
+# Reporting stuff #
+###################
 
 def report_ports(target, ports):
     """portscan a target and output a LaTeX table
