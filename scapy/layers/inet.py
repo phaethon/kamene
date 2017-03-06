@@ -67,20 +67,20 @@ _ip_options_names = { 0: "end_of_list",
                       25: "quick_start",
                       30: "rfc4727_experiment", 
                       }
-                      
+
 
 class _IPOption_HDR(Packet):
     fields_desc = [ BitField("copy_flag",0, 1),
                     BitEnumField("optclass",0,2,{0:"control",2:"debug"}),
                     BitEnumField("option",0,5, _ip_options_names) ]
-    
+
 class IPOption(Packet):
     name = "IP Option"
     fields_desc = [ _IPOption_HDR,
                     FieldLenField("length", None, fmt="B",  # Only option 0 and 1 have no length and value
                                   length_of="value", adjust=lambda pkt,l:l+2),
                     StrLenField("value", "",length_from=lambda pkt:pkt.length-2) ]
-    
+
     def extract_padding(self, p):
         return b"",p
 
@@ -100,7 +100,7 @@ class IPOption_EOL(IPOption):
     name = "IP Option End of Options List"
     option = 0
     fields_desc = [ _IPOption_HDR ]
-    
+
 
 class IPOption_NOP(IPOption):
     name = "IP Option No Operation"
@@ -118,7 +118,7 @@ class IPOption_Security(IPOption):
                     ShortField("handling_restrictions",0),
                     StrFixedLenField("transmission_control_code","xxx",3),
                     ]
-    
+
 class IPOption_LSRR(IPOption):
     name = "IP Option Loose Source and Record Route"
     copy_flag = 1
