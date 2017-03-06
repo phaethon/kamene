@@ -311,7 +311,7 @@ class ICMPTimeStampField(IntField):
         if type(val) is str:
             hmsms = self.re_hmsm.match(val)
             if hmsms:
-                h,_,m,_,s,_,ms = hmsms = hmsms.groups()
+                h, _, m, _, s, _, ms = hmsms = hmsms.groups()
                 ms = int(((ms or "")+"000")[:3])
                 val = ((int(h)*60+int(m or 0))*60+int(s or 0))*1000+ms
             else:
@@ -328,7 +328,7 @@ class IP(Packet, IPTools):
                     XByteField("tos", 0),
                     ShortField("len", None),
                     ShortField("id", 1),
-                    FlagsField("flags", 0, 3, ["MF","DF","evil"]),
+                    FlagsField("flags", 0, 3, ["MF", "DF", "evil"]),
                     BitField("frag", 0, 13),
                     ByteField("ttl", 64),
                     ByteEnumField("proto", 0, IP_PROTOS),
@@ -353,39 +353,39 @@ class IP(Packet, IPTools):
 
     def extract_padding(self, s):
         l = self.len - (self.ihl << 2)
-        return s[:l],s[l:]
+        return s[:l], s[l:]
 
     def send(self, s, slp=0):
         for p in self:
             try:
-                s.sendto(bytes(p), (p.dst,0))
+                s.sendto(bytes(p), (p.dst, 0))
             except socket.error as msg:
                 log_runtime.error(msg)
             if slp:
                 time.sleep(slp)
     def route(self):
         dst = self.dst
-        if isinstance(dst,Gen):
+        if isinstance(dst, Gen):
             dst = next(iter(dst))
         return conf.route.route(dst)
     def hashret(self):
         if ( (self.proto == socket.IPPROTO_ICMP)
              and (isinstance(self.payload, ICMP))
-             and (self.payload.type in [3,4,5,11,12]) ):
+             and (self.payload.type in [3, 4, 5, 11, 12]) ):
             return self.payload.payload.hashret()
         else:
             if conf.checkIPsrc and conf.checkIPaddr:
-                return strxor(inet_aton(self.src),inet_aton(self.dst))+struct.pack("B",self.proto)+self.payload.hashret()
+                return strxor(inet_aton(self.src), inet_aton(self.dst))+struct.pack("B", self.proto)+self.payload.hashret()
             else:
                 return struct.pack("B", self.proto)+self.payload.hashret()
     def answers(self, other):
-        if not isinstance(other,IP):
+        if not isinstance(other, IP):
             return 0
         if conf.checkIPaddr and (self.dst != other.src):
             return 0
         if ( (self.proto == socket.IPPROTO_ICMP) and
              (isinstance(self.payload, ICMP)) and
-             (self.payload.type in [3,4,5,11,12]) ):
+             (self.payload.type in [3, 4, 5, 11, 12]) ):
             # ICMP error message
             return self.payload.payload.answers(other)
 
@@ -447,7 +447,7 @@ class TCP(Packet):
         p += pay
         dataofs = self.dataofs
         if dataofs is None:
-            dataofs = 5+((len(self.get_field("options").i2m(self,self.options))+3)//4)
+            dataofs = 5+((len(self.get_field("options").i2m(self, self.options))+3)//4)
             p = p[:12]+bytes([(dataofs << 4) | (p[12])&0x0f])+p[13:]
         if self.chksum is None:
             if isinstance(self.underlayer, IP):
@@ -470,7 +470,7 @@ class TCP(Packet):
         return p
     def hashret(self):
         if conf.checkIPsrc:
-            return struct.pack("H",self.sport ^ self.dport)+self.payload.hashret()
+            return struct.pack("H", self.sport ^ self.dport)+self.payload.hashret()
         else:
             return self.payload.hashret()
     def answers(self, other):
@@ -502,7 +502,7 @@ class UDP(Packet):
         l = self.len
         if l is None:
             l = len(p)
-            p = p[:4]+struct.pack("!H",l)+p[6:]
+            p = p[:4]+struct.pack("!H", l)+p[6:]
         if self.chksum is None:
             if isinstance(self.underlayer, IP):
                 if self.underlayer.len is not None:
@@ -524,7 +524,7 @@ class UDP(Packet):
         return p
     def extract_padding(self, s):
         l = self.len - 8
-        return s[:l],s[l:]
+        return s[:l], s[l:]
     def hashret(self):
         return self.payload.hashret()
     def answers(self, other):
@@ -587,19 +587,19 @@ icmpcodes = { 3 : { 0  : "network-unreachable",
 
 class ICMP(Packet):
     name = "ICMP"
-    fields_desc = [ ByteEnumField("type",8, icmptypes),
-                    MultiEnumField("code",0, icmpcodes, depends_on=lambda pkt:pkt.type,fmt="B"),
+    fields_desc = [ ByteEnumField("type", 8, icmptypes),
+                    MultiEnumField("code", 0, icmpcodes, depends_on=lambda pkt:pkt.type, fmt="B"),
                     XShortField("chksum", None),
-                    ConditionalField(XShortField("id",0),  lambda pkt:pkt.type in [0,8,13,14,15,16,17,18]),
-                    ConditionalField(XShortField("seq",0), lambda pkt:pkt.type in [0,8,13,14,15,16,17,18]),
-                    ConditionalField(ICMPTimeStampField("ts_ori", None), lambda pkt:pkt.type in [13,14]),
-                    ConditionalField(ICMPTimeStampField("ts_rx", None), lambda pkt:pkt.type in [13,14]),
-                    ConditionalField(ICMPTimeStampField("ts_tx", None), lambda pkt:pkt.type in [13,14]),
-                    ConditionalField(IPField("gw","0.0.0.0"),  lambda pkt:pkt.type==5),
-                    ConditionalField(ByteField("ptr",0),   lambda pkt:pkt.type==12),
-                    ConditionalField(X3BytesField("reserved",0), lambda pkt:pkt.type==12),
-                    ConditionalField(IPField("addr_mask","0.0.0.0"), lambda pkt:pkt.type in [17,18]),
-                    ConditionalField(IntField("unused",0), lambda pkt:pkt.type not in [0,5,8,12,13,14,15,16,17,18]),
+                    ConditionalField(XShortField("id", 0),  lambda pkt:pkt.type in [0, 8, 13, 14, 15, 16, 17, 18]),
+                    ConditionalField(XShortField("seq", 0), lambda pkt:pkt.type in [0, 8, 13, 14, 15, 16, 17, 18]),
+                    ConditionalField(ICMPTimeStampField("ts_ori", None), lambda pkt:pkt.type in [13, 14]),
+                    ConditionalField(ICMPTimeStampField("ts_rx", None), lambda pkt:pkt.type in [13, 14]),
+                    ConditionalField(ICMPTimeStampField("ts_tx", None), lambda pkt:pkt.type in [13, 14]),
+                    ConditionalField(IPField("gw", "0.0.0.0"),  lambda pkt:pkt.type==5),
+                    ConditionalField(ByteField("ptr", 0),   lambda pkt:pkt.type==12),
+                    ConditionalField(X3BytesField("reserved", 0), lambda pkt:pkt.type==12),
+                    ConditionalField(IPField("addr_mask", "0.0.0.0"), lambda pkt:pkt.type in [17, 18]),
+                    ConditionalField(IntField("unused", 0), lambda pkt:pkt.type not in [0, 5, 8, 12, 13, 14, 15, 16, 17, 18]),
 
                     ]
     def post_build(self, p, pay):
@@ -610,20 +610,20 @@ class ICMP(Packet):
         return p
 
     def hashret(self):
-        if self.type in [0,8,13,14,15,16,17,18]:
-            return struct.pack("HH",self.id,self.seq)+self.payload.hashret()
+        if self.type in [0, 8, 13, 14, 15, 16, 17, 18]:
+            return struct.pack("HH", self.id, self.seq)+self.payload.hashret()
         return self.payload.hashret()
     def answers(self, other):
-        if not isinstance(other,ICMP):
+        if not isinstance(other, ICMP):
             return 0
-        if ( (other.type,self.type) in [(8,0),(13,14),(15,16),(17,18)] and
+        if ( (other.type, self.type) in [(8, 0), (13, 14), (15, 16), (17, 18)] and
              self.id == other.id and
              self.seq == other.seq ):
             return 1
         return 0
 
     def guess_payload_class(self, payload):
-        if self.type in [3,4,5,11,12]:
+        if self.type in [3, 4, 5, 11, 12]:
             return IPerror
         else:
             return None
@@ -699,12 +699,12 @@ class UDPerror(UDP):
 class ICMPerror(ICMP):
     name = "ICMP in ICMP"
     def answers(self, other):
-        if not isinstance(other,ICMP):
+        if not isinstance(other, ICMP):
             return 0
         if not ((self.type == other.type) and
                 (self.code == other.code)):
             return 0
-        if self.code in [0,8,13,14,17,18]:
+        if self.code in [0, 8, 13, 14, 17, 18]:
             if (self.id == other.id and
                 self.seq == other.seq):
                 return 1
@@ -736,8 +736,8 @@ conf.l3types.register(ETH_P_IP, IP)
 conf.l3types.register_num2layer(ETH_P_ALL, IP)
 
 
-conf.neighbor.register_l3(Ether, IP, lambda l2,l3: getmacbyip(l3.dst))
-conf.neighbor.register_l3(Dot3, IP, lambda l2,l3: getmacbyip(l3.dst))
+conf.neighbor.register_l3(Ether, IP, lambda l2, l3: getmacbyip(l3.dst))
+conf.neighbor.register_l3(Dot3, IP, lambda l2, l3: getmacbyip(l3.dst))
 
 
 ###################
@@ -793,7 +793,7 @@ def defrag(plist):
         if ip.frag == 0 and ip.flags & 1 == 0:
             nofrag.append(p)
             continue
-        uniq = (ip.id,ip.src,ip.dst,ip.proto)
+        uniq = (ip.id, ip.src, ip.dst, ip.proto)
         frags[uniq].append(p)
     defrag = []
     missfrag = []
@@ -816,7 +816,7 @@ def defrag(plist):
         for q in lst[1:]:
             if clen != q.frag<<3: # Wrong fragmentation offset
                 if clen > q.frag<<3:
-                    warning("Fragment overlap (%i > %i) %r || %r ||  %r" % (clen, q.frag<<3, p,txt,q))
+                    warning("Fragment overlap (%i > %i) %r || %r ||  %r" % (clen, q.frag<<3, p, txt, q))
                 missfrag.append(lst)
                 break
             if q[IP].len is None or q[IP].ihl is None:
@@ -835,12 +835,12 @@ def defrag(plist):
     defrag2=PacketList()
     for p in defrag:
         defrag2.append(p.__class__(bytes(p)))
-    return nofrag,defrag2,missfrag
+    return nofrag, defrag2, missfrag
 
 @conf.commands.register
 def defragment(plist):
     """defragment(plist) -> plist defragmented as much as possible """
-    frags = defaultdict(lambda:[])
+    frags = defaultdict(lambda: [])
     final = []
 
     pos = 0
