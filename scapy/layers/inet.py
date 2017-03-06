@@ -7,7 +7,12 @@
 IPv4 (Internet Protocol v4).
 """
 
-import os, time, struct, re, socket, types
+import os
+import time
+import struct
+import re
+import socket
+import types
 from select import select
 from collections import defaultdict
 from scapy.utils import checksum, is_private_addr
