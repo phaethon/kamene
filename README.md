@@ -8,11 +8,6 @@ Please, submit all issues https://github.com/phaethon/scapy preferrably with .pc
 
 [winpcapy.py by Massimo Ciani] (https://code.google.com/p/winpcapy/) integrated inside code.
 
-## Supporting scapy3k
-
-Support scapy3k inclusion in Kali linux by commenting on the [issue at Kali bug tracker](https://bugs.kali.org/view.php?id=2336).
-
-
 ## News
 [Follow @scapy3k](https://twitter.com/scapy3k) and/or see [scapy3k](https://phaethon.github.io/scapy) for recent news.
 
