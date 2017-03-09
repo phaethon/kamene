@@ -25,29 +25,18 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Scapy 3.0.0 documentation" href="index.html" />
     <link rel="next" title="Credits" href="backmatter.html" />
-    <link rel="prev" title="Troubleshooting" href="troubleshooting.html" /> 
+    <link rel="prev" title="Troubleshooting" href="troubleshooting.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
   </head>
-  <body>
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="backmatter.html" title="Credits"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="troubleshooting.html" title="Troubleshooting"
-             accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Scapy 3.0.0 documentation</a> &raquo;</li> 
-      </ul>
-    </div>  
+  <body role="document">  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="scapy-development">
 <h1>Scapy development<a class="headerlink" href="#scapy-development" title="Permalink to this headline">¶</a></h1>
@@ -131,7 +120,7 @@ print(a)
 a == 1
 </pre></div>
 </div>
-<p>Python statements are identified by the lack of a defined UTScapy syntax specifier. The Python statements are fed directly to the Python interpreter as if one is operating within the interactive Scapy shell (<tt class="docutils literal"><span class="pre">interact</span></tt>). Looping, iteration and conditionals are permissible but must be terminated by a blank line. A test set may be comprised of multiple unit tests and multiple test sets may be defined for each campaign. It is even possible to have multiple test campaigns in a particular test definition file. The use of keywords allows testing of subsets of the entire campaign. For example, during development of a test campaign, the user may wish to mark new tests under development with the keyword “debug”. Once the tests run successfully to their desired conclusion, the keyword “debug” could be removed. Keywords such as “regression” or “limited” could be used as well.</p>
+<p>Python statements are identified by the lack of a defined UTScapy syntax specifier. The Python statements are fed directly to the Python interpreter as if one is operating within the interactive Scapy shell (<code class="docutils literal"><span class="pre">interact</span></code>). Looping, iteration and conditionals are permissible but must be terminated by a blank line. A test set may be comprised of multiple unit tests and multiple test sets may be defined for each campaign. It is even possible to have multiple test campaigns in a particular test definition file. The use of keywords allows testing of subsets of the entire campaign. For example, during development of a test campaign, the user may wish to mark new tests under development with the keyword “debug”. Once the tests run successfully to their desired conclusion, the keyword “debug” could be removed. Keywords such as “regression” or “limited” could be used as well.</p>
 <p>It is important to note that UTScapy uses the truth value from the last Python statement as the indicator as to whether a test passed or failed. Multiple logical tests may appear on the last line. If the result is 0 or False, the test fails. Otherwise, the test passes. Use of an assert() statement can force evaluation of intermediate values if needed.</p>
 <p>The syntax for UTScapy is shown in Table 3 - UTScapy command line syntax:</p>
 <div class="highlight-python"><div class="highlight"><pre>[root@localhost scapy]# ./UTscapy.py –h
@@ -152,7 +141,7 @@ Usage: UTscapy [-m module] [-f {text|ansi|HTML|LaTeX}] [-o output_file]
 </pre></div>
 </div>
 <p>Table 3 - UTScapy command line syntax</p>
-<p>All arguments are optional. Arguments that have no associated argument value may be strung together (i.e. <tt class="docutils literal"><span class="pre">–lqF</span></tt>). If no testfile is specified, the test definition comes from &lt;STDIN&gt;. Similarly, if no output file is specified it is directed to &lt;STDOUT&gt;. The default output format is “ansi”. Table 4 lists the arguments, the associated argument value and their meaning to UTScapy.</p>
+<p>All arguments are optional. Arguments that have no associated argument value may be strung together (i.e. <code class="docutils literal"><span class="pre">–lqF</span></code>). If no testfile is specified, the test definition comes from &lt;STDIN&gt;. Similarly, if no output file is specified it is directed to &lt;STDOUT&gt;. The default output format is “ansi”. Table 4 lists the arguments, the associated argument value and their meaning to UTScapy.</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="10%" />
@@ -230,7 +219,7 @@ invoked by UTScapy as “__main__”.</td>
 </tbody>
 </table>
 <p>Table 4 - UTScapy parameters</p>
-<p>Table 5 shows a simple test campaign with multiple test set definitions. Additionally, keywords are specified that allow a limited number of test cases to be executed. Notice the use of the <tt class="docutils literal"><span class="pre">assert()</span></tt> statement in test 3 and 5 used to check intermediate results. Tests 2 and 5 will fail by design.</p>
+<p>Table 5 shows a simple test campaign with multiple test set definitions. Additionally, keywords are specified that allow a limited number of test cases to be executed. Notice the use of the <code class="docutils literal"><span class="pre">assert()</span></code> statement in test 3 and 5 used to check intermediate results. Tests 2 and 5 will fail by design.</p>
 <div class="highlight-python"><div class="highlight"><pre>% Example Test Campaign
 
 # Comment describing this campaign
@@ -289,11 +278,11 @@ print(e)
 e == 1296
 </pre></div>
 </div>
-<p>To see an example that is targeted to Scapy, go to <a class="reference external" href="http://www.secdev.org/projects/UTscapy">http://www.secdev.org/projects/UTscapy</a>. Cut and paste the example at the bottom of the page to the file <tt class="docutils literal"><span class="pre">demo_campaign.txt</span></tt> and run UTScapy against it:</p>
+<p>To see an example that is targeted to Scapy, go to <a class="reference external" href="http://www.secdev.org/projects/UTscapy">http://www.secdev.org/projects/UTscapy</a>. Cut and paste the example at the bottom of the page to the file <code class="docutils literal"><span class="pre">demo_campaign.txt</span></code> and run UTScapy against it:</p>
 <div class="highlight-python"><div class="highlight"><pre>./UTscapy.py -t demo_campaign.txt -f html -o demo_campaign.html –F -l
 </pre></div>
 </div>
-<p>Examine the output generated in file <tt class="docutils literal"><span class="pre">demo_campaign.html</span></tt>.</p>
+<p>Examine the output generated in file <code class="docutils literal"><span class="pre">demo_campaign.html</span></code>.</p>
 </div>
 </div>
 </div>
@@ -302,7 +291,7 @@ e == 1296
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
@@ -317,19 +306,23 @@ e == 1296
 </ul>
 </li>
 </ul>
-
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="troubleshooting.html"
-                        title="previous chapter">Troubleshooting</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="backmatter.html"
-                        title="next chapter">Credits</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/development.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="troubleshooting.html" title="previous chapter">Troubleshooting</a></li>
+      <li>Next: <a href="backmatter.html" title="next chapter">Credits</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/development.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -346,25 +339,20 @@ e == 1296
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="backmatter.html" title="Credits"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="troubleshooting.html" title="Troubleshooting"
-             >previous</a> |</li>
-        <li><a href="index.html">Scapy 3.0.0 documentation</a> &raquo;</li> 
-      </ul>
-    </div>
     <div class="footer">
-        &copy; Copyright 2008, 2009 Philippe Biondi and the Scapy community.
-      Last updated on Nov 28, 2015.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+      &copy;2008, 2009 Philippe Biondi and the Scapy community.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/development.txt"
+          rel="nofollow">Page source</a>
     </div>
+
+    
+
+    
   </body>
 </html>

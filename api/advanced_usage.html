@@ -25,29 +25,18 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Scapy 3.0.0 documentation" href="index.html" />
     <link rel="next" title="Build your own tools" href="extending.html" />
-    <link rel="prev" title="Usage" href="usage.html" /> 
+    <link rel="prev" title="Usage" href="usage.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
   </head>
-  <body>
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="extending.html" title="Build your own tools"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="usage.html" title="Usage"
-             accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Scapy 3.0.0 documentation</a> &raquo;</li> 
-      </ul>
-    </div>  
+  <body role="document">  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="advanced-usage">
 <h1>Advanced usage<a class="headerlink" href="#advanced-usage" title="Permalink to this headline">¶</a></h1>
@@ -66,7 +55,7 @@
 <p>ASN.1 is a notation whose goal is to specify formats for data exchange. It is independant of the way data is encoded. Data encoding is specified in Encoding Rules.</p>
 <p>The most used encoding rules are BER (Basic Encoding Rules) and DER (Distinguished Encoding Rules). Both look the same, but the latter is specified to guarantee uniqueness of encoding. This property is quite interesting when speaking about cryptography, hashes and signatures.</p>
 <p>ASN.1 provides basic objects: integers, many kinds of strings, floats, booleans, containers, etc. They are grouped in the so called Universal class. A given protocol can provide other objects which will be grouped in the Context class. For example, SNMP defines PDU_GET or PDU_SET objects. There are also the Application and Private classes.</p>
-<p>Each of theses objects is given a tag that will be used by the encoding rules. Tags from 1 are used for Universal class. 1 is boolean, 2 is integer, 3 is a bit string, 6 is an OID, 48 is for a sequence. Tags from the <tt class="docutils literal"><span class="pre">Context</span></tt> class begin at 0xa0. When encountering an object tagged by 0xa0, we&#8217;ll need to know the context to be able to decode it. For example, in SNMP context, 0xa0 is a PDU_GET object, while in X509 context, it is a container for the certificate version.</p>
+<p>Each of theses objects is given a tag that will be used by the encoding rules. Tags from 1 are used for Universal class. 1 is boolean, 2 is integer, 3 is a bit string, 6 is an OID, 48 is for a sequence. Tags from the <code class="docutils literal"><span class="pre">Context</span></code> class begin at 0xa0. When encountering an object tagged by 0xa0, we&#8217;ll need to know the context to be able to decode it. For example, in SNMP context, 0xa0 is a PDU_GET object, while in X509 context, it is a container for the certificate version.</p>
 <p>Other objects are created by assembling all those basic brick objects. The composition is done using sequences and arrays (sets) of previously defined or existing objects. The final object (an X509 certificate, a SNMP packet) is a tree whose non-leaf nodes are sequences and sets objects (or derived context objects), and whose leaf nodes are integers, strings, OID, etc.</p>
 </div>
 <div class="section" id="scapy-and-asn-1">
@@ -76,29 +65,29 @@
 <h4>ASN.1 engine<a class="headerlink" href="#asn-1-engine" title="Permalink to this headline">¶</a></h4>
 <p>Note: many of the classes definitions presented here use metaclasses. If you don&#8217;t look precisely at the source code and you only rely on my captures, you may think they sometimes exhibit a kind of magic behaviour.
 ``
-Scapy ASN.1 engine provides classes to link objects and their tags. They inherit from the <tt class="docutils literal"><span class="pre">ASN1_Class</span></tt>. The first one is <tt class="docutils literal"><span class="pre">ASN1_Class_UNIVERSAL</span></tt>, which provide tags for most Universal objects. Each new context (<tt class="docutils literal"><span class="pre">SNMP</span></tt>, <tt class="docutils literal"><span class="pre">X509</span></tt>) will inherit from it and add its own objects.</p>
+Scapy ASN.1 engine provides classes to link objects and their tags. They inherit from the <code class="docutils literal"><span class="pre">ASN1_Class</span></code>. The first one is <code class="docutils literal"><span class="pre">ASN1_Class_UNIVERSAL</span></code>, which provide tags for most Universal objects. Each new context (<code class="docutils literal"><span class="pre">SNMP</span></code>, <code class="docutils literal"><span class="pre">X509</span></code>) will inherit from it and add its own objects.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ASN1_Class_UNIVERSAL</span><span class="p">(</span><span class="n">ASN1_Class</span><span class="p">):</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;UNIVERSAL&quot;</span>
-<span class="c"># [...]</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;UNIVERSAL&quot;</span>
+<span class="c1"># [...]</span>
     <span class="n">BOOLEAN</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">INTEGER</span> <span class="o">=</span> <span class="mi">2</span>
     <span class="n">BIT_STRING</span> <span class="o">=</span> <span class="mi">3</span>
-<span class="c"># [...]</span>
+<span class="c1"># [...]</span>
 
 <span class="k">class</span> <span class="nc">ASN1_Class_SNMP</span><span class="p">(</span><span class="n">ASN1_Class_UNIVERSAL</span><span class="p">):</span>
-    <span class="n">name</span><span class="o">=</span><span class="s">&quot;SNMP&quot;</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;SNMP&quot;</span>
     <span class="n">PDU_GET</span> <span class="o">=</span> <span class="mh">0xa0</span>
     <span class="n">PDU_NEXT</span> <span class="o">=</span> <span class="mh">0xa1</span>
     <span class="n">PDU_RESPONSE</span> <span class="o">=</span> <span class="mh">0xa2</span>
 
 <span class="k">class</span> <span class="nc">ASN1_Class_X509</span><span class="p">(</span><span class="n">ASN1_Class_UNIVERSAL</span><span class="p">):</span>
-    <span class="n">name</span><span class="o">=</span><span class="s">&quot;X509&quot;</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;X509&quot;</span>
     <span class="n">CONT0</span> <span class="o">=</span> <span class="mh">0xa0</span>
     <span class="n">CONT1</span> <span class="o">=</span> <span class="mh">0xa1</span>
-<span class="c"># [...]</span>
+<span class="c1"># [...]</span>
 </pre></div>
 </div>
-<p>All ASN.1 objects are represented by simple Python instances that act as nutshells for the raw values. The simple logic is handled by <tt class="docutils literal"><span class="pre">ASN1_Object</span></tt> whose they inherit from. Hence they are quite simple:</p>
+<p>All ASN.1 objects are represented by simple Python instances that act as nutshells for the raw values. The simple logic is handled by <code class="docutils literal"><span class="pre">ASN1_Object</span></code> whose they inherit from. Hence they are quite simple:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ASN1_INTEGER</span><span class="p">(</span><span class="n">ASN1_Object</span><span class="p">):</span>
     <span class="n">tag</span> <span class="o">=</span> <span class="n">ASN1_Class_UNIVERSAL</span><span class="o">.</span><span class="n">INTEGER</span>
 
@@ -110,7 +99,7 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 </pre></div>
 </div>
 <p>These instances can be assembled to create an ASN.1 tree:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">=</span><span class="n">ASN1_SEQUENCE</span><span class="p">([</span><span class="n">ASN1_INTEGER</span><span class="p">(</span><span class="mi">7</span><span class="p">),</span><span class="n">ASN1_STRING</span><span class="p">(</span><span class="s">&quot;egg&quot;</span><span class="p">),</span><span class="n">ASN1_SEQUENCE</span><span class="p">([</span><span class="n">ASN1_BOOLEAN</span><span class="p">(</span><span class="bp">False</span><span class="p">)])])</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">=</span><span class="n">ASN1_SEQUENCE</span><span class="p">([</span><span class="n">ASN1_INTEGER</span><span class="p">(</span><span class="mi">7</span><span class="p">),</span><span class="n">ASN1_STRING</span><span class="p">(</span><span class="s2">&quot;egg&quot;</span><span class="p">),</span><span class="n">ASN1_SEQUENCE</span><span class="p">([</span><span class="n">ASN1_BOOLEAN</span><span class="p">(</span><span class="bp">False</span><span class="p">)])])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span>
 <span class="go">&lt;ASN1_SEQUENCE[[&lt;ASN1_INTEGER[7]&gt;, &lt;ASN1_STRING[&#39;egg&#39;]&gt;, &lt;ASN1_SEQUENCE[[&lt;ASN1_BOOLEAN[False]&gt;]]&gt;]]&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -125,16 +114,16 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 <div class="section" id="encoding-engines">
 <h4>Encoding engines<a class="headerlink" href="#encoding-engines" title="Permalink to this headline">¶</a></h4>
 <p>As with the standard, ASN.1 and encoding are independent. We have just seen how to create a compounded ASN.1 object. To encode or decode it, we need to choose an encoding rule. Scapy provides only BER for the moment (actually, it may be DER. DER looks like BER except only minimal encoding is authorised which may well be what I did). I call this an ASN.1 codec.</p>
-<p>Encoding and decoding are done using class methods provided by the codec. For example the <tt class="docutils literal"><span class="pre">BERcodec_INTEGER</span></tt> class provides a <tt class="docutils literal"><span class="pre">.enc()</span></tt> and a <tt class="docutils literal"><span class="pre">.dec()</span></tt> class methods that can convert between an encoded string and a value of their type. They all inherit from BERcodec_Object which is able to decode objects from any type:</p>
+<p>Encoding and decoding are done using class methods provided by the codec. For example the <code class="docutils literal"><span class="pre">BERcodec_INTEGER</span></code> class provides a <code class="docutils literal"><span class="pre">.enc()</span></code> and a <code class="docutils literal"><span class="pre">.dec()</span></code> class methods that can convert between an encoded string and a value of their type. They all inherit from BERcodec_Object which is able to decode objects from any type:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">BERcodec_INTEGER</span><span class="o">.</span><span class="n">enc</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
 <span class="go">&#39;\x02\x01\x07&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">BERcodec_BIT_STRING</span><span class="o">.</span><span class="n">enc</span><span class="p">(</span><span class="s">&quot;egg&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">BERcodec_BIT_STRING</span><span class="o">.</span><span class="n">enc</span><span class="p">(</span><span class="s2">&quot;egg&quot;</span><span class="p">)</span>
 <span class="go">&#39;\x03\x03egg&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">BERcodec_STRING</span><span class="o">.</span><span class="n">enc</span><span class="p">(</span><span class="s">&quot;egg&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">BERcodec_STRING</span><span class="o">.</span><span class="n">enc</span><span class="p">(</span><span class="s2">&quot;egg&quot;</span><span class="p">)</span>
 <span class="go">&#39;\x04\x03egg&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">BERcodec_STRING</span><span class="o">.</span><span class="n">dec</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\x04\x03</span><span class="s">egg&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">BERcodec_STRING</span><span class="o">.</span><span class="n">dec</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\x04\x03</span><span class="s1">egg&#39;</span><span class="p">)</span>
 <span class="go">(&lt;ASN1_STRING[&#39;egg&#39;]&gt;, &#39;&#39;)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">BERcodec_STRING</span><span class="o">.</span><span class="n">dec</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\x03\x03</span><span class="s">egg&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">BERcodec_STRING</span><span class="o">.</span><span class="n">dec</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\x03\x03</span><span class="s1">egg&#39;</span><span class="p">)</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;console&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">?</span>
   File <span class="nb">&quot;/usr/bin/scapy&quot;</span>, line <span class="m">2099</span>, in <span class="n">dec</span>
@@ -152,24 +141,11 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 <span class="go">None</span>
 <span class="go">### Remaining ###</span>
 <span class="go">&#39;\x03\x03egg&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">BERcodec_Object</span><span class="o">.</span><span class="n">dec</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\x03\x03</span><span class="s">egg&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">BERcodec_Object</span><span class="o">.</span><span class="n">dec</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\x03\x03</span><span class="s1">egg&#39;</span><span class="p">)</span>
 <span class="go">(&lt;ASN1_BIT_STRING[&#39;egg&#39;]&gt;, &#39;&#39;)</span>
-<span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;console&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">?</span>
-  File <span class="nb">&quot;/usr/bin/scapy&quot;</span>, line <span class="m">2099</span>, in <span class="n">dec</span>
-    <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">do_dec</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">safe</span><span class="p">)</span>
-  File <span class="nb">&quot;/usr/bin/scapy&quot;</span>, line <span class="m">2178</span>, in <span class="n">do_dec</span>
-    <span class="n">l</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">t</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">check_type_check_len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-  File <span class="nb">&quot;/usr/bin/scapy&quot;</span>, line <span class="m">2076</span>, in <span class="n">check_type_check_len</span>
-    <span class="n">l</span><span class="p">,</span><span class="n">s3</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">check_type_get_len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-  File <span class="nb">&quot;/usr/bin/scapy&quot;</span>, line <span class="m">2069</span>, in <span class="n">check_type_get_len</span>
-    <span class="n">s2</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">check_type</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-  File <span class="nb">&quot;/usr/bin/scapy&quot;</span>, line <span class="m">2065</span>, in <span class="n">check_type</span>
-    <span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="nb">ord</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">ord</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="n">cls</span><span class="o">.</span><span class="n">tag</span><span class="p">),</span> <span class="n">remaining</span><span class="o">=</span><span class="n">s</span><span class="p">)</span>
-<span class="gr">BER_BadTag_Decoding_Error</span>: <span class="n">BERcodec_STRING: Got tag [3/0x3] while expecting &lt;ASN1Tag STRING[4]&gt;</span>
 </pre></div>
 </div>
-<p>ASN.1 objects are encoded using their <tt class="docutils literal"><span class="pre">.enc()</span></tt> method. This method must be called with the codec we want to use. All codecs are referenced in the ASN1_Codecs object. <tt class="docutils literal"><span class="pre">str()</span></tt> can also be used. In this case, the default codec (<tt class="docutils literal"><span class="pre">conf.ASN1_default_codec</span></tt>) will be used.</p>
+<p>ASN.1 objects are encoded using their <code class="docutils literal"><span class="pre">.enc()</span></code> method. This method must be called with the codec we want to use. All codecs are referenced in the ASN1_Codecs object. <code class="docutils literal"><span class="pre">str()</span></code> can also be used. In this case, the default codec (<code class="docutils literal"><span class="pre">conf.ASN1_default_codec</span></code>) will be used.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">enc</span><span class="p">(</span><span class="n">ASN1_Codecs</span><span class="o">.</span><span class="n">BER</span><span class="p">)</span>
 <span class="go">&#39;0\r\x02\x01\x07\x04\x03egg0\x03\x01\x01\x00&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -186,43 +162,43 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 <span class="go">&#39;&#39;</span>
 </pre></div>
 </div>
-<p>By default, decoding is done using the <tt class="docutils literal"><span class="pre">Universal</span></tt> class, which means objects defined in the <tt class="docutils literal"><span class="pre">Context</span></tt> class will not be decoded. There is a good reason for that: the decoding depends on the context!</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cert</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
-<span class="gp">... </span><span class="s">MIIF5jCCA86gAwIBAgIBATANBgkqhkiG9w0BAQUFADCBgzELMAkGA1UEBhMC</span>
-<span class="gp">... </span><span class="s">VVMxHTAbBgNVBAoTFEFPTCBUaW1lIFdhcm5lciBJbmMuMRwwGgYDVQQLExNB</span>
-<span class="gp">... </span><span class="s">bWVyaWNhIE9ubGluZSBJbmMuMTcwNQYDVQQDEy5BT0wgVGltZSBXYXJuZXIg</span>
-<span class="gp">... </span><span class="s">Um9vdCBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eSAyMB4XDTAyMDUyOTA2MDAw</span>
-<span class="gp">... </span><span class="s">MFoXDTM3MDkyODIzNDMwMFowgYMxCzAJBgNVBAYTAlVTMR0wGwYDVQQKExRB</span>
-<span class="gp">... </span><span class="s">T0wgVGltZSBXYXJuZXIgSW5jLjEcMBoGA1UECxMTQW1lcmljYSBPbmxpbmUg</span>
-<span class="gp">... </span><span class="s">SW5jLjE3MDUGA1UEAxMuQU9MIFRpbWUgV2FybmVyIFJvb3QgQ2VydGlmaWNh</span>
-<span class="gp">... </span><span class="s">dGlvbiBBdXRob3JpdHkgMjCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoC</span>
-<span class="gp">... </span><span class="s">ggIBALQ3WggWmRToVbEbJGv8x4vmh6mJ7ouZzU9AhqS2TcnZsdw8TQ2FTBVs</span>
-<span class="gp">... </span><span class="s">RotSeJ/4I/1n9SQ6aF3Q92RhQVSji6UI0ilbm2BPJoPRYxJWSXakFsKlnUWs</span>
-<span class="gp">... </span><span class="s">i4SVqBax7J/qJBrvuVdcmiQhLE0OcR+mrF1FdAOYxFSMFkpBd4aVdQxHAWZg</span>
-<span class="gp">... </span><span class="s">/BXxD+r1FHjHDtdugRxev17nOirYlxcwfACtCJ0zr7iZYYCLqJV+FNwSbKTQ</span>
-<span class="gp">... </span><span class="s">2O9ASQI2+W6p1h2WVgSysy0WVoaP2SBXgM1nEG2wTPDaRrbqJS5Gr42whTg0</span>
-<span class="gp">... </span><span class="s">ixQmgiusrpkLjhTXUr2eacOGAgvqdnUxCc4zGSGFQ+aJLZ8lN2fxI2rSAG2X</span>
-<span class="gp">... </span><span class="s">+Z/nKcrdH9cG6rjJuQkhn8g/BsXS6RJGAE57COtCPStIbp1n3UsC5ETzkxml</span>
-<span class="gp">... </span><span class="s">J85per5n0/xQpCyrw2u544BMzwVhSyvcG7mm0tCq9Stz+86QNZ8MUhy/XCFh</span>
-<span class="gp">... </span><span class="s">EVsVS6kkUfykXPcXnbDS+gfpj1bkGoxoigTTfFrjnqKhynFbotSg5ymFXQNo</span>
-<span class="gp">... </span><span class="s">Kk/SBtc9+cMDLz9l+WceR0DTYw/j1Y75hauXTLPXJuuWCpTehTacyH+BCQJJ</span>
-<span class="gp">... </span><span class="s">Kg71ZDIMgtG6aoIbs0t0EfOMd9afv9w3pKdVBC/UMejTRrkDfNoSTllkt1Ex</span>
-<span class="gp">... </span><span class="s">MVCgyhwn2RAurda9EGYrw7AiShJbAgMBAAGjYzBhMA8GA1UdEwEB/wQFMAMB</span>
-<span class="gp">... </span><span class="s">Af8wHQYDVR0OBBYEFE9pbQN+nZ8HGEO8txBO1b+pxCAoMB8GA1UdIwQYMBaA</span>
-<span class="gp">... </span><span class="s">FE9pbQN+nZ8HGEO8txBO1b+pxCAoMA4GA1UdDwEB/wQEAwIBhjANBgkqhkiG</span>
-<span class="gp">... </span><span class="s">9w0BAQUFAAOCAgEAO/Ouyuguh4X7ZVnnrREUpVe8WJ8kEle7+z802u6teio0</span>
-<span class="gp">... </span><span class="s">cnAxa8cZmIDJgt43d15Ui47y6mdPyXSEkVYJ1eV6moG2gcKtNuTxVBFT8zRF</span>
-<span class="gp">... </span><span class="s">ASbI5Rq8NEQh3q0l/HYWdyGQgJhXnU7q7C+qPBR7V8F+GBRn7iTGvboVsNIY</span>
-<span class="gp">... </span><span class="s">vbdVgaxTwOjdaRITQrcCtQVBynlQboIOcXKTRuidDV29rs4prWPVVRaAMCf/</span>
-<span class="gp">... </span><span class="s">drr3uNZK49m1+VLQTkCpx+XCMseqdiThawVQ68W/ClTluUI8JPu3B5wwn3la</span>
-<span class="gp">... </span><span class="s">5uBAUhX0/Kr0VvlEl4ftDmVyXr4m+02kLQgH3thcoNyBM5kYJRF3p+v9WAks</span>
-<span class="gp">... </span><span class="s">mWsbivNSPxpNSGDxoPYzAlOL7SUJuA0t7Zdz7NeWH45gDtoQmy8YJPamTQr5</span>
-<span class="gp">... </span><span class="s">O8t1wswvziRpyQoijlmn94IM19drNZxDAGrElWe6nEXLuA4399xOAU++CrYD</span>
-<span class="gp">... </span><span class="s">062KRffaJ00psUjf5BHklka9bAI+1lHIlRcBFanyqqryvy9lG2/QuRqT9Y41</span>
-<span class="gp">... </span><span class="s">xICHPpQvZuTpqP9BnHAqTyo5GJUefvthATxRCC4oGKQWDzH9OmwjkyB24f0H</span>
-<span class="gp">... </span><span class="s">hdFbP9IcczLd+rn4jM8Ch3qaluTtT4mNU0OrDhPAARW0eTjb/G49nlG2uBOL</span>
-<span class="gp">... </span><span class="s">Z8/5fNkiHfZdxRwBL5joeiQYvITX+txyW/fBOmg=</span>
-<span class="gp">... </span><span class="s">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&quot;base64&quot;</span><span class="p">)</span>
+<p>By default, decoding is done using the <code class="docutils literal"><span class="pre">Universal</span></code> class, which means objects defined in the <code class="docutils literal"><span class="pre">Context</span></code> class will not be decoded. There is a good reason for that: the decoding depends on the context!</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cert</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="gp">... </span><span class="s2">MIIF5jCCA86gAwIBAgIBATANBgkqhkiG9w0BAQUFADCBgzELMAkGA1UEBhMC</span>
+<span class="gp">... </span><span class="s2">VVMxHTAbBgNVBAoTFEFPTCBUaW1lIFdhcm5lciBJbmMuMRwwGgYDVQQLExNB</span>
+<span class="gp">... </span><span class="s2">bWVyaWNhIE9ubGluZSBJbmMuMTcwNQYDVQQDEy5BT0wgVGltZSBXYXJuZXIg</span>
+<span class="gp">... </span><span class="s2">Um9vdCBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eSAyMB4XDTAyMDUyOTA2MDAw</span>
+<span class="gp">... </span><span class="s2">MFoXDTM3MDkyODIzNDMwMFowgYMxCzAJBgNVBAYTAlVTMR0wGwYDVQQKExRB</span>
+<span class="gp">... </span><span class="s2">T0wgVGltZSBXYXJuZXIgSW5jLjEcMBoGA1UECxMTQW1lcmljYSBPbmxpbmUg</span>
+<span class="gp">... </span><span class="s2">SW5jLjE3MDUGA1UEAxMuQU9MIFRpbWUgV2FybmVyIFJvb3QgQ2VydGlmaWNh</span>
+<span class="gp">... </span><span class="s2">dGlvbiBBdXRob3JpdHkgMjCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoC</span>
+<span class="gp">... </span><span class="s2">ggIBALQ3WggWmRToVbEbJGv8x4vmh6mJ7ouZzU9AhqS2TcnZsdw8TQ2FTBVs</span>
+<span class="gp">... </span><span class="s2">RotSeJ/4I/1n9SQ6aF3Q92RhQVSji6UI0ilbm2BPJoPRYxJWSXakFsKlnUWs</span>
+<span class="gp">... </span><span class="s2">i4SVqBax7J/qJBrvuVdcmiQhLE0OcR+mrF1FdAOYxFSMFkpBd4aVdQxHAWZg</span>
+<span class="gp">... </span><span class="s2">/BXxD+r1FHjHDtdugRxev17nOirYlxcwfACtCJ0zr7iZYYCLqJV+FNwSbKTQ</span>
+<span class="gp">... </span><span class="s2">2O9ASQI2+W6p1h2WVgSysy0WVoaP2SBXgM1nEG2wTPDaRrbqJS5Gr42whTg0</span>
+<span class="gp">... </span><span class="s2">ixQmgiusrpkLjhTXUr2eacOGAgvqdnUxCc4zGSGFQ+aJLZ8lN2fxI2rSAG2X</span>
+<span class="gp">... </span><span class="s2">+Z/nKcrdH9cG6rjJuQkhn8g/BsXS6RJGAE57COtCPStIbp1n3UsC5ETzkxml</span>
+<span class="gp">... </span><span class="s2">J85per5n0/xQpCyrw2u544BMzwVhSyvcG7mm0tCq9Stz+86QNZ8MUhy/XCFh</span>
+<span class="gp">... </span><span class="s2">EVsVS6kkUfykXPcXnbDS+gfpj1bkGoxoigTTfFrjnqKhynFbotSg5ymFXQNo</span>
+<span class="gp">... </span><span class="s2">Kk/SBtc9+cMDLz9l+WceR0DTYw/j1Y75hauXTLPXJuuWCpTehTacyH+BCQJJ</span>
+<span class="gp">... </span><span class="s2">Kg71ZDIMgtG6aoIbs0t0EfOMd9afv9w3pKdVBC/UMejTRrkDfNoSTllkt1Ex</span>
+<span class="gp">... </span><span class="s2">MVCgyhwn2RAurda9EGYrw7AiShJbAgMBAAGjYzBhMA8GA1UdEwEB/wQFMAMB</span>
+<span class="gp">... </span><span class="s2">Af8wHQYDVR0OBBYEFE9pbQN+nZ8HGEO8txBO1b+pxCAoMB8GA1UdIwQYMBaA</span>
+<span class="gp">... </span><span class="s2">FE9pbQN+nZ8HGEO8txBO1b+pxCAoMA4GA1UdDwEB/wQEAwIBhjANBgkqhkiG</span>
+<span class="gp">... </span><span class="s2">9w0BAQUFAAOCAgEAO/Ouyuguh4X7ZVnnrREUpVe8WJ8kEle7+z802u6teio0</span>
+<span class="gp">... </span><span class="s2">cnAxa8cZmIDJgt43d15Ui47y6mdPyXSEkVYJ1eV6moG2gcKtNuTxVBFT8zRF</span>
+<span class="gp">... </span><span class="s2">ASbI5Rq8NEQh3q0l/HYWdyGQgJhXnU7q7C+qPBR7V8F+GBRn7iTGvboVsNIY</span>
+<span class="gp">... </span><span class="s2">vbdVgaxTwOjdaRITQrcCtQVBynlQboIOcXKTRuidDV29rs4prWPVVRaAMCf/</span>
+<span class="gp">... </span><span class="s2">drr3uNZK49m1+VLQTkCpx+XCMseqdiThawVQ68W/ClTluUI8JPu3B5wwn3la</span>
+<span class="gp">... </span><span class="s2">5uBAUhX0/Kr0VvlEl4ftDmVyXr4m+02kLQgH3thcoNyBM5kYJRF3p+v9WAks</span>
+<span class="gp">... </span><span class="s2">mWsbivNSPxpNSGDxoPYzAlOL7SUJuA0t7Zdz7NeWH45gDtoQmy8YJPamTQr5</span>
+<span class="gp">... </span><span class="s2">O8t1wswvziRpyQoijlmn94IM19drNZxDAGrElWe6nEXLuA4399xOAU++CrYD</span>
+<span class="gp">... </span><span class="s2">062KRffaJ00psUjf5BHklka9bAI+1lHIlRcBFanyqqryvy9lG2/QuRqT9Y41</span>
+<span class="gp">... </span><span class="s2">xICHPpQvZuTpqP9BnHAqTyo5GJUefvthATxRCC4oGKQWDzH9OmwjkyB24f0H</span>
+<span class="gp">... </span><span class="s2">hdFbP9IcczLd+rn4jM8Ch3qaluTtT4mNU0OrDhPAARW0eTjb/G49nlG2uBOL</span>
+<span class="gp">... </span><span class="s2">Z8/5fNkiHfZdxRwBL5joeiQYvITX+txyW/fBOmg=</span>
+<span class="gp">... </span><span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;base64&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">dcert</span><span class="p">,</span><span class="n">remain</span><span class="p">)</span> <span class="o">=</span> <span class="n">BERcodec_Object</span><span class="o">.</span><span class="n">dec</span><span class="p">(</span><span class="n">cert</span><span class="p">)</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;console&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">?</span>
@@ -245,38 +221,15 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
   File <span class="nb">&quot;/usr/bin/scapy&quot;</span>, line <span class="m">2099</span>, in <span class="n">dec</span>
     <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">do_dec</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">safe</span><span class="p">)</span>
   File <span class="nb">&quot;/usr/bin/scapy&quot;</span>, line <span class="m">2092</span>, in <span class="n">do_dec</span>
-    <span class="k">raise</span> <span class="n">BER_Decoding_Error</span><span class="p">(</span><span class="s">&quot;Unknown prefix [</span><span class="si">%02x</span><span class="s">] for [</span><span class="si">%r</span><span class="s">]&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">t</span><span class="p">),</span> <span class="n">remaining</span><span class="o">=</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="n">BER_Decoding_Error</span><span class="p">(</span><span class="s2">&quot;Unknown prefix [</span><span class="si">%02x</span><span class="s2">] for [</span><span class="si">%r</span><span class="s2">]&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">t</span><span class="p">),</span> <span class="n">remaining</span><span class="o">=</span><span class="n">s</span><span class="p">)</span>
 <span class="gr">BER_Decoding_Error</span>: <span class="n">Unknown prefix [a0] for [&#39;\xa0\x03\x02\x01\x02\x02\x01\x010\r\x06\t*\x86H...&#39;]</span>
 <span class="go">### Already decoded ###</span>
 <span class="go">[[]]</span>
 <span class="go">### Remaining ###</span>
 <span class="go">&#39;\xa0\x03\x02\x01\x02\x02\x01\x010\r\x06\t*\x86H\x86\xf7\r\x01\x01\x05\x05\x000\x81\x831\x0b0\t\x06\x03U\x04\x06\x13\x02US1\x1d0\x1b\x06\x03U\x04\n\x13\x14AOL Time Warner Inc.1\x1c0\x1a\x06\x03U\x04\x0b\x13\x13America Online Inc.1705\x06\x03U\x04\x03\x13.AOL Time Warner Root Certification Authority 20\x1e\x17\r020529060000Z\x17\r370928234300Z0\x81\x831\x0b0\t\x06\x03U\x04\x06\x13\x02US1\x1d0\x1b\x06\x03U\x04\n\x13\x14AOL Time Warner Inc.1\x1c0\x1a\x06\x03U\x04\x0b\x13\x13America Online Inc.1705\x06\x03U\x04\x03\x13.AOL Time Warner Root Certification Authority 20\x82\x02&quot;0\r\x06\t*\x86H\x86\xf7\r\x01\x01\x01\x05\x00\x03\x82\x02\x0f\x000\x82\x02\n\x02\x82\x02\x01\x00\xb47Z\x08\x16\x99\x14\xe8U\xb1\x1b$k\xfc\xc7\x8b\xe6\x87\xa9\x89\xee\x8b\x99\xcdO@\x86\xa4\xb6M\xc9\xd9\xb1\xdc&lt;M\r\x85L\x15lF\x8bRx\x9f\xf8#\xfdg\xf5$:h]\xd0\xf7daAT\xa3\x8b\xa5\x08\xd2)[\x9b`O&amp;\x83\xd1c\x12VIv\xa4\x16\xc2\xa5\x9dE\xac\x8b\x84\x95\xa8\x16\xb1\xec\x9f\xea$\x1a\xef\xb9W\\\x9a$!,M\x0eq\x1f\xa6\xac]Et\x03\x98\xc4T\x8c\x16JAw\x86\x95u\x0cG\x01f`\xfc\x15\xf1\x0f\xea\xf5\x14x\xc7\x0e\xd7n\x81\x1c^\xbf^\xe7:*\xd8\x97\x170|\x00\xad\x08\x9d3\xaf\xb8\x99a\x80\x8b\xa8\x95~\x14\xdc\x12l\xa4\xd0\xd8\xef@I\x026\xf9n\xa9\xd6\x1d\x96V\x04\xb2\xb3-\x16V\x86\x8f\xd9 W\x80\xcdg\x10m\xb0L\xf0\xdaF\xb6\xea%.F\xaf\x8d\xb0\x8584\x8b\x14&amp;\x82+\xac\xae\x99\x0b\x8e\x14\xd7R\xbd\x9ei\xc3\x86\x02\x0b\xeavu1\t\xce3\x19!\x85C\xe6\x89-\x9f%7g\xf1#j\xd2\x00m\x97\xf9\x9f\xe7)\xca\xdd\x1f\xd7\x06\xea\xb8\xc9\xb9\t!\x9f\xc8?\x06\xc5\xd2\xe9\x12F\x00N{\x08\xebB=+Hn\x9dg\xddK\x02\xe4D\xf3\x93\x19\xa5\&#39;\xceiz\xbeg\xd3\xfcP\xa4,\xab\xc3k\xb9\xe3\x80L\xcf\x05aK+\xdc\x1b\xb9\xa6\xd2\xd0\xaa\xf5+s\xfb\xce\x905\x9f\x0cR\x1c\xbf\\!a\x11[\x15K\xa9$Q\xfc\xa4\\\xf7\x17\x9d\xb0\xd2\xfa\x07\xe9\x8fV\xe4\x1a\x8ch\x8a\x04\xd3|Z\xe3\x9e\xa2\xa1\xcaq[\xa2\xd4\xa0\xe7)\x85]\x03h*O\xd2\x06\xd7=\xf9\xc3\x03/?e\xf9g\x1eG@\xd3c\x0f\xe3\xd5\x8e\xf9\x85\xab\x97L\xb3\xd7&amp;\xeb\x96\n\x94\xde\x856\x9c\xc8\x7f\x81\t\x02I*\x0e\xf5d2\x0c\x82\xd1\xbaj\x82\x1b\xb3Kt\x11\xf3\x8cw\xd6\x9f\xbf\xdc7\xa4\xa7U\x04/\xd41\xe8\xd3F\xb9\x03|\xda\x12NYd\xb7Q11P\xa0\xca\x1c\&#39;\xd9\x10.\xad\xd6\xbd\x10f+\xc3\xb0&quot;J\x12[\x02\x03\x01\x00\x01\xa3c0a0\x0f\x06\x03U\x1d\x13\x01\x01\xff\x04\x050\x03\x01\x01\xff0\x1d\x06\x03U\x1d\x0e\x04\x16\x04\x14Oim\x03~\x9d\x9f\x07\x18C\xbc\xb7\x10N\xd5\xbf\xa9\xc4 (0\x1f\x06\x03U\x1d#\x04\x180\x16\x80\x14Oim\x03~\x9d\x9f\x07\x18C\xbc\xb7\x10N\xd5\xbf\xa9\xc4 (0\x0e\x06\x03U\x1d\x0f\x01\x01\xff\x04\x04\x03\x02\x01\x860\r\x06\t*\x86H\x86\xf7\r\x01\x01\x05\x05\x00\x03\x82\x02\x01\x00;\xf3\xae\xca\xe8.\x87\x85\xfbeY\xe7\xad\x11\x14\xa5W\xbcX\x9f$\x12W\xbb\xfb?4\xda\xee\xadz*4rp1k\xc7\x19\x98\x80\xc9\x82\xde7w^T\x8b\x8e\xf2\xeagO\xc9t\x84\x91V\t\xd5\xe5z\x9a\x81\xb6\x81\xc2\xad6\xe4\xf1T\x11S\xf34E\x01&amp;\xc8\xe5\x1a\xbc4D!\xde\xad%\xfcv\x16w!\x90\x80\x98W\x9dN\xea\xec/\xaa&lt;\x14{W\xc1~\x18\x14g\xee$\xc6\xbd\xba\x15\xb0\xd2\x18\xbd\xb7U\x81\xacS\xc0\xe8\xddi\x12\x13B\xb7\x02\xb5\x05A\xcayPn\x82\x0eqr\x93F\xe8\x9d\r]\xbd\xae\xce)\xadc\xd5U\x16\x800\&#39;\xffv\xba\xf7\xb8\xd6J\xe3\xd9\xb5\xf9R\xd0N@\xa9\xc7\xe5\xc22\xc7\xaav$\xe1k\x05P\xeb\xc5\xbf\nT\xe5\xb9B&lt;$\xfb\xb7\x07\x9c0\x9fyZ\xe6\xe0@R\x15\xf4\xfc\xaa\xf4V\xf9D\x97\x87\xed\x0eer^\xbe&amp;\xfbM\xa4-\x08\x07\xde\xd8\\\xa0\xdc\x813\x99\x18%\x11w\xa7\xeb\xfdX\t,\x99k\x1b\x8a\xf3R?\x1aMH`\xf1\xa0\xf63\x02S\x8b\xed%\t\xb8\r-\xed\x97s\xec\xd7\x96\x1f\x8e`\x0e\xda\x10\x9b/\x18$\xf6\xa6M\n\xf9;\xcbu\xc2\xcc/\xce$i\xc9\n&quot;\x8eY\xa7\xf7\x82\x0c\xd7\xd7k5\x9cC\x00j\xc4\x95g\xba\x9cE\xcb\xb8\x0e7\xf7\xdcN\x01O\xbe\n\xb6\x03\xd3\xad\x8aE\xf7\xda\&#39;M)\xb1H\xdf\xe4\x11\xe4\x96F\xbdl\x02&gt;\xd6Q\xc8\x95\x17\x01\x15\xa9\xf2\xaa\xaa\xf2\xbf/e\x1bo\xd0\xb9\x1a\x93\xf5\x8e5\xc4\x80\x87&gt;\x94/f\xe4\xe9\xa8\xffA\x9cp*O*9\x18\x95\x1e~\xfba\x01&lt;Q\x08.(\x18\xa4\x16\x0f1\xfd:l#\x93 v\xe1\xfd\x07\x85\xd1[?\xd2\x1cs2\xdd\xfa\xb9\xf8\x8c\xcf\x02\x87z\x9a\x96\xe4\xedO\x89\x8dSC\xab\x0e\x13\xc0\x01\x15\xb4y8\xdb\xfcn=\x9eQ\xb6\xb8\x13\x8bg\xcf\xf9|\xd9&quot;\x1d\xf6]\xc5\x1c\x01/\x98\xe8z$\x18\xbc\x84\xd7\xfa\xdcr[\xf7\xc1:h&#39;</span>
-<span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;console&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">?</span>
-  File <span class="nb">&quot;/usr/bin/scapy&quot;</span>, line <span class="m">2099</span>, in <span class="n">dec</span>
-    <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">do_dec</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">safe</span><span class="p">)</span>
-  File <span class="nb">&quot;/usr/bin/scapy&quot;</span>, line <span class="m">2094</span>, in <span class="n">do_dec</span>
-    <span class="k">return</span> <span class="n">codec</span><span class="o">.</span><span class="n">dec</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">context</span><span class="p">,</span><span class="n">safe</span><span class="p">)</span>
-  File <span class="nb">&quot;/usr/bin/scapy&quot;</span>, line <span class="m">2099</span>, in <span class="n">dec</span>
-    <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">do_dec</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">safe</span><span class="p">)</span>
-  File <span class="nb">&quot;/usr/bin/scapy&quot;</span>, line <span class="m">2218</span>, in <span class="n">do_dec</span>
-    <span class="n">o</span><span class="p">,</span><span class="n">s</span> <span class="o">=</span> <span class="n">BERcodec_Object</span><span class="o">.</span><span class="n">dec</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">safe</span><span class="p">)</span>
-  File <span class="nb">&quot;/usr/bin/scapy&quot;</span>, line <span class="m">2099</span>, in <span class="n">dec</span>
-    <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">do_dec</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">safe</span><span class="p">)</span>
-  File <span class="nb">&quot;/usr/bin/scapy&quot;</span>, line <span class="m">2094</span>, in <span class="n">do_dec</span>
-    <span class="k">return</span> <span class="n">codec</span><span class="o">.</span><span class="n">dec</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">context</span><span class="p">,</span><span class="n">safe</span><span class="p">)</span>
-  File <span class="nb">&quot;/usr/bin/scapy&quot;</span>, line <span class="m">2099</span>, in <span class="n">dec</span>
-    <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">do_dec</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">safe</span><span class="p">)</span>
-  File <span class="nb">&quot;/usr/bin/scapy&quot;</span>, line <span class="m">2218</span>, in <span class="n">do_dec</span>
-    <span class="n">o</span><span class="p">,</span><span class="n">s</span> <span class="o">=</span> <span class="n">BERcodec_Object</span><span class="o">.</span><span class="n">dec</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">safe</span><span class="p">)</span>
-  File <span class="nb">&quot;/usr/bin/scapy&quot;</span>, line <span class="m">2099</span>, in <span class="n">dec</span>
-    <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">do_dec</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">safe</span><span class="p">)</span>
-  File <span class="nb">&quot;/usr/bin/scapy&quot;</span>, line <span class="m">2092</span>, in <span class="n">do_dec</span>
-    <span class="k">raise</span> <span class="n">BER_Decoding_Error</span><span class="p">(</span><span class="s">&quot;Unknown prefix [</span><span class="si">%02x</span><span class="s">] for [</span><span class="si">%r</span><span class="s">]&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">t</span><span class="p">),</span> <span class="n">remaining</span><span class="o">=</span><span class="n">s</span><span class="p">)</span>
-<span class="gr">BER_Decoding_Error</span>: <span class="n">Unknown prefix [a0] for [&#39;\xa0\x03\x02\x01\x02\x02\x01\x010\r\x06\t*\x86H...&#39;]</span>
 </pre></div>
 </div>
-<p>The <tt class="docutils literal"><span class="pre">Context</span></tt> class must be specified:</p>
+<p>The <code class="docutils literal"><span class="pre">Context</span></code> class must be specified:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">dcert</span><span class="p">,</span><span class="n">remain</span><span class="p">)</span> <span class="o">=</span> <span class="n">BERcodec_Object</span><span class="o">.</span><span class="n">dec</span><span class="p">(</span><span class="n">cert</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ASN1_Class_X509</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dcert</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="go"># ASN1_SEQUENCE:</span>
@@ -357,12 +310,12 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 <p>While this may be nice, it&#8217;s only an ASN.1 encoder/decoder. Nothing related to Scapy yet.</p>
 <div class="section" id="asn-1-fields">
 <h5>ASN.1 fields<a class="headerlink" href="#asn-1-fields" title="Permalink to this headline">¶</a></h5>
-<p>Scapy provides ASN.1 fields. They will wrap ASN.1 objects and provide the necessary logic to bind a field name to the value. ASN.1 packets will be described as a tree of ASN.1 fields. Then each field name will be made available as a normal <tt class="docutils literal"><span class="pre">Packet</span></tt> object, in a flat flavor (ex: to access the version field of a SNMP packet, you don&#8217;t need to know how many containers wrap it).</p>
+<p>Scapy provides ASN.1 fields. They will wrap ASN.1 objects and provide the necessary logic to bind a field name to the value. ASN.1 packets will be described as a tree of ASN.1 fields. Then each field name will be made available as a normal <code class="docutils literal"><span class="pre">Packet</span></code> object, in a flat flavor (ex: to access the version field of a SNMP packet, you don&#8217;t need to know how many containers wrap it).</p>
 <p>Each ASN.1 field is linked to an ASN.1 object through its tag.</p>
 </div>
 <div class="section" id="asn-1-packets">
 <h5>ASN.1 packets<a class="headerlink" href="#asn-1-packets" title="Permalink to this headline">¶</a></h5>
-<p>ASN.1 packets inherit from the Packet class. Instead of a <tt class="docutils literal"><span class="pre">fields_desc</span></tt> list of fields, they define <tt class="docutils literal"><span class="pre">ASN1_codec</span></tt> and <tt class="docutils literal"><span class="pre">ASN1_root</span></tt> attributes. The first one is a codec (for example: <tt class="docutils literal"><span class="pre">ASN1_Codecs.BER</span></tt>), the second one is a tree compounded with ASN.1 fields.</p>
+<p>ASN.1 packets inherit from the Packet class. Instead of a <code class="docutils literal"><span class="pre">fields_desc</span></code> list of fields, they define <code class="docutils literal"><span class="pre">ASN1_codec</span></code> and <code class="docutils literal"><span class="pre">ASN1_root</span></code> attributes. The first one is a codec (for example: <code class="docutils literal"><span class="pre">ASN1_Codecs.BER</span></code>), the second one is a tree compounded with ASN.1 fields.</p>
 </div>
 </div>
 </div>
@@ -370,7 +323,7 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 <h3>A complete example: SNMP<a class="headerlink" href="#a-complete-example-snmp" title="Permalink to this headline">¶</a></h3>
 <p>SNMP defines new ASN.1 objects. We need to define them:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ASN1_Class_SNMP</span><span class="p">(</span><span class="n">ASN1_Class_UNIVERSAL</span><span class="p">):</span>
-    <span class="n">name</span><span class="o">=</span><span class="s">&quot;SNMP&quot;</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;SNMP&quot;</span>
     <span class="n">PDU_GET</span> <span class="o">=</span> <span class="mh">0xa0</span>
     <span class="n">PDU_NEXT</span> <span class="o">=</span> <span class="mh">0xa1</span>
     <span class="n">PDU_RESPONSE</span> <span class="o">=</span> <span class="mh">0xa2</span>
@@ -388,7 +341,7 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 <span class="k">class</span> <span class="nc">ASN1_SNMP_PDU_NEXT</span><span class="p">(</span><span class="n">ASN1_SEQUENCE</span><span class="p">):</span>
     <span class="n">tag</span> <span class="o">=</span> <span class="n">ASN1_Class_SNMP</span><span class="o">.</span><span class="n">PDU_NEXT</span>
 
-<span class="c"># [...]</span>
+<span class="c1"># [...]</span>
 
 <span class="k">class</span> <span class="nc">BERcodec_SNMP_PDU_GET</span><span class="p">(</span><span class="n">BERcodec_SEQUENCE</span><span class="p">):</span>
     <span class="n">tag</span> <span class="o">=</span> <span class="n">ASN1_Class_SNMP</span><span class="o">.</span><span class="n">PDU_GET</span>
@@ -396,7 +349,7 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 <span class="k">class</span> <span class="nc">BERcodec_SNMP_PDU_NEXT</span><span class="p">(</span><span class="n">BERcodec_SEQUENCE</span><span class="p">):</span>
     <span class="n">tag</span> <span class="o">=</span> <span class="n">ASN1_Class_SNMP</span><span class="o">.</span><span class="n">PDU_NEXT</span>
 
-<span class="c"># [...]</span>
+<span class="c1"># [...]</span>
 </pre></div>
 </div>
 <p>Metaclasses provide the magic behind the fact that everything is automatically registered and that ASN.1 objects and BER codecs can find each other.</p>
@@ -407,50 +360,50 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 <span class="k">class</span> <span class="nc">ASN1F_SNMP_PDU_NEXT</span><span class="p">(</span><span class="n">ASN1F_SEQUENCE</span><span class="p">):</span>
     <span class="n">ASN1_tag</span> <span class="o">=</span> <span class="n">ASN1_Class_SNMP</span><span class="o">.</span><span class="n">PDU_NEXT</span>
 
-<span class="c"># [...]</span>
+<span class="c1"># [...]</span>
 </pre></div>
 </div>
 <p>Now, the hard part, the ASN.1 packet:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">SNMP_error</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">0</span><span class="p">:</span> <span class="s">&quot;no_error&quot;</span><span class="p">,</span>
-               <span class="mi">1</span><span class="p">:</span> <span class="s">&quot;too_big&quot;</span><span class="p">,</span>
-<span class="c"># [...]</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">SNMP_error</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;no_error&quot;</span><span class="p">,</span>
+               <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;too_big&quot;</span><span class="p">,</span>
+<span class="c1"># [...]</span>
              <span class="p">}</span>
 
-<span class="n">SNMP_trap_types</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">0</span><span class="p">:</span> <span class="s">&quot;cold_start&quot;</span><span class="p">,</span>
-                    <span class="mi">1</span><span class="p">:</span> <span class="s">&quot;warm_start&quot;</span><span class="p">,</span>
-<span class="c"># [...]</span>
+<span class="n">SNMP_trap_types</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;cold_start&quot;</span><span class="p">,</span>
+                    <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;warm_start&quot;</span><span class="p">,</span>
+<span class="c1"># [...]</span>
                   <span class="p">}</span>
 
 <span class="k">class</span> <span class="nc">SNMPvarbind</span><span class="p">(</span><span class="n">ASN1_Packet</span><span class="p">):</span>
     <span class="n">ASN1_codec</span> <span class="o">=</span> <span class="n">ASN1_Codecs</span><span class="o">.</span><span class="n">BER</span>
-    <span class="n">ASN1_root</span> <span class="o">=</span> <span class="n">ASN1F_SEQUENCE</span><span class="p">(</span> <span class="n">ASN1F_OID</span><span class="p">(</span><span class="s">&quot;oid&quot;</span><span class="p">,</span><span class="s">&quot;1.3&quot;</span><span class="p">),</span>
-                                <span class="n">ASN1F_field</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span><span class="n">ASN1_NULL</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">ASN1_root</span> <span class="o">=</span> <span class="n">ASN1F_SEQUENCE</span><span class="p">(</span> <span class="n">ASN1F_OID</span><span class="p">(</span><span class="s2">&quot;oid&quot;</span><span class="p">,</span><span class="s2">&quot;1.3&quot;</span><span class="p">),</span>
+                                <span class="n">ASN1F_field</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span><span class="n">ASN1_NULL</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
                                 <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">SNMPget</span><span class="p">(</span><span class="n">ASN1_Packet</span><span class="p">):</span>
     <span class="n">ASN1_codec</span> <span class="o">=</span> <span class="n">ASN1_Codecs</span><span class="o">.</span><span class="n">BER</span>
-    <span class="n">ASN1_root</span> <span class="o">=</span> <span class="n">ASN1F_SNMP_PDU_GET</span><span class="p">(</span> <span class="n">ASN1F_INTEGER</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
-                                    <span class="n">ASN1F_enum_INTEGER</span><span class="p">(</span><span class="s">&quot;error&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span> <span class="n">SNMP_error</span><span class="p">),</span>
-                                    <span class="n">ASN1F_INTEGER</span><span class="p">(</span><span class="s">&quot;error_index&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
-                                    <span class="n">ASN1F_SEQUENCE_OF</span><span class="p">(</span><span class="s">&quot;varbindlist&quot;</span><span class="p">,</span> <span class="p">[],</span> <span class="n">SNMPvarbind</span><span class="p">)</span>
+    <span class="n">ASN1_root</span> <span class="o">=</span> <span class="n">ASN1F_SNMP_PDU_GET</span><span class="p">(</span> <span class="n">ASN1F_INTEGER</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+                                    <span class="n">ASN1F_enum_INTEGER</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span> <span class="n">SNMP_error</span><span class="p">),</span>
+                                    <span class="n">ASN1F_INTEGER</span><span class="p">(</span><span class="s2">&quot;error_index&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+                                    <span class="n">ASN1F_SEQUENCE_OF</span><span class="p">(</span><span class="s2">&quot;varbindlist&quot;</span><span class="p">,</span> <span class="p">[],</span> <span class="n">SNMPvarbind</span><span class="p">)</span>
                                     <span class="p">)</span>
 
 <span class="k">class</span> <span class="nc">SNMPnext</span><span class="p">(</span><span class="n">ASN1_Packet</span><span class="p">):</span>
     <span class="n">ASN1_codec</span> <span class="o">=</span> <span class="n">ASN1_Codecs</span><span class="o">.</span><span class="n">BER</span>
-    <span class="n">ASN1_root</span> <span class="o">=</span> <span class="n">ASN1F_SNMP_PDU_NEXT</span><span class="p">(</span> <span class="n">ASN1F_INTEGER</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
-                                     <span class="n">ASN1F_enum_INTEGER</span><span class="p">(</span><span class="s">&quot;error&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span> <span class="n">SNMP_error</span><span class="p">),</span>
-                                     <span class="n">ASN1F_INTEGER</span><span class="p">(</span><span class="s">&quot;error_index&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
-                                     <span class="n">ASN1F_SEQUENCE_OF</span><span class="p">(</span><span class="s">&quot;varbindlist&quot;</span><span class="p">,</span> <span class="p">[],</span> <span class="n">SNMPvarbind</span><span class="p">)</span>
+    <span class="n">ASN1_root</span> <span class="o">=</span> <span class="n">ASN1F_SNMP_PDU_NEXT</span><span class="p">(</span> <span class="n">ASN1F_INTEGER</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+                                     <span class="n">ASN1F_enum_INTEGER</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span> <span class="n">SNMP_error</span><span class="p">),</span>
+                                     <span class="n">ASN1F_INTEGER</span><span class="p">(</span><span class="s2">&quot;error_index&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+                                     <span class="n">ASN1F_SEQUENCE_OF</span><span class="p">(</span><span class="s2">&quot;varbindlist&quot;</span><span class="p">,</span> <span class="p">[],</span> <span class="n">SNMPvarbind</span><span class="p">)</span>
                                      <span class="p">)</span>
-<span class="c"># [...]</span>
+<span class="c1"># [...]</span>
 
 <span class="k">class</span> <span class="nc">SNMP</span><span class="p">(</span><span class="n">ASN1_Packet</span><span class="p">):</span>
     <span class="n">ASN1_codec</span> <span class="o">=</span> <span class="n">ASN1_Codecs</span><span class="o">.</span><span class="n">BER</span>
     <span class="n">ASN1_root</span> <span class="o">=</span> <span class="n">ASN1F_SEQUENCE</span><span class="p">(</span>
-        <span class="n">ASN1F_enum_INTEGER</span><span class="p">(</span><span class="s">&quot;version&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span><span class="s">&quot;v1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="s">&quot;v2c&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s">&quot;v2&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="s">&quot;v3&quot;</span><span class="p">}),</span>
-        <span class="n">ASN1F_STRING</span><span class="p">(</span><span class="s">&quot;community&quot;</span><span class="p">,</span><span class="s">&quot;public&quot;</span><span class="p">),</span>
-        <span class="n">ASN1F_CHOICE</span><span class="p">(</span><span class="s">&quot;PDU&quot;</span><span class="p">,</span> <span class="n">SNMPget</span><span class="p">(),</span>
+        <span class="n">ASN1F_enum_INTEGER</span><span class="p">(</span><span class="s2">&quot;version&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span><span class="s2">&quot;v1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="s2">&quot;v2c&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s2">&quot;v2&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="s2">&quot;v3&quot;</span><span class="p">}),</span>
+        <span class="n">ASN1F_STRING</span><span class="p">(</span><span class="s2">&quot;community&quot;</span><span class="p">,</span><span class="s2">&quot;public&quot;</span><span class="p">),</span>
+        <span class="n">ASN1F_CHOICE</span><span class="p">(</span><span class="s2">&quot;PDU&quot;</span><span class="p">,</span> <span class="n">SNMPget</span><span class="p">(),</span>
                      <span class="n">SNMPget</span><span class="p">,</span> <span class="n">SNMPnext</span><span class="p">,</span> <span class="n">SNMPresponse</span><span class="p">,</span> <span class="n">SNMPset</span><span class="p">,</span>
                      <span class="n">SNMPtrapv1</span><span class="p">,</span> <span class="n">SNMPbulk</span><span class="p">,</span> <span class="n">SNMPinform</span><span class="p">,</span> <span class="n">SNMPtrapv2</span><span class="p">)</span>
         <span class="p">)</span>
@@ -460,15 +413,15 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
                    <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">PDU</span><span class="p">,</span> <span class="n">SNMPnext</span><span class="p">)</span> <span class="ow">or</span>
                    <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">PDU</span><span class="p">,</span> <span class="n">SNMPset</span><span class="p">)</span>    <span class="p">)</span> <span class="ow">and</span>
                  <span class="bp">self</span><span class="o">.</span><span class="n">PDU</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">PDU</span><span class="o">.</span><span class="n">id</span> <span class="p">)</span>
-<span class="c"># [...]</span>
+<span class="c1"># [...]</span>
 <span class="n">bind_layers</span><span class="p">(</span> <span class="n">UDP</span><span class="p">,</span> <span class="n">SNMP</span><span class="p">,</span> <span class="n">sport</span><span class="o">=</span><span class="mi">161</span><span class="p">)</span>
 <span class="n">bind_layers</span><span class="p">(</span> <span class="n">UDP</span><span class="p">,</span> <span class="n">SNMP</span><span class="p">,</span> <span class="n">dport</span><span class="o">=</span><span class="mi">161</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>That wasn&#8217;t that much difficult. If you think that can&#8217;t be that short to implement SNMP encoding/decoding and that I may may have cut too much, just look at the complete source code.</p>
 <p>Now, how to use it? As usual:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">=</span><span class="n">SNMP</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">PDU</span><span class="o">=</span><span class="n">SNMPget</span><span class="p">(</span><span class="n">varbindlist</span><span class="o">=</span><span class="p">[</span><span class="n">SNMPvarbind</span><span class="p">(</span><span class="n">oid</span><span class="o">=</span><span class="s">&quot;1.2.3&quot;</span><span class="p">,</span><span class="n">value</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
-<span class="gp">... </span>                                           <span class="n">SNMPvarbind</span><span class="p">(</span><span class="n">oid</span><span class="o">=</span><span class="s">&quot;3.2.1&quot;</span><span class="p">,</span><span class="n">value</span><span class="o">=</span><span class="s">&quot;hello&quot;</span><span class="p">)]))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">=</span><span class="n">SNMP</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">PDU</span><span class="o">=</span><span class="n">SNMPget</span><span class="p">(</span><span class="n">varbindlist</span><span class="o">=</span><span class="p">[</span><span class="n">SNMPvarbind</span><span class="p">(</span><span class="n">oid</span><span class="o">=</span><span class="s2">&quot;1.2.3&quot;</span><span class="p">,</span><span class="n">value</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+<span class="gp">... </span>                                           <span class="n">SNMPvarbind</span><span class="p">(</span><span class="n">oid</span><span class="o">=</span><span class="s2">&quot;3.2.1&quot;</span><span class="p">,</span><span class="n">value</span><span class="o">=</span><span class="s2">&quot;hello&quot;</span><span class="p">)]))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="go">###[ SNMP ]###</span>
 <span class="go">  version= v3</span>
@@ -489,7 +442,7 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 <span class="go">0000   30 2E 02 01 03 04 06 70  75 62 6C 69 63 A0 21 02   0......public.!.</span>
 <span class="go">0010   01 00 02 01 00 02 01 00  30 16 30 07 06 02 2A 03   ........0.0...*.</span>
 <span class="go">0020   02 01 05 30 0B 06 02 7A  01 04 05 68 65 6C 6C 6F   ...0...z...hello</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">send</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s">&quot;1.2.3.4&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">UDP</span><span class="p">()</span><span class="o">/</span><span class="n">SNMP</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">send</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;1.2.3.4&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">UDP</span><span class="p">()</span><span class="o">/</span><span class="n">SNMP</span><span class="p">())</span>
 <span class="go">.</span>
 <span class="go">Sent 1 packets.</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">SNMP</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -515,9 +468,9 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 <h3>Resolving OID from a MIB<a class="headerlink" href="#resolving-oid-from-a-mib" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="about-oid-objects">
 <h4>About OID objects<a class="headerlink" href="#about-oid-objects" title="Permalink to this headline">¶</a></h4>
-<p>OID objects are created with an <tt class="docutils literal"><span class="pre">ASN1_OID</span></tt> class:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">=</span><span class="n">ASN1_OID</span><span class="p">(</span><span class="s">&quot;2.5.29.10&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">o2</span><span class="o">=</span><span class="n">ASN1_OID</span><span class="p">(</span><span class="s">&quot;1.2.840.113549.1.1.1&quot;</span><span class="p">)</span>
+<p>OID objects are created with an <code class="docutils literal"><span class="pre">ASN1_OID</span></code> class:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">=</span><span class="n">ASN1_OID</span><span class="p">(</span><span class="s2">&quot;2.5.29.10&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">o2</span><span class="o">=</span><span class="n">ASN1_OID</span><span class="p">(</span><span class="s2">&quot;1.2.840.113549.1.1.1&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="p">,</span><span class="n">o2</span>
 <span class="go">(&lt;ASN1_OID[&#39;.2.5.29.10&#39;]&gt;, &lt;ASN1_OID[&#39;.1.2.840.113549.1.1.1&#39;]&gt;)</span>
 </pre></div>
@@ -526,7 +479,7 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 <div class="section" id="loading-a-mib">
 <h4>Loading a MIB<a class="headerlink" href="#loading-a-mib" title="Permalink to this headline">¶</a></h4>
 <p>Scapy can parse MIB files and become aware of a mapping between an OID and its name:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">load_mib</span><span class="p">(</span><span class="s">&quot;mib/*&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">load_mib</span><span class="p">(</span><span class="s2">&quot;mib/*&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="p">,</span><span class="n">o2</span>
 <span class="go">(&lt;ASN1_OID[&#39;basicConstraints&#39;]&gt;, &lt;ASN1_OID[&#39;rsaEncryption&#39;]&gt;)</span>
 </pre></div>
@@ -541,7 +494,7 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 </pre></div>
 </div>
 <p>or to resolve an OID:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">mib</span><span class="o">.</span><span class="n">_oidname</span><span class="p">(</span><span class="s">&quot;1.2.3.6.1.4.1.5&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">mib</span><span class="o">.</span><span class="n">_oidname</span><span class="p">(</span><span class="s2">&quot;1.2.3.6.1.4.1.5&quot;</span><span class="p">)</span>
 <span class="go">&#39;enterprises.5&#39;</span>
 </pre></div>
 </div>
@@ -554,38 +507,38 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 </div>
 <div class="section" id="automata">
 <h2>Automata<a class="headerlink" href="#automata" title="Permalink to this headline">¶</a></h2>
-<p>Scapy enables to create easily network automata. Scapy does not stick to a specific model like Moore or Mealy automata. It provides a flexible way for you to choose you way to go.</p>
-<p>An automaton in Scapy is deterministic. It has different states. A start state and some end and error states. There are transitions from one state to another. Transitions can be transitions on a specific condition, transitions on the reception of a specific packet or transitions on a timeout. When a transition is taken, one or more actions can be run. An action can be bound to many transitions. Parameters can be passed from states to transitions and from transitions to states and actions.</p>
-<p>From a programmer&#8217;s point of view, states, transitions and actions are methods from an Automaton subclass. They are decorated to provide meta-information needed in order for the automaton to work.</p>
+<p>Scapy enables you to easily create network automata. Scapy does not stick to a specific model like <a class="reference external" href="https://en.wikipedia.org/wiki/Moore_machine">Moore</a> or <a class="reference external" href="https://en.wikipedia.org/wiki/Mealy_machine">Mealy</a> automata. It provides a flexible way for you to choose your way to go.</p>
+<p>An automaton in Scapy is deterministic. It has different states: a start state, some intermediate and some end and error states. There are transitions from one state to another. Transitions can be tied to specific conditions, the reception of a specific packet or a timeout. When a transition is taken, one or more actions can be run. An action can be bound to many transitions. Parameters can be passed from states to transitions and from transitions to states and actions.</p>
+<p>From a programmer&#8217;s point of view, states, transitions and actions are methods from an automaton subclass. They are decorated to provide some meta-information needed in order for the automaton to work.</p>
 <div class="section" id="first-example">
 <h3>First example<a class="headerlink" href="#first-example" title="Permalink to this headline">¶</a></h3>
-<p>Let&#8217;s begin with a simple example. I take the convention to write states with capitals, but anything valid with Python syntax would work as well.</p>
+<p>Let&#8217;s begin with a simple example. I take the convention to write states with capitals, but any valid Python syntax would work as well.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">HelloWorld</span><span class="p">(</span><span class="n">Automaton</span><span class="p">):</span>
     <span class="nd">@ATMT.state</span><span class="p">(</span><span class="n">initial</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">BEGIN</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">&quot;State=BEGIN&quot;</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;State=BEGIN&quot;</span><span class="p">)</span>
 
     <span class="nd">@ATMT.condition</span><span class="p">(</span><span class="n">BEGIN</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">wait_for_nothing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Wait for nothing...&quot;</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Wait for nothing...&quot;</span><span class="p">)</span>
         <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">END</span><span class="p">()</span>
 
     <span class="nd">@ATMT.action</span><span class="p">(</span><span class="n">wait_for_nothing</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">on_nothing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Action on &#39;nothing&#39; condition&quot;</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Action on &#39;nothing&#39; condition&quot;</span><span class="p">)</span>
 
     <span class="nd">@ATMT.state</span><span class="p">(</span><span class="n">final</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">END</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">&quot;State=END&quot;</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;State=END&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>In this example, we can see 3 decorators:</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">ATMT.state</span></tt> that is used to indicate that a method is a state, and that can
+<li><code class="docutils literal"><span class="pre">ATMT.state</span></code> is used to indicate that a method is a state, and that can
 have initial, final and error optional arguments set to non-zero for special states.</li>
-<li><tt class="docutils literal"><span class="pre">ATMT.condition</span></tt> that indicate a method to be run when the automaton state
+<li><code class="docutils literal"><span class="pre">ATMT.condition</span></code> indicates a method to be run when the automaton state
 reaches the indicated state. The argument is the name of the method representing that state</li>
-<li><tt class="docutils literal"><span class="pre">ATMT.action</span></tt> binds a method to a transition and is run when the transition is taken.</li>
+<li><code class="docutils literal"><span class="pre">ATMT.action</span></code> binds a method to a transition and is run when the transition is taken.</li>
 </ul>
 <p>Running this example gives the following result:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">=</span><span class="n">HelloWorld</span><span class="p">()</span>
@@ -602,21 +555,25 @@ reaches the indicated state. The argument is the name of the method representing
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">HelloWorld</span><span class="o">.</span><span class="n">graph</span><span class="p">()</span>
 </pre></div>
 </div>
+<p>The graph can be saved to an image file using:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">HelloWorld</span><span class="o">.</span><span class="n">graph</span><span class="p">()</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;automaton.png&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="changing-states">
 <h3>Changing states<a class="headerlink" href="#changing-states" title="Permalink to this headline">¶</a></h3>
-<p>The <tt class="docutils literal"><span class="pre">ATMT.state</span></tt> decorator transforms a method into a function that returns an exception. If you raise that exception, the automaton state will be changed. If the change occurs in a transition, actions bound to this transition will be called. The parameters given to the function replacing the method will be kept and finally delivered to the method. The exception has a method action_parameters that can be called before it is raised so that it will store parameters to be delivered to all actions bound to the current transition.</p>
+<p>The <code class="docutils literal"><span class="pre">ATMT.state</span></code> decorator transforms a method into a function that raises an exception. If you raise that exception, the automaton state will be changed. If the change occurs in a transition, actions bound to this transition will be called. The parameters given to the function replacing the method will be kept and finally delivered to the method. The exception has a method action_parameters that can be called before it is raised so that it will store parameters to be delivered to all actions bound to the current transition.</p>
 <p>As an example, let&#8217;s consider the following state:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="nd">@ATMT.state</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">MY_STATE</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param1</span><span class="p">,</span> <span class="n">param2</span><span class="p">):</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">&quot;state=MY_STATE. param1=</span><span class="si">%r</span><span class="s"> param2=</span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">param1</span><span class="p">,</span> <span class="n">param2</span><span class="p">))</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;state=MY_STATE. param1=</span><span class="si">%r</span><span class="s2"> param2=</span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">param1</span><span class="p">,</span> <span class="n">param2</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>This state will be reached with the following code:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="nd">@ATMT.receive_condition</span><span class="p">(</span><span class="n">ANOTHER_STATE</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">received_ICMP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkt</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">ICMP</span> <span class="ow">in</span> <span class="n">pkt</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">MY_STATE</span><span class="p">(</span><span class="s">&quot;got icmp&quot;</span><span class="p">,</span> <span class="n">pkt</span><span class="p">[</span><span class="n">ICMP</span><span class="p">]</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">MY_STATE</span><span class="p">(</span><span class="s2">&quot;got icmp&quot;</span><span class="p">,</span> <span class="n">pkt</span><span class="p">[</span><span class="n">ICMP</span><span class="p">]</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Let&#8217;s suppose we want to bind an action to this transition, that will also need some parameters:</p>
@@ -629,7 +586,7 @@ reaches the indicated state. The argument is the name of the method representing
 <div class="highlight-python"><div class="highlight"><pre><span class="nd">@ATMT.receive_condition</span><span class="p">(</span><span class="n">ANOTHER_STATE</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">received_ICMP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkt</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">ICMP</span> <span class="ow">in</span> <span class="n">pkt</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">MY_STATE</span><span class="p">(</span><span class="s">&quot;got icmp&quot;</span><span class="p">,</span> <span class="n">pkt</span><span class="p">[</span><span class="n">ICMP</span><span class="p">]</span><span class="o">.</span><span class="n">type</span><span class="p">)</span><span class="o">.</span><span class="n">action_parameters</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="n">ICMP</span><span class="p">]</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">pkt</span><span class="p">[</span><span class="n">ICMP</span><span class="p">]</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">MY_STATE</span><span class="p">(</span><span class="s2">&quot;got icmp&quot;</span><span class="p">,</span> <span class="n">pkt</span><span class="p">[</span><span class="n">ICMP</span><span class="p">]</span><span class="o">.</span><span class="n">type</span><span class="p">)</span><span class="o">.</span><span class="n">action_parameters</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="n">ICMP</span><span class="p">]</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">pkt</span><span class="p">[</span><span class="n">ICMP</span><span class="p">]</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -650,23 +607,23 @@ reaches the indicated state. The argument is the name of the method representing
                  <span class="ow">and</span> <span class="n">pkt</span><span class="p">[</span><span class="n">UDP</span><span class="p">]</span><span class="o">.</span><span class="n">dport</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">my_tid</span>
                  <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_tid</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">pkt</span><span class="p">[</span><span class="n">UDP</span><span class="p">]</span><span class="o">.</span><span class="n">sport</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_tid</span><span class="p">)</span> <span class="p">)</span>
 
-    <span class="c"># BEGIN</span>
+    <span class="c1"># BEGIN</span>
     <span class="nd">@ATMT.state</span><span class="p">(</span><span class="n">initial</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">BEGIN</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">blocksize</span><span class="o">=</span><span class="mi">512</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">my_tid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sport</span> <span class="ow">or</span> <span class="n">RandShort</span><span class="p">()</span><span class="o">.</span><span class="n">_fix</span><span class="p">()</span>
         <span class="n">bind_bottom_up</span><span class="p">(</span><span class="n">UDP</span><span class="p">,</span> <span class="n">TFTP</span><span class="p">,</span> <span class="n">dport</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">my_tid</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">server_tid</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">res</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">res</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">l3</span> <span class="o">=</span> <span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">)</span><span class="o">/</span><span class="n">UDP</span><span class="p">(</span><span class="n">sport</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">my_tid</span><span class="p">,</span> <span class="n">dport</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span><span class="o">/</span><span class="n">TFTP</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">last_packet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">l3</span><span class="o">/</span><span class="n">TFTP_RRQ</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&quot;octet&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_packet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">l3</span><span class="o">/</span><span class="n">TFTP_RRQ</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;octet&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_packet</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">awaiting</span><span class="o">=</span><span class="mi">1</span>
 
         <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">WAITING</span><span class="p">()</span>
 
-    <span class="c"># WAITING</span>
+    <span class="c1"># WAITING</span>
     <span class="nd">@ATMT.state</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">WAITING</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
@@ -695,7 +652,7 @@ reaches the indicated state. The argument is the name of the method representing
     <span class="k">def</span> <span class="nf">retransmit_last_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_packet</span><span class="p">)</span>
 
-    <span class="c"># RECEIVED</span>
+    <span class="c1"># RECEIVED</span>
     <span class="nd">@ATMT.state</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">RECEIVING</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkt</span><span class="p">):</span>
         <span class="n">recvd</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="n">Raw</span><span class="p">]</span><span class="o">.</span><span class="n">load</span>
@@ -705,13 +662,13 @@ reaches the indicated state. The argument is the name of the method representing
             <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">WAITING</span><span class="p">()</span>
         <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">END</span><span class="p">()</span>
 
-    <span class="c"># ERROR</span>
+    <span class="c1"># ERROR</span>
     <span class="nd">@ATMT.state</span><span class="p">(</span><span class="n">error</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">ERROR</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">pkt</span><span class="p">):</span>
         <span class="n">split_bottom_up</span><span class="p">(</span><span class="n">UDP</span><span class="p">,</span> <span class="n">TFTP</span><span class="p">,</span> <span class="n">dport</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">my_tid</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pkt</span><span class="p">[</span><span class="n">TFTP_ERROR</span><span class="p">]</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
 
-    <span class="c">#END</span>
+    <span class="c1">#END</span>
     <span class="nd">@ATMT.state</span><span class="p">(</span><span class="n">final</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">END</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">split_bottom_up</span><span class="p">(</span><span class="n">UDP</span><span class="p">,</span> <span class="n">TFTP</span><span class="p">,</span> <span class="n">dport</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">my_tid</span><span class="p">)</span>
@@ -719,7 +676,7 @@ reaches the indicated state. The argument is the name of the method representing
 </pre></div>
 </div>
 <p>It can be run like this, for instance:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">TFTP_read</span><span class="p">(</span><span class="s">&quot;my_file&quot;</span><span class="p">,</span> <span class="s">&quot;192.168.1.128&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">TFTP_read</span><span class="p">(</span><span class="s2">&quot;my_file&quot;</span><span class="p">,</span> <span class="s2">&quot;192.168.1.128&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -729,7 +686,7 @@ reaches the indicated state. The argument is the name of the method representing
 <h4>Decorators<a class="headerlink" href="#decorators" title="Permalink to this headline">¶</a></h4>
 <div class="section" id="decorator-for-states">
 <h5>Decorator for states<a class="headerlink" href="#decorator-for-states" title="Permalink to this headline">¶</a></h5>
-<p>States are methods decorated by the result of the <tt class="docutils literal"><span class="pre">ATMT.state</span></tt> function. It can take 3 optional parameters, <tt class="docutils literal"><span class="pre">initial</span></tt>, <tt class="docutils literal"><span class="pre">final</span></tt> and <tt class="docutils literal"><span class="pre">error</span></tt>, that, when set to <tt class="docutils literal"><span class="pre">True</span></tt>, indicate that the state is an initial, final or error state.</p>
+<p>States are methods decorated by the result of the <code class="docutils literal"><span class="pre">ATMT.state</span></code> function. It can take 3 optional parameters: <code class="docutils literal"><span class="pre">initial</span></code>, <code class="docutils literal"><span class="pre">final</span></code> and <code class="docutils literal"><span class="pre">error</span></code>. The set to <code class="docutils literal"><span class="pre">True</span></code> indicates that the state is an initial, final or error state.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Example</span><span class="p">(</span><span class="n">Automaton</span><span class="p">):</span>
     <span class="nd">@ATMT.state</span><span class="p">(</span><span class="n">initial</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">BEGIN</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -741,19 +698,19 @@ reaches the indicated state. The argument is the name of the method representing
 
     <span class="nd">@ATMT.state</span><span class="p">(</span><span class="n">final</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">END</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&quot;Result of the automaton: 42&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;Result of the automaton: 42&quot;</span>
 
     <span class="nd">@ATMT.state</span><span class="p">(</span><span class="n">error</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">ERROR</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&quot;Partial result, or explanation&quot;</span>
-<span class="c"># [...]</span>
+        <span class="k">return</span> <span class="s2">&quot;Partial result, or explanation&quot;</span>
+<span class="c1"># [...]</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="decorators-for-transitions">
 <h5>Decorators for transitions<a class="headerlink" href="#decorators-for-transitions" title="Permalink to this headline">¶</a></h5>
-<p>Transitions are methods decorated by the result of one of <tt class="docutils literal"><span class="pre">ATMT.condition</span></tt>, <tt class="docutils literal"><span class="pre">ATMT.receive_condition</span></tt>, <tt class="docutils literal"><span class="pre">ATMT.timeout</span></tt>. They all take as argument the state method they are related to. <tt class="docutils literal"><span class="pre">ATMT.timeout</span></tt> also have a mandatory <tt class="docutils literal"><span class="pre">timeout</span></tt> parameter to provide the timeout value in seconds. <tt class="docutils literal"><span class="pre">ATMT.condition</span></tt> and <tt class="docutils literal"><span class="pre">ATMT.receive_condition</span></tt> have an optional <tt class="docutils literal"><span class="pre">prio</span></tt> parameter so that the order in which conditions are evaluated can be forced. Default priority is 0. Transitions with the same priority level are called in an undetermined order.</p>
-<p>When the automaton switches to a given state, the state&#8217;s method is executed. Then transitions methods are called at specific moments until one triggers a new state (something like <tt class="docutils literal"><span class="pre">raise</span> <span class="pre">self.MY_NEW_STATE()</span></tt>). First, right after the state&#8217;s method returns, the <tt class="docutils literal"><span class="pre">ATMT.condition</span></tt> decorated methods are run by growing prio. Then each time a packet is received and accepted by the master filter all <tt class="docutils literal"><span class="pre">ATMT.receive_condition</span></tt> decorated hods are called by growing prio. When a timeout is reached since the time we entered into the current space, the corresponding <tt class="docutils literal"><span class="pre">ATMT.timeout</span></tt> decorated method is called.</p>
+<p>Transitions are methods decorated by the result of one of <code class="docutils literal"><span class="pre">ATMT.condition</span></code>, <code class="docutils literal"><span class="pre">ATMT.receive_condition</span></code>, <code class="docutils literal"><span class="pre">ATMT.timeout</span></code>. They all take as argument the state method they are related to. <code class="docutils literal"><span class="pre">ATMT.timeout</span></code> also have a mandatory <code class="docutils literal"><span class="pre">timeout</span></code> parameter to provide the timeout value in seconds. <code class="docutils literal"><span class="pre">ATMT.condition</span></code> and <code class="docutils literal"><span class="pre">ATMT.receive_condition</span></code> have an optional <code class="docutils literal"><span class="pre">prio</span></code> parameter so that the order in which conditions are evaluated can be forced. Default priority is 0. Transitions with the same priority level are called in an undetermined order.</p>
+<p>When the automaton switches to a given state, the state&#8217;s method is executed. Then transitions methods are called at specific moments until one triggers a new state (something like <code class="docutils literal"><span class="pre">raise</span> <span class="pre">self.MY_NEW_STATE()</span></code>). First, right after the state&#8217;s method returns, the <code class="docutils literal"><span class="pre">ATMT.condition</span></code> decorated methods are run by growing prio. Then each time a packet is received and accepted by the master filter all <code class="docutils literal"><span class="pre">ATMT.receive_condition</span></code> decorated hods are called by growing prio. When a timeout is reached since the time we entered into the current space, the corresponding <code class="docutils literal"><span class="pre">ATMT.timeout</span></code> decorated method is called.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Example</span><span class="p">(</span><span class="n">Automaton</span><span class="p">):</span>
     <span class="nd">@ATMT.state</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">WAITING</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -782,7 +739,7 @@ reaches the indicated state. The argument is the name of the method representing
 </div>
 <div class="section" id="decorator-for-actions">
 <h5>Decorator for actions<a class="headerlink" href="#decorator-for-actions" title="Permalink to this headline">¶</a></h5>
-<p>Actions are methods that are decorated by the return of <tt class="docutils literal"><span class="pre">ATMT.action</span></tt> function. This function takes the transition method it is bound to as first parameter and an optionnal priority <tt class="docutils literal"><span class="pre">prio</span></tt> as a second parameter. Default priority is 0. An action method can be decorated many times to be bound to many transitions.</p>
+<p>Actions are methods that are decorated by the return of <code class="docutils literal"><span class="pre">ATMT.action</span></code> function. This function takes the transition method it is bound to as first parameter and an optionnal priority <code class="docutils literal"><span class="pre">prio</span></code> as a second parameter. Default priority is 0. An action method can be decorated many times to be bound to many transitions.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Example</span><span class="p">(</span><span class="n">Automaton</span><span class="p">):</span>
     <span class="nd">@ATMT.state</span><span class="p">(</span><span class="n">initial</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">BEGIN</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -802,14 +759,14 @@ reaches the indicated state. The argument is the name of the method representing
 
     <span class="nd">@ATMT.action</span><span class="p">(</span><span class="n">maybe_go_to_end</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">maybe_action</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">&quot;We are lucky...&quot;</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;We are lucky...&quot;</span><span class="p">)</span>
     <span class="nd">@ATMT.action</span><span class="p">(</span><span class="n">certainly_go_to_end</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">certainly_action</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">&quot;We are not lucky...&quot;</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;We are not lucky...&quot;</span><span class="p">)</span>
     <span class="nd">@ATMT.action</span><span class="p">(</span><span class="n">maybe_go_to_end</span><span class="p">,</span> <span class="n">prio</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="nd">@ATMT.action</span><span class="p">(</span><span class="n">certainly_go_to_end</span><span class="p">,</span> <span class="n">prio</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">always_action</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">&quot;This wasn&#39;t luck!...&quot;</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;This wasn&#39;t luck!...&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The two possible outputs are:</p>
@@ -828,8 +785,8 @@ reaches the indicated state. The argument is the name of the method representing
 <h4>Methods to overload<a class="headerlink" href="#methods-to-overload" title="Permalink to this headline">¶</a></h4>
 <p>Two methods are hooks to be overloaded:</p>
 <ul class="simple">
-<li>The <tt class="docutils literal"><span class="pre">parse_args()</span></tt> method is called with arguments given at <tt class="docutils literal"><span class="pre">__init__()</span></tt> and <tt class="docutils literal"><span class="pre">run()</span></tt>. Use that to parametrize the behaviour of your automaton.</li>
-<li>The <tt class="docutils literal"><span class="pre">master_filter()</span></tt> method is called each time a packet is sniffed and decides if it is interesting for the automaton. When working on a specific protocol, this is where you will ensure the packet belongs to the connection you are being part of, so that you do not need to make all the sanity checks in each transition.</li>
+<li>The <code class="docutils literal"><span class="pre">parse_args()</span></code> method is called with arguments given at <code class="docutils literal"><span class="pre">__init__()</span></code> and <code class="docutils literal"><span class="pre">run()</span></code>. Use that to parametrize the behaviour of your automaton.</li>
+<li>The <code class="docutils literal"><span class="pre">master_filter()</span></code> method is called each time a packet is sniffed and decides if it is interesting for the automaton. When working on a specific protocol, this is where you will ensure the packet belongs to the connection you are being part of, so that you do not need to make all the sanity checks in each transition.</li>
 </ul>
 </div>
 </div>
@@ -840,7 +797,7 @@ reaches the indicated state. The argument is the name of the method representing
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
@@ -885,19 +842,23 @@ reaches the indicated state. The argument is the name of the method representing
 </ul>
 </li>
 </ul>
-
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="usage.html"
-                        title="previous chapter">Usage</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="extending.html"
-                        title="next chapter">Build your own tools</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/advanced_usage.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="usage.html" title="previous chapter">Usage</a></li>
+      <li>Next: <a href="extending.html" title="next chapter">Build your own tools</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/advanced_usage.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -914,25 +875,20 @@ reaches the indicated state. The argument is the name of the method representing
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="extending.html" title="Build your own tools"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="usage.html" title="Usage"
-             >previous</a> |</li>
-        <li><a href="index.html">Scapy 3.0.0 documentation</a> &raquo;</li> 
-      </ul>
-    </div>
     <div class="footer">
-        &copy; Copyright 2008, 2009 Philippe Biondi and the Scapy community.
-      Last updated on Nov 28, 2015.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+      &copy;2008, 2009 Philippe Biondi and the Scapy community.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/advanced_usage.txt"
+          rel="nofollow">Page source</a>
     </div>
+
+    
+
+    
   </body>
 </html>

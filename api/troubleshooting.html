@@ -25,29 +25,18 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Scapy 3.0.0 documentation" href="index.html" />
     <link rel="next" title="Scapy development" href="development.html" />
-    <link rel="prev" title="Adding new protocols" href="build_dissect.html" /> 
+    <link rel="prev" title="Adding new protocols" href="build_dissect.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
   </head>
-  <body>
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="development.html" title="Scapy development"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="build_dissect.html" title="Adding new protocols"
-             accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Scapy 3.0.0 documentation</a> &raquo;</li> 
-      </ul>
-    </div>  
+  <body role="document">  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="troubleshooting">
 <h1>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h1>
@@ -68,7 +57,7 @@
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">L3socket</span>
 <span class="go">&lt;class __main__.L3PacketSocket at 0xb7bdf5fc&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">L3socket</span><span class="o">=</span><span class="n">L3RawSocket</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sr1</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s">&quot;127.0.0.1&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sr1</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">())</span>
 <span class="go">&lt;IP  version=4L ihl=5L tos=0x0 len=28 id=40953 flags= frag=0L ttl=64 proto=ICMP chksum=0xdce5 src=127.0.0.1 dst=127.0.0.1 options=&#39;&#39; |&lt;ICMP  type=echo-reply code=0 chksum=0xffff id=0x0 seq=0x0 |&gt;&gt;</span>
 </pre></div>
 </div>
@@ -80,33 +69,33 @@
 <div class="section" id="traceroute-does-not-work-i-m-on-a-ppp-link">
 <h3>traceroute() does not work. I&#8217;m on a ppp link<a class="headerlink" href="#traceroute-does-not-work-i-m-on-a-ppp-link" title="Permalink to this headline">¶</a></h3>
 <p>This is a known bug. See BPF filters do not work. I&#8217;m on a ppp link</p>
-<p>To work arround this, use <tt class="docutils literal"><span class="pre">nofilter=1</span></tt>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">traceroute</span><span class="p">(</span><span class="s">&quot;target&quot;</span><span class="p">,</span> <span class="n">nofilter</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<p>To work arround this, use <code class="docutils literal"><span class="pre">nofilter=1</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">traceroute</span><span class="p">(</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> <span class="n">nofilter</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="graphs-are-ugly-fonts-are-too-big-image-is-truncated">
 <h3>Graphs are ugly/fonts are too big/image is truncated.<a class="headerlink" href="#graphs-are-ugly-fonts-are-too-big-image-is-truncated" title="Permalink to this headline">¶</a></h3>
 <p>Quick fix: use png format:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">graph</span><span class="p">(</span><span class="n">format</span><span class="o">=</span><span class="s">&quot;png&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">graph</span><span class="p">(</span><span class="n">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Upgrade to latest version of GraphViz.</p>
 <p>Try providing different DPI options (50,70,75,96,101,125, for instance):</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">graph</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="s">&quot;-Gdpi=70&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">graph</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="s2">&quot;-Gdpi=70&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>If it works, you can make it permanenent:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">prog</span><span class="o">.</span><span class="n">dot</span> <span class="o">=</span> <span class="s">&quot;dot -Gdpi=70&quot;</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">prog</span><span class="o">.</span><span class="n">dot</span> <span class="o">=</span> <span class="s2">&quot;dot -Gdpi=70&quot;</span>
 </pre></div>
 </div>
-<p>You can also put this line in your <tt class="docutils literal"><span class="pre">~/.scapy_startup.py</span></tt> file</p>
+<p>You can also put this line in your <code class="docutils literal"><span class="pre">~/.scapy_startup.py</span></code> file</p>
 </div>
 </div>
 <div class="section" id="getting-help">
 <h2>Getting help<a class="headerlink" href="#getting-help" title="Permalink to this headline">¶</a></h2>
 <p>Common problems are answered in the FAQ.</p>
-<p>There&#8217;s a low traffic mailing list at <tt class="docutils literal"><span class="pre">scapy.ml(at)secdev.org</span></tt>  (<a class="reference external" href="http://news.gmane.org/gmane.comp.security.scapy.general">archive</a>, <a class="reference external" href="http://gmane.org/info.php?group=gmane.comp.security.scapy.general">RSS, NNTP</a>). You are encouraged to send questions, bug reports, suggestions, ideas, cool usages of Scapy, etc. to this list. Subscribe by sending a mail to <tt class="docutils literal"><span class="pre">scapy.ml-subscribe(at)secdev.org</span></tt>.</p>
+<p>There&#8217;s a low traffic mailing list at <code class="docutils literal"><span class="pre">scapy.ml(at)secdev.org</span></code>  (<a class="reference external" href="http://news.gmane.org/gmane.comp.security.scapy.general">archive</a>, <a class="reference external" href="http://gmane.org/info.php?group=gmane.comp.security.scapy.general">RSS, NNTP</a>). You are encouraged to send questions, bug reports, suggestions, ideas, cool usages of Scapy, etc. to this list. Subscribe by sending a mail to <code class="docutils literal"><span class="pre">scapy.ml-subscribe(at)secdev.org</span></code>.</p>
 <p>To avoid spam, you must subscribe to the mailing list to post.</p>
 </div>
 </div>
@@ -115,7 +104,7 @@
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
@@ -132,19 +121,23 @@
 </ul>
 </li>
 </ul>
-
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="build_dissect.html"
-                        title="previous chapter">Adding new protocols</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="development.html"
-                        title="next chapter">Scapy development</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/troubleshooting.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="build_dissect.html" title="previous chapter">Adding new protocols</a></li>
+      <li>Next: <a href="development.html" title="next chapter">Scapy development</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/troubleshooting.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -161,25 +154,20 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="development.html" title="Scapy development"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="build_dissect.html" title="Adding new protocols"
-             >previous</a> |</li>
-        <li><a href="index.html">Scapy 3.0.0 documentation</a> &raquo;</li> 
-      </ul>
-    </div>
     <div class="footer">
-        &copy; Copyright 2008, 2009 Philippe Biondi and the Scapy community.
-      Last updated on Nov 28, 2015.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+      &copy;2008, 2009 Philippe Biondi and the Scapy community.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/troubleshooting.txt"
+          rel="nofollow">Page source</a>
     </div>
+
+    
+
+    
   </body>
 </html>

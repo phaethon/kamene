@@ -25,29 +25,18 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Scapy 3.0.0 documentation" href="index.html" />
     <link rel="next" title="Download and Installation" href="installation.html" />
-    <link rel="prev" title="Welcome to Scapy’s documentation!" href="index.html" /> 
+    <link rel="prev" title="Welcome to Scapy’s documentation!" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
   </head>
-  <body>
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="installation.html" title="Download and Installation"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="index.html" title="Welcome to Scapy’s documentation!"
-             accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Scapy 3.0.0 documentation</a> &raquo;</li> 
-      </ul>
-    </div>  
+  <body role="document">  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
@@ -70,7 +59,7 @@ injecting your own 802.11 frames, combining techniques
 <div class="section" id="what-makes-scapy-so-special">
 <h2>What makes Scapy so special<a class="headerlink" href="#what-makes-scapy-so-special" title="Permalink to this headline">¶</a></h2>
 <p>First, with most other networking tools, you won&#8217;t build someting the author did not imagine. These tools have been built for a specific goal and can&#8217;t deviate much from it. For example, an ARP cache poisoning program won&#8217;t let you use double 802.1q encapsulation. Or try to find a program that can send, say, an ICMP packet with padding (I said <em>padding</em>, not <em>payload</em>, see?). In fact, each time you have a new need, you have to build a new tool.</p>
-<p>Second, they usually confuse decoding and interpreting. Machines are good at decoding and can help human beings with that. Interpretation is reserved to human beings. Some programs try to mimic this behaviour. For instance they say &#8220;<em>this port is open</em>&#8221; instead of &#8220;<em>I received a SYN-ACK</em>&#8221;. Sometimes they are right. Sometimes not. It&#8217;s easier for beginners, but when you know what you&#8217;re doing, you keep on trying to deduce what really happened from the program&#8217;s interpretation to make your own, which is hard because you lost a big amount of information. And you often end up using <tt class="docutils literal"><span class="pre">tcpdump</span> <span class="pre">-xX</span></tt> to decode and interpret what the tool missed.</p>
+<p>Second, they usually confuse decoding and interpreting. Machines are good at decoding and can help human beings with that. Interpretation is reserved to human beings. Some programs try to mimic this behaviour. For instance they say &#8220;<em>this port is open</em>&#8221; instead of &#8220;<em>I received a SYN-ACK</em>&#8221;. Sometimes they are right. Sometimes not. It&#8217;s easier for beginners, but when you know what you&#8217;re doing, you keep on trying to deduce what really happened from the program&#8217;s interpretation to make your own, which is hard because you lost a big amount of information. And you often end up using <code class="docutils literal"><span class="pre">tcpdump</span> <span class="pre">-xX</span></code> to decode and interpret what the tool missed.</p>
 <p>Third, even programs which only decode do not give you all the information they received. The network&#8217;s vision they give you is the one their author thought was sufficient. But it is not complete, and you have a bias. For instance, do you know a tool that reports the Ethernet padding?</p>
 <p>Scapy tries to overcome those problems. It enables you to build exactly the packets you want. Even if I think stacking a 802.1q layer on top of TCP has no sense, it may have some for somebody else working on some product I don&#8217;t know. Scapy has a flexible model that tries to avoid such arbitrary limits. You&#8217;re free to put any value you want in any field you want, and stack them like you want. You&#8217;re an adult after all.</p>
 <p>In fact, it&#8217;s like building a new tool each time, but instead of dealing with a hundred line C program, you only write 2 lines of Scapy.</p>
@@ -164,7 +153,7 @@ Welcome to Scapy (0.9.17.108beta)
 <p>Now, let&#8217;s manipulate some packets:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">IP</span><span class="p">()</span>
 <span class="go">&lt;IP |&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">=</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s">&quot;172.16.1.40&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">=</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;172.16.1.40&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span>
 <span class="go">&lt;IP dst=172.16.1.40 |&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">dst</span>
@@ -175,7 +164,7 @@ Welcome to Scapy (0.9.17.108beta)
 </div>
 <p>Let&#8217;s say I want a broadcast MAC address, and IP payload to ketchup.com
 and to mayo.com, TTL value from 1 to 9, and an UDP payload:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Ether</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s">&quot;ff:ff:ff:ff:ff:ff&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Ether</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;ff:ff:ff:ff:ff:ff&quot;</span><span class="p">)</span>
 <span class="go">      /IP(dst=[&quot;ketchup.com&quot;,&quot;mayo.com&quot;],ttl=(1,9))</span>
 <span class="go">      /UDP()</span>
 </pre></div>
@@ -191,7 +180,7 @@ If not overriden,</p>
 <li>Source MAC is chosen according to the output interface</li>
 <li>Ethernet type and IP protocol are determined by the upper layer</li>
 </ul>
-<a class="reference internal image-reference" href="_images/default-values-ip.png"><img alt="_images/default-values-ip.png" src="_images/default-values-ip.png" style="width: 342.59999999999997px; height: 206.4px;" /></a>
+<a class="reference internal image-reference" href="_images/default-values-ip.png"><img alt="_images/default-values-ip.png" src="_images/default-values-ip.png" style="width: 342.6px; height: 206.4px;" /></a>
 <p>Other fields’ default values are chosen to be the most useful ones:</p>
 <ul class="simple">
 <li>TCP source port is 20, destination port is 80.</li>
@@ -206,12 +195,12 @@ If not overriden,</p>
 <p>If you are new to Python and you really don&#8217;t understand a word because of that, or if you want to learn this language, take an hour to read the very good <a class="reference external" href="http://docs.python.org/tutorial/">Python tutorial</a>  by Guido Van Rossum. After that, you&#8217;ll know Python :) (really!). For a more in-depth tutorial <a class="reference external" href="http://diveintopython.org/">Dive Into Python</a> is a very good start too.</p>
 <p>For a quick start, here&#8217;s an overview of Python&#8217;s data types:</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">int</span></tt> (signed, 32bits) : <tt class="docutils literal"><span class="pre">42</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">long</span></tt> (signed, infinite): <tt class="docutils literal"><span class="pre">42L</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">str</span></tt> : <tt class="docutils literal"><span class="pre">&quot;bell\x07\n&quot;</span></tt> or <tt class="docutils literal"><span class="pre">’bell\x07\n’</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">tuple</span></tt> (immutable): <tt class="docutils literal"><span class="pre">(1,4,&quot;42&quot;)</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">list</span></tt> (mutable): <tt class="docutils literal"><span class="pre">[4,2,&quot;1&quot;]</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">dict`</span> <span class="pre">(mutable):</span> <span class="pre">``{</span> <span class="pre">&quot;one&quot;:1</span> <span class="pre">,</span> <span class="pre">&quot;two&quot;:2</span> <span class="pre">}</span></tt></li>
+<li><code class="docutils literal"><span class="pre">int</span></code> (signed, 32bits) : <code class="docutils literal"><span class="pre">42</span></code></li>
+<li><code class="docutils literal"><span class="pre">long</span></code> (signed, infinite): <code class="docutils literal"><span class="pre">42L</span></code></li>
+<li><code class="docutils literal"><span class="pre">str</span></code> : <code class="docutils literal"><span class="pre">&quot;bell\x07\n&quot;</span></code> or <code class="docutils literal"><span class="pre">’bell\x07\n’</span></code></li>
+<li><code class="docutils literal"><span class="pre">tuple</span></code> (immutable): <code class="docutils literal"><span class="pre">(1,4,&quot;42&quot;)</span></code></li>
+<li><code class="docutils literal"><span class="pre">list</span></code> (mutable): <code class="docutils literal"><span class="pre">[4,2,&quot;1&quot;]</span></code></li>
+<li><code class="docutils literal"><span class="pre">dict`</span> <span class="pre">(mutable):</span> <span class="pre">``{</span> <span class="pre">&quot;one&quot;:1</span> <span class="pre">,</span> <span class="pre">&quot;two&quot;:2</span> <span class="pre">}</span></code></li>
 </ul>
 <p>There are no block delimiters in Python. Instead, indendation does matter:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">cond</span><span class="p">:</span>
@@ -230,7 +219,7 @@ If not overriden,</p>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
@@ -250,19 +239,23 @@ If not overriden,</p>
 </ul>
 </li>
 </ul>
-
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">Welcome to Scapy&#8217;s documentation!</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="installation.html"
-                        title="next chapter">Download and Installation</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/introduction.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to Scapy&#8217;s documentation!</a></li>
+      <li>Next: <a href="installation.html" title="next chapter">Download and Installation</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/introduction.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -279,25 +272,20 @@ If not overriden,</p>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="installation.html" title="Download and Installation"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="index.html" title="Welcome to Scapy’s documentation!"
-             >previous</a> |</li>
-        <li><a href="index.html">Scapy 3.0.0 documentation</a> &raquo;</li> 
-      </ul>
-    </div>
     <div class="footer">
-        &copy; Copyright 2008, 2009 Philippe Biondi and the Scapy community.
-      Last updated on Nov 28, 2015.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+      &copy;2008, 2009 Philippe Biondi and the Scapy community.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/introduction.txt"
+          rel="nofollow">Page source</a>
     </div>
+
+    
+
+    
   </body>
 </html>

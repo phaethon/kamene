@@ -497,16 +497,16 @@ It is even possible to graph it::
 Automata
 ========
 
-Scapy enables to create easily network automata. Scapy does not stick to a specific model like Moore or Mealy automata. It provides a flexible way for you to choose you way to go.
+Scapy enables you to easily create network automata. Scapy does not stick to a specific model like `Moore <https://en.wikipedia.org/wiki/Moore_machine>`_ or `Mealy <https://en.wikipedia.org/wiki/Mealy_machine>`_ automata. It provides a flexible way for you to choose your way to go.
 
-An automaton in Scapy is deterministic. It has different states. A start state and some end and error states. There are transitions from one state to another. Transitions can be transitions on a specific condition, transitions on the reception of a specific packet or transitions on a timeout. When a transition is taken, one or more actions can be run. An action can be bound to many transitions. Parameters can be passed from states to transitions and from transitions to states and actions.
+An automaton in Scapy is deterministic. It has different states: a start state, some intermediate and some end and error states. There are transitions from one state to another. Transitions can be tied to specific conditions, the reception of a specific packet or a timeout. When a transition is taken, one or more actions can be run. An action can be bound to many transitions. Parameters can be passed from states to transitions and from transitions to states and actions.
 
-From a programmer's point of view, states, transitions and actions are methods from an Automaton subclass. They are decorated to provide meta-information needed in order for the automaton to work.
+From a programmer's point of view, states, transitions and actions are methods from an automaton subclass. They are decorated to provide some meta-information needed in order for the automaton to work.
 
 First example
 -------------
 
-Let's begin with a simple example. I take the convention to write states with capitals, but anything valid with Python syntax would work as well.
+Let's begin with a simple example. I take the convention to write states with capitals, but any valid Python syntax would work as well.
 
 ::
 
@@ -530,9 +530,9 @@ Let's begin with a simple example. I take the convention to write states with ca
 
 In this example, we can see 3 decorators:
 
-* ``ATMT.state`` that is used to indicate that a method is a state, and that can
+* ``ATMT.state`` is used to indicate that a method is a state, and that can
   have initial, final and error optional arguments set to non-zero for special states.
-* ``ATMT.condition`` that indicate a method to be run when the automaton state 
+* ``ATMT.condition`` indicates a method to be run when the automaton state 
   reaches the indicated state. The argument is the name of the method representing that state
 * ``ATMT.action`` binds a method to a transition and is run when the transition is taken. 
 
@@ -553,10 +553,15 @@ The graph can be automatically drawn from the code with::
 
     >>> HelloWorld.graph()
 
+The graph can be saved to an image file using::
+
+    >>> HelloWorld.graph().savefig('automaton.png')
+
+
 Changing states
 ---------------
 
-The ``ATMT.state`` decorator transforms a method into a function that returns an exception. If you raise that exception, the automaton state will be changed. If the change occurs in a transition, actions bound to this transition will be called. The parameters given to the function replacing the method will be kept and finally delivered to the method. The exception has a method action_parameters that can be called before it is raised so that it will store parameters to be delivered to all actions bound to the current transition.
+The ``ATMT.state`` decorator transforms a method into a function that raises an exception. If you raise that exception, the automaton state will be changed. If the change occurs in a transition, actions bound to this transition will be called. The parameters given to the function replacing the method will be kept and finally delivered to the method. The exception has a method action_parameters that can be called before it is raised so that it will store parameters to be delivered to all actions bound to the current transition.
 
 As an example, let's consider the following state::
 
@@ -685,7 +690,7 @@ Decorators
 Decorator for states
 ~~~~~~~~~~~~~~~~~~~~
 
-States are methods decorated by the result of the ``ATMT.state`` function. It can take 3 optional parameters, ``initial``, ``final`` and ``error``, that, when set to ``True``, indicate that the state is an initial, final or error state.
+States are methods decorated by the result of the ``ATMT.state`` function. It can take 3 optional parameters: ``initial``, ``final`` and ``error``. The set to ``True`` indicates that the state is an initial, final or error state.
 
 ::
 
