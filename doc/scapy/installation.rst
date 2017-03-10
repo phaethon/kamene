@@ -15,7 +15,7 @@ Overview
  
 Each of these steps can be done in a different way dependent on your platform and on the version of Scapy you want to use. 
 
-This document is for scapy3k. It requires python 3.x. See `original scapy homepage <http://www.secdev.org/projects/scapy/>` for Scapy v2.x or earlier.
+This document is for scapy3k. It requires python 3.x. See `original scapy homepage <http://www.secdev.org/projects/scapy/>_` for Scapy v2.x or earlier.
 
 .. note::
 
