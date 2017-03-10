@@ -39,7 +39,7 @@ Make sure you have `Python <https://www.python.org/>`_ installed before you go o
 Latest release
 --------------
 
-The easiest way to install the latest scapy3k package is using `pip <https://pip.pypa.io/en/stable/>`_.
+The easiest way to install the latest scapy3k package is using `pip <https://pip.pypa.io/en/stable/>`_.::
 
 $ pip3 install scapy-python3
  
