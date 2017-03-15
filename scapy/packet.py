@@ -316,7 +316,7 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
     def __rmul__(self,other):
         return self.__mul__(other)
     
-    def __nonzero__(self):
+    def __bool__(self):
         return True
     def __len__(self):
         return len(bytes(self))
@@ -1088,7 +1088,7 @@ class NoPayload(Packet):
         return ""
     def __str__(self):
         return ""
-    def __nonzero__(self):
+    def __bool__(self):
         return False
     def do_build(self):
         return b""
