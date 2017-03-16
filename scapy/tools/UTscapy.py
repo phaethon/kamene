@@ -162,7 +162,7 @@ class UnitTest(TestClass):
         self.keywords = []
         self.crc = None
         self.expand = 1
-    def __nonzero__(self):
+    def __bool__(self):
         return self.res
 
 
