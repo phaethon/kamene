@@ -1306,7 +1306,7 @@ class TracerouteResult(SndRcvList):
         if padding:
             s += "\n#Padding\n"
             pad = {}
-            for snd, rcv in self.res:
+            for _, rcv in self.res:
                 if rcv.src not in ports and rcv.haslayer(conf.padding_layer):
                     p = rcv.getlayer(conf.padding_layer).load
                     if p != "\x00" * len(p):
