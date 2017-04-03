@@ -8,7 +8,7 @@
     
     <title>Download and Installation &mdash; Scapy 3.0.0 documentation</title>
     
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -52,7 +52,7 @@
 </ol>
 </div></blockquote>
 <p>Each of these steps can be done in a different way dependent on your platform and on the version of Scapy you want to use.</p>
-<p>This document is for scapy3k. It requires python 3.x. See <cite>original scapy homepage &lt;http://www.secdev.org/projects/scapy/&gt;_</cite> for Scapy v2.x or earlier.</p>
+<p>This document is for scapy3k. It requires python 3.x. See <cite>original scapy homepage &lt;http://www.secdev.org/projects/scapy/&gt;</cite> for Scapy v2.x or earlier.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">In scapy3k and Scapy v2.x use <code class="docutils literal"><span class="pre">from</span> <span class="pre">scapy.all</span> <span class="pre">import</span> <span class="pre">*</span></code> instead of <code class="docutils literal"><span class="pre">from</span> <span class="pre">scapy</span> <span class="pre">import</span> <span class="pre">*</span></code>.</p>
@@ -71,15 +71,13 @@ Windows, currently is under development.</p>
 <p>Make sure you have <a class="reference external" href="https://www.python.org/">Python</a> installed before you go on. Depending on your system you may have to use python3 and pip3 or python and pip for python version 3.x.</p>
 <div class="section" id="latest-release">
 <h3>Latest release<a class="headerlink" href="#latest-release" title="Permalink to this headline">¶</a></h3>
-<p>The easiest way to install the latest scapy3k package is using <a class="reference external" href="https://pip.pypa.io/en/stable/">pip</a>.:</p>
-<div class="highlight-sh"><div class="highlight"><pre><span></span>$ pip3 install scapy-python3
-</pre></div>
-</div>
+<p>The easiest way to install the latest scapy3k package is using <a class="reference external" href="https://pip.pypa.io/en/stable/">pip</a>.</p>
+<p>$ pip3 install scapy-python3</p>
 </div>
 <div class="section" id="current-development-version">
 <h3>Current development version<a class="headerlink" href="#current-development-version" title="Permalink to this headline">¶</a></h3>
 <p>Clone <a class="reference external" href="http://github.com/phaethon/scapy">GitHub repository</a> to a temporary directory and install it in the standard <a class="reference external" href="http://docs.python.org/inst/inst.html">distutils</a> way:</p>
-<div class="highlight-sh"><div class="highlight"><pre><span></span>$ <span class="nb">cd</span> /tmp
+<div class="highlight-sh"><div class="highlight"><pre>$ <span class="nb">cd</span> /tmp
 $ git clone https://github.com/phaethon/scapy
 $ <span class="nb">cd</span> scapy
 $ sudo python3 setup.py install
@@ -88,24 +86,24 @@ $ sudo python3 setup.py install
 <p id="index-0">If you always want the latest version with all new features and bugfixes, use Scapy&#8217;s GitHub repository:</p>
 <ol class="arabic">
 <li><p class="first">Install <a class="reference external" href="https://git-scm.com/">git</a> version control system. For example, on Debian/Ubuntu use:</p>
-<div class="highlight-sh"><div class="highlight"><pre><span></span>$ sudo apt-get install git
+<div class="highlight-sh"><div class="highlight"><pre>$ sudo apt-get install git
 </pre></div>
 </div>
 </li>
 <li><p class="first">Check out a clone of Scapy&#8217;s repository:</p>
-<div class="highlight-sh"><div class="highlight"><pre><span></span>$ git clone https://github.com/phaethon/scapy
+<div class="highlight-sh"><div class="highlight"><pre>$ git clone https://github.com/phaethon/scapy
 </pre></div>
 </div>
 </li>
 <li><p class="first">Install Scapy in the standard distutils way:</p>
-<div class="highlight-sh"><div class="highlight"><pre><span></span>$ <span class="nb">cd</span> scapy
+<div class="highlight-sh"><div class="highlight"><pre>$ <span class="nb">cd</span> scapy
 $ sudo python3 setup.py install
 </pre></div>
 </div>
 </li>
 </ol>
 <p>Then you can always update to the latest version:</p>
-<div class="highlight-sh"><div class="highlight"><pre><span></span>$ git pull
+<div class="highlight-sh"><div class="highlight"><pre>$ git pull
 $ sudo python3 setup.py install
 </pre></div>
 </div>
@@ -115,7 +113,7 @@ $ sudo python3 setup.py install
 <h2>Optional software for special features<a class="headerlink" href="#optional-software-for-special-features" title="Permalink to this headline">¶</a></h2>
 <ul>
 <li><p class="first">WEP decryption. <code class="docutils literal"><span class="pre">unwep()</span></code> needs <a class="reference external" href="https://cryptography.io">cryptography</a>. Example using a <a class="reference external" href="http://weplab.sourceforge.net/caps/weplab-64bit-AA-managed.pcap">Weplap test file</a>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">enc</span><span class="o">=</span><span class="n">rdpcap</span><span class="p">(</span><span class="s2">&quot;weplab-64bit-AA-managed.pcap&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">enc</span><span class="o">=</span><span class="n">rdpcap</span><span class="p">(</span><span class="s2">&quot;weplab-64bit-AA-managed.pcap&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">enc</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">enc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="go"> &gt;&gt;&gt; conf.wepkey=b&quot;AA\x00\x00\x00&quot;</span>
@@ -154,7 +152,7 @@ $ sudo python3 setup.py install
 <div class="section" id="debian-ubuntu">
 <h3>Debian/Ubuntu<a class="headerlink" href="#debian-ubuntu" title="Permalink to this headline">¶</a></h3>
 <p>Just use the standard packages:</p>
-<div class="highlight-sh"><div class="highlight"><pre><span></span>$ sudo apt-get install tcpdump python3-crypto ipython3
+<div class="highlight-sh"><div class="highlight"><pre>$ sudo apt-get install tcpdump python3-crypto ipython3
 </pre></div>
 </div>
 </div>
@@ -176,26 +174,39 @@ $ sudo python3 setup.py install
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Download and Installation</a><ul>
-<li><a class="reference internal" href="#overview">Overview</a></li>
-<li><a class="reference internal" href="#installing-scapy3k">Installing scapy3k</a><ul>
-<li><a class="reference internal" href="#latest-release">Latest release</a></li>
-<li><a class="reference internal" href="#current-development-version">Current development version</a></li>
+<h1 class="logo"><a href="index.html">Scapy</a></h1>
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=phaethon&repo=scapy&type=fork&count=true&size=large"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Download and Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-scapy3k">Installing scapy3k</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#optional-software-for-special-features">Optional software for special features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#platform-specific-instructions">Platform-specific instructions</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#optional-software-for-special-features">Optional software for special features</a></li>
-<li><a class="reference internal" href="#platform-specific-instructions">Platform-specific instructions</a><ul>
-<li><a class="reference internal" href="#linux-native">Linux native</a></li>
-<li><a class="reference internal" href="#debian-ubuntu">Debian/Ubuntu</a></li>
-<li><a class="reference internal" href="#mac-os-x">Mac OS X</a></li>
-<li><a class="reference internal" href="#windows">Windows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_usage.html">Advanced usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending.html">Build your own tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build_dissect.html">Adding new protocols</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Scapy development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="backmatter.html">Credits</a></li>
 </ul>
-</li>
-</ul>
-</li>
-</ul>
+
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
@@ -205,13 +216,6 @@ $ sudo python3 setup.py install
   </ul></li>
 </ul>
 </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/installation.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -241,6 +245,10 @@ $ sudo python3 setup.py install
           rel="nofollow">Page source</a>
     </div>
 
+    
+    <a href="https://github.com/phaethon/scapy" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
     
 
     

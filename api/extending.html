@@ -8,7 +8,7 @@
     
     <title>Build your own tools &mdash; Scapy 3.0.0 documentation</title>
     
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -50,7 +50,7 @@
 <h2>Using Scapy in your tools<a class="headerlink" href="#using-scapy-in-your-tools" title="Permalink to this headline">¶</a></h2>
 <p>You can easily use Scapy in your own tools. Just import what you need and do it.</p>
 <p>This first example takes an IP or a name as the first parameter, sends an ICMP echo request packet and displays the completely dissected return packet:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="ch">#! /usr/bin/env python3</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="ch">#! /usr/bin/env python3</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">scapy.all</span> <span class="kn">import</span> <span class="n">sr1</span><span class="p">,</span><span class="n">IP</span><span class="p">,</span><span class="n">ICMP</span>
@@ -61,7 +61,7 @@
 </pre></div>
 </div>
 <p>This is a more complex example which does an ARP ping and reports what it found with LaTeX formating:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="ch">#! /usr/bin/env python3</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="ch">#! /usr/bin/env python3</span>
 <span class="c1"># arping2tex : arpings a network and outputs a LaTeX table as a result</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
@@ -85,7 +85,7 @@
 </pre></div>
 </div>
 <p>Here is another tool that will constantly monitor all interfaces on a machine and print all ARP request it sees, even on 802.11 frames from a Wi-Fi card in monitor mode. Note the store=0 parameter to sniff() to avoid storing all packets in memory for nothing:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="ch">#! /usr/bin/env python3</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="ch">#! /usr/bin/env python3</span>
 <span class="kn">from</span> <span class="nn">scapy.all</span> <span class="kn">import</span> <span class="o">*</span>
 
 <span class="k">def</span> <span class="nf">arp_monitor_callback</span><span class="p">(</span><span class="n">pkt</span><span class="p">):</span>
@@ -101,7 +101,7 @@
 <h2>Extending Scapy with add-ons<a class="headerlink" href="#extending-scapy-with-add-ons" title="Permalink to this headline">¶</a></h2>
 <p>If you need to add some new protocols, new functions, anything, you can write it directly into Scapy source file. But this is not very convenient. Even if those modifications are to be integrated into Scapy, it can be more convenient to write them in a separate file.</p>
 <p>Once you&#8217;ve done that, you can launch Scapy and import your file, but this is still not very convenient. Another way to do that is to make your file executable and have it call the Scapy function named interact():</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="ch">#! /usr/bin/env python3</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="ch">#! /usr/bin/env python3</span>
 
 <span class="c1"># Set log level to benefit from Scapy warnings</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -122,7 +122,7 @@
 </pre></div>
 </div>
 <p>If you put the above listing in the test_interact.py file and make it executable, you&#8217;ll get:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span># ./test_interact.py
+<div class="highlight-python"><div class="highlight"><pre># ./test_interact.py
 Welcome to Scapy (0.9.17.109beta)
 Test add-on v3.14
 &gt;&gt;&gt; make_test(42,666)
@@ -138,14 +138,37 @@ Test add-on v3.14
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Build your own tools</a><ul>
-<li><a class="reference internal" href="#using-scapy-in-your-tools">Using Scapy in your tools</a></li>
-<li><a class="reference internal" href="#extending-scapy-with-add-ons">Extending Scapy with add-ons</a></li>
+<h1 class="logo"><a href="index.html">Scapy</a></h1>
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=phaethon&repo=scapy&type=fork&count=true&size=large"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Download and Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_usage.html">Advanced usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Build your own tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#using-scapy-in-your-tools">Using Scapy in your tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#extending-scapy-with-add-ons">Extending Scapy with add-ons</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="build_dissect.html">Adding new protocols</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Scapy development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="backmatter.html">Credits</a></li>
 </ul>
+
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
@@ -155,13 +178,6 @@ Test add-on v3.14
   </ul></li>
 </ul>
 </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/extending.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -191,6 +207,10 @@ Test add-on v3.14
           rel="nofollow">Page source</a>
     </div>
 
+    
+    <a href="https://github.com/phaethon/scapy" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
     
 
     

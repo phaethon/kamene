@@ -8,7 +8,7 @@
     
     <title>Advanced usage &mdash; Scapy 3.0.0 documentation</title>
     
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -66,7 +66,7 @@
 <p>Note: many of the classes definitions presented here use metaclasses. If you don&#8217;t look precisely at the source code and you only rely on my captures, you may think they sometimes exhibit a kind of magic behaviour.
 ``
 Scapy ASN.1 engine provides classes to link objects and their tags. They inherit from the <code class="docutils literal"><span class="pre">ASN1_Class</span></code>. The first one is <code class="docutils literal"><span class="pre">ASN1_Class_UNIVERSAL</span></code>, which provide tags for most Universal objects. Each new context (<code class="docutils literal"><span class="pre">SNMP</span></code>, <code class="docutils literal"><span class="pre">X509</span></code>) will inherit from it and add its own objects.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ASN1_Class_UNIVERSAL</span><span class="p">(</span><span class="n">ASN1_Class</span><span class="p">):</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ASN1_Class_UNIVERSAL</span><span class="p">(</span><span class="n">ASN1_Class</span><span class="p">):</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;UNIVERSAL&quot;</span>
 <span class="c1"># [...]</span>
     <span class="n">BOOLEAN</span> <span class="o">=</span> <span class="mi">1</span>
@@ -88,7 +88,7 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 </pre></div>
 </div>
 <p>All ASN.1 objects are represented by simple Python instances that act as nutshells for the raw values. The simple logic is handled by <code class="docutils literal"><span class="pre">ASN1_Object</span></code> whose they inherit from. Hence they are quite simple:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ASN1_INTEGER</span><span class="p">(</span><span class="n">ASN1_Object</span><span class="p">):</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ASN1_INTEGER</span><span class="p">(</span><span class="n">ASN1_Object</span><span class="p">):</span>
     <span class="n">tag</span> <span class="o">=</span> <span class="n">ASN1_Class_UNIVERSAL</span><span class="o">.</span><span class="n">INTEGER</span>
 
 <span class="k">class</span> <span class="nc">ASN1_STRING</span><span class="p">(</span><span class="n">ASN1_Object</span><span class="p">):</span>
@@ -99,7 +99,7 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 </pre></div>
 </div>
 <p>These instances can be assembled to create an ASN.1 tree:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">=</span><span class="n">ASN1_SEQUENCE</span><span class="p">([</span><span class="n">ASN1_INTEGER</span><span class="p">(</span><span class="mi">7</span><span class="p">),</span><span class="n">ASN1_STRING</span><span class="p">(</span><span class="s2">&quot;egg&quot;</span><span class="p">),</span><span class="n">ASN1_SEQUENCE</span><span class="p">([</span><span class="n">ASN1_BOOLEAN</span><span class="p">(</span><span class="bp">False</span><span class="p">)])])</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">=</span><span class="n">ASN1_SEQUENCE</span><span class="p">([</span><span class="n">ASN1_INTEGER</span><span class="p">(</span><span class="mi">7</span><span class="p">),</span><span class="n">ASN1_STRING</span><span class="p">(</span><span class="s2">&quot;egg&quot;</span><span class="p">),</span><span class="n">ASN1_SEQUENCE</span><span class="p">([</span><span class="n">ASN1_BOOLEAN</span><span class="p">(</span><span class="bp">False</span><span class="p">)])])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span>
 <span class="go">&lt;ASN1_SEQUENCE[[&lt;ASN1_INTEGER[7]&gt;, &lt;ASN1_STRING[&#39;egg&#39;]&gt;, &lt;ASN1_SEQUENCE[[&lt;ASN1_BOOLEAN[False]&gt;]]&gt;]]&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -115,7 +115,7 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 <h4>Encoding engines<a class="headerlink" href="#encoding-engines" title="Permalink to this headline">¶</a></h4>
 <p>As with the standard, ASN.1 and encoding are independent. We have just seen how to create a compounded ASN.1 object. To encode or decode it, we need to choose an encoding rule. Scapy provides only BER for the moment (actually, it may be DER. DER looks like BER except only minimal encoding is authorised which may well be what I did). I call this an ASN.1 codec.</p>
 <p>Encoding and decoding are done using class methods provided by the codec. For example the <code class="docutils literal"><span class="pre">BERcodec_INTEGER</span></code> class provides a <code class="docutils literal"><span class="pre">.enc()</span></code> and a <code class="docutils literal"><span class="pre">.dec()</span></code> class methods that can convert between an encoded string and a value of their type. They all inherit from BERcodec_Object which is able to decode objects from any type:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">BERcodec_INTEGER</span><span class="o">.</span><span class="n">enc</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">BERcodec_INTEGER</span><span class="o">.</span><span class="n">enc</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
 <span class="go">&#39;\x02\x01\x07&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">BERcodec_BIT_STRING</span><span class="o">.</span><span class="n">enc</span><span class="p">(</span><span class="s2">&quot;egg&quot;</span><span class="p">)</span>
 <span class="go">&#39;\x03\x03egg&#39;</span>
@@ -146,7 +146,7 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 </pre></div>
 </div>
 <p>ASN.1 objects are encoded using their <code class="docutils literal"><span class="pre">.enc()</span></code> method. This method must be called with the codec we want to use. All codecs are referenced in the ASN1_Codecs object. <code class="docutils literal"><span class="pre">str()</span></code> can also be used. In this case, the default codec (<code class="docutils literal"><span class="pre">conf.ASN1_default_codec</span></code>) will be used.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">enc</span><span class="p">(</span><span class="n">ASN1_Codecs</span><span class="o">.</span><span class="n">BER</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">enc</span><span class="p">(</span><span class="n">ASN1_Codecs</span><span class="o">.</span><span class="n">BER</span><span class="p">)</span>
 <span class="go">&#39;0\r\x02\x01\x07\x04\x03egg0\x03\x01\x01\x00&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <span class="go">&#39;0\r\x02\x01\x07\x04\x03egg0\x03\x01\x01\x00&#39;</span>
@@ -163,7 +163,7 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 </pre></div>
 </div>
 <p>By default, decoding is done using the <code class="docutils literal"><span class="pre">Universal</span></code> class, which means objects defined in the <code class="docutils literal"><span class="pre">Context</span></code> class will not be decoded. There is a good reason for that: the decoding depends on the context!</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cert</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cert</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="gp">... </span><span class="s2">MIIF5jCCA86gAwIBAgIBATANBgkqhkiG9w0BAQUFADCBgzELMAkGA1UEBhMC</span>
 <span class="gp">... </span><span class="s2">VVMxHTAbBgNVBAoTFEFPTCBUaW1lIFdhcm5lciBJbmMuMRwwGgYDVQQLExNB</span>
 <span class="gp">... </span><span class="s2">bWVyaWNhIE9ubGluZSBJbmMuMTcwNQYDVQQDEy5BT0wgVGltZSBXYXJuZXIg</span>
@@ -230,7 +230,7 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 </pre></div>
 </div>
 <p>The <code class="docutils literal"><span class="pre">Context</span></code> class must be specified:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">dcert</span><span class="p">,</span><span class="n">remain</span><span class="p">)</span> <span class="o">=</span> <span class="n">BERcodec_Object</span><span class="o">.</span><span class="n">dec</span><span class="p">(</span><span class="n">cert</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ASN1_Class_X509</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">dcert</span><span class="p">,</span><span class="n">remain</span><span class="p">)</span> <span class="o">=</span> <span class="n">BERcodec_Object</span><span class="o">.</span><span class="n">dec</span><span class="p">(</span><span class="n">cert</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">ASN1_Class_X509</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dcert</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="go"># ASN1_SEQUENCE:</span>
 <span class="go">  # ASN1_SEQUENCE:</span>
@@ -322,7 +322,7 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 <div class="section" id="a-complete-example-snmp">
 <h3>A complete example: SNMP<a class="headerlink" href="#a-complete-example-snmp" title="Permalink to this headline">¶</a></h3>
 <p>SNMP defines new ASN.1 objects. We need to define them:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ASN1_Class_SNMP</span><span class="p">(</span><span class="n">ASN1_Class_UNIVERSAL</span><span class="p">):</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ASN1_Class_SNMP</span><span class="p">(</span><span class="n">ASN1_Class_UNIVERSAL</span><span class="p">):</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;SNMP&quot;</span>
     <span class="n">PDU_GET</span> <span class="o">=</span> <span class="mh">0xa0</span>
     <span class="n">PDU_NEXT</span> <span class="o">=</span> <span class="mh">0xa1</span>
@@ -335,7 +335,7 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 </pre></div>
 </div>
 <p>These objects are PDU, and are in fact new names for a sequence container (this is generally the case for context objects: they are old containers with new names). This means creating the corresponding ASN.1 objects and BER codecs is simplistic:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ASN1_SNMP_PDU_GET</span><span class="p">(</span><span class="n">ASN1_SEQUENCE</span><span class="p">):</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ASN1_SNMP_PDU_GET</span><span class="p">(</span><span class="n">ASN1_SEQUENCE</span><span class="p">):</span>
     <span class="n">tag</span> <span class="o">=</span> <span class="n">ASN1_Class_SNMP</span><span class="o">.</span><span class="n">PDU_GET</span>
 
 <span class="k">class</span> <span class="nc">ASN1_SNMP_PDU_NEXT</span><span class="p">(</span><span class="n">ASN1_SEQUENCE</span><span class="p">):</span>
@@ -354,7 +354,7 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 </div>
 <p>Metaclasses provide the magic behind the fact that everything is automatically registered and that ASN.1 objects and BER codecs can find each other.</p>
 <p>The ASN.1 fields are also trivial:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ASN1F_SNMP_PDU_GET</span><span class="p">(</span><span class="n">ASN1F_SEQUENCE</span><span class="p">):</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ASN1F_SNMP_PDU_GET</span><span class="p">(</span><span class="n">ASN1F_SEQUENCE</span><span class="p">):</span>
     <span class="n">ASN1_tag</span> <span class="o">=</span> <span class="n">ASN1_Class_SNMP</span><span class="o">.</span><span class="n">PDU_GET</span>
 
 <span class="k">class</span> <span class="nc">ASN1F_SNMP_PDU_NEXT</span><span class="p">(</span><span class="n">ASN1F_SEQUENCE</span><span class="p">):</span>
@@ -364,7 +364,7 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 </pre></div>
 </div>
 <p>Now, the hard part, the ASN.1 packet:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">SNMP_error</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;no_error&quot;</span><span class="p">,</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">SNMP_error</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;no_error&quot;</span><span class="p">,</span>
                <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;too_big&quot;</span><span class="p">,</span>
 <span class="c1"># [...]</span>
              <span class="p">}</span>
@@ -420,7 +420,7 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 </div>
 <p>That wasn&#8217;t that much difficult. If you think that can&#8217;t be that short to implement SNMP encoding/decoding and that I may may have cut too much, just look at the complete source code.</p>
 <p>Now, how to use it? As usual:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">=</span><span class="n">SNMP</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">PDU</span><span class="o">=</span><span class="n">SNMPget</span><span class="p">(</span><span class="n">varbindlist</span><span class="o">=</span><span class="p">[</span><span class="n">SNMPvarbind</span><span class="p">(</span><span class="n">oid</span><span class="o">=</span><span class="s2">&quot;1.2.3&quot;</span><span class="p">,</span><span class="n">value</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">=</span><span class="n">SNMP</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">PDU</span><span class="o">=</span><span class="n">SNMPget</span><span class="p">(</span><span class="n">varbindlist</span><span class="o">=</span><span class="p">[</span><span class="n">SNMPvarbind</span><span class="p">(</span><span class="n">oid</span><span class="o">=</span><span class="s2">&quot;1.2.3&quot;</span><span class="p">,</span><span class="n">value</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
 <span class="gp">... </span>                                           <span class="n">SNMPvarbind</span><span class="p">(</span><span class="n">oid</span><span class="o">=</span><span class="s2">&quot;3.2.1&quot;</span><span class="p">,</span><span class="n">value</span><span class="o">=</span><span class="s2">&quot;hello&quot;</span><span class="p">)]))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="go">###[ SNMP ]###</span>
@@ -469,7 +469,7 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 <div class="section" id="about-oid-objects">
 <h4>About OID objects<a class="headerlink" href="#about-oid-objects" title="Permalink to this headline">¶</a></h4>
 <p>OID objects are created with an <code class="docutils literal"><span class="pre">ASN1_OID</span></code> class:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">=</span><span class="n">ASN1_OID</span><span class="p">(</span><span class="s2">&quot;2.5.29.10&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="o">=</span><span class="n">ASN1_OID</span><span class="p">(</span><span class="s2">&quot;2.5.29.10&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">o2</span><span class="o">=</span><span class="n">ASN1_OID</span><span class="p">(</span><span class="s2">&quot;1.2.840.113549.1.1.1&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="p">,</span><span class="n">o2</span>
 <span class="go">(&lt;ASN1_OID[&#39;.2.5.29.10&#39;]&gt;, &lt;ASN1_OID[&#39;.1.2.840.113549.1.1.1&#39;]&gt;)</span>
@@ -479,7 +479,7 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 <div class="section" id="loading-a-mib">
 <h4>Loading a MIB<a class="headerlink" href="#loading-a-mib" title="Permalink to this headline">¶</a></h4>
 <p>Scapy can parse MIB files and become aware of a mapping between an OID and its name:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">load_mib</span><span class="p">(</span><span class="s2">&quot;mib/*&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">load_mib</span><span class="p">(</span><span class="s2">&quot;mib/*&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">o1</span><span class="p">,</span><span class="n">o2</span>
 <span class="go">(&lt;ASN1_OID[&#39;basicConstraints&#39;]&gt;, &lt;ASN1_OID[&#39;rsaEncryption&#39;]&gt;)</span>
 </pre></div>
@@ -489,17 +489,17 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 <div class="section" id="scapy-s-mib-database">
 <h4>Scapy&#8217;s MIB database<a class="headerlink" href="#scapy-s-mib-database" title="Permalink to this headline">¶</a></h4>
 <p>All MIB information is stored into the conf.mib object. This object can be used to find the OID of a name</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">mib</span><span class="o">.</span><span class="n">sha1_with_rsa_signature</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">mib</span><span class="o">.</span><span class="n">sha1_with_rsa_signature</span>
 <span class="go">&#39;1.2.840.113549.1.1.5&#39;</span>
 </pre></div>
 </div>
 <p>or to resolve an OID:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">mib</span><span class="o">.</span><span class="n">_oidname</span><span class="p">(</span><span class="s2">&quot;1.2.3.6.1.4.1.5&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">mib</span><span class="o">.</span><span class="n">_oidname</span><span class="p">(</span><span class="s2">&quot;1.2.3.6.1.4.1.5&quot;</span><span class="p">)</span>
 <span class="go">&#39;enterprises.5&#39;</span>
 </pre></div>
 </div>
 <p>It is even possible to graph it:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">mib</span><span class="o">.</span><span class="n">_make_graph</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">mib</span><span class="o">.</span><span class="n">_make_graph</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -513,7 +513,7 @@ Scapy ASN.1 engine provides classes to link objects and their tags. They inherit
 <div class="section" id="first-example">
 <h3>First example<a class="headerlink" href="#first-example" title="Permalink to this headline">¶</a></h3>
 <p>Let&#8217;s begin with a simple example. I take the convention to write states with capitals, but any valid Python syntax would work as well.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">HelloWorld</span><span class="p">(</span><span class="n">Automaton</span><span class="p">):</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">HelloWorld</span><span class="p">(</span><span class="n">Automaton</span><span class="p">):</span>
     <span class="nd">@ATMT.state</span><span class="p">(</span><span class="n">initial</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">BEGIN</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">print</span><span class="p">(</span><span class="s2">&quot;State=BEGIN&quot;</span><span class="p">)</span>
@@ -541,7 +541,7 @@ reaches the indicated state. The argument is the name of the method representing
 <li><code class="docutils literal"><span class="pre">ATMT.action</span></code> binds a method to a transition and is run when the transition is taken.</li>
 </ul>
 <p>Running this example gives the following result:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">=</span><span class="n">HelloWorld</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">=</span><span class="n">HelloWorld</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 <span class="go">State=BEGIN</span>
 <span class="go">Wait for nothing...</span>
@@ -552,11 +552,11 @@ reaches the indicated state. The argument is the name of the method representing
 <p>This simple automaton can be described with the following graph:</p>
 <img alt="_images/ATMT_HelloWorld.png" src="_images/ATMT_HelloWorld.png" />
 <p>The graph can be automatically drawn from the code with:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">HelloWorld</span><span class="o">.</span><span class="n">graph</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">HelloWorld</span><span class="o">.</span><span class="n">graph</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>The graph can be saved to an image file using:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">HelloWorld</span><span class="o">.</span><span class="n">graph</span><span class="p">()</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;automaton.png&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">HelloWorld</span><span class="o">.</span><span class="n">graph</span><span class="p">()</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;automaton.png&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -564,26 +564,26 @@ reaches the indicated state. The argument is the name of the method representing
 <h3>Changing states<a class="headerlink" href="#changing-states" title="Permalink to this headline">¶</a></h3>
 <p>The <code class="docutils literal"><span class="pre">ATMT.state</span></code> decorator transforms a method into a function that raises an exception. If you raise that exception, the automaton state will be changed. If the change occurs in a transition, actions bound to this transition will be called. The parameters given to the function replacing the method will be kept and finally delivered to the method. The exception has a method action_parameters that can be called before it is raised so that it will store parameters to be delivered to all actions bound to the current transition.</p>
 <p>As an example, let&#8217;s consider the following state:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@ATMT.state</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@ATMT.state</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">MY_STATE</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param1</span><span class="p">,</span> <span class="n">param2</span><span class="p">):</span>
     <span class="k">print</span><span class="p">(</span><span class="s2">&quot;state=MY_STATE. param1=</span><span class="si">%r</span><span class="s2"> param2=</span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">param1</span><span class="p">,</span> <span class="n">param2</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>This state will be reached with the following code:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@ATMT.receive_condition</span><span class="p">(</span><span class="n">ANOTHER_STATE</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@ATMT.receive_condition</span><span class="p">(</span><span class="n">ANOTHER_STATE</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">received_ICMP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkt</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">ICMP</span> <span class="ow">in</span> <span class="n">pkt</span><span class="p">:</span>
         <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">MY_STATE</span><span class="p">(</span><span class="s2">&quot;got icmp&quot;</span><span class="p">,</span> <span class="n">pkt</span><span class="p">[</span><span class="n">ICMP</span><span class="p">]</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Let&#8217;s suppose we want to bind an action to this transition, that will also need some parameters:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@ATMT.action</span><span class="p">(</span><span class="n">received_ICMP</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@ATMT.action</span><span class="p">(</span><span class="n">received_ICMP</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">on_ICMP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">icmp_type</span><span class="p">,</span> <span class="n">icmp_code</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">retaliate</span><span class="p">(</span><span class="n">icmp_type</span><span class="p">,</span> <span class="n">icmp_code</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The condition should become:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@ATMT.receive_condition</span><span class="p">(</span><span class="n">ANOTHER_STATE</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@ATMT.receive_condition</span><span class="p">(</span><span class="n">ANOTHER_STATE</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">received_ICMP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkt</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">ICMP</span> <span class="ow">in</span> <span class="n">pkt</span><span class="p">:</span>
         <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">MY_STATE</span><span class="p">(</span><span class="s2">&quot;got icmp&quot;</span><span class="p">,</span> <span class="n">pkt</span><span class="p">[</span><span class="n">ICMP</span><span class="p">]</span><span class="o">.</span><span class="n">type</span><span class="p">)</span><span class="o">.</span><span class="n">action_parameters</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="n">ICMP</span><span class="p">]</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">pkt</span><span class="p">[</span><span class="n">ICMP</span><span class="p">]</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
@@ -594,7 +594,7 @@ reaches the indicated state. The argument is the name of the method representing
 <h3>Real example<a class="headerlink" href="#real-example" title="Permalink to this headline">¶</a></h3>
 <p>Here is a real example take from Scapy. It implements a TFTP client that can issue read requests.</p>
 <img alt="_images/ATMT_TFTP_read.png" src="_images/ATMT_TFTP_read.png" />
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TFTP_read</span><span class="p">(</span><span class="n">Automaton</span><span class="p">):</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">TFTP_read</span><span class="p">(</span><span class="n">Automaton</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">parse_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">server</span><span class="p">,</span> <span class="n">sport</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">69</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
         <span class="n">Automaton</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
@@ -676,16 +676,18 @@ reaches the indicated state. The argument is the name of the method representing
 </pre></div>
 </div>
 <p>It can be run like this, for instance:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">TFTP_read</span><span class="p">(</span><span class="s2">&quot;my_file&quot;</span><span class="p">,</span> <span class="s2">&quot;192.168.1.128&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">TFTP_read</span><span class="p">(</span><span class="s2">&quot;my_file&quot;</span><span class="p">,</span> <span class="s2">&quot;192.168.1.128&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="detailed-documentation">
 <h3>Detailed documentation<a class="headerlink" href="#detailed-documentation" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="decorators">
+<h4>Decorators<a class="headerlink" href="#decorators" title="Permalink to this headline">¶</a></h4>
 <div class="section" id="decorator-for-states">
-<h4>Decorator for states<a class="headerlink" href="#decorator-for-states" title="Permalink to this headline">¶</a></h4>
+<h5>Decorator for states<a class="headerlink" href="#decorator-for-states" title="Permalink to this headline">¶</a></h5>
 <p>States are methods decorated by the result of the <code class="docutils literal"><span class="pre">ATMT.state</span></code> function. It can take 3 optional parameters: <code class="docutils literal"><span class="pre">initial</span></code>, <code class="docutils literal"><span class="pre">final</span></code> and <code class="docutils literal"><span class="pre">error</span></code>. The set to <code class="docutils literal"><span class="pre">True</span></code> indicates that the state is an initial, final or error state.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Example</span><span class="p">(</span><span class="n">Automaton</span><span class="p">):</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Example</span><span class="p">(</span><span class="n">Automaton</span><span class="p">):</span>
     <span class="nd">@ATMT.state</span><span class="p">(</span><span class="n">initial</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">BEGIN</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
@@ -706,10 +708,10 @@ reaches the indicated state. The argument is the name of the method representing
 </div>
 </div>
 <div class="section" id="decorators-for-transitions">
-<h4>Decorators for transitions<a class="headerlink" href="#decorators-for-transitions" title="Permalink to this headline">¶</a></h4>
+<h5>Decorators for transitions<a class="headerlink" href="#decorators-for-transitions" title="Permalink to this headline">¶</a></h5>
 <p>Transitions are methods decorated by the result of one of <code class="docutils literal"><span class="pre">ATMT.condition</span></code>, <code class="docutils literal"><span class="pre">ATMT.receive_condition</span></code>, <code class="docutils literal"><span class="pre">ATMT.timeout</span></code>. They all take as argument the state method they are related to. <code class="docutils literal"><span class="pre">ATMT.timeout</span></code> also have a mandatory <code class="docutils literal"><span class="pre">timeout</span></code> parameter to provide the timeout value in seconds. <code class="docutils literal"><span class="pre">ATMT.condition</span></code> and <code class="docutils literal"><span class="pre">ATMT.receive_condition</span></code> have an optional <code class="docutils literal"><span class="pre">prio</span></code> parameter so that the order in which conditions are evaluated can be forced. Default priority is 0. Transitions with the same priority level are called in an undetermined order.</p>
 <p>When the automaton switches to a given state, the state&#8217;s method is executed. Then transitions methods are called at specific moments until one triggers a new state (something like <code class="docutils literal"><span class="pre">raise</span> <span class="pre">self.MY_NEW_STATE()</span></code>). First, right after the state&#8217;s method returns, the <code class="docutils literal"><span class="pre">ATMT.condition</span></code> decorated methods are run by growing prio. Then each time a packet is received and accepted by the master filter all <code class="docutils literal"><span class="pre">ATMT.receive_condition</span></code> decorated hods are called by growing prio. When a timeout is reached since the time we entered into the current space, the corresponding <code class="docutils literal"><span class="pre">ATMT.timeout</span></code> decorated method is called.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Example</span><span class="p">(</span><span class="n">Automaton</span><span class="p">):</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Example</span><span class="p">(</span><span class="n">Automaton</span><span class="p">):</span>
     <span class="nd">@ATMT.state</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">WAITING</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
@@ -736,9 +738,9 @@ reaches the indicated state. The argument is the name of the method representing
 </div>
 </div>
 <div class="section" id="decorator-for-actions">
-<h4>Decorator for actions<a class="headerlink" href="#decorator-for-actions" title="Permalink to this headline">¶</a></h4>
+<h5>Decorator for actions<a class="headerlink" href="#decorator-for-actions" title="Permalink to this headline">¶</a></h5>
 <p>Actions are methods that are decorated by the return of <code class="docutils literal"><span class="pre">ATMT.action</span></code> function. This function takes the transition method it is bound to as first parameter and an optionnal priority <code class="docutils literal"><span class="pre">prio</span></code> as a second parameter. Default priority is 0. An action method can be decorated many times to be bound to many transitions.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Example</span><span class="p">(</span><span class="n">Automaton</span><span class="p">):</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Example</span><span class="p">(</span><span class="n">Automaton</span><span class="p">):</span>
     <span class="nd">@ATMT.state</span><span class="p">(</span><span class="n">initial</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">BEGIN</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
@@ -768,7 +770,7 @@ reaches the indicated state. The argument is the name of the method representing
 </pre></div>
 </div>
 <p>The two possible outputs are:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">=</span><span class="n">Example</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">=</span><span class="n">Example</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 <span class="go">We are not lucky...</span>
 <span class="go">This wasn&#39;t luck!...</span>
@@ -776,6 +778,7 @@ reaches the indicated state. The argument is the name of the method representing
 <span class="go">We are lucky...</span>
 <span class="go">This wasn&#39;t luck!...</span>
 </pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="methods-to-overload">
@@ -796,46 +799,37 @@ reaches the indicated state. The argument is the name of the method representing
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Advanced usage</a><ul>
-<li><a class="reference internal" href="#asn-1-and-snmp">ASN.1 and SNMP</a><ul>
-<li><a class="reference internal" href="#what-is-asn-1">What is ASN.1?</a></li>
-<li><a class="reference internal" href="#scapy-and-asn-1">Scapy and ASN.1</a><ul>
-<li><a class="reference internal" href="#asn-1-engine">ASN.1 engine</a></li>
-<li><a class="reference internal" href="#encoding-engines">Encoding engines</a></li>
-<li><a class="reference internal" href="#asn-1-layers">ASN.1 layers</a><ul>
-<li><a class="reference internal" href="#asn-1-fields">ASN.1 fields</a></li>
-<li><a class="reference internal" href="#asn-1-packets">ASN.1 packets</a></li>
+<h1 class="logo"><a href="index.html">Scapy</a></h1>
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=phaethon&repo=scapy&type=fork&count=true&size=large"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Download and Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Advanced usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#asn-1-and-snmp">ASN.1 and SNMP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#automata">Automata</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="extending.html">Build your own tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build_dissect.html">Adding new protocols</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Scapy development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="backmatter.html">Credits</a></li>
 </ul>
-</li>
-<li><a class="reference internal" href="#a-complete-example-snmp">A complete example: SNMP</a></li>
-<li><a class="reference internal" href="#resolving-oid-from-a-mib">Resolving OID from a MIB</a><ul>
-<li><a class="reference internal" href="#about-oid-objects">About OID objects</a></li>
-<li><a class="reference internal" href="#loading-a-mib">Loading a MIB</a></li>
-<li><a class="reference internal" href="#scapy-s-mib-database">Scapy&#8217;s MIB database</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference internal" href="#automata">Automata</a><ul>
-<li><a class="reference internal" href="#first-example">First example</a></li>
-<li><a class="reference internal" href="#changing-states">Changing states</a></li>
-<li><a class="reference internal" href="#real-example">Real example</a></li>
-<li><a class="reference internal" href="#detailed-documentation">Detailed documentation</a><ul>
-<li><a class="reference internal" href="#decorator-for-states">Decorator for states</a></li>
-<li><a class="reference internal" href="#decorators-for-transitions">Decorators for transitions</a></li>
-<li><a class="reference internal" href="#decorator-for-actions">Decorator for actions</a></li>
-<li><a class="reference internal" href="#methods-to-overload">Methods to overload</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
+
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
@@ -845,13 +839,6 @@ reaches the indicated state. The argument is the name of the method representing
   </ul></li>
 </ul>
 </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/advanced_usage.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -881,6 +868,10 @@ reaches the indicated state. The argument is the name of the method representing
           rel="nofollow">Page source</a>
     </div>
 
+    
+    <a href="https://github.com/phaethon/scapy" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
     
 
     

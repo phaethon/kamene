@@ -8,7 +8,7 @@
     
     <title>Scapy development &mdash; Scapy 3.0.0 documentation</title>
     
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -104,7 +104,7 @@ Scapy3k is not synchronized with scapy v2.x repository at <a class="reference ex
 <p>Table 1 - UTScapy Syntax Specifiers</p>
 <p>Comments placed in the test report have a context. Each comment will be associated to the last defined test container - be it a individual unit test, a test set or a test campaign. Multiple comments associated with a particular container will be concatenated together and will appear in the report directly after the test container announcement. General comments for a test file should appear before announcing a test campaign. For comments to be associated with a test campaign, they must appear after declaration of the test campaign but before any test set or unit test. Comments for a test set should appear before definition of the set’s first unit test.</p>
 <p>The generic format for a test campaign is shown in the following table:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>% Test Campaign Name
+<div class="highlight-python"><div class="highlight"><pre>% Test Campaign Name
 * Comment describing this campaign
 
 
@@ -123,7 +123,7 @@ a == 1
 <p>Python statements are identified by the lack of a defined UTScapy syntax specifier. The Python statements are fed directly to the Python interpreter as if one is operating within the interactive Scapy shell (<code class="docutils literal"><span class="pre">interact</span></code>). Looping, iteration and conditionals are permissible but must be terminated by a blank line. A test set may be comprised of multiple unit tests and multiple test sets may be defined for each campaign. It is even possible to have multiple test campaigns in a particular test definition file. The use of keywords allows testing of subsets of the entire campaign. For example, during development of a test campaign, the user may wish to mark new tests under development with the keyword “debug”. Once the tests run successfully to their desired conclusion, the keyword “debug” could be removed. Keywords such as “regression” or “limited” could be used as well.</p>
 <p>It is important to note that UTScapy uses the truth value from the last Python statement as the indicator as to whether a test passed or failed. Multiple logical tests may appear on the last line. If the result is 0 or False, the test fails. Otherwise, the test passes. Use of an assert() statement can force evaluation of intermediate values if needed.</p>
 <p>The syntax for UTScapy is shown in Table 3 - UTScapy command line syntax:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>[root@localhost scapy]# ./UTscapy.py –h
+<div class="highlight-python"><div class="highlight"><pre>[root@localhost scapy]# ./UTscapy.py –h
 Usage: UTscapy [-m module] [-f {text|ansi|HTML|LaTeX}] [-o output_file]
                [-t testfile] [-k keywords [-k ...]] [-K keywords [-K ...]]
                [-l] [-d|-D] [-F] [-q[q]]
@@ -220,7 +220,7 @@ invoked by UTScapy as “__main__”.</td>
 </table>
 <p>Table 4 - UTScapy parameters</p>
 <p>Table 5 shows a simple test campaign with multiple test set definitions. Additionally, keywords are specified that allow a limited number of test cases to be executed. Notice the use of the <code class="docutils literal"><span class="pre">assert()</span></code> statement in test 3 and 5 used to check intermediate results. Tests 2 and 5 will fail by design.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>% Example Test Campaign
+<div class="highlight-python"><div class="highlight"><pre>% Example Test Campaign
 
 # Comment describing this campaign
 #
@@ -279,7 +279,7 @@ e == 1296
 </pre></div>
 </div>
 <p>To see an example that is targeted to Scapy, go to <a class="reference external" href="http://www.secdev.org/projects/UTscapy">http://www.secdev.org/projects/UTscapy</a>. Cut and paste the example at the bottom of the page to the file <code class="docutils literal"><span class="pre">demo_campaign.txt</span></code> and run UTScapy against it:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>./UTscapy.py -t demo_campaign.txt -f html -o demo_campaign.html –F -l
+<div class="highlight-python"><div class="highlight"><pre>./UTscapy.py -t demo_campaign.txt -f html -o demo_campaign.html –F -l
 </pre></div>
 </div>
 <p>Examine the output generated in file <code class="docutils literal"><span class="pre">demo_campaign.html</span></code>.</p>
@@ -293,19 +293,38 @@ e == 1296
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Scapy development</a><ul>
-<li><a class="reference internal" href="#project-organization">Project organization</a></li>
-<li><a class="reference internal" href="#how-to-contribute">How to contribute</a></li>
-<li><a class="reference internal" href="#testing-with-utscapy">Testing with UTScapy</a><ul>
-<li><a class="reference internal" href="#what-is-utscapy">What is UTScapy?</a></li>
-<li><a class="reference internal" href="#syntax-of-a-test-campaign">Syntax of a Test Campaign</a></li>
+<h1 class="logo"><a href="index.html">Scapy</a></h1>
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=phaethon&repo=scapy&type=fork&count=true&size=large"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Download and Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_usage.html">Advanced usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending.html">Build your own tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build_dissect.html">Adding new protocols</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Scapy development</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#project-organization">Project organization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-to-contribute">How to contribute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#testing-with-utscapy">Testing with UTScapy</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="backmatter.html">Credits</a></li>
 </ul>
-</li>
-</ul>
+
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
@@ -315,13 +334,6 @@ e == 1296
   </ul></li>
 </ul>
 </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/development.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -351,6 +363,10 @@ e == 1296
           rel="nofollow">Page source</a>
     </div>
 
+    
+    <a href="https://github.com/phaethon/scapy" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
     
 
     

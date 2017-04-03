@@ -8,7 +8,7 @@
     
     <title>Introduction &mdash; Scapy 3.0.0 documentation</title>
     
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -127,7 +127,7 @@ information is lost in this operation.</p>
 <div class="section" id="quick-demo">
 <h2>Quick demo<a class="headerlink" href="#quick-demo" title="Permalink to this headline">¶</a></h2>
 <p>First, we play a bit and create four IP packets at once. Let&#8217;s see how it works. We first instantiate the IP class. Then, we instantiate it again and we provide a destination that is worth four IP addresses (/30 gives the netmask). Using a Python idiom, we develop this implicit packet in a set of explicit packets. Then, we quit the interpreter. As we provided a session file, the variables we were working on are saved, then reloaded:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span># ./scapy.py -s mysession
+<div class="highlight-python"><div class="highlight"><pre># ./scapy.py -s mysession
 New session [mysession]
 Welcome to Scapy (0.9.17.108beta)
 &gt;&gt;&gt; IP()
@@ -143,7 +143,7 @@ Welcome to Scapy (0.9.17.108beta)
 &gt;&gt;&gt; ^D
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span># scapy -s mysession
+<div class="highlight-python"><div class="highlight"><pre># scapy -s mysession
 Using session [mysession]
 Welcome to Scapy (0.9.17.108beta)
 &gt;&gt;&gt; ip
@@ -151,7 +151,7 @@ Welcome to Scapy (0.9.17.108beta)
 </pre></div>
 </div>
 <p>Now, let&#8217;s manipulate some packets:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">IP</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">IP</span><span class="p">()</span>
 <span class="go">&lt;IP |&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">=</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;172.16.1.40&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span>
@@ -164,7 +164,7 @@ Welcome to Scapy (0.9.17.108beta)
 </div>
 <p>Let&#8217;s say I want a broadcast MAC address, and IP payload to ketchup.com
 and to mayo.com, TTL value from 1 to 9, and an UDP payload:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Ether</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;ff:ff:ff:ff:ff:ff&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Ether</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;ff:ff:ff:ff:ff:ff&quot;</span><span class="p">)</span>
 <span class="go">      /IP(dst=[&quot;ketchup.com&quot;,&quot;mayo.com&quot;],ttl=(1,9))</span>
 <span class="go">      /UDP()</span>
 </pre></div>
@@ -203,7 +203,7 @@ If not overriden,</p>
 <li><code class="docutils literal"><span class="pre">dict`</span> <span class="pre">(mutable):</span> <span class="pre">``{</span> <span class="pre">&quot;one&quot;:1</span> <span class="pre">,</span> <span class="pre">&quot;two&quot;:2</span> <span class="pre">}</span></code></li>
 </ul>
 <p>There are no block delimiters in Python. Instead, indendation does matter:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">cond</span><span class="p">:</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">cond</span><span class="p">:</span>
     <span class="n">instr</span>
     <span class="n">instr</span>
 <span class="k">elif</span> <span class="n">cond2</span><span class="p">:</span>
@@ -221,24 +221,39 @@ If not overriden,</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Introduction</a><ul>
-<li><a class="reference internal" href="#about-scapy">About Scapy</a></li>
-<li><a class="reference internal" href="#what-makes-scapy-so-special">What makes Scapy so special</a><ul>
-<li><a class="reference internal" href="#fast-packet-design">Fast packet design</a></li>
-<li><a class="reference internal" href="#probe-once-interpret-many">Probe once, interpret many</a></li>
-<li><a class="reference internal" href="#scapy-decodes-it-does-not-interpret">Scapy decodes, it does not interpret</a></li>
+<h1 class="logo"><a href="index.html">Scapy</a></h1>
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=phaethon&repo=scapy&type=fork&count=true&size=large"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#about-scapy">About Scapy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-makes-scapy-so-special">What makes Scapy so special</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#quick-demo">Quick demo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#learning-python">Learning Python</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#quick-demo">Quick demo</a><ul>
-<li><a class="reference internal" href="#sensible-default-values">Sensible default values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Download and Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_usage.html">Advanced usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending.html">Build your own tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build_dissect.html">Adding new protocols</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Scapy development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="backmatter.html">Credits</a></li>
 </ul>
-</li>
-<li><a class="reference internal" href="#learning-python">Learning Python</a></li>
-</ul>
-</li>
-</ul>
+
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
@@ -248,13 +263,6 @@ If not overriden,</p>
   </ul></li>
 </ul>
 </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/introduction.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -284,6 +292,10 @@ If not overriden,</p>
           rel="nofollow">Page source</a>
     </div>
 
+    
+    <a href="https://github.com/phaethon/scapy" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
     
 
     

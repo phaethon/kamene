@@ -8,7 +8,7 @@
     
     <title>Usage &mdash; Scapy 3.0.0 documentation</title>
     
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -48,7 +48,7 @@
 <h2>Starting Scapy<a class="headerlink" href="#starting-scapy" title="Permalink to this headline">¶</a></h2>
 <p>Scapy&#8217;s interactive shell is run in a terminal session. Root privileges are needed to
 send the packets, so we&#8217;re using <code class="docutils literal"><span class="pre">sudo</span></code> here:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>$ sudo scapy
+<div class="highlight-python"><div class="highlight"><pre>$ sudo scapy
 INFO: Please, report issues to https://github.com/phaethon/scapy
 WARNING: IPython not available. Using standard Python shell instead.
 Welcome to Scapy (3.0.0)
@@ -56,7 +56,7 @@ Welcome to Scapy (3.0.0)
 </pre></div>
 </div>
 <p>If you have installed IPython this is an example Scapy startup:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>$ sudo scapy
+<div class="highlight-python"><div class="highlight"><pre>$ sudo scapy
 INFO: Please, report issues to https://github.com/phaethon/scapy
 Python 3.4.2 (default, Jul  9 2015, 17:24:30)
 Type &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
@@ -73,7 +73,7 @@ In [1]:
 </div>
 <p>If you do not have all optional packages installed, Scapy will inform you that
 some features will not be available:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>INFO: Can&#39;t import matplotlib. Not critical, but won&#39;t be able to plot.
+<div class="highlight-python"><div class="highlight"><pre>INFO: Can&#39;t import matplotlib. Not critical, but won&#39;t be able to plot.
 INFO: Can&#39;t import networkx. Not criticial, but won&#39;t be able to draw network graphs.
 INFO: Can&#39;t import PyX. Won&#39;t be able to use psdump() or pdfdump().
 </pre></div>
@@ -87,7 +87,7 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 <div class="section" id="first-steps">
 <h3>First steps<a class="headerlink" href="#first-steps" title="Permalink to this headline">¶</a></h3>
 <p>Let&#8217;s build a packet and play with it:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">=</span><span class="n">IP</span><span class="p">(</span><span class="n">ttl</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">=</span><span class="n">IP</span><span class="p">(</span><span class="n">ttl</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span>
 <span class="go">&lt; IP ttl=10 |&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">src</span>
@@ -108,7 +108,7 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 <div class="section" id="stacking-layers">
 <h3>Stacking layers<a class="headerlink" href="#stacking-layers" title="Permalink to this headline">¶</a></h3>
 <p>The <code class="docutils literal"><span class="pre">/</span></code> operator has been used as a composition operator between two layers. When doing so, the lower layer can have one or more of its defaults fields overloaded according to the upper layer. (You still can give the value you want). A string can be used as a raw layer.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">IP</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">IP</span><span class="p">()</span>
 <span class="go">&lt;IP |&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">IP</span><span class="p">()</span><span class="o">/</span><span class="n">TCP</span><span class="p">()</span>
 <span class="go">&lt;IP frag=0 proto=TCP |&lt;TCP |&gt;&gt;</span>
@@ -124,7 +124,7 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 </div>
 <a class="reference internal image-reference" href="_images/fieldsmanagement.png"><img alt="_images/fieldsmanagement.png" src="_images/fieldsmanagement.png" style="width: 779.4px; height: 181.8px;" /></a>
 <p>Each packet can be build or dissected (note: in Python <code class="docutils literal"><span class="pre">_</span></code> (underscore) is the latest result):</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">bytes</span><span class="p">(</span><span class="n">IP</span><span class="p">())</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">bytes</span><span class="p">(</span><span class="n">IP</span><span class="p">())</span>
 <span class="go">b&#39;E\x00\x00\x14\x00\x01\x00\x00@\x00|\xe7\x7f\x00\x00\x01\x7f\x00\x00\x01&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">IP</span><span class="p">(</span><span class="n">_</span><span class="p">)</span>
 <span class="go">&lt;IP version=4 ihl=5 tos=0x0 len=20 id=1 flags= frag=0 ttl=64 proto=IP</span>
@@ -152,7 +152,7 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 </pre></div>
 </div>
 <p>We see that a dissected packet has all its fields filled. That&#8217;s because I consider that each field has its value imposed by the original string. If this is too verbose, the method hide_defaults() will delete every field that has the same value as the default:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">hide_defaults</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">hide_defaults</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">c</span>
 <span class="go">&lt;Ether dst=00:0f:66:56:fa:d2 src=00:ae:f3:52:aa:d1 type=0x800 |&lt;IP ihl=5L len=67</span>
 <span class="go"> frag=0 proto=TCP chksum=0x783c src=192.168.5.21 dst=66.35.250.151 |&lt;TCP dataofs=5L</span>
@@ -163,7 +163,7 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 <div class="section" id="reading-pcap-files">
 <h3>Reading PCAP files<a class="headerlink" href="#reading-pcap-files" title="Permalink to this headline">¶</a></h3>
 <p id="index-0">You can read packets from a pcap file and write them to a pcap file.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">=</span><span class="n">rdpcap</span><span class="p">(</span><span class="s2">&quot;/spare/captures/isakmp.cap&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">=</span><span class="n">rdpcap</span><span class="p">(</span><span class="s2">&quot;/spare/captures/isakmp.cap&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span>
 <span class="go">&lt;isakmp.cap: UDP:721 TCP:0 ICMP:0 Other:0&gt;</span>
 </pre></div>
@@ -172,7 +172,7 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 <div class="section" id="graphical-dumps-pdf-ps">
 <h3>Graphical dumps (PDF, PS)<a class="headerlink" href="#graphical-dumps-pdf-ps" title="Permalink to this headline">¶</a></h3>
 <p id="index-1">If you have PyX installed, you can make a graphical PostScript/PDF dump of a packet or a list of packets (see the ugly PNG image below. PostScript/PDF are far better quality...):</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">[</span><span class="mi">423</span><span class="p">]</span><span class="o">.</span><span class="n">pdfdump</span><span class="p">(</span><span class="n">layer_shift</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">[</span><span class="mi">423</span><span class="p">]</span><span class="o">.</span><span class="n">pdfdump</span><span class="p">(</span><span class="n">layer_shift</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">[</span><span class="mi">423</span><span class="p">]</span><span class="o">.</span><span class="n">psdump</span><span class="p">(</span><span class="s2">&quot;/tmp/isakmp_pkt.eps&quot;</span><span class="p">,</span><span class="n">layer_shift</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -227,7 +227,7 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 <div class="section" id="generating-sets-of-packets">
 <h3>Generating sets of packets<a class="headerlink" href="#generating-sets-of-packets" title="Permalink to this headline">¶</a></h3>
 <p>For the moment, we have only generated one packet. Let see how to specify sets of packets as easily. Each field of the whole packet (ever layers) can be a set. This implicidely define a set of packets, generated using a kind of cartesian product between all the fields.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">=</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;www.slashdot.org/30&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">=</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;www.slashdot.org/30&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span>
 <span class="go">&lt;IP  dst=Net(&#39;www.slashdot.org/30&#39;) |&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">a</span><span class="p">]</span>
@@ -302,7 +302,7 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 <div class="section" id="sending-packets">
 <h3>Sending packets<a class="headerlink" href="#sending-packets" title="Permalink to this headline">¶</a></h3>
 <p id="index-2">Now that we know how to manipulate packets. Let&#8217;s see how to send them. The send() function will send packets at layer 3. That is to say it will handle routing and layer 2 for you. The sendp() function will work at layer 2. It&#8217;s up to you to choose the right interface and the right link layer protocol.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">send</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;1.2.3.4&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">())</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">send</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;1.2.3.4&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">())</span>
 <span class="go">.</span>
 <span class="go">Sent 1 packets.</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sendp</span><span class="p">(</span><span class="n">Ether</span><span class="p">()</span><span class="o">/</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;1.2.3.4&quot;</span><span class="p">,</span><span class="n">ttl</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">)),</span> <span class="n">iface</span><span class="o">=</span><span class="s2">&quot;eth1&quot;</span><span class="p">)</span>
@@ -320,7 +320,7 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 <div class="section" id="fuzzing">
 <h3>Fuzzing<a class="headerlink" href="#fuzzing" title="Permalink to this headline">¶</a></h3>
 <p id="index-3">The function fuzz() is able to change any default value that is not to be calculated (like checksums) by an object whose value is random and whose type is adapted to the field. This enables to quicky built fuzzing templates and send them in loop. In the following example, the IP layer is normal, and the UDP and NTP layers are fuzzed. The UDP checksum will be correct, the UDP destination port will be overloaded by NTP to be 123 and the NTP version will be forced to be 4. All the other ports will be randomized:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">send</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;target&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">fuzz</span><span class="p">(</span><span class="n">UDP</span><span class="p">()</span><span class="o">/</span><span class="n">NTP</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="mi">4</span><span class="p">)),</span><span class="n">loop</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">send</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;target&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">fuzz</span><span class="p">(</span><span class="n">UDP</span><span class="p">()</span><span class="o">/</span><span class="n">NTP</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="mi">4</span><span class="p">)),</span><span class="n">loop</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="go">................^C</span>
 <span class="go">Sent 16 packets.</span>
 </pre></div>
@@ -329,7 +329,7 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 <div class="section" id="send-and-receive-packets-sr">
 <h3>Send and receive packets (sr)<a class="headerlink" href="#send-and-receive-packets-sr" title="Permalink to this headline">¶</a></h3>
 <p id="index-4">Now, let&#8217;s try to do some fun things. The sr() function is for sending packets and receiving answers. The function returns a couple of packet and answers, and the unanswered packets. The function sr1() is a variant that only return one packet that answered the packet (or the packet set) sent. The packets must be layer 3 packets (IP, ARP, etc.). The function srp() do the same for layer 2 packets (Ethernet, 802.3, etc.).</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">=</span><span class="n">sr1</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;www.slashdot.org&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">()</span><span class="o">/</span><span class="n">b</span><span class="s2">&quot;XXXXXXXXXXX&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">=</span><span class="n">sr1</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;www.slashdot.org&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">()</span><span class="o">/</span><span class="n">b</span><span class="s2">&quot;XXXXXXXXXXX&quot;</span><span class="p">)</span>
 <span class="go">Begin emission:</span>
 <span class="go">...Finished to send 1 packets.</span>
 <span class="go">.*</span>
@@ -366,7 +366,7 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 </pre></div>
 </div>
 <p id="index-5">A DNS query (<code class="docutils literal"><span class="pre">rd</span></code> = recursion desired). The host 192.168.5.1 is my DNS server. Note the non-null padding coming from my Linksys having the Etherleak flaw:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sr1</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.5.1&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">UDP</span><span class="p">()</span><span class="o">/</span><span class="n">DNS</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">qd</span><span class="o">=</span><span class="n">DNSQR</span><span class="p">(</span><span class="n">qname</span><span class="o">=</span><span class="s2">&quot;www.slashdot.org&quot;</span><span class="p">)))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sr1</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.5.1&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">UDP</span><span class="p">()</span><span class="o">/</span><span class="n">DNS</span><span class="p">(</span><span class="n">rd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">qd</span><span class="o">=</span><span class="n">DNSQR</span><span class="p">(</span><span class="n">qname</span><span class="o">=</span><span class="s2">&quot;www.slashdot.org&quot;</span><span class="p">)))</span>
 <span class="go">Begin emission:</span>
 <span class="go">Finished to send 1 packets.</span>
 <span class="go">..*</span>
@@ -380,7 +380,7 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 </pre></div>
 </div>
 <p>The &#8220;send&#8217;n&#8217;receive&#8221; functions family is the heart of scapy. They return a couple of two lists. The first element is a list of couples (packet sent, answer), and the second element is the list of unanswered packets. These two elements are lists, but they are wrapped by an object to present them better, and to provide them with some methods that do most frequently needed actions:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.8.1&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="p">[</span><span class="mi">21</span><span class="p">,</span><span class="mi">22</span><span class="p">,</span><span class="mi">23</span><span class="p">]))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.8.1&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="p">[</span><span class="mi">21</span><span class="p">,</span><span class="mi">22</span><span class="p">,</span><span class="mi">23</span><span class="p">]))</span>
 <span class="go">Received 6 packets, got 3 answers, remaining 0 packets</span>
 <span class="go">(&lt;Results: UDP:0 TCP:3 ICMP:0 Other:0&gt;, &lt;Unanswered: UDP:0 TCP:0 ICMP:0 Other:0&gt;)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">_</span>
@@ -391,7 +391,7 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 </pre></div>
 </div>
 <p>If there is a limited rate of answers, you can specify a time interval to wait between two packets with the inter parameter. If some packets are lost or if specifying an interval is not enough, you can resend all the unanswered packets, either by calling the function again, directly with the unanswered list, or by specifying a retry parameter. If retry is 3, scapy will try to resend unanswered packets 3 times. If retry is -3, scapy will resend unanswered packets until no more answer is given for the same set of unanswered packets 3 times in a row. The timeout parameter specify the time to wait after the last packet has been sent:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;172.20.29.5/30&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="p">[</span><span class="mi">21</span><span class="p">,</span><span class="mi">22</span><span class="p">,</span><span class="mi">23</span><span class="p">]),</span><span class="n">inter</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span><span class="n">retry</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span><span class="n">timeout</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;172.20.29.5/30&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="p">[</span><span class="mi">21</span><span class="p">,</span><span class="mi">22</span><span class="p">,</span><span class="mi">23</span><span class="p">]),</span><span class="n">inter</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span><span class="n">retry</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span><span class="n">timeout</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="go">Begin emission:</span>
 <span class="go">Finished to send 12 packets.</span>
 <span class="go">Begin emission:</span>
@@ -407,11 +407,11 @@ Just open a Scapy session as shown above and try the examples yourself.</p>
 <div class="section" id="syn-scans">
 <h3>SYN Scans<a class="headerlink" href="#syn-scans" title="Permalink to this headline">¶</a></h3>
 <p id="index-6">Classic SYN Scan can be initialized by executing the following command from Scapy&#8217;s prompt:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sr1</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;72.14.207.99&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span><span class="n">flags</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sr1</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;72.14.207.99&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span><span class="n">flags</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>The above will send a single SYN packet to Google&#8217;s port 80 and will quit after receving a single response:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>Begin emission:
+<div class="highlight-python"><div class="highlight"><pre>Begin emission:
 .Finished to send 1 packets.
 *
 Received 2 packets, got 1 answers, remaining 0 packets
@@ -424,15 +424,15 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 </div>
 <p>From the above output, we can see Google returned “SA” or SYN-ACK flags indicating an open port.</p>
 <p>Use either notations to scan ports 400 through 443 on the system:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.1.1&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">sport</span><span class="o">=</span><span class="mi">666</span><span class="p">,</span><span class="n">dport</span><span class="o">=</span><span class="p">(</span><span class="mi">440</span><span class="p">,</span><span class="mi">443</span><span class="p">),</span><span class="n">flags</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.1.1&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">sport</span><span class="o">=</span><span class="mi">666</span><span class="p">,</span><span class="n">dport</span><span class="o">=</span><span class="p">(</span><span class="mi">440</span><span class="p">,</span><span class="mi">443</span><span class="p">),</span><span class="n">flags</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>or</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.1.1&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">sport</span><span class="o">=</span><span class="n">RandShort</span><span class="p">(),</span><span class="n">dport</span><span class="o">=</span><span class="p">[</span><span class="mi">440</span><span class="p">,</span><span class="mi">441</span><span class="p">,</span><span class="mi">442</span><span class="p">,</span><span class="mi">443</span><span class="p">],</span><span class="n">flags</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.1.1&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">sport</span><span class="o">=</span><span class="n">RandShort</span><span class="p">(),</span><span class="n">dport</span><span class="o">=</span><span class="p">[</span><span class="mi">440</span><span class="p">,</span><span class="mi">441</span><span class="p">,</span><span class="mi">442</span><span class="p">,</span><span class="mi">443</span><span class="p">],</span><span class="n">flags</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>In order to quickly review responses simply request a summary of collected packets:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span> <span class="o">=</span> <span class="n">_</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span> <span class="o">=</span> <span class="n">_</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
 <span class="go">IP / TCP 192.168.1.100:ftp-data &gt; 192.168.1.1:440 S ======&gt; IP / TCP 192.168.1.1:440 &gt; 192.168.1.100:ftp-data RA / Padding</span>
 <span class="go">IP / TCP 192.168.1.100:ftp-data &gt; 192.168.1.1:441 S ======&gt; IP / TCP 192.168.1.1:441 &gt; 192.168.1.100:ftp-data RA / Padding</span>
@@ -441,7 +441,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 </pre></div>
 </div>
 <p>The above will display stimulus/response pairs for answered probes. We can display only the information we are interested in by using a simple loop:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;%TCP.sport% </span><span class="se">\t</span><span class="s2"> %TCP.flags%&quot;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;%TCP.sport% </span><span class="se">\t</span><span class="s2"> %TCP.flags%&quot;</span><span class="p">))</span>
 <span class="go">440      RA</span>
 <span class="go">441      RA</span>
 <span class="go">442      RA</span>
@@ -449,7 +449,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 </pre></div>
 </div>
 <p>Even better, a table can be built using the <code class="docutils literal"><span class="pre">make_table()</span></code> function to display information about multiple targets:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span> <span class="o">=</span> <span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;192.168.1.1&quot;</span><span class="p">,</span><span class="s2">&quot;yahoo.com&quot;</span><span class="p">,</span><span class="s2">&quot;slashdot.org&quot;</span><span class="p">])</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="p">[</span><span class="mi">22</span><span class="p">,</span><span class="mi">80</span><span class="p">,</span><span class="mi">443</span><span class="p">],</span><span class="n">flags</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span> <span class="o">=</span> <span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;192.168.1.1&quot;</span><span class="p">,</span><span class="s2">&quot;yahoo.com&quot;</span><span class="p">,</span><span class="s2">&quot;slashdot.org&quot;</span><span class="p">])</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="p">[</span><span class="mi">22</span><span class="p">,</span><span class="mi">80</span><span class="p">,</span><span class="mi">443</span><span class="p">],</span><span class="n">flags</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">))</span>
 <span class="go">Begin emission:</span>
 <span class="go">.......*.**.......Finished to send 9 packets.</span>
 <span class="go">**.*.*..*..................</span>
@@ -465,17 +465,17 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 </div>
 <p>The above example will even print the ICMP error type if the ICMP packet was received as a response instead of expected TCP.</p>
 <p>For larger scans, we could be interested in displaying only certain responses. The example below will only display packets with the “SA” flag set:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">nsummary</span><span class="p">(</span><span class="n">lfilter</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;%TCP.flags%&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;SA&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">nsummary</span><span class="p">(</span><span class="n">lfilter</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;%TCP.flags%&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;SA&quot;</span><span class="p">)</span>
 <span class="go">0003 IP / TCP 192.168.1.100:ftp_data &gt; 192.168.1.1:https S ======&gt; IP / TCP 192.168.1.1:https &gt; 192.168.1.100:ftp_data SA</span>
 </pre></div>
 </div>
 <p>In case we want to do some expert analysis of responses, we can use the following command to indicate which ports are open:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">lfilter</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;%TCP.flags%&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;SA&quot;</span><span class="p">,</span> <span class="n">prn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;%TCP.sport</span><span class="si">% i</span><span class="s2">s open&quot;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">lfilter</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;%TCP.flags%&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;SA&quot;</span><span class="p">,</span> <span class="n">prn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;%TCP.sport</span><span class="si">% i</span><span class="s2">s open&quot;</span><span class="p">))</span>
 <span class="go">https is open</span>
 </pre></div>
 </div>
 <p>Again, for larger scans we can build a table of open ports:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="n">TCP</span> <span class="ow">in</span> <span class="n">r</span> <span class="ow">and</span> <span class="n">r</span><span class="p">[</span><span class="n">TCP</span><span class="p">]</span><span class="o">.</span><span class="n">flags</span><span class="o">&amp;</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">make_table</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="n">TCP</span> <span class="ow">in</span> <span class="n">r</span> <span class="ow">and</span> <span class="n">r</span><span class="p">[</span><span class="n">TCP</span><span class="p">]</span><span class="o">.</span><span class="n">flags</span><span class="o">&amp;</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">make_table</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span>
 <span class="gp">... </span>            <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">dport</span><span class="p">,</span> <span class="s2">&quot;X&quot;</span><span class="p">))</span>
 <span class="go">    66.35.250.150 192.168.1.1 216.109.112.135</span>
 <span class="go">80  X             -           X</span>
@@ -483,7 +483,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 </pre></div>
 </div>
 <p>If all of the above methods were not enough, Scapy includes a report_ports() function which not only automates the SYN scan, but also produces a LaTeX output with collected results:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">report_ports</span><span class="p">(</span><span class="s2">&quot;192.168.1.1&quot;</span><span class="p">,(</span><span class="mi">440</span><span class="p">,</span><span class="mi">443</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">report_ports</span><span class="p">(</span><span class="s2">&quot;192.168.1.1&quot;</span><span class="p">,(</span><span class="mi">440</span><span class="p">,</span><span class="mi">443</span><span class="p">))</span>
 <span class="go">Begin emission:</span>
 <span class="go">...*.**Finished to send 4 packets.</span>
 <span class="go">*</span>
@@ -497,7 +497,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 <div class="section" id="tcp-traceroute">
 <h3>TCP traceroute<a class="headerlink" href="#tcp-traceroute" title="Permalink to this headline">¶</a></h3>
 <p id="index-7">A TCP traceroute:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">25</span><span class="p">),</span><span class="nb">id</span><span class="o">=</span><span class="n">RandShort</span><span class="p">())</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">flags</span><span class="o">=</span><span class="mh">0x2</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">25</span><span class="p">),</span><span class="nb">id</span><span class="o">=</span><span class="n">RandShort</span><span class="p">())</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">flags</span><span class="o">=</span><span class="mh">0x2</span><span class="p">))</span>
 <span class="go">*****.******.*.***..*.**Finished to send 22 packets.</span>
 <span class="go">***......</span>
 <span class="go">Received 33 packets, got 21 answers, remaining 1 packets</span>
@@ -528,7 +528,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 </pre></div>
 </div>
 <p>Note that the TCP traceroute and some other high-level functions are already coded:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">lsc</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">lsc</span><span class="p">()</span>
 <span class="go">sr               : Send and receive packets at layer 3</span>
 <span class="go">sr1              : Send packets at layer 3 and return only the first answer</span>
 <span class="go">srp              : Send and receive packets at layer 2</span>
@@ -556,7 +556,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 <div class="section" id="configuring-super-sockets">
 <h3>Configuring super sockets<a class="headerlink" href="#configuring-super-sockets" title="Permalink to this headline">¶</a></h3>
 <p id="index-8">The process of sending packets and receiving is quite complicated. As I wanted to use the PF_PACKET interface to go through netfilter, I also needed to implement an ARP stack and ARP cache, and a LL stack. Well it seems to work, on ethernet and PPP interfaces, but I don&#8217;t guarantee anything. Anyway, the fact I used a kind of super-socket for that mean that you can switch your IO layer very easily, and use PF_INET/SOCK_RAW, or use PF_PACKET at level 2 (giving the LL header (ethernet,...) and giving yourself mac addresses, ...). I&#8217;ve just added a super socket which use libdnet and libpcap, so that it should be portable:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">L3socket</span><span class="o">=</span><span class="n">L3dnetSocket</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">L3socket</span><span class="o">=</span><span class="n">L3dnetSocket</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">L3listen</span><span class="o">=</span><span class="n">L3pcapListenSocket</span>
 </pre></div>
 </div>
@@ -564,7 +564,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 <div class="section" id="sniffing">
 <h3>Sniffing<a class="headerlink" href="#sniffing" title="Permalink to this headline">¶</a></h3>
 <p id="index-9">We can easily capture some packets or even clone tcpdump or tethereal. If no interface is given, sniffing will happen on every interfaces:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">sniff</span><span class="p">(</span><span class="nb">filter</span><span class="o">=</span><span class="s2">&quot;icmp and host 66.35.250.151&quot;</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span> <span class="n">sniff</span><span class="p">(</span><span class="nb">filter</span><span class="o">=</span><span class="s2">&quot;icmp and host 66.35.250.151&quot;</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="go">&lt;Sniffed: UDP:0 TCP:0 ICMP:2 Other:0&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span> <span class="n">a</span><span class="o">=</span><span class="n">_</span>
 <span class="gp">&gt;&gt;&gt; </span> <span class="n">a</span><span class="o">.</span><span class="n">nsummary</span><span class="p">()</span>
@@ -652,7 +652,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 </pre></div>
 </div>
 <p>For even more control over displayed information we can use the <code class="docutils literal"><span class="pre">sprintf()</span></code> function:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pkts</span> <span class="o">=</span> <span class="n">sniff</span><span class="p">(</span><span class="n">prn</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;{IP:%IP.src% -&gt; %IP.dst%</span><span class="se">\n</span><span class="s2">}{Raw:%Raw.load%</span><span class="se">\n</span><span class="s2">}&quot;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">pkts</span> <span class="o">=</span> <span class="n">sniff</span><span class="p">(</span><span class="n">prn</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;{IP:%IP.src% -&gt; %IP.dst%</span><span class="se">\n</span><span class="s2">}{Raw:%Raw.load%</span><span class="se">\n</span><span class="s2">}&quot;</span><span class="p">))</span>
 <span class="go">192.168.1.100 -&gt; 64.233.167.99</span>
 
 <span class="go">64.233.167.99 -&gt; 192.168.1.100</span>
@@ -670,7 +670,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 </pre></div>
 </div>
 <p>We can sniff and do passive OS fingerprinting:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span>
 <span class="go">&lt;Ether dst=00:10:4b:b3:7d:4e src=00:40:33:96:7b:60 type=0x800 |&lt;IP version=4</span>
 <span class="go"> ihl=5 tos=0x0 len=60 id=61681 flags=DF frag=0 ttl=64 proto=TCP chksum=0xb85e</span>
 <span class="go"> src=192.168.8.10 dst=192.168.8.1 options=&#39;&#39; |&lt;TCP sport=46511 dport=80</span>
@@ -692,7 +692,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 <div class="section" id="filters">
 <h3>Filters<a class="headerlink" href="#filters" title="Permalink to this headline">¶</a></h3>
 <p id="index-10">Demo of both bpf filter and sprintf() method:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">=</span><span class="n">sniff</span><span class="p">(</span><span class="nb">filter</span><span class="o">=</span><span class="s2">&quot;tcp and ( port 25 or port 110 )&quot;</span><span class="p">,</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">=</span><span class="n">sniff</span><span class="p">(</span><span class="nb">filter</span><span class="o">=</span><span class="s2">&quot;tcp and ( port 25 or port 110 )&quot;</span><span class="p">,</span>
 <span class="go"> prn=lambda x: x.sprintf(&quot;%IP.src%:%TCP.sport% -&gt; %IP.dst%:%TCP.dport%  %2s,TCP.flags% : %TCP.payload%&quot;))</span>
 <span class="go">192.168.8.10:47226 -&gt; 213.228.0.14:110   S :</span>
 <span class="go">213.228.0.14:110 -&gt; 192.168.8.10:47226  SA :</span>
@@ -720,7 +720,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 <div class="section" id="send-and-receive-in-a-loop">
 <h3>Send and receive in a loop<a class="headerlink" href="#send-and-receive-in-a-loop" title="Permalink to this headline">¶</a></h3>
 <p id="index-11">Here is an example of a (h)ping-like functionnality : you always send the same set of packets to see if something change:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">srloop</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;www.target.com/30&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">())</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">srloop</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;www.target.com/30&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">())</span>
 <span class="go">RECV 1: Ether / IP / TCP 192.168.11.99:80 &gt; 192.168.8.14:20 SA / Padding</span>
 <span class="go">fail 3: IP / TCP 192.168.8.14:20 &gt; 192.168.11.96:80 S</span>
 <span class="go">        IP / TCP 192.168.8.14:20 &gt; 192.168.11.98:80 S</span>
@@ -745,15 +745,15 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 <div class="section" id="pcap">
 <h4>PCAP<a class="headerlink" href="#pcap" title="Permalink to this headline">¶</a></h4>
 <p>It is often useful to save capture packets to pcap file for use at later time or with different applications:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">wrpcap</span><span class="p">(</span><span class="s2">&quot;temp.cap&quot;</span><span class="p">,</span><span class="n">pkts</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">wrpcap</span><span class="p">(</span><span class="s2">&quot;temp.cap&quot;</span><span class="p">,</span><span class="n">pkts</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>To restore previously saved pcap file:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pkts</span> <span class="o">=</span> <span class="n">rdpcap</span><span class="p">(</span><span class="s2">&quot;temp.cap&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">pkts</span> <span class="o">=</span> <span class="n">rdpcap</span><span class="p">(</span><span class="s2">&quot;temp.cap&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>or</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pkts</span> <span class="o">=</span> <span class="n">sniff</span><span class="p">(</span><span class="n">offline</span><span class="o">=</span><span class="s2">&quot;temp.cap&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">pkts</span> <span class="o">=</span> <span class="n">sniff</span><span class="p">(</span><span class="n">offline</span><span class="o">=</span><span class="s2">&quot;temp.cap&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -761,7 +761,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 <h4>Hexdump<a class="headerlink" href="#hexdump" title="Permalink to this headline">¶</a></h4>
 <p>Scapy allows you to export recorded packets in various hex formats.</p>
 <p>Use <code class="docutils literal"><span class="pre">hexdump()</span></code> to display one or more packets using classic hexdump format:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">hexdump</span><span class="p">(</span><span class="n">pkt</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">hexdump</span><span class="p">(</span><span class="n">pkt</span><span class="p">)</span>
 <span class="go">0000   00 50 56 FC CE 50 00 0C  29 2B 53 19 08 00 45 00   .PV..P..)+S...E.</span>
 <span class="go">0010   00 54 00 00 40 00 40 01  5A 7C C0 A8 19 82 04 02   .T..@.@.Z|......</span>
 <span class="go">0020   02 01 08 00 9C 90 5A 61  00 01 E6 DA 70 49 B6 E5   ......Za....pI..</span>
@@ -772,7 +772,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 </pre></div>
 </div>
 <p>Hexdump above can be reimported back into Scapy using <code class="docutils literal"><span class="pre">import_hexcap()</span></code>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pkt_hex</span> <span class="o">=</span> <span class="n">Ether</span><span class="p">(</span><span class="n">import_hexcap</span><span class="p">())</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">pkt_hex</span> <span class="o">=</span> <span class="n">Ether</span><span class="p">(</span><span class="n">import_hexcap</span><span class="p">())</span>
 <span class="go">0000   00 50 56 FC CE 50 00 0C  29 2B 53 19 08 00 45 00   .PV..P..)+S...E.</span>
 <span class="go">0010   00 54 00 00 40 00 40 01  5A 7C C0 A8 19 82 04 02   .T..@.@.Z|......</span>
 <span class="go">0020   02 01 08 00 9C 90 5A 61  00 01 E6 DA 70 49 B6 E5   ......Za....pI..</span>
@@ -793,7 +793,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 <div class="section" id="hex-string">
 <h4>Hex string<a class="headerlink" href="#hex-string" title="Permalink to this headline">¶</a></h4>
 <p>You can also convert entire packet into a hex string using the <code class="docutils literal"><span class="pre">bytes()</span></code> function:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pkts</span> <span class="o">=</span> <span class="n">sniff</span><span class="p">(</span><span class="n">count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">pkts</span> <span class="o">=</span> <span class="n">sniff</span><span class="p">(</span><span class="n">count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pkt</span> <span class="o">=</span> <span class="n">pkts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pkt</span>
 <span class="go">&lt;Ether  dst=00:50:56:fc:ce:50 src=00:0c:29:2b:53:19 type=0x800 |&lt;IP  version=4L</span>
@@ -811,7 +811,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 </pre></div>
 </div>
 <p>We can reimport the produced hex string by selecting the appropriate starting layer (e.g. <code class="docutils literal"><span class="pre">Ether()</span></code>).</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">new_pkt</span> <span class="o">=</span> <span class="n">Ether</span><span class="p">(</span><span class="n">pkt_str</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">new_pkt</span> <span class="o">=</span> <span class="n">Ether</span><span class="p">(</span><span class="n">pkt_str</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">new_pkt</span>
 <span class="go">&lt;Ether  dst=00:50:56:fc:ce:50 src=00:0c:29:2b:53:19 type=0x800 |&lt;IP  version=4L</span>
 <span class="go">ihl=5L tos=0x0 len=84 id=0 flags=DF frag=0L ttl=64 proto=icmp chksum=0x5a7c</span>
@@ -829,7 +829,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 <p class="last">export_object() and import_object() require dill library. Install it with <cite>pip3 install dill</cite></p>
 </div>
 <p>Using the <code class="docutils literal"><span class="pre">export_object()</span></code> function, Scapy can export a base64 encoded Python data structure representing a packet:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pkt</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">pkt</span>
 <span class="go">&lt;Ether  dst=00:50:56:fc:ce:50 src=00:0c:29:2b:53:19 type=0x800 |&lt;IP  version=4L</span>
 <span class="go">ihl=5L tos=0x0 len=84 id=0 flags=DF frag=0L ttl=64 proto=icmp chksum=0x5a7c</span>
 <span class="go">src=192.168.25.130 dst=4.2.2.1 options=&#39;&#39; |&lt;ICMP  type=echo-request code=0</span>
@@ -846,7 +846,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 </pre></div>
 </div>
 <p>The output above can be reimported back into Scapy using <code class="docutils literal"><span class="pre">import_object()</span></code>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">new_pkt</span> <span class="o">=</span> <span class="n">import_object</span><span class="p">(</span><span class="n">exported_string</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">new_pkt</span> <span class="o">=</span> <span class="n">import_object</span><span class="p">(</span><span class="n">exported_string</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">new_pkt</span>
 <span class="go">&lt;Ether  dst=00:50:56:fc:ce:50 src=00:0c:29:2b:53:19 type=0x800 |&lt;IP  version=4</span>
 <span class="go">ihl=5 tos=0x0 len=84 id=0 flags=DF frag=0 ttl=64 proto=icmp chksum=0x5a7c</span>
@@ -864,14 +864,14 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 <p class="last">Session saving/loading functions require dill library. Install it with <cite>pip3 install dill</cite></p>
 </div>
 <p>At last Scapy is capable of saving all session variables using the <code class="docutils literal"><span class="pre">save_session()</span></code> function:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">dir</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">dir</span><span class="p">()</span>
 <span class="go">[&#39;__builtins__&#39;, &#39;conf&#39;, &#39;new_pkt&#39;, &#39;pkt&#39;, &#39;pkt_export&#39;, &#39;pkt_hex&#39;, &#39;pkt_str&#39;, &#39;pkts&#39;]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">save_session</span><span class="p">(</span><span class="s2">&quot;session.scapy&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Variables, which start with <cite>_</cite> are not saved, as well as those typical to IPython (In, Out, or inherited from IPython module). Also, conf is not saved.</p>
 <p>Next time you start Scapy you can load the previous saved session using the <code class="docutils literal"><span class="pre">load_session()</span></code> command:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">dir</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">dir</span><span class="p">()</span>
 <span class="go">[&#39;__builtins__&#39;, &#39;conf&#39;]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">load_session</span><span class="p">(</span><span class="s2">&quot;session.scapy&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">dir</span><span class="p">()</span>
@@ -884,7 +884,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 <h3>Making tables<a class="headerlink" href="#making-tables" title="Permalink to this headline">¶</a></h3>
 <p id="index-12">Now we have a demonstration of the <code class="docutils literal"><span class="pre">make_table()</span></code> presentation function. It takes a list as parameter, and a function who returns a 3-uple. The first element is the value on the x axis from an element of the list, the second is about the y value and the third is the value that we want to see at coordinates (x,y). The result is a table. This function has 2 variants, <code class="docutils literal"><span class="pre">make_lined_table()</span></code> and <code class="docutils literal"><span class="pre">make_tex_table()</span></code> to copy/paste into your LaTeX pentest report. Those functions are available as methods of a result object :</p>
 <p>Here we can see a multi-parallel traceroute (scapy already has a multi TCP traceroute function. See later):</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;www.test.fr/30&quot;</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span><span class="o">/</span><span class="n">TCP</span><span class="p">())</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;www.test.fr/30&quot;</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span><span class="o">/</span><span class="n">TCP</span><span class="p">())</span>
 <span class="go">Received 49 packets, got 24 answers, remaining 0 packets</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">make_table</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">ttl</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">src</span><span class="p">))</span>
 <span class="go">  216.15.189.192  216.15.189.193  216.15.189.194  216.15.189.195</span>
@@ -897,7 +897,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 </pre></div>
 </div>
 <p>Here is a more complex example to identify machines from their IPID field. We can see that 172.20.80.200:22 is answered by the same IP stack than 172.20.80.201 and that 172.20.80.197:25 is not answered by the sape IP stack than other ports on the same IP.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;172.20.80.192/28&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span><span class="mi">21</span><span class="p">,</span><span class="mi">22</span><span class="p">,</span><span class="mi">25</span><span class="p">,</span><span class="mi">53</span><span class="p">,</span><span class="mi">80</span><span class="p">]))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;172.20.80.192/28&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span><span class="mi">21</span><span class="p">,</span><span class="mi">22</span><span class="p">,</span><span class="mi">25</span><span class="p">,</span><span class="mi">53</span><span class="p">,</span><span class="mi">80</span><span class="p">]))</span>
 <span class="go">Received 142 packets, got 25 answers, remaining 71 packets</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">make_table</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">dport</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;%IP.id%&quot;</span><span class="p">)))</span>
 <span class="go">   172.20.80.196 172.20.80.197 172.20.80.198 172.20.80.200 172.20.80.201</span>
@@ -914,7 +914,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 <div class="section" id="routing">
 <h3>Routing<a class="headerlink" href="#routing" title="Permalink to this headline">¶</a></h3>
 <p id="index-13">Now scapy has its own routing table, so that you can have your packets routed diffrently than the system:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">route</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">route</span>
 <span class="go">Network         Netmask         Gateway         Iface</span>
 <span class="go">127.0.0.0       255.0.0.0       0.0.0.0         lo</span>
 <span class="go">192.168.8.0     255.255.255.0   0.0.0.0         eth0</span>
@@ -940,7 +940,7 @@ flags=SA window=8190 chksum=0xcdc7 urgptr=0 options=[(&#39;MSS&#39;, 536)] |
 <div class="section" id="matplotlib">
 <h3>Matplotlib<a class="headerlink" href="#matplotlib" title="Permalink to this headline">¶</a></h3>
 <p id="index-14">One can easily plot some harvested values using the python 2D plotting library: Matplotlib. (Make sure that you have matplotlib installed.) For example, we can plot the random source ports generated when sending and receiving packets with the following command:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>In [1]: ans,unans=sr(IP(dst=&quot;www.target.com&quot;)/TCP(sport=[RandShort()]*200), timeout=1)
+<div class="highlight-python"><div class="highlight"><pre>In [1]: ans,unans=sr(IP(dst=&quot;www.target.com&quot;)/TCP(sport=[RandShort()]*200), timeout=1)
 Begin emission:
 ...................................*.........*......*......*.......*......*.....*......*
 ......*.......*.......*....*..........*.......*......*......*......*......*.....*.......*
@@ -963,7 +963,7 @@ Out[2]: [&lt;matplotlib.lines.Line2D at 0x7f6ccccbe470&gt;]
 <div class="section" id="tcp-traceroute-2">
 <h3>TCP traceroute (2)<a class="headerlink" href="#tcp-traceroute-2" title="Permalink to this headline">¶</a></h3>
 <p id="index-15">Scapy also has a powerful TCP traceroute function. Unlike other traceroute programs that wait for each node to reply before going to the next, scapy sends all the packets at the same time. This has the disadvantage that it can&#8217;t know when to stop (thus the maxttl parameter) but the great advantage that it took less than 3 seconds to get this multi-target traceroute result:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">traceroute</span><span class="p">([</span><span class="s2">&quot;www.yahoo.com&quot;</span><span class="p">,</span><span class="s2">&quot;www.altavista.com&quot;</span><span class="p">,</span><span class="s2">&quot;www.wisenut.com&quot;</span><span class="p">,</span><span class="s2">&quot;www.copernic.com&quot;</span><span class="p">],</span><span class="n">maxttl</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">traceroute</span><span class="p">([</span><span class="s2">&quot;www.yahoo.com&quot;</span><span class="p">,</span><span class="s2">&quot;www.altavista.com&quot;</span><span class="p">,</span><span class="s2">&quot;www.wisenut.com&quot;</span><span class="p">,</span><span class="s2">&quot;www.copernic.com&quot;</span><span class="p">],</span><span class="n">maxttl</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 <span class="go">Received 80 packets, got 80 answers, remaining 0 packets</span>
 <span class="go">   193.45.10.88:80    216.109.118.79:80  64.241.242.243:80  66.94.229.254:80</span>
 <span class="go">1  192.168.8.1        192.168.8.1        192.168.8.1        192.168.8.1</span>
@@ -990,7 +990,7 @@ Out[2]: [&lt;matplotlib.lines.Line2D at 0x7f6ccccbe470&gt;]
 </pre></div>
 </div>
 <p>The last line is in fact a the result of the function : a traceroute result object and a packet list of unanswered packets. The traceroute result is a more specialised version (a subclass, in fact) of a classic result object. We can save it to consult the traceroute result again a bit later, or to deeply inspect one of the answers, for example to check padding.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">_</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">_</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="go">   193.45.10.88:80    216.109.118.79:80  64.241.242.243:80  66.94.229.254:80</span>
 <span class="go">1  192.168.8.1        192.168.8.1        192.168.8.1        192.168.8.1</span>
@@ -1001,7 +1001,7 @@ Out[2]: [&lt;matplotlib.lines.Line2D at 0x7f6ccccbe470&gt;]
 </pre></div>
 </div>
 <p>Like any result object, traceroute objects can be added :</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">r2</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">traceroute</span><span class="p">([</span><span class="s2">&quot;www.voila.com&quot;</span><span class="p">],</span><span class="n">maxttl</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">r2</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">traceroute</span><span class="p">([</span><span class="s2">&quot;www.voila.com&quot;</span><span class="p">],</span><span class="n">maxttl</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 <span class="go">Received 19 packets, got 19 answers, remaining 1 packets</span>
 <span class="go">   195.101.94.25:80</span>
 <span class="go">1  192.168.8.1</span>
@@ -1050,7 +1050,7 @@ Out[2]: [&lt;matplotlib.lines.Line2D at 0x7f6ccccbe470&gt;]
 </pre></div>
 </div>
 <p>Traceroute result object also have a very neat feature: they can make a directed graph from all the routes they got, and cluster them by AS. You will need graphviz. By default, ImageMagick is used to display the graph.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">,</span><span class="n">unans</span> <span class="o">=</span> <span class="n">traceroute</span><span class="p">([</span><span class="s2">&quot;www.microsoft.com&quot;</span><span class="p">,</span><span class="s2">&quot;www.cisco.com&quot;</span><span class="p">,</span><span class="s2">&quot;www.yahoo.com&quot;</span><span class="p">,</span><span class="s2">&quot;www.wanadoo.fr&quot;</span><span class="p">,</span><span class="s2">&quot;www.pacsec.com&quot;</span><span class="p">],</span><span class="n">dport</span><span class="o">=</span><span class="p">[</span><span class="mi">80</span><span class="p">,</span><span class="mi">443</span><span class="p">],</span><span class="n">maxttl</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span><span class="n">retry</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">,</span><span class="n">unans</span> <span class="o">=</span> <span class="n">traceroute</span><span class="p">([</span><span class="s2">&quot;www.microsoft.com&quot;</span><span class="p">,</span><span class="s2">&quot;www.cisco.com&quot;</span><span class="p">,</span><span class="s2">&quot;www.yahoo.com&quot;</span><span class="p">,</span><span class="s2">&quot;www.wanadoo.fr&quot;</span><span class="p">,</span><span class="s2">&quot;www.pacsec.com&quot;</span><span class="p">],</span><span class="n">dport</span><span class="o">=</span><span class="p">[</span><span class="mi">80</span><span class="p">,</span><span class="mi">443</span><span class="p">],</span><span class="n">maxttl</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span><span class="n">retry</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
 <span class="go">Received 190 packets, got 190 answers, remaining 10 packets</span>
 <span class="go">   193.252.122.103:443 193.252.122.103:80 198.133.219.25:443 198.133.219.25:80  207.46...</span>
 <span class="go">1  192.168.8.1         192.168.8.1        192.168.8.1        192.168.8.1        192.16...</span>
@@ -1068,7 +1068,7 @@ Out[2]: [&lt;matplotlib.lines.Line2D at 0x7f6ccccbe470&gt;]
 <p class="last">VPython is currently not ported to python3.x.</p>
 </div>
 <p>If you have VPython installed, you also can have a 3D representation of the traceroute. With the right button, you can rotate the scene, with the middle button, you can zoom, with the left button, you can move the scene. If you click on a ball, it&#8217;s IP will appear/disappear. If you Ctrl-click on a ball, ports 21, 22, 23, 25, 80 and 443 will be scanned and the result displayed:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">trace3D</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">trace3D</span><span class="p">()</span>
 </pre></div>
 </div>
 <img alt="_images/trace3d_1.png" src="_images/trace3d_1.png" />
@@ -1077,12 +1077,12 @@ Out[2]: [&lt;matplotlib.lines.Line2D at 0x7f6ccccbe470&gt;]
 <div class="section" id="wireless-frame-injection">
 <h3>Wireless frame injection<a class="headerlink" href="#wireless-frame-injection" title="Permalink to this headline">¶</a></h3>
 <p id="index-16">Provided that your wireless card and driver are correctly configured for frame injection</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>$ iw dev wlan0 interface add mon0 type monitor
+<div class="highlight-python"><div class="highlight"><pre>$ iw dev wlan0 interface add mon0 type monitor
 $ ifconfig mon0 up
 </pre></div>
 </div>
 <p>you can have a kind of FakeAP:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sendp</span><span class="p">(</span><span class="n">RadioTap</span><span class="p">()</span><span class="o">/</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sendp</span><span class="p">(</span><span class="n">RadioTap</span><span class="p">()</span><span class="o">/</span>
 <span class="go">          Dot11(addr1=&quot;ff:ff:ff:ff:ff:ff&quot;,</span>
 <span class="go">                addr2=&quot;00:01:02:03:04:05&quot;,</span>
 <span class="go">                addr3=&quot;00:01:02:03:04:05&quot;)/</span>
@@ -1103,17 +1103,17 @@ $ ifconfig mon0 up
 <h3>ACK Scan<a class="headerlink" href="#ack-scan" title="Permalink to this headline">¶</a></h3>
 <p>Using Scapy&#8217;s powerful packet crafting facilities we can quick replicate classic TCP Scans.
 For example, the following string will be sent to simulate an ACK Scan:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span> <span class="o">=</span> <span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;www.slashdot.org&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="p">[</span><span class="mi">80</span><span class="p">,</span><span class="mi">666</span><span class="p">],</span><span class="n">flags</span><span class="o">=</span><span class="s2">&quot;A&quot;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span> <span class="o">=</span> <span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;www.slashdot.org&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="p">[</span><span class="mi">80</span><span class="p">,</span><span class="mi">666</span><span class="p">],</span><span class="n">flags</span><span class="o">=</span><span class="s2">&quot;A&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>We can find unfiltered ports in answered packets:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span> <span class="ow">in</span> <span class="n">ans</span><span class="p">:</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span> <span class="ow">in</span> <span class="n">ans</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="n">TCP</span><span class="p">]</span><span class="o">.</span><span class="n">dport</span> <span class="o">==</span> <span class="n">r</span><span class="p">[</span><span class="n">TCP</span><span class="p">]</span><span class="o">.</span><span class="n">sport</span><span class="p">:</span>
 <span class="gp">... </span>       <span class="k">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">TCP</span><span class="p">]</span><span class="o">.</span><span class="n">dport</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; is unfiltered&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Similarly, filtered ports can be found with unanswered packets:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">unans</span><span class="p">:</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">unans</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="k">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">TCP</span><span class="p">]</span><span class="o">.</span><span class="n">dport</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; is filtered&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1121,7 +1121,7 @@ For example, the following string will be sent to simulate an ACK Scan:</p>
 <div class="section" id="xmas-scan">
 <h3>Xmas Scan<a class="headerlink" href="#xmas-scan" title="Permalink to this headline">¶</a></h3>
 <p>Xmas Scan can be launced using the following command:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span> <span class="o">=</span> <span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.1.1&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="mi">666</span><span class="p">,</span><span class="n">flags</span><span class="o">=</span><span class="s2">&quot;FPU&quot;</span><span class="p">)</span> <span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span> <span class="o">=</span> <span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.1.1&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="mi">666</span><span class="p">,</span><span class="n">flags</span><span class="o">=</span><span class="s2">&quot;FPU&quot;</span><span class="p">)</span> <span class="p">)</span>
 </pre></div>
 </div>
 <p>Checking RST responses will reveal closed ports on the target.</p>
@@ -1129,76 +1129,76 @@ For example, the following string will be sent to simulate an ACK Scan:</p>
 <div class="section" id="ip-scan">
 <h3>IP Scan<a class="headerlink" href="#ip-scan" title="Permalink to this headline">¶</a></h3>
 <p>A lower level IP Scan can be used to enumerate supported protocols:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.1.1&quot;</span><span class="p">,</span><span class="n">proto</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">255</span><span class="p">))</span><span class="o">/</span><span class="s2">&quot;SCAPY&quot;</span><span class="p">,</span><span class="n">retry</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.1.1&quot;</span><span class="p">,</span><span class="n">proto</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">255</span><span class="p">))</span><span class="o">/</span><span class="s2">&quot;SCAPY&quot;</span><span class="p">,</span><span class="n">retry</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="arp-ping">
 <h3>ARP Ping<a class="headerlink" href="#arp-ping" title="Permalink to this headline">¶</a></h3>
 <p>The fastest way to discover hosts on a local ethernet network is to use the ARP Ping method:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">srp</span><span class="p">(</span><span class="n">Ether</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;ff:ff:ff:ff:ff:ff&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">ARP</span><span class="p">(</span><span class="n">pdst</span><span class="o">=</span><span class="s2">&quot;192.168.1.0/24&quot;</span><span class="p">),</span><span class="n">timeout</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">srp</span><span class="p">(</span><span class="n">Ether</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;ff:ff:ff:ff:ff:ff&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">ARP</span><span class="p">(</span><span class="n">pdst</span><span class="o">=</span><span class="s2">&quot;192.168.1.0/24&quot;</span><span class="p">),</span><span class="n">timeout</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Answers can be reviewed with the following command:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%E</span><span class="s2">ther.src</span><span class="si">% %</span><span class="s2">ARP.psrc%&quot;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%E</span><span class="s2">ther.src</span><span class="si">% %</span><span class="s2">ARP.psrc%&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Scapy also includes a built-in arping() function which performs similar to the above two commands:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">arping</span><span class="p">(</span><span class="s2">&quot;192.168.1.*&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">arping</span><span class="p">(</span><span class="s2">&quot;192.168.1.*&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="icmp-ping">
 <h3>ICMP Ping<a class="headerlink" href="#icmp-ping" title="Permalink to this headline">¶</a></h3>
 <p>Classical ICMP Ping can be emulated using the following command:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.1.1-254&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">())</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.1.1-254&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">())</span>
 </pre></div>
 </div>
 <p>Information on live hosts can be collected with the following request:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;%IP.src</span><span class="si">% i</span><span class="s2">s alive&quot;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;%IP.src</span><span class="si">% i</span><span class="s2">s alive&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="tcp-ping">
 <h3>TCP Ping<a class="headerlink" href="#tcp-ping" title="Permalink to this headline">¶</a></h3>
 <p>In cases where ICMP echo requests are blocked, we can still use various TCP Pings such as TCP SYN Ping below:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">sr</span><span class="p">(</span> <span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.1.*&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span><span class="n">flags</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">)</span> <span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">sr</span><span class="p">(</span> <span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.1.*&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span><span class="n">flags</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">)</span> <span class="p">)</span>
 </pre></div>
 </div>
 <p>Any response to our probes will indicate a live host. We can collect results with the following command:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span> <span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;%IP.src</span><span class="si">% i</span><span class="s2">s alive&quot;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span> <span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;%IP.src</span><span class="si">% i</span><span class="s2">s alive&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="udp-ping">
 <h3>UDP Ping<a class="headerlink" href="#udp-ping" title="Permalink to this headline">¶</a></h3>
 <p>If all else fails there is always UDP Ping which will produce ICMP Port unreachable errors from live hosts. Here you can pick any port which is most likely to be closed, such as port 0:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">sr</span><span class="p">(</span> <span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.*.1-10&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">UDP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">sr</span><span class="p">(</span> <span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.*.1-10&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">UDP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">)</span>
 </pre></div>
 </div>
 <p>Once again, results can be collected with this command:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span> <span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;%IP.src</span><span class="si">% i</span><span class="s2">s alive&quot;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span> <span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;%IP.src</span><span class="si">% i</span><span class="s2">s alive&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="classical-attacks">
 <h3>Classical attacks<a class="headerlink" href="#classical-attacks" title="Permalink to this headline">¶</a></h3>
 <p>Malformed packets:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">send</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;10.1.1.5&quot;</span><span class="p">,</span> <span class="n">ihl</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">())</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">send</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;10.1.1.5&quot;</span><span class="p">,</span> <span class="n">ihl</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">())</span>
 </pre></div>
 </div>
 <p>Ping of death (Muuahahah):</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">send</span><span class="p">(</span> <span class="n">fragment</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;10.0.0.5&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">()</span><span class="o">/</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="o">*</span><span class="mi">60000</span><span class="p">))</span> <span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">send</span><span class="p">(</span> <span class="n">fragment</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;10.0.0.5&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">()</span><span class="o">/</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="o">*</span><span class="mi">60000</span><span class="p">))</span> <span class="p">)</span>
 </pre></div>
 </div>
 <p>Nestea attack:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">send</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="s2">&quot;MF&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">UDP</span><span class="p">()</span><span class="o">/</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="o">*</span><span class="mi">10</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">send</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="s2">&quot;MF&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">UDP</span><span class="p">()</span><span class="o">/</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="o">*</span><span class="mi">10</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">send</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">frag</span><span class="o">=</span><span class="mi">48</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="o">*</span><span class="mi">116</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">send</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="s2">&quot;MF&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">UDP</span><span class="p">()</span><span class="o">/</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="o">*</span><span class="mi">224</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Land attack (designed for Microsoft Windows):</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">send</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="n">target</span><span class="p">,</span><span class="n">dst</span><span class="o">=</span><span class="n">target</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">sport</span><span class="o">=</span><span class="mi">135</span><span class="p">,</span><span class="n">dport</span><span class="o">=</span><span class="mi">135</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">send</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="n">target</span><span class="p">,</span><span class="n">dst</span><span class="o">=</span><span class="n">target</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">sport</span><span class="o">=</span><span class="mi">135</span><span class="p">,</span><span class="n">dport</span><span class="o">=</span><span class="mi">135</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -1207,12 +1207,12 @@ For example, the following string will be sent to simulate an ACK Scan:</p>
 <p>This attack prevents a client from joining the gateway by poisoning
 its ARP cache through a VLAN hopping attack.</p>
 <p>Classic ARP cache poisoning:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">send</span><span class="p">(</span> <span class="n">Ether</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">clientMAC</span><span class="p">)</span><span class="o">/</span><span class="n">ARP</span><span class="p">(</span><span class="n">op</span><span class="o">=</span><span class="s2">&quot;who-has&quot;</span><span class="p">,</span> <span class="n">psrc</span><span class="o">=</span><span class="n">gateway</span><span class="p">,</span> <span class="n">pdst</span><span class="o">=</span><span class="n">client</span><span class="p">),</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">send</span><span class="p">(</span> <span class="n">Ether</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">clientMAC</span><span class="p">)</span><span class="o">/</span><span class="n">ARP</span><span class="p">(</span><span class="n">op</span><span class="o">=</span><span class="s2">&quot;who-has&quot;</span><span class="p">,</span> <span class="n">psrc</span><span class="o">=</span><span class="n">gateway</span><span class="p">,</span> <span class="n">pdst</span><span class="o">=</span><span class="n">client</span><span class="p">),</span>
 <span class="go">      inter=RandNum(10,40), loop=1 )</span>
 </pre></div>
 </div>
 <p>ARP cache poisoning with double 802.1q encapsulation:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">send</span><span class="p">(</span> <span class="n">Ether</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">clientMAC</span><span class="p">)</span><span class="o">/</span><span class="n">Dot1Q</span><span class="p">(</span><span class="n">vlan</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">Dot1Q</span><span class="p">(</span><span class="n">vlan</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">send</span><span class="p">(</span> <span class="n">Ether</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">clientMAC</span><span class="p">)</span><span class="o">/</span><span class="n">Dot1Q</span><span class="p">(</span><span class="n">vlan</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">Dot1Q</span><span class="p">(</span><span class="n">vlan</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="go">      /ARP(op=&quot;who-has&quot;, psrc=gateway, pdst=client),</span>
 <span class="go">      inter=RandNum(10,40), loop=1 )</span>
 </pre></div>
@@ -1221,12 +1221,12 @@ its ARP cache through a VLAN hopping attack.</p>
 <div class="section" id="tcp-port-scanning">
 <h3>TCP Port Scanning<a class="headerlink" href="#tcp-port-scanning" title="Permalink to this headline">¶</a></h3>
 <p>Send a TCP SYN on each port. Wait for a SYN-ACK or a RST or an ICMP error:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">,</span><span class="n">unans</span> <span class="o">=</span> <span class="n">sr</span><span class="p">(</span> <span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;target&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">,</span><span class="n">unans</span> <span class="o">=</span> <span class="n">sr</span><span class="p">(</span> <span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;target&quot;</span><span class="p">)</span>
 <span class="go">                /TCP(flags=&quot;S&quot;, dport=(1,1024)) )</span>
 </pre></div>
 </div>
 <p>Possible result visualization: open ports</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">nsummary</span><span class="p">(</span><span class="n">lfilter</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">haslayer</span><span class="p">(</span><span class="n">TCP</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">getlayer</span><span class="p">(</span><span class="n">TCP</span><span class="p">)</span><span class="o">.</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="mi">2</span><span class="p">)))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">nsummary</span><span class="p">(</span><span class="n">lfilter</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">haslayer</span><span class="p">(</span><span class="n">TCP</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">getlayer</span><span class="p">(</span><span class="n">TCP</span><span class="p">)</span><span class="o">.</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="mi">2</span><span class="p">)))</span>
 </pre></div>
 </div>
 </div>
@@ -1234,14 +1234,14 @@ its ARP cache through a VLAN hopping attack.</p>
 <h3>IKE Scanning<a class="headerlink" href="#ike-scanning" title="Permalink to this headline">¶</a></h3>
 <p>We try to identify VPN concentrators by sending ISAKMP Security Association proposals
 and receiving the answers:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">,</span><span class="n">unans</span> <span class="o">=</span> <span class="n">sr</span><span class="p">(</span> <span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.1.*&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">UDP</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">,</span><span class="n">unans</span> <span class="o">=</span> <span class="n">sr</span><span class="p">(</span> <span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.1.*&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">UDP</span><span class="p">()</span>
 <span class="go">                /ISAKMP(init_cookie=RandString(8), exch_type=&quot;identity prot.&quot;)</span>
 <span class="go">                /ISAKMP_payload_SA(prop=ISAKMP_payload_Proposal())</span>
 <span class="go">              )</span>
 </pre></div>
 </div>
 <p>Visualizing the results in a list:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">nsummary</span><span class="p">(</span><span class="n">prn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">src</span><span class="p">,</span> <span class="n">lfilter</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">haslayer</span><span class="p">(</span><span class="n">ISAKMP</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">nsummary</span><span class="p">(</span><span class="n">prn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">src</span><span class="p">,</span> <span class="n">lfilter</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">haslayer</span><span class="p">(</span><span class="n">ISAKMP</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -1249,11 +1249,11 @@ and receiving the answers:</p>
 <h3>Advanced traceroute<a class="headerlink" href="#advanced-traceroute" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="tcp-syn-traceroute">
 <h4>TCP SYN traceroute<a class="headerlink" href="#tcp-syn-traceroute" title="Permalink to this headline">¶</a></h4>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;4.2.2.1&quot;</span><span class="p">,</span><span class="n">ttl</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="mi">53</span><span class="p">,</span><span class="n">flags</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;4.2.2.1&quot;</span><span class="p">,</span><span class="n">ttl</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="mi">53</span><span class="p">,</span><span class="n">flags</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Results would be:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;%IP.src%</span><span class="se">\t</span><span class="s2">{ICMP:%ICMP.type%}</span><span class="se">\t</span><span class="s2">{TCP:%TCP.flags%}&quot;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;%IP.src%</span><span class="se">\t</span><span class="s2">{ICMP:%ICMP.type%}</span><span class="se">\t</span><span class="s2">{TCP:%TCP.flags%}&quot;</span><span class="p">))</span>
 <span class="go">192.168.1.1     time-exceeded</span>
 <span class="go">68.86.90.162    time-exceeded</span>
 <span class="go">4.79.43.134     time-exceeded</span>
@@ -1269,19 +1269,19 @@ and receiving the answers:</p>
 <p>Tracerouting an UDP application like we do with TCP is not
 reliable, because there&#8217;s no handshake. We need to give an applicative payload (DNS, ISAKMP,
 NTP, etc.) to deserve an answer:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">,</span><span class="n">unans</span> <span class="o">=</span> <span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">20</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">,</span><span class="n">unans</span> <span class="o">=</span> <span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">20</span><span class="p">))</span>
 <span class="go">              /UDP()/DNS(qd=DNSQR(qname=&quot;test.com&quot;))</span>
 </pre></div>
 </div>
 <p>We can visualize the results as a list of routers:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">make_table</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">ttl</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">src</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">make_table</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">:</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">ttl</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">src</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="dns-traceroute">
 <h4>DNS traceroute<a class="headerlink" href="#dns-traceroute" title="Permalink to this headline">¶</a></h4>
 <p>We can perform a DNS traceroute by specifying a complete packet in <code class="docutils literal"><span class="pre">l4</span></code> parameter of <code class="docutils literal"><span class="pre">traceroute()</span></code> function:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">traceroute</span><span class="p">(</span><span class="s2">&quot;4.2.2.1&quot;</span><span class="p">,</span><span class="n">l4</span><span class="o">=</span><span class="n">UDP</span><span class="p">(</span><span class="n">sport</span><span class="o">=</span><span class="n">RandShort</span><span class="p">())</span><span class="o">/</span><span class="n">DNS</span><span class="p">(</span><span class="n">qd</span><span class="o">=</span><span class="n">DNSQR</span><span class="p">(</span><span class="n">qname</span><span class="o">=</span><span class="s2">&quot;thesprawl.org&quot;</span><span class="p">)))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">traceroute</span><span class="p">(</span><span class="s2">&quot;4.2.2.1&quot;</span><span class="p">,</span><span class="n">l4</span><span class="o">=</span><span class="n">UDP</span><span class="p">(</span><span class="n">sport</span><span class="o">=</span><span class="n">RandShort</span><span class="p">())</span><span class="o">/</span><span class="n">DNS</span><span class="p">(</span><span class="n">qd</span><span class="o">=</span><span class="n">DNSQR</span><span class="p">(</span><span class="n">qname</span><span class="o">=</span><span class="s2">&quot;thesprawl.org&quot;</span><span class="p">)))</span>
 <span class="go">Begin emission:</span>
 <span class="go">..*....******...******.***...****Finished to send 30 packets.</span>
 <span class="go">*****...***...............................</span>
@@ -1301,7 +1301,7 @@ NTP, etc.) to deserve an answer:</p>
 </div>
 <div class="section" id="etherleaking">
 <h3>Etherleaking<a class="headerlink" href="#etherleaking" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sr1</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;172.16.1.232&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">())</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sr1</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;172.16.1.232&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">())</span>
 <span class="go">&lt;IP src=172.16.1.232 proto=1 [...] |&lt;ICMP code=0 type=0 [...]|</span>
 <span class="go">&lt;Padding load=’0O\x02\x01\x00\x04\x06public\xa2B\x02\x02\x1e’ |&gt;&gt;&gt;</span>
 </pre></div>
@@ -1310,7 +1310,7 @@ NTP, etc.) to deserve an answer:</p>
 <div class="section" id="icmp-leaking">
 <h3>ICMP leaking<a class="headerlink" href="#icmp-leaking" title="Permalink to this headline">¶</a></h3>
 <p>This was a Linux 2.0 bug:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sr1</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;172.16.1.1&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\x02</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">())</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sr1</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;172.16.1.1&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\x02</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">())</span>
 <span class="go">&lt;IP src=172.16.1.1 [...] |&lt;ICMP code=0 type=12 [...] |</span>
 <span class="go">&lt;IPerror src=172.16.1.24 options=’\x02\x00\x00\x00’ [...] |</span>
 <span class="go">&lt;ICMPerror code=0 type=8 id=0x0 seq=0x0 chksum=0xf7ff |</span>
@@ -1322,18 +1322,18 @@ NTP, etc.) to deserve an answer:</p>
 <h3>VLAN hopping<a class="headerlink" href="#vlan-hopping" title="Permalink to this headline">¶</a></h3>
 <p>In very specific conditions, a double 802.1q encapsulation will
 make a packet jump to another VLAN:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sendp</span><span class="p">(</span><span class="n">Ether</span><span class="p">()</span><span class="o">/</span><span class="n">Dot1Q</span><span class="p">(</span><span class="n">vlan</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">Dot1Q</span><span class="p">(</span><span class="n">vlan</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span><span class="o">/</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">target</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">())</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sendp</span><span class="p">(</span><span class="n">Ether</span><span class="p">()</span><span class="o">/</span><span class="n">Dot1Q</span><span class="p">(</span><span class="n">vlan</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">Dot1Q</span><span class="p">(</span><span class="n">vlan</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span><span class="o">/</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">target</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="wireless-sniffing">
 <h3>Wireless sniffing<a class="headerlink" href="#wireless-sniffing" title="Permalink to this headline">¶</a></h3>
 <p>The following command will display information similar to most wireless sniffers:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sniff</span><span class="p">(</span><span class="n">iface</span> <span class="o">=</span> <span class="s2">&quot;ath0&quot;</span><span class="p">,</span> <span class="n">prn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;{Dot11Beacon:%Dot11.addr3%</span><span class="se">\t</span><span class="s2">%Dot11Beacon.info%</span><span class="se">\t</span><span class="s2">%PrismHeader.channel%</span><span class="se">\t</span><span class="s2">Dot11Beacon.cap%}&quot;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sniff</span><span class="p">(</span><span class="n">iface</span> <span class="o">=</span> <span class="s2">&quot;ath0&quot;</span><span class="p">,</span> <span class="n">prn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">&quot;{Dot11Beacon:%Dot11.addr3%</span><span class="se">\t</span><span class="s2">%Dot11Beacon.info%</span><span class="se">\t</span><span class="s2">%PrismHeader.channel%</span><span class="se">\t</span><span class="s2">Dot11Beacon.cap%}&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>The above command will produce output similar to the one below:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>00:00:00:01:02:03 netgear      6L   ESS+privacy+PBCC
+<div class="highlight-python"><div class="highlight"><pre>00:00:00:01:02:03 netgear      6L   ESS+privacy+PBCC
 11:22:33:44:55:66 wireless_100 6L   short-slot+ESS+privacy
 44:55:66:00:11:22 linksys      6L   short-slot+ESS+privacy
 12:34:56:78:90:12 NETGEAR      6L   short-slot+ESS+privacy+short-preamble
@@ -1346,7 +1346,7 @@ make a packet jump to another VLAN:</p>
 <div class="section" id="simplistic-arp-monitor">
 <h3>Simplistic ARP Monitor<a class="headerlink" href="#simplistic-arp-monitor" title="Permalink to this headline">¶</a></h3>
 <p>This program uses the <code class="docutils literal"><span class="pre">sniff()</span></code> callback (paramter prn). The store parameter is set to 0 so that the <code class="docutils literal"><span class="pre">sniff()</span></code> function will not store anything (as it would do otherwise) and thus can run forever. The filter parameter is used for better performances on high load : the filter is applied inside the kernel and Scapy will only see ARP traffic.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="ch">#! /usr/bin/env python</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="ch">#! /usr/bin/env python</span>
 <span class="kn">from</span> <span class="nn">scapy.all</span> <span class="kn">import</span> <span class="o">*</span>
 
 <span class="k">def</span> <span class="nf">arp_monitor_callback</span><span class="p">(</span><span class="n">pkt</span><span class="p">):</span>
@@ -1367,7 +1367,7 @@ Thus you want to check for any active DHCP servers and identify their IP and MAC
 <div class="section" id="solution">
 <h4>Solution<a class="headerlink" href="#solution" title="Permalink to this headline">¶</a></h4>
 <p>Use Scapy to send a DHCP discover request and analyze the replies:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">checkIPaddr</span> <span class="o">=</span> <span class="bp">False</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">checkIPaddr</span> <span class="o">=</span> <span class="bp">False</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">hw</span> <span class="o">=</span> <span class="n">get_if_raw_hwaddr</span><span class="p">(</span><span class="n">conf</span><span class="o">.</span><span class="n">iface</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dhcp_discover</span> <span class="o">=</span> <span class="n">Ether</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;ff:ff:ff:ff:ff:ff&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">IP</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="s2">&quot;0.0.0.0&quot;</span><span class="p">,</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;255.255.255.255&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">UDP</span><span class="p">(</span><span class="n">sport</span><span class="o">=</span><span class="mi">68</span><span class="p">,</span><span class="n">dport</span><span class="o">=</span><span class="mi">67</span><span class="p">)</span><span class="o">/</span><span class="n">BOOTP</span><span class="p">(</span><span class="n">chaddr</span><span class="o">=</span><span class="n">hw</span><span class="p">)</span><span class="o">/</span><span class="n">DHCP</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="p">[(</span><span class="s2">&quot;message-type&quot;</span><span class="p">,</span><span class="s2">&quot;discover&quot;</span><span class="p">),</span><span class="s2">&quot;end&quot;</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span> <span class="n">unans</span> <span class="o">=</span> <span class="n">srp</span><span class="p">(</span><span class="n">dhcp_discover</span><span class="p">,</span> <span class="n">multi</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>      <span class="c1"># Press CTRL-C after several seconds</span>
@@ -1378,7 +1378,7 @@ Thus you want to check for any active DHCP servers and identify their IP and MAC
 </pre></div>
 </div>
 <p>In this case we got 2 replies, so there were two active DHCP servers on the test network:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">summarize</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="o">.</span><span class="n">summarize</span><span class="p">()</span>
 <span class="go">Ether / IP / UDP 0.0.0.0:bootpc &gt; 255.255.255.255:bootps / BOOTP / DHCP ==&gt; Ether / IP / UDP 192.168.1.1:bootps &gt; 255.255.255.255:bootpc / BOOTP / DHCP</span>
 <span class="go">Ether / IP / UDP 0.0.0.0:bootpc &gt; 255.255.255.255:bootps / BOOTP / DHCP ==&gt; Ether / IP / UDP 192.168.1.11:bootps &gt; 255.255.255.255:bootpc / BOOTP / DHCP</span>
 <span class="go">}}}</span>
@@ -1406,7 +1406,7 @@ This is also the reason why we can&#8217;t use the more convenient <code class="
 <h3>Firewalking<a class="headerlink" href="#firewalking" title="Permalink to this headline">¶</a></h3>
 <p>TTL decrementation after a filtering operation
 only not filtered packets generate an ICMP TTL exceeded</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span> <span class="n">unans</span> <span class="o">=</span> <span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;172.16.4.27&quot;</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1024</span><span class="p">)))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span> <span class="n">unans</span> <span class="o">=</span> <span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;172.16.4.27&quot;</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1024</span><span class="p">)))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span> <span class="ow">in</span> <span class="n">ans</span><span class="p">:</span>
 <span class="go">        if r.haslayer(ICMP) and r.payload.type == 11:</span>
 <span class="go">            print(s.dport )</span>
@@ -1414,7 +1414,7 @@ only not filtered packets generate an ICMP TTL exceeded</p>
 </div>
 <p>Find subnets on a multi-NIC firewall
 only his own NIC’s IP are reachable with this TTL:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span> <span class="n">unans</span> <span class="o">=</span> <span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;172.16.5/24&quot;</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">())</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span> <span class="n">unans</span> <span class="o">=</span> <span class="n">sr</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;172.16.5/24&quot;</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">())</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">unans</span><span class="p">:</span> <span class="k">print</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">dst</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1428,7 +1428,7 @@ only his own NIC’s IP are reachable with this TTL:</p>
 <div class="section" id="id2">
 <h4>Solution<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
 <p>To allow Scapy to reach target destination additional options must be used:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sr1</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;72.14.207.99&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span><span class="n">flags</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">,</span><span class="n">options</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;Timestamp&#39;</span><span class="p">,(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))]))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sr1</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;72.14.207.99&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span><span class="n">flags</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">,</span><span class="n">options</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;Timestamp&#39;</span><span class="p">,(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))]))</span>
 </pre></div>
 </div>
 </div>
@@ -1442,7 +1442,7 @@ only his own NIC’s IP are reachable with this TTL:</p>
 <div class="section" id="id4">
 <h4>Solution<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
 <p>That&#8217;s what the <code class="docutils literal"><span class="pre">wireshark()</span></code> function is for:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">packets</span> <span class="o">=</span> <span class="n">Ether</span><span class="p">()</span><span class="o">/</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">Net</span><span class="p">(</span><span class="s2">&quot;google.com/30&quot;</span><span class="p">))</span><span class="o">/</span><span class="n">ICMP</span><span class="p">()</span>     <span class="c1"># first generate some packets</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">packets</span> <span class="o">=</span> <span class="n">Ether</span><span class="p">()</span><span class="o">/</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">Net</span><span class="p">(</span><span class="s2">&quot;google.com/30&quot;</span><span class="p">))</span><span class="o">/</span><span class="n">ICMP</span><span class="p">()</span>     <span class="c1"># first generate some packets</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">wireshark</span><span class="p">(</span><span class="n">packets</span><span class="p">)</span>                                        <span class="c1"># show them with Wireshark</span>
 </pre></div>
 </div>
@@ -1460,11 +1460,11 @@ only his own NIC’s IP are reachable with this TTL:</p>
 <div class="section" id="isn">
 <h4>ISN<a class="headerlink" href="#isn" title="Permalink to this headline">¶</a></h4>
 <p>Scapy can be used to analyze ISN (Initial Sequence Number) increments to possibly discover vulnerable systems. First we will collect target responses by sending a number of SYN probes in a loop:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">srloop</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.1.1&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span><span class="n">flags</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ans</span><span class="p">,</span><span class="n">unans</span><span class="o">=</span><span class="n">srloop</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;192.168.1.1&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">TCP</span><span class="p">(</span><span class="n">dport</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span><span class="n">flags</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Once we obtain a reasonable number of responses we can start analyzing collected data with something like this:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">temp</span> <span class="o">=</span> <span class="mi">0</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">temp</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">s</span><span class="p">,</span><span class="n">r</span> <span class="ow">in</span> <span class="n">ans</span><span class="p">:</span>
 <span class="gp">... </span>   <span class="n">temp</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">TCP</span><span class="p">]</span><span class="o">.</span><span class="n">seq</span> <span class="o">-</span> <span class="n">temp</span>
 <span class="gp">... </span>   <span class="k">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">TCP</span><span class="p">]</span><span class="o">.</span><span class="n">seq</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">+&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">temp</span><span class="p">))</span>
@@ -1481,15 +1481,15 @@ only his own NIC’s IP are reachable with this TTL:</p>
 <div class="section" id="nmap-fp">
 <h4>nmap_fp<a class="headerlink" href="#nmap-fp" title="Permalink to this headline">¶</a></h4>
 <p>Nmap fingerprinting (the old &#8220;1st generation&#8221; one that was done by Nmap up to v4.20) is supported in Scapy. In Scapy v2 you have to load an extension module first:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">load_module</span><span class="p">(</span><span class="s2">&quot;nmap&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">load_module</span><span class="p">(</span><span class="s2">&quot;nmap&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>If you have Nmap installed you can use it&#8217;s active os fingerprinting database with Scapy. Make sure that version 1 of signature database is located in the path specified by:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">nmap_base</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">nmap_base</span>
 </pre></div>
 </div>
 <p>Then you can use the <code class="docutils literal"><span class="pre">nmap_fp()</span></code> function which implements same probes as in Nmap&#8217;s OS Detection engine:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">nmap_fp</span><span class="p">(</span><span class="s2">&quot;192.168.1.1&quot;</span><span class="p">,</span><span class="n">oport</span><span class="o">=</span><span class="mi">443</span><span class="p">,</span><span class="n">cport</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">nmap_fp</span><span class="p">(</span><span class="s2">&quot;192.168.1.1&quot;</span><span class="p">,</span><span class="n">oport</span><span class="o">=</span><span class="mi">443</span><span class="p">,</span><span class="n">cport</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="go">Begin emission:</span>
 <span class="go">.****..**Finished to send 8 packets.</span>
 <span class="go">*................................................</span>
@@ -1503,11 +1503,11 @@ only his own NIC’s IP are reachable with this TTL:</p>
 <div class="section" id="p0f">
 <h4>p0f<a class="headerlink" href="#p0f" title="Permalink to this headline">¶</a></h4>
 <p>If you have p0f installed on your system, you can use it to guess OS name and version right from Scapy (only SYN database is used). First make sure that p0f database exists in the path specified by:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">p0f_base</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">p0f_base</span>
 </pre></div>
 </div>
 <p>For example to guess OS from a single captured packet:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sniff</span><span class="p">(</span><span class="n">prn</span><span class="o">=</span><span class="n">prnp0f</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sniff</span><span class="p">(</span><span class="n">prn</span><span class="o">=</span><span class="n">prnp0f</span><span class="p">)</span>
 <span class="go">192.168.1.100:54716 - Linux 2.6 (newer, 1) (up: 24 hrs)</span>
 <span class="go">  -&gt; 74.125.19.104:www (distance 0)</span>
 <span class="go">&lt;Sniffed: TCP:339 UDP:2 ICMP:0 Other:156&gt;</span>
@@ -1524,96 +1524,39 @@ only his own NIC’s IP are reachable with this TTL:</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Usage</a><ul>
-<li><a class="reference internal" href="#starting-scapy">Starting Scapy</a></li>
-<li><a class="reference internal" href="#interactive-tutorial">Interactive tutorial</a><ul>
-<li><a class="reference internal" href="#first-steps">First steps</a></li>
-<li><a class="reference internal" href="#stacking-layers">Stacking layers</a></li>
-<li><a class="reference internal" href="#reading-pcap-files">Reading PCAP files</a></li>
-<li><a class="reference internal" href="#graphical-dumps-pdf-ps">Graphical dumps (PDF, PS)</a></li>
-<li><a class="reference internal" href="#generating-sets-of-packets">Generating sets of packets</a></li>
-<li><a class="reference internal" href="#sending-packets">Sending packets</a></li>
-<li><a class="reference internal" href="#fuzzing">Fuzzing</a></li>
-<li><a class="reference internal" href="#send-and-receive-packets-sr">Send and receive packets (sr)</a></li>
-<li><a class="reference internal" href="#syn-scans">SYN Scans</a></li>
-<li><a class="reference internal" href="#tcp-traceroute">TCP traceroute</a></li>
-<li><a class="reference internal" href="#configuring-super-sockets">Configuring super sockets</a></li>
-<li><a class="reference internal" href="#sniffing">Sniffing</a></li>
-<li><a class="reference internal" href="#filters">Filters</a></li>
-<li><a class="reference internal" href="#send-and-receive-in-a-loop">Send and receive in a loop</a></li>
-<li><a class="reference internal" href="#importing-and-exporting-data">Importing and Exporting Data</a><ul>
-<li><a class="reference internal" href="#pcap">PCAP</a></li>
-<li><a class="reference internal" href="#hexdump">Hexdump</a></li>
-<li><a class="reference internal" href="#hex-string">Hex string</a></li>
-<li><a class="reference internal" href="#base64">Base64</a></li>
-<li><a class="reference internal" href="#sessions">Sessions</a></li>
+<h1 class="logo"><a href="index.html">Scapy</a></h1>
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=phaethon&repo=scapy&type=fork&count=true&size=large"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Download and Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#starting-scapy">Starting Scapy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#interactive-tutorial">Interactive tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#simple-one-liners">Simple one-liners</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#recipes">Recipes</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#making-tables">Making tables</a></li>
-<li><a class="reference internal" href="#routing">Routing</a></li>
-<li><a class="reference internal" href="#matplotlib">Matplotlib</a></li>
-<li><a class="reference internal" href="#tcp-traceroute-2">TCP traceroute (2)</a></li>
-<li><a class="reference internal" href="#wireless-frame-injection">Wireless frame injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_usage.html">Advanced usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending.html">Build your own tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build_dissect.html">Adding new protocols</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Scapy development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="backmatter.html">Credits</a></li>
 </ul>
-</li>
-<li><a class="reference internal" href="#simple-one-liners">Simple one-liners</a><ul>
-<li><a class="reference internal" href="#ack-scan">ACK Scan</a></li>
-<li><a class="reference internal" href="#xmas-scan">Xmas Scan</a></li>
-<li><a class="reference internal" href="#ip-scan">IP Scan</a></li>
-<li><a class="reference internal" href="#arp-ping">ARP Ping</a></li>
-<li><a class="reference internal" href="#icmp-ping">ICMP Ping</a></li>
-<li><a class="reference internal" href="#tcp-ping">TCP Ping</a></li>
-<li><a class="reference internal" href="#udp-ping">UDP Ping</a></li>
-<li><a class="reference internal" href="#classical-attacks">Classical attacks</a></li>
-<li><a class="reference internal" href="#arp-cache-poisoning">ARP cache poisoning</a></li>
-<li><a class="reference internal" href="#tcp-port-scanning">TCP Port Scanning</a></li>
-<li><a class="reference internal" href="#ike-scanning">IKE Scanning</a></li>
-<li><a class="reference internal" href="#advanced-traceroute">Advanced traceroute</a><ul>
-<li><a class="reference internal" href="#tcp-syn-traceroute">TCP SYN traceroute</a></li>
-<li><a class="reference internal" href="#udp-traceroute">UDP traceroute</a></li>
-<li><a class="reference internal" href="#dns-traceroute">DNS traceroute</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#etherleaking">Etherleaking</a></li>
-<li><a class="reference internal" href="#icmp-leaking">ICMP leaking</a></li>
-<li><a class="reference internal" href="#vlan-hopping">VLAN hopping</a></li>
-<li><a class="reference internal" href="#wireless-sniffing">Wireless sniffing</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#recipes">Recipes</a><ul>
-<li><a class="reference internal" href="#simplistic-arp-monitor">Simplistic ARP Monitor</a></li>
-<li><a class="reference internal" href="#identifying-rogue-dhcp-servers-on-your-lan">Identifying rogue DHCP servers on your LAN</a><ul>
-<li><a class="reference internal" href="#problem">Problem</a></li>
-<li><a class="reference internal" href="#solution">Solution</a></li>
-<li><a class="reference internal" href="#discussion">Discussion</a></li>
-<li><a class="reference internal" href="#see-also">See also</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#firewalking">Firewalking</a></li>
-<li><a class="reference internal" href="#tcp-timestamp-filtering">TCP Timestamp Filtering</a><ul>
-<li><a class="reference internal" href="#id1">Problem</a></li>
-<li><a class="reference internal" href="#id2">Solution</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#viewing-packets-with-wireshark">Viewing packets with Wireshark</a><ul>
-<li><a class="reference internal" href="#index-18">Problem</a></li>
-<li><a class="reference internal" href="#id4">Solution</a></li>
-<li><a class="reference internal" href="#id5">Discussion</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#os-fingerprinting">OS Fingerprinting</a><ul>
-<li><a class="reference internal" href="#isn">ISN</a></li>
-<li><a class="reference internal" href="#nmap-fp">nmap_fp</a></li>
-<li><a class="reference internal" href="#p0f">p0f</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
+
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
@@ -1623,13 +1566,6 @@ only his own NIC’s IP are reachable with this TTL:</p>
   </ul></li>
 </ul>
 </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/usage.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -1659,6 +1595,10 @@ only his own NIC’s IP are reachable with this TTL:</p>
           rel="nofollow">Page source</a>
     </div>
 
+    
+    <a href="https://github.com/phaethon/scapy" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
     
 
     
