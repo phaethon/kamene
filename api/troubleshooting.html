@@ -8,7 +8,7 @@
     
     <title>Troubleshooting &mdash; Scapy 3.0.0 documentation</title>
     
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -54,7 +54,7 @@
 <h3>I can&#8217;t ping 127.0.0.1. Scapy does not work with 127.0.0.1 or on the loopback interface<a class="headerlink" href="#i-can-t-ping-127-0-0-1-scapy-does-not-work-with-127-0-0-1-or-on-the-loopback-interface" title="Permalink to this headline">¶</a></h3>
 <p>The loopback interface is a very special interface. Packets going through it are not really assembled and dissassembled. The kernel routes the packet to its destination while it is still stored an internal structure. What you see with tcpdump -i lo is only a fake to make you think everything is normal. The kernel is not aware of what Scapy is doing behind his back, so what you see on the loopback interface is also a fake. Except this one did not come from a local structure. Thus the kernel will never receive it.</p>
 <p>In order to speak to local applications, you need to build your packets one layer upper, using a PF_INET/SOCK_RAW socket instead of a PF_PACKET/SOCK_RAW (or its equivalent on other systems that Linux):</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">L3socket</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">L3socket</span>
 <span class="go">&lt;class __main__.L3PacketSocket at 0xb7bdf5fc&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">L3socket</span><span class="o">=</span><span class="n">L3RawSocket</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sr1</span><span class="p">(</span><span class="n">IP</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">)</span><span class="o">/</span><span class="n">ICMP</span><span class="p">())</span>
@@ -70,23 +70,23 @@
 <h3>traceroute() does not work. I&#8217;m on a ppp link<a class="headerlink" href="#traceroute-does-not-work-i-m-on-a-ppp-link" title="Permalink to this headline">¶</a></h3>
 <p>This is a known bug. See BPF filters do not work. I&#8217;m on a ppp link</p>
 <p>To work arround this, use <code class="docutils literal"><span class="pre">nofilter=1</span></code>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">traceroute</span><span class="p">(</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> <span class="n">nofilter</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">traceroute</span><span class="p">(</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> <span class="n">nofilter</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="graphs-are-ugly-fonts-are-too-big-image-is-truncated">
 <h3>Graphs are ugly/fonts are too big/image is truncated.<a class="headerlink" href="#graphs-are-ugly-fonts-are-too-big-image-is-truncated" title="Permalink to this headline">¶</a></h3>
 <p>Quick fix: use png format:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">graph</span><span class="p">(</span><span class="n">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">graph</span><span class="p">(</span><span class="n">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Upgrade to latest version of GraphViz.</p>
 <p>Try providing different DPI options (50,70,75,96,101,125, for instance):</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">graph</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="s2">&quot;-Gdpi=70&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">graph</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="s2">&quot;-Gdpi=70&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>If it works, you can make it permanenent:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">prog</span><span class="o">.</span><span class="n">dot</span> <span class="o">=</span> <span class="s2">&quot;dot -Gdpi=70&quot;</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conf</span><span class="o">.</span><span class="n">prog</span><span class="o">.</span><span class="n">dot</span> <span class="o">=</span> <span class="s2">&quot;dot -Gdpi=70&quot;</span>
 </pre></div>
 </div>
 <p>You can also put this line in your <code class="docutils literal"><span class="pre">~/.scapy_startup.py</span></code> file</p>
@@ -106,37 +106,21 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="index.html">Scapy</a></h1>
-
-
-
-
-
-<p>
-<iframe src="https://ghbtns.com/github-btn.html?user=phaethon&repo=scapy&type=fork&count=true&size=large"
-  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
-</p>
-
-
-
-
-<h3>Navigation</h3>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Download and Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="advanced_usage.html">Advanced usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="extending.html">Build your own tools</a></li>
-<li class="toctree-l1"><a class="reference internal" href="build_dissect.html">Adding new protocols</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Troubleshooting</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#faq">FAQ</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#getting-help">Getting help</a></li>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Troubleshooting</a><ul>
+<li><a class="reference internal" href="#faq">FAQ</a><ul>
+<li><a class="reference internal" href="#my-tcp-connections-are-reset-by-scapy-or-by-my-kernel">My TCP connections are reset by Scapy or by my kernel.</a></li>
+<li><a class="reference internal" href="#i-can-t-ping-127-0-0-1-scapy-does-not-work-with-127-0-0-1-or-on-the-loopback-interface">I can&#8217;t ping 127.0.0.1. Scapy does not work with 127.0.0.1 or on the loopback interface</a></li>
+<li><a class="reference internal" href="#bpf-filters-do-not-work-i-m-on-a-ppp-link">BPF filters do not work. I&#8217;m on a ppp link</a></li>
+<li><a class="reference internal" href="#traceroute-does-not-work-i-m-on-a-ppp-link">traceroute() does not work. I&#8217;m on a ppp link</a></li>
+<li><a class="reference internal" href="#graphs-are-ugly-fonts-are-too-big-image-is-truncated">Graphs are ugly/fonts are too big/image is truncated.</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="development.html">Scapy development</a></li>
-<li class="toctree-l1"><a class="reference internal" href="backmatter.html">Credits</a></li>
+<li><a class="reference internal" href="#getting-help">Getting help</a></li>
 </ul>
-
+</li>
+</ul>
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
@@ -146,6 +130,13 @@
   </ul></li>
 </ul>
 </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/troubleshooting.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -175,10 +166,6 @@
           rel="nofollow">Page source</a>
     </div>
 
-    
-    <a href="https://github.com/phaethon/scapy" class="github">
-        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
-    </a>
     
 
     
