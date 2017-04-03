@@ -12,7 +12,6 @@ import time
 import struct
 import re
 import socket
-import types
 from select import select
 from collections import defaultdict
 from scapy.utils import checksum, is_private_addr
