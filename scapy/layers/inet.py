@@ -2100,7 +2100,7 @@ class MTR:
             s += "\n\t### Nodes With Padding ###\n"
             pad = {}
             for t in range(0, self._ntraces):
-                for snd, rcv in self._res[t]:
+                for _, rcv in self._res[t]:
                     if rcv.src not in self._ports and rcv.haslayer(conf.padding_layer):
                         p = rcv.getlayer(conf.padding_layer).load
                         if p != "\x00" * len(p):
