@@ -1878,7 +1878,7 @@ class MTR:
                                 #
                                 # Check for not already added...
                                 uip = '{uip:s} 3/icmp'.format(uip=ip)
-                                if not uip in cipall:
+                                if uip not in cipall:
                                     s += '\t\t"{uip:s}";\n'.format(uip=uip)
                                     cipall.append(uip)
                 else:
@@ -2103,7 +2103,7 @@ class MTR:
                             bhh = nd
                         #
                         # If not already added...
-                        if not bhh in bhhops:
+                        if bhh not in bhhops:
                             lb = 'label=<{lh:s}<BR/><FONT POINT-SIZE="8">Failed Target</FONT>>'.format(lh=bhh)
                             s += '\t"{bh:s}" [{l:s},shape="doubleoctagon",color="black",gradientangle=270,fillcolor="white:red",style="filled,rounded",tooltip="Failed MTR Resolved Target: {b:s}"];\n'.format(bh=nd, l=lb, b=v[2])
                             bhhops.append(bhh)
@@ -2583,14 +2583,14 @@ def mtr(target, dport=80, minttl=1, maxttl=30, stype="Random", srcport=50000, if
     # Default to network protocol: "TCP" if not found in list...
     plist = ["TCP", "UDP", "ICMP"]
     netproto = netproto.upper()
-    if not netproto in plist:
+    if netproto not in plist:
         netproto = "TCP"
     mtrc._netprotocol = netproto
     #
     # Default to source type: "Random" if not found in list...
     slist = ["Random", "Increment"]
     stype = stype.title()
-    if not stype in slist:
+    if stype not in slist:
         stype = "Random"
     if stype == "Random":
         sport = RandShort()  # Random
