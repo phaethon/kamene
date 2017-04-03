@@ -2936,12 +2936,12 @@ def report_ports(target, ports):
 report_ports(target, ports) -> string"""
     ans, unans = sr(IP(dst=target) / TCP(dport=ports), timeout=5)
     rep = "\\begin{tabular}{|r|l|l|}\n\\hline\n"
-    for s, r in ans:
+    for _, r in ans:
         if not r.haslayer(ICMP):
             if r.payload.flags == 0x12:
                 rep += r.sprintf("%TCP.sport% & open & SA \\\\\n")
     rep += "\\hline\n"
-    for s, r in ans:
+    for _, r in ans:
         if r.haslayer(ICMP):
             rep += r.sprintf("%TCPerror.dport% & closed & ICMP type %ICMP.type%/%ICMP.code% from %IP.src% \\\\\n")
         elif r.payload.flags != 0x12:
@@ -2978,7 +2978,7 @@ def fragleak(target, sport=123, dport=123, timeout=0.2, onlyasc=0):
             try:
                 if not intr:
                     s.send(pkt)
-                sin, sout, serr = select([s], [], [], timeout)
+                sin, _, _ = select([s], [], [], timeout)
                 if not sin:
                     continue
                 ans = s.recv(1600)
