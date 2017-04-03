@@ -755,9 +755,18 @@ class IPerror(IP):
 
 
 class TCPerror(TCP):
+# Better fix to be found for building and parsing TCPerror inside ICMP destination unreachable. With this at least the test suite passes
     fields_desc = [ShortEnumField("sport", 20, TCP_SERVICES),
                    ShortEnumField("dport", 80, TCP_SERVICES),
-                   IntField("seq", 0)]
+                   IntField("seq", 0),
+                   IntField("ack", 0),
+                   BitField("dataofs", None, 4),
+                   BitField("reserved", 0, 4),
+                   FlagsField("flags", 0x2, 8, "FSRPAUEC"),
+                   ShortField("window", 8192),
+                   XShortField("chksum", None),
+                   ShortField("urgptr", 0),
+                   TCPOptionsField("options", {})]
     name = "TCP in ICMP"
 
     def post_build(self, p, pay):
