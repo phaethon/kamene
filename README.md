@@ -51,6 +51,7 @@ All commands listed by lsc() should work. Tested layers are:
 * DHCP
 * DHCPv6
 * DNS
+* DoIP
 * Dot3
 * Dot11
 * Ether

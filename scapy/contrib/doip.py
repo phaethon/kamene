@@ -21,7 +21,7 @@ This is pretty much a work in progress, so expect breaking changes.
 - the two automotive people for nagging me
 """
 from scapy.fields import ByteEnumField, IntField, StrLenField, XByteField, XShortEnumField
-from scapy.layers.inet import UDP
+from scapy.layers.inet import TCP, UDP
 from scapy.packet import Packet, bind_layers
 
 
@@ -76,7 +76,7 @@ class DoIPRawPacket(Packet):
         """
         if len(b) < 8:
             raise ValueError("given packet too short")
-        return super(DoIPRawPacket, self).dissect(s)
+        return super(DoIPRawPacket, self).dissect(b)
 
 # bind things together
 bind_layers(UDP, DoIPRawPacket, sport=13400)
