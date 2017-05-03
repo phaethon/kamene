@@ -75,7 +75,7 @@ if WINDOWS:
 # def get_if_raw_addr(iff):
 # def get_if_list():
 # def get_working_if():
-# def attach_filter(s, filter):
+# def attach_filter(s, bpf_filter, iface):
 # def set_promisc(s,iff,val=1):
 # def read_routes():
 # def get_if(iff,cmd):
