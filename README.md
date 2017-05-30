@@ -14,13 +14,12 @@ Please, submit all issues https://github.com/phaethon/scapy preferrably with .pc
 Scapy3k is included in the [Network Security Toolkit] (http://www.networksecuritytoolkit.org/nst/index.html) Release 22. 
 
 Classic scapy has been trying to catch up with the improvements in scapy3k. These features were first implemented in scapy3k and some of them might have been reimplemented in scapy or not:
-* replaced PyCrypto with cryptography.io (thanks to @ThomasFaivre)
 * Windows support without a need for libdnet
 * option to return Networkx graphs instead of image, e.g. for conversations
 * replaced gnuplot with Matplotlib
 * Reading PCAP Next Generation (PCAPNG) files (please, add issues on GitHub for block types and options, which need support. Currently, reading packets only from Enhanced Packet Block)
 * new command tdecode to call tshark decoding on one packet and display results, this is handy for interactive work and debugging
-* some bugs fixed, which are still present in original scapy
+* some bugs fixed
 
 ## Installation
 
