@@ -7,7 +7,7 @@
 Customizations needed to support Microsoft Windows.
 """
 
-import os,re,sys,socket,time, itertools
+import os,re,sys,socket,time, itertools, tempfile
 import subprocess as sp
 from glob import glob
 from scapy.config import conf,ConfClass
@@ -25,6 +25,93 @@ from scapy.arch.pcapdnet import *
 
 LOOPBACK_NAME="lo0"
 WINDOWS = True
+
+def _exec_query_ps(cmd, fields):
+    """Execute a PowerShell query"""
+    ps = sp.Popen([conf.prog.powershell] + cmd +
+                  ['|', 'select %s' % ', '.join(fields), '|', 'fl'],
+                  stdout=sp.PIPE,
+                  universal_newlines=True)
+    l=[]
+    for line in ps.stdout:
+        if not line.strip(): #skip empty lines
+            continue
+        l.append(line.split(':', 1)[1].strip())
+        if len(l) == len(fields):
+            yield l
+            l=[]
+
+def _vbs_exec_code(code):
+    tmpfile = tempfile.NamedTemporaryFile(suffix=".vbs", delete=False)
+    tmpfile.write(code)
+    tmpfile.close()
+    ps = sp.Popen([conf.prog.cscript, tmpfile.name],
+                  stdout=sp.PIPE, stderr=open(os.devnull),
+                  universal_newlines=True)
+    for _ in range(3):
+        # skip 3 first lines
+        ps.stdout.readline()
+    for line in ps.stdout:
+        yield line
+    os.unlink(tmpfile.name)
+
+def _vbs_get_iface_guid(devid):
+    try:
+        devid = str(int(devid) + 1)
+        guid = _vbs_exec_code("""WScript.Echo CreateObject("WScript.Shell").RegRead("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\NetworkCards\\%s\\ServiceName")
+""" % devid).__iter__().next()
+        if guid.startswith('{') and guid.endswith('}\n'):
+            return guid[:-1]
+    except StopIteration:
+        pass
+
+# Some names differ between VBS and PS
+## None: field will not be returned under VBS
+_VBS_WMI_FIELDS = {
+    "Win32_NetworkAdapter": {
+        "InterfaceIndex": "Index",
+        "InterfaceDescription": "Description",
+        "GUID": "DeviceID",
+    }
+}
+
+_VBS_WMI_OUTPUT = {
+    "Win32_NetworkAdapter": {
+        "DeviceID": _vbs_get_iface_guid,
+    }
+}
+
+def _exec_query_vbs(cmd, fields):
+    """Execute a query using VBS. Currently Get-WmiObject queries are
+    supported.
+
+    """
+    assert len(cmd) == 2 and cmd[0] == "Get-WmiObject"
+    fields = [_VBS_WMI_FIELDS.get(cmd[1], {}).get(fld, fld) for fld in fields]
+    values = _vbs_exec_code("""Set wmi = GetObject("winmgmts:")
+Set lines = wmi.InstancesOf("%s")
+On Error Resume Next
+Err.clear
+For Each line in lines
+  %s
+Next
+""" % (cmd[1], "\n  ".join("WScript.Echo line.%s" % fld for fld in fields
+                           if fld is not None))).__iter__()
+    while True:
+        yield [None if fld is None else
+               _VBS_WMI_OUTPUT.get(cmd[1], {}).get(fld, lambda x: x)(
+                   values.next().strip()
+               )
+               for fld in fields]
+
+def exec_query(cmd, fields):
+    """Execute a system query using PowerShell if it is available, and
+    using VBS/cscript as a fallback.
+
+    """
+    if conf.prog.powershell is None:
+        return _exec_query_vbs(cmd, fields)
+    return _exec_query_ps(cmd, fields)
 
 
 def _where(filename, dirs=[], env="PATH"):
@@ -66,40 +153,43 @@ class WinProgPath(ConfClass):
     display = _default
     hexedit = win_find_exe("hexer")
     wireshark = win_find_exe("wireshark", "wireshark")
+    powershell = win_find_exe(
+        "powershell",
+        installsubdir="System32\\WindowsPowerShell\\v1.0",
+        env="SystemRoot"
+    )
+    cscript = win_find_exe("cscript", installsubdir="System32",
+                           env="SystemRoot")
 
 conf.prog = WinProgPath()
+if conf.prog.powershell == "powershell":
+    conf.prog.powershell = None
 
 class PcapNameNotFoundError(Scapy_Exception):
     pass    
+import platform
+
+def is_interface_valid(iface):
+    if "guid" in iface and iface["guid"]:
+        return True
+    return False
 
 def get_windows_if_list():
-    # Windows 8+ way: ps = sp.Popen(['powershell', 'Get-NetAdapter', '|', 'select Name, InterfaceIndex, InterfaceDescription, InterfaceGuid, MacAddress', '|', 'fl'], stdout = sp.PIPE, universal_newlines = True)
-    ps = sp.Popen(['powershell', '-NoProfile', 'Get-WMIObject -class Win32_NetworkAdapter', '|', 'select Name, @{Name="InterfaceIndex";Expression={$_.InterfaceIndex}}, @{Name="InterfaceDescription";Expression={$_.Description}},@{Name="InterfaceGuid";Expression={$_.GUID}}, @{Name="MacAddress";Expression={$_.MacAddress.Replace(":","-")}} | where InterfaceGuid -ne $null', '|', 'fl'], stdout = sp.PIPE, universal_newlines = True)
-    stdout, stdin = ps.communicate(timeout = 10)
-    current_interface = None
-    interface_list = []
-    for i in stdout.split('\n'):
-        if not i.strip():
-            continue
-        if i.find(':')<0:
-            continue
-        name, value = [ j.strip() for j in i.split(':') ]
-        if name == 'Name':
-            if current_interface:
-                interface_list.append(current_interface)
-            current_interface = {}
-            current_interface['name'] = value
-        elif name == 'InterfaceIndex':
-            current_interface['win_index'] = int(value)
-        elif name == 'InterfaceDescription':
-            current_interface['description'] = value
-        elif name == 'InterfaceGuid':
-            current_interface['guid'] = value
-        elif name == 'MacAddress':
-            current_interface['mac'] = ':'.join([ j for j in value.split('-')])    
-    if current_interface:
-        interface_list.append(current_interface)
-    return interface_list
+    if platform.release()=="post2008Server" or platform.release()=="8":
+        # This works only starting from Windows 8/2012 and up. For older Windows another solution is needed
+        query = exec_query(['Get-NetAdapter'],
+                           ['Name', 'InterfaceIndex', 'InterfaceDescription',
+                            'InterfaceGuid', 'MacAddress'])
+    else:
+        query = exec_query(['Get-WmiObject', 'Win32_NetworkAdapter'],
+                           ['Name', 'InterfaceIndex', 'InterfaceDescription',
+                            'GUID', 'MacAddress'])
+    return [
+        iface for iface in
+        (dict(zip(['name', 'win_index', 'description', 'guid', 'mac'], line))
+         for line in query)
+        if is_interface_valid(iface)
+    ]
 
 class NetworkInterface(object):
     """A network interface of your local host"""
@@ -177,7 +267,7 @@ class NetworkInterfaceDict(UserDict):
             if iface.pcap_name == pcap_name:
                 return iface.name
         raise ValueError("Unknown pypcap network interface %r" % pcap_name)
-    
+
     def devname_from_index(self, if_index):
         """Return interface name from interface index"""
         for devname, iface in self.items():
@@ -230,7 +320,63 @@ _orig_get_if_raw_hwaddr = pcapdnet.get_if_raw_hwaddr
 pcapdnet.get_if_raw_hwaddr = lambda iface,*args,**kargs: [ int(i, 16) for i in ifaces[iface].mac.split(':') ]
 get_if_raw_hwaddr = pcapdnet.get_if_raw_hwaddr
 
+def read_routes_xp():
+    # The InterfaceIndex in Win32_IP4RouteTable does not match the
+    # InterfaceIndex in Win32_NetworkAdapter under some platforms
+    # (namely Windows XP): let's try an IP association
+    routes = []
+    partial_routes = []
+    # map local IP addresses to interfaces
+    local_addresses = dict((iface.ip, iface)
+                           for iface in ifaces.itervalues())
+    iface_indexes = {}
+    for line in exec_query(['Get-WmiObject', 'Win32_IP4RouteTable'],
+                           ['Name', 'Mask', 'NextHop', 'InterfaceIndex']):
+        if line[2] in local_addresses:
+            iface = local_addresses[line[2]]
+            # This gives us an association InterfaceIndex <-> interface
+            iface_indexes[line[3]] = iface
+            routes.append((atol(line[0]), atol(line[1]), "0.0.0.0", iface,
+                           ifaces[iface].ip))
+        else:
+            partial_routes.append((atol(line[0]), atol(line[1]), line[2],
+                                   line[3]))
+    for dst, mask, gw, ifidx in partial_routes:
+        if ifidx in iface_indexes:
+            iface = iface_indexes[ifidx]
+            routes.append((dst, mask, gw, iface, iface.ip))
+    return routes
+
+def read_routes_7():
+    routes=[]
+    for line in exec_query(['Get-WmiObject', 'win32_IP4RouteTable'],
+                           ['Name', 'Mask', 'NextHop', 'InterfaceIndex']):
+        try:
+            iface = devname_from_index(line[3])
+        except ValueError:
+            continue
+        routes.append((atol(line[0]), atol(line[1]), line[2], iface, ifaces[iface].ip))
+    return routes
+
 def read_routes():
+    routes = []
+    release = platform.release()
+    try:
+        if release in ["post2008Server", "8"]:
+            routes = read_routes_post2008()
+        elif release == "XP":
+            routes = read_routes_xp()
+        else:
+            routes = read_routes_7()
+    except Exception as e:
+        log_loading.warning("Error building scapy routing table : %s"%str(e))
+    else:
+        if not routes:
+            log_loading.warning("No default IPv4 routes found. Your Windows release may no be supported and you have to enter your routes manually")
+    return routes
+
+def read_routes_post2008():
+    # XXX TODO: FIX THIS XXX
     routes = []
     if_index = '(\d+)'
     dest = '(\d+\.\d+\.\d+\.\d+)/(\d+)'
@@ -240,8 +386,8 @@ def read_routes():
     netstat_line = delim.join([if_index, dest, next_hop, metric_pattern])
     pattern = re.compile(netstat_line)
     # This works only starting from Windows 8/2012 and up. For older Windows another solution is needed
-    ps = sp.Popen(['powershell', 'Get-NetRoute', '-AddressFamily IPV4', '|', 'select ifIndex, DestinationPrefix, NextHop, RouteMetric'], stdout = sp.PIPE, universal_newlines = True)
-    stdout, stdin = ps.communicate(timeout = 10)
+    ps = sp.Popen([conf.prog.powershell, 'Get-NetRoute', '-AddressFamily IPV4', '|', 'select ifIndex, DestinationPrefix, NextHop, RouteMetric'], stdout = sp.PIPE, universal_newlines = True)
+    stdout, stdin = ps.communicate(timeout=10)
     for l in stdout.split('\n'):
         match = re.search(pattern,l)
         if match:
