@@ -43,7 +43,7 @@ def _exec_query_ps(cmd, fields):
 
 def _vbs_exec_code(code):
     tmpfile = tempfile.NamedTemporaryFile(suffix=".vbs", delete=False)
-    tmpfile.write(code)
+    tmpfile.write(bytes(code, "UTF-8"))
     tmpfile.close()
     ps = sp.Popen([conf.prog.cscript, tmpfile.name],
                   stdout=sp.PIPE, stderr=open(os.devnull),
@@ -58,8 +58,8 @@ def _vbs_exec_code(code):
 def _vbs_get_iface_guid(devid):
     try:
         devid = str(int(devid) + 1)
-        guid = _vbs_exec_code("""WScript.Echo CreateObject("WScript.Shell").RegRead("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\NetworkCards\\%s\\ServiceName")
-""" % devid).__iter__().next()
+        guid = next(_vbs_exec_code("""WScript.Echo CreateObject("WScript.Shell").RegRead("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\NetworkCards\\%s\\ServiceName")
+""" % devid).__iter__())
         if guid.startswith('{') and guid.endswith('}\n'):
             return guid[:-1]
     except StopIteration:
@@ -69,7 +69,6 @@ def _vbs_get_iface_guid(devid):
 ## None: field will not be returned under VBS
 _VBS_WMI_FIELDS = {
     "Win32_NetworkAdapter": {
-        "InterfaceIndex": "Index",
         "InterfaceDescription": "Description",
         "GUID": "DeviceID",
     }
@@ -100,7 +99,7 @@ Next
     while True:
         yield [None if fld is None else
                _VBS_WMI_OUTPUT.get(cmd[1], {}).get(fld, lambda x: x)(
-                   values.next().strip()
+                   next(values).strip()
                )
                for fld in fields]
 
