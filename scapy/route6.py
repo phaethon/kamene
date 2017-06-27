@@ -50,8 +50,8 @@ class Route6:
             rtlst.append(('%s/%i'% (net,msk), gw, iface, ", ".join(cset)))
 
         #colwidth = map(lambda x: max(map(lambda y: len(y), x)), apply(zip, rtlst))
-        rtlst = zip(rtlst)
-        colwidth = [ max([len(y) for y in x]) for x in rtlst]
+        zipped_rtlst = list(zip(*rtlst))
+        colwidth = [ max([len(y) for y in x]) for x in zipped_rtlst]
         fmt = "  ".join(map(lambda x: "%%-%ds"%x, colwidth))
         rt = "\n".join([ fmt % x for x in rtlst])
 
