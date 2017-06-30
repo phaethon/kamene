@@ -498,15 +498,13 @@ scapy.sendrecv.sniff = sniff
 
 def get_working_if():
     try:
-        if 'Ethernet' in ifaces and ifaces['Ethernet'].ip != '0.0.0.0':
-            return 'Ethernet'
-        elif 'Wi-Fi' in ifaces and ifaces['Wi-Fi'].ip != '0.0.0.0':
-            return 'Wi-Fi'
-        elif len(ifaces) > 0:
+        # Try to return the interface that is used for the default route (0.0.0.0) and set it as default
+        return conf.route.route("0.0.0.0")[0]
+    except:
+        if len(ifaces) > 0:
             return ifaces[list(ifaces.keys())[0]].name
         else:
+            log_runtime.exception("--- No interface found to send data on")
             return LOOPBACK_NAME
-    except:
-        return LOOPBACK_NAME
 
 conf.iface = get_working_if()
