@@ -233,14 +233,18 @@ get_if_raw_hwaddr = pcapdnet.get_if_raw_hwaddr
 def read_routes():
     routes = []
     if_index = '(\d+)'
-    dest = '(\d+\.\d+\.\d+\.\d+)/(\d+)'
+    dest = '(\d+\.\d+\.\d+\.\d+)'
+    mask = '(\d+\.\d+\.\d+\.\d+)'
     next_hop = '(\d+\.\d+\.\d+\.\d+)'
     metric_pattern = "(\d+)"
     delim = "\s+"        # The columns are separated by whitespace
-    netstat_line = delim.join([if_index, dest, next_hop, metric_pattern])
+    netstat_line = delim.join([if_index, dest, mask, next_hop, metric_pattern])
     pattern = re.compile(netstat_line)
-    # This works only starting from Windows 8/2012 and up. For older Windows another solution is needed
-    ps = sp.Popen(['powershell', 'Get-NetRoute', '-AddressFamily IPV4', '|', 'select ifIndex, DestinationPrefix, NextHop, RouteMetric'], stdout = sp.PIPE, universal_newlines = True)
+    # This way works on Windows 7+ (probably as well on older Windows systems). Note the | ft in the end to keep table
+    # format, as powershell will change from table to line based format when it has to print more than 4 columns
+    ps = sp.Popen(['powershell', 'Get-WMIObject', 'Win32_IP4RouteTable', '|',
+                   'select InterfaceIndex, Destination, Mask, NextHop, Metric1', '|', 'ft'],
+                  stdout = sp.PIPE, universal_newlines = True)
     stdout, stdin = ps.communicate(timeout = 10)
     for l in stdout.split('\n'):
         match = re.search(pattern,l)
@@ -251,7 +255,7 @@ def read_routes():
             except:
                 continue
             dest = atol(match.group(2))
-            mask = itom(int(match.group(3)))
+            mask = itom(sum([len(bin(int(a)).replace("0", ""))-1 for a in match.group(3).split(".")]))
             gw = match.group(4)
             # try:
             #     intf = pcapdnet.dnet.intf().get_dst(pcapdnet.dnet.addr(type=2, addrtxt=dest))
@@ -494,15 +498,13 @@ scapy.sendrecv.sniff = sniff
 
 def get_working_if():
     try:
-        if 'Ethernet' in ifaces and ifaces['Ethernet'].ip != '0.0.0.0':
-            return 'Ethernet'
-        elif 'Wi-Fi' in ifaces and ifaces['Wi-Fi'].ip != '0.0.0.0':
-            return 'Wi-Fi'
-        elif len(ifaces) > 0:
+        # Try to return the interface that is used for the default route (0.0.0.0) and set it as default
+        return conf.route.route("0.0.0.0")[0]
+    except:
+        if len(ifaces) > 0:
             return ifaces[list(ifaces.keys())[0]].name
         else:
+            log_runtime.exception("--- No interface found to send data on")
             return LOOPBACK_NAME
-    except:
-        return LOOPBACK_NAME
 
 conf.iface = get_working_if()
