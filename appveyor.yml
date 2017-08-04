@@ -1,0 +1,19 @@
+version: 1.0.{build}
+
+environment:
+
+  matrix:
+
+  - python: '"C:\\Python36-x64"'
+
+    PATH: '%PYTHON%:%PATH%'
+
+build: off
+
+test_script:
+
+- ps: "choco install -y winpcap\n$env:Path=\"C:\\\\Python36-x64;\"+$env:Path\ncd test\ncmd /c 
+\".\\run_tests.bat -t windows.uts\" 2>&1 1> output.txt\n$lineobject = cat output.txt | Select-String 
+\"FAILED=[^0]\" | Measure-Object -line\nif ($lineobject.lines -ne 0) { \n    cat output.txt\n    exit 1 \n}"
+
+
