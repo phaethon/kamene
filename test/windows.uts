@@ -1,0 +1,75 @@
++ Windows specific tests of windows/__init__.py stuff
+
+= Check route generation via default route
+assert(conf.route.route("8.8.8.8")[0], conf.iface)
+
+= Importing interfaces (get_windows_if_list)
+class Popen:
+    def __init__(self, *args, **kwargs):
+        self.powershell_output = """
+
+Name                 : Realtek PCIe GBE Family Controller
+InterfaceIndex       : 11
+InterfaceDescription : Realtek PCIe GBE Family Controller
+InterfaceGuid        : {7703BFF2-5842-44F7-8BAD-268D755F55B3}
+MacAddress           : 54-04-A6-69-26-F4
+
+Name                 : Bluetooth-Geraet (PAN)
+InterfaceIndex       : 15
+InterfaceDescription : Bluetooth-Geraet (PAN)
+InterfaceGuid        : {11817093-3540-417B-AC79-F3607122BAAF}
+MacAddress           : 00-26-83-30-D6-92
+
+Name                 : VirtualBox Host-Only Ethernet Adapter blub
+InterfaceIndex       : 16
+InterfaceDescription : VirtualBox Host-Only Ethernet Adapter blub
+InterfaceGuid        : {7E865158-F01F-4F94-A20C-F8E4609F159A}
+MacAddress           : 0A-00-27-00-00-10
+
+
+"""
+    def communicate(self, *args, **kwargs):
+        return self.powershell_output, ""
+
+from scapy.all import *
+scapy.arch.windows.sp.Popen = Popen
+iface_list = get_windows_if_list()
+
+for iface in iface_list:
+    assert(iface["name"] == iface["description"])
+
+= Mac address delimitors replaced?
+for iface in iface_list:
+    assert(iface["mac"].find("-") == -1)
+
+= Check read_routes
+class Popen:
+    def __init__(self, *args, **kwargs):
+        self.powershell_output = """
+InterfaceIndex Destination     Mask            NextHop       Metric1
+-------------- -----------     ----            -------       -------
+            11 0.0.0.0         0.0.0.0         192.168.192.1      10
+             1 127.0.0.0       255.0.0.0       0.0.0.0           306
+             1 127.0.0.1       255.255.255.255 0.0.0.0           306
+             1 127.255.255.255 255.255.255.255 0.0.0.0           306
+            16 192.168.56.0    255.255.255.0   0.0.0.0           266
+            16 192.168.56.1    255.255.255.255 0.0.0.0           266
+            16 192.168.56.255  255.255.255.255 0.0.0.0           266
+            11 192.168.192.0   255.255.255.0   0.0.0.0           266
+            11 192.168.192.86  255.255.255.255 0.0.0.0           266
+            11 192.168.192.255 255.255.255.255 0.0.0.0           266
+             1 224.0.0.0       240.0.0.0       0.0.0.0           306
+            11 224.0.0.0       240.0.0.0       0.0.0.0           266
+            16 224.0.0.0       240.0.0.0       0.0.0.0           266
+             1 255.255.255.255 255.255.255.255 0.0.0.0           306
+            11 255.255.255.255 255.255.255.255 0.0.0.0           266
+            16 255.255.255.255 255.255.255.255 0.0.0.0           266
+            15 192.168.97.0    255.255.255.0   192.168.56.13     266
+
+"""
+    def communicate(self, *args, **kwargs):
+        return self.powershell_output, ""
+
+scapy.arch.windows.sp.Popen = Popen
+#assert(len(read_routes()) == 12)
+assert(True)

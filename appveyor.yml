@@ -1,0 +1,19 @@
+version: 1.0.{build}
+
+environment:
+
+  matrix:
+  - python: C:\\Python36-x64
+  - python: C:\\Python36
+
+build: off
+
+test_script:
+
+- ps: "echo \"Python var is:\"\necho $env:python\n\nchoco install -y 
+winpcap\n$env:Path=$env:python+\";\"+$env:Path\necho $env:Path\npython 
+--version\ncd test\ncmd /c \".\\run_tests.bat -t windows.uts\" 2>&1 1> 
+output.txt\n$lineobject = cat output.txt | Select-String \"FAILED=[^0]\" 
+| Measure-Object -line\nif ($lineobject.lines -ne 0 -or $lastexitcode 
+-ne 0) { \n    cat output.txt\n    exit 1 \n}"
+
