@@ -871,7 +871,7 @@ Creates an EPS file describing a packet. If filename is not provided a temporary
                                                               +len(f.name)
                                                               +4))
 
-                if str(reprval) != str(fvalue):
+                if reprval and str(reprval) != str(fvalue):
                     reprval = "%s (%s)" % (str(fvalue), reprval)
 
 
