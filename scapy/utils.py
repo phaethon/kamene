@@ -634,6 +634,7 @@ class _RawPcapNGReader:
         self.filep.seek(0, 0)
         self.endian = '<'
         self.tsresol = 6
+        self.LLcls = []
         self.linktype = None
 
     def __iter__(self):
@@ -704,10 +705,10 @@ class _RawPcapNGReader:
                 elif not i & (0b1 << 15):
                     warning("PcapNGReader: Unparsed option %d/#%x in enhanced packet block" % (i, i))
         try:
-            self.LLcls = conf.l2types[self.linktype]
+            self.LLcls.append(conf.l2types[self.linktype])
         except KeyError:
             warning("RawPcapReader: unknown LL type [%i]/[%#x]. Using Raw packets" % (self.linktype,self.linktype))
-            self.LLcls = conf.raw_layer
+            self.LLcls.append(conf.raw_layer)
 
         self._check_length(block_length)
 
@@ -724,7 +725,7 @@ class _RawPcapNGReader:
                 if not i & (0b1 << 15):
                     warning("PcapNGReader: Unparsed option %d/#%x in enhanced packet block" % (i, i))
         self._check_length(block_length)
-        return pkt[:MTU], (self.parse_sec(timestamp), self.parse_usec(timestamp), wirelen)
+        return pkt[:MTU], interface, (self.parse_sec(timestamp), self.parse_usec(timestamp), wirelen)
     
     def parse_sec(self, t):
         if self.tsresol & 0b10000000:
@@ -771,10 +772,10 @@ class _RawPcapOldReader:
 
         self.linktype = linktype
         try:
-            self.LLcls = conf.l2types[self.linktype]
+            self.LLcls = [conf.l2types[self.linktype]]
         except KeyError:
             warning("RawPcapReader: unknown LL type [%i]/[%#x]. Using Raw packets" % (self.linktype,self.linktype))
-            self.LLcls = conf.raw_layer
+            self.LLcls = [conf.raw_layer]
 
     def __iter__(self):
         return self
@@ -798,7 +799,7 @@ class _RawPcapOldReader:
             return None
         sec,usec,caplen,wirelen = struct.unpack(self.endian+"IIII", hdr)
         s = self.f.read(caplen)[:MTU]
-        return s,(sec,usec,wirelen) # caplen = len(s)
+        return s, 0, (sec,usec,wirelen) # caplen = len(s)
 
 
 class PcapReader(RawPcapReader):
@@ -818,11 +819,11 @@ class PcapReader(RawPcapReader):
         rp = RawPcapReader.read_packet(self,size)
         if rp is None:
             return None
-        s,(sec,usec,wirelen) = rp
+        s, i, (sec,usec,wirelen) = rp
 
         
         try:
-            p = self.reader.LLcls(s)
+            p = self.reader.LLcls[i](s)
         except KeyboardInterrupt:
             raise
         except:
