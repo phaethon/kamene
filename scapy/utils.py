@@ -633,7 +633,7 @@ class _RawPcapNGReader:
         self.filep = filep
         self.filep.seek(0, 0)
         self.endian = '<'
-        self.tsresol = 6
+        self.tsresol = []
         self.LLcls = []
         self.linktype = None
 
@@ -697,13 +697,15 @@ class _RawPcapNGReader:
         buf = self._read_bytes(12)
         block_length, self.linktype, reserved, self.snaplen = struct.unpack(self.endian + 'IHHI', buf)
         options = self._read_bytes(block_length - 20)
+        tsresol = 6
         if options:
             opt = self.parse_options(options)
             for i in opt.keys():
                 if 9 in opt:
-                    self.tsresol = opt[9][0]
+                    tsresol = opt[9][0]
                 elif not i & (0b1 << 15):
                     warning("PcapNGReader: Unparsed option %d/#%x in enhanced packet block" % (i, i))
+        self.tsresol.append(tsresol)
         try:
             self.LLcls.append(conf.l2types[self.linktype])
         except KeyError:
@@ -725,25 +727,26 @@ class _RawPcapNGReader:
                 if not i & (0b1 << 15):
                     warning("PcapNGReader: Unparsed option %d/#%x in enhanced packet block" % (i, i))
         self._check_length(block_length)
-        return pkt[:MTU], interface, (self.parse_sec(timestamp), self.parse_usec(timestamp), wirelen)
+        tsresol = self.tsresol[interface]
+        return pkt[:MTU], interface, (self.parse_sec(tsresol, timestamp), self.parse_usec(tsresol, timestamp), wirelen)
     
-    def parse_sec(self, t):
-        if self.tsresol & 0b10000000:
-            return t >> (self.tsresol & ~0b10000000)
+    def parse_sec(self, tsresol, t):
+        if tsresol & 0b10000000:
+            return t >> (tsresol & ~0b10000000)
         else:
-            if self.tsresol == 0:
+            if tsresol == 0:
                 return t // pow(10, 6)
             else:
-                return t // pow(10, self.tsresol)
+                return t // pow(10, tsresol)
 
-    def parse_usec(self, t):
-        if self.tsresol & 0b10000000:            
-            return (t & (1 << (self.tsresol & ~0b10000000)) - 1) / pow(2, (self.tsresol & ~0b10000000)) * pow(10, 6)
+    def parse_usec(self, tsresol, t):
+        if tsresol & 0b10000000:
+            return (t & (1 << (tsresol & ~0b10000000)) - 1) / pow(2, (tsresol & ~0b10000000)) * pow(10, 6)
         else:
-            if self.tsresol == 0:
+            if tsresol == 0:
                 return (t % pow(10, 6))
             else:
-                return (t % pow(10, self.tsresol)) / pow(10, self.tsresol - 6)
+                return (t % pow(10, tsresol)) / pow(10, tsresol - 6)
 
     def parse_options(self, opt):
         buf = opt
