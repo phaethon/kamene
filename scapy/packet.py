@@ -655,7 +655,7 @@ Creates an EPS file describing a packet. If filename is not provided a temporary
                     del(self.fields[k])
         self.payload.hide_defaults()
             
-    def clone_with(self, payload=None, **kargs):
+    def clone_with(self, _payload=None, **kargs):
         pkt = self.__class__()
         pkt.explicit = 1
         pkt.fields = kargs
@@ -663,8 +663,8 @@ Creates an EPS file describing a packet. If filename is not provided a temporary
         pkt.underlayer = self.underlayer
         pkt.overload_fields = self.overload_fields.copy()
         pkt.post_transforms = self.post_transforms
-        if payload is not None:
-            pkt.add_payload(payload)
+        if _payload is not None:
+            pkt.add_payload(_payload)
         return pkt
         
 
@@ -692,7 +692,7 @@ Creates an EPS file describing a packet. If filename is not provided a temporary
                     for k in done2:
                         if isinstance(done2[k], VolatileValue):
                             done2[k] = done2[k]._fix()
-                    pkt = self.clone_with(payload=payl, **done2)
+                    pkt = self.clone_with(_payload=payl, **done2)
                     yield pkt
 
         if self.explicit:
