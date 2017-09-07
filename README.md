@@ -24,13 +24,13 @@ Classic scapy has been trying to catch up with the improvements in scapy3k. Thes
 
 ## Installation
 
-Install with 'python3 setup.py install' from source tree (get it with `git clone https://github.com/phaethon/scapy.git`) or `pip3 install scapy-python3` for latest published version.
+Install with `python3 setup.py install` from source tree (get it with `git clone https://github.com/phaethon/scapy.git`) or `pip3 install scapy-python3` for latest published version.
 
 On all OS except Linux libpcap should be installed for sending and receiving packets (not python modules - just C libraries) or winpcap driver on Windows. On some OS and configurations installing libdnet may improve experience (for MacOS: `brew install libdnet`). On Windows libdnet is not required. On some less common configurations netifaces may improve experience.
 
 ## Usage
 
-*N.B.! As a difference from scapy for python2, use bytes() instead of str() when converting packet to bytes. Also, most arguments expect bytes value instead of str value except the ones, which are naturally suited for human input (e.g. domain name).*
+*N.B.! As a difference from scapy for python2, use `bytes()` instead of `str()` when converting packet to bytes. Also, most arguments expect `bytes` value instead of `str `value except the ones, which are naturally suited for human input (e.g. domain name).*
 
 You can use scapy running scapy command or by importing scapy library from interactive python shell (python or ipython).
 Simple example that you can try from interactive shell:
@@ -42,11 +42,11 @@ sr1(p)
 ```
 Notice `'www.somesite.ex'` as a string, and `b'Some raw bytes'` as bytes. Domain name is normal human input, thus it is string, raw packet content is byte data. Once you start using, it will seem easier than it looks.
 
-Use ls() to list all supported layers. Use lsc() to list all commands.
+Use `ls()` to list all supported layers. Use `lsc()` to list all commands.
 
 ## Compatibility
 
-All commands listed by lsc() should work. Tested layers are:
+All commands listed by `lsc()` should work. Tested layers are:
 * ARP
 * DHCP
 * DHCPv6
