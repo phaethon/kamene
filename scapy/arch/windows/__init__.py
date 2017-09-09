@@ -99,6 +99,7 @@ def get_windows_if_list():
             current_interface['mac'] = ':'.join([ j for j in value.split('-')])    
     if current_interface:
         interface_list.append(current_interface)
+    interface_list.append({'name': LOOPBACK_NAME, 'win_index': 1, 'description': LOOPBACK_NAME, 'guid': '', 'mac': ''})
     return interface_list
 
 class NetworkInterface(object):
@@ -111,9 +112,20 @@ class NetworkInterface(object):
         self.pcap_name = None
         self.description = None
         self.data = data
-        if data is not None:
+        if data["name"] == LOOPBACK_NAME:
+            self.init_loopback(data)
+        elif data is not None:
             self.update(data)
-        
+
+    def init_loopback(self, data):
+        """Just initialize the object for our Pseudo Loopback"""
+        self.name = data["name"]
+        self.description = data['description']
+        self.win_index = data['win_index']
+        self.mac = data["mac"]
+        self.guid = data["guid"]
+        self.ip = "127.0.0.1"
+
     def update(self, data):
         """Update info about network interface according to given dnet dictionary"""
         self.name = data["name"]
