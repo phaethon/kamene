@@ -160,13 +160,13 @@ def chexdump(x):
       except:
         x = str(x)
     print(", ".join(map(lambda x: "%#04x"%orb(x), x)))
-    
+
 def hexstr(x, onlyasc=0, onlyhex=0):
     s = []
     if not onlyasc:
         s.append(" ".join(map(lambda x:"%02x"%orb(x), x)))
     if not onlyhex:
-        s.append(sane(x)) 
+        s.append(sane(x))
     return "  ".join(s)
 
 
@@ -189,7 +189,7 @@ def hexdiff(x,y):
             d[i,j] = min( ( d[i-1,j-1][0]+SUBST*(x[i] != y[j]), (i-1,j-1) ),
                           ( d[i-1,j][0]+INSERT, (i-1,j) ),
                           ( d[i,j-1][0]+INSERT, (i,j-1) ) )
-                          
+
 
     backtrackx = []
     backtracky = []
@@ -201,13 +201,13 @@ def hexdiff(x,y):
         backtracky.append(y[j2+1:j+1])
         i,j = i2,j2
 
-        
+
 
     x = y = i = 0
     colorize = { 0: lambda x:x,
                 -1: conf.color_theme.left,
                  1: conf.color_theme.right }
-    
+
     dox=1
     doy=0
     l = len(backtrackx)
@@ -222,7 +222,7 @@ def hexdiff(x,y):
             doy = 1
         if dox and linex == liney:
             doy=1
-            
+
         if dox:
             xd = y
             j = 0
@@ -245,9 +245,9 @@ def hexdiff(x,y):
             line=liney
         else:
             print("    ", end = " ")
-            
+
         print(" ", end = " ")
-        
+
         cl = ""
         for j in range(16):
             if i+j < l:
@@ -280,7 +280,7 @@ def hexdiff(x,y):
             else:
                 i += 16
 
-    
+
 crc32 = zlib.crc32
 
 if struct.pack("H",1) == b"\x00\x01": # big endian
@@ -312,7 +312,7 @@ def mac2str(mac):
     return b''.join([ bytes([int(i, 16)]) for i in mac.split(":") ])
 
 def str2mac(s):
-    return ("%02x:"*6)[:-1] % tuple(s) 
+    return ("%02x:"*6)[:-1] % tuple(s)
 
 def strxor(x,y):
     #return "".join(map(lambda i,j:chr(ord(i)^ord(j)),x,y))
@@ -390,7 +390,7 @@ def do_graph(graph,prog=None,format='png',target=None,string=False,options=None,
             try:
                 import matplotlib.image as mpimg
                 import matplotlib.pyplot as plt
-                figure = plt.figure(figsize = figsize)                
+                figure = plt.figure(figsize = figsize)
                 plt.axis('off')
                 plt.imshow(mpimg.imread(r, format = format), **kargs)
                 return figure
@@ -414,7 +414,7 @@ _TEX_TR = {
     "<":"{\\tt\\char60}",
     ">":"{\\tt\\char62}",
     }
-    
+
 def tex_escape(x):
     s = ""
     for c in x:
@@ -515,7 +515,7 @@ def load_object(fname):
 @conf.commands.register
 def corrupt_bytes(s, p=0.01, n=None):
     """Corrupt a given percentage or number of bytes from bytes"""
-    s = str2bytes(s)
+    s = bytes(s)
     s = array.array("B",s)
     l = len(s)
     if n is None:
@@ -527,7 +527,7 @@ def corrupt_bytes(s, p=0.01, n=None):
 @conf.commands.register
 def corrupt_bits(s, p=0.01, n=None):
     """Flip a given percentage or number of bits from bytes"""
-    s = str2bytes(s)
+    s = bytes(s)
     s = array.array("B",s)
     l = len(s)*8
     if n is None:
@@ -576,7 +576,7 @@ class RawPcapReader:
             self.endian = "<"
             self.reader = _RawPcapOldReader(self.f, self.endian)
         elif magic == b"\x0a\x0d\x0d\x0a": #PcapNG
-            self.reader = _RawPcapNGReader(self.f) 
+            self.reader = _RawPcapNGReader(self.f)
         else:
             raise Scapy_Exception("Not a pcap capture file (bad magic)")
 
@@ -591,9 +591,9 @@ class RawPcapReader:
 
     def dispatch(self, callback):
         """call the specified callback routine for each packet read
-        
+
         This is just a convienience function for the main loop
-        that allows for easy launching of packet processing in a 
+        that allows for easy launching of packet processing in a
         thread.
         """
         for p in self:
@@ -683,7 +683,7 @@ class _RawPcapNGReader:
         elif buf[4:8] == b'\x4d\x3c\x2b\x1a':
             self.endian = '<'
         else:
-            raise Scapy_Exception('Cannot read byte order value')  
+            raise Scapy_Exception('Cannot read byte order value')
         block_length, _, major_version, minor_version, section_length = struct.unpack(self.endian + 'IIHHi', buf)
         options = self._read_bytes(block_length - 24)
         if options:
@@ -729,7 +729,7 @@ class _RawPcapNGReader:
         self._check_length(block_length)
         tsresol = self.tsresol[interface]
         return pkt[:MTU], interface, (self.parse_sec(tsresol, timestamp), self.parse_usec(tsresol, timestamp), wirelen)
-    
+
     def parse_sec(self, tsresol, t):
         if tsresol & 0b10000000:
             return t >> (tsresol & ~0b10000000)
@@ -794,7 +794,7 @@ class _RawPcapOldReader:
         """return a single packet read from the file
         bytes, (sec, #timestamp seconds
                 usec, #timestamp microseconds
-                wirelen) #actual length of packet 
+                wirelen) #actual length of packet
         returns None when no more packets are available
         """
         hdr = self.f.read(16)
@@ -824,7 +824,7 @@ class PcapReader(RawPcapReader):
             return None
         s, i, (sec,usec,wirelen) = rp
 
-        
+
         try:
             p = self.reader.LLcls[i](s)
         except KeyboardInterrupt:
@@ -856,7 +856,7 @@ class RawPcapWriter:
         append: append packets to the capture file instead of truncating it
         sync: do not bufferize writes to the capture file
         """
-        
+
         self.linktype = linktype
         self.header_present = 0
         self.append=append
@@ -869,7 +869,7 @@ class RawPcapWriter:
             bufsz=0
 
         self.f = [open,gzip.open][gz](filename,append and "ab" or "wb", gz and 9 or bufsz)
-        
+
     def fileno(self):
         return self.f.fileno()
 
@@ -884,11 +884,11 @@ class RawPcapWriter:
             g = [open,gzip.open][self.gz](self.filename,"rb")
             if g.read(16):
                 return
-            
+
         self.f.write(struct.pack(self.endian+"IHHIIII", 0xa1b2c3d4,
                                  2, 4, 0, 0, MTU, self.linktype))
         self.f.flush()
-    
+
 
     def write(self, pkt):
         """accepts a either a single packet or a list of packets
@@ -957,7 +957,7 @@ class PcapWriter(RawPcapWriter):
         usec = int(round((t-sec)*1000000))
         return (sec,usec)
 
-    def _write_packet(self, packet):        
+    def _write_packet(self, packet):
         try:
           t = self.get_packet_time(packet)
           s = bytes(packet)
@@ -993,10 +993,10 @@ def import_hexcap():
                 continue
     except EOFError:
         pass
-    
+
     p = p.replace(" ","").encode()
     return codecs.decode(p, 'hex')
-        
+
 
 
 @conf.commands.register
@@ -1028,8 +1028,8 @@ def hexedit(x):
     return x
 
 def __make_table(yfmtfunc, fmtfunc, endline, items, fxyz, sortx=None, sorty=None, seplinefunc=None):
-    vx = {} 
-    vy = {} 
+    vx = {}
+    vy = {}
     vz = {}
     vxf = {}
     vyf = {}
@@ -1081,7 +1081,7 @@ def __make_table(yfmtfunc, fmtfunc, endline, items, fxyz, sortx=None, sorty=None
 
 def make_table(*args, **kargs):
     __make_table(lambda l:"%%-%is" % l, lambda l:"%%-%is" % l, "", *args, **kargs)
-    
+
 def make_lined_table(*args, **kargs):
     __make_table(lambda l:"%%-%is |" % l, lambda l:"%%-%is |" % l, "",
                  seplinefunc=lambda max_length,x:"+".join([ "-"*(y+2) for y in [max_length-1]+x+[-2]]),
