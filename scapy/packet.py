@@ -160,6 +160,8 @@ class Packet(BasePacket, metaclass = Packet_metaclass):
         clone.post_transforms = self.post_transforms[:]
         clone.__dict__["payload"] = self.payload.copy()
         clone.payload.add_underlayer(clone)
+        clone.time = self.time
+        clone.sent_time = self.sent_time
         return clone
 
     def getfieldval(self, attr):
