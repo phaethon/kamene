@@ -442,7 +442,7 @@ def sndrcv(pks, pkt, timeout = 2, inter = 0, verbose=None, chainCC=0, retry=0, m
 import scapy.sendrecv
 scapy.sendrecv.sndrcv = sndrcv
 
-def sniff(count=0, store=1, offline=None, prn = None, lfilter=None, L2socket=None, timeout=None, *arg, **karg):
+def sniff(count=0, store=1, offline=None, prn = None, lfilter=None, L2socket=None, timeout=None, stop_callback=None, *arg, **karg):
     """Sniff packets
 sniff([count=0,] [prn=None,] [store=1,] [offline=None,] [lfilter=None,] + L2ListenSocket args) -> list of packets
 Select interface to sniff by setting conf.iface. Use show_interfaces() to see interface names.
@@ -457,6 +457,8 @@ lfilter: python function applied to each packet to determine
 offline: pcap file to read packets from, instead of sniffing them
 timeout: stop sniffing after a given time (default: None)
 L2socket: use the provided L2socket
+stop_callback: Call every loop to determine if we need
+               to stop the capture
     """
     c = 0
 
@@ -479,6 +481,8 @@ L2socket: use the provided L2socket
                 if remain <= 0:
                     break
 
+            if stop_callback and stop_callback():
+                break
             try:
                 p = s.recv(MTU)
             except PcapTimeoutElapsed:
