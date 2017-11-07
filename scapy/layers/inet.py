@@ -1821,7 +1821,7 @@ class MTR:
                 gwl = ' (Default Gateway)'
             ecs += '\t\tsubgraph cluster_{ep:s} {{\n'.format(ep=uep)
             ecs += '\t\t\ttooltip="MTR Target: {trg:s}{gwl:s}";\n'.format(trg=self._ip2host[eph], gwl=gwl)
-            ecs += '\t\t\tcolor="green";\n'
+            ecs += '\t\t\tcolor="darkgreen";\n'
             ecs += '\t\t\tfontsize=11;\n'
             ecs += '\t\t\tfontname="Sans-Serif";\n'
             ecs += '\t\t\tgradientangle=270;\n'
@@ -2067,7 +2067,7 @@ class MTR:
                 epip[k[0]] = [(tr, p, v[0])]
         #
         # Build Endpoint strings...
-        # Ex eps = '162.144.22.87" [shape=record,color="black",gradientangle=270,fillcolor="lightgreen:green",style=i"filled,rounded",'
+        # Ex eps = '162.144.22.87" [shape=record,color="black",gradientangle=270,fillcolor="darkgreen:green",style=i"filled,rounded",'
         #        + 'label="162.144.22.87\nTarget|{{<ET1>T1|<ET3>T3}|https SA}|{{<ET2>T4|<ET3>T4}|http SA}"];'
         for k, v in epip.items():
             tr = ''
@@ -2083,7 +2083,7 @@ class MTR:
             pre = ''
             if k in uepprb:		# Special Case: Separate Endpoint Target from Probe
                 pre = '_'			# when they are the same
-            eps1 = '\t"{pre:s}{ip:s}" [shape="record",color="black",gradientangle=270,fillcolor="lightgreen:green",style="filled,rounded",'.format(pre=pre, ip=k)
+            eps1 = '\t"{pre:s}{ip:s}" [shape="record",color="black",gradientangle=270,fillcolor="darkgreen:green",style="filled,rounded",'.format(pre=pre, ip=k)
             eps2 = 'label="Resolved Target\\n{ip:s}|{tr:s}",tooltip="MTR Resolved Target: {ip:s}"];\n'.format(ip=k, tr=tr)
             s += eps1 + eps2
 

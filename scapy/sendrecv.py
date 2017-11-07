@@ -541,7 +541,7 @@ iface:    listen answers only on the given interface"""
 
 @conf.commands.register
 def sniff(count=0, store=1, offline=None, prn = None, lfilter=None, L2socket=None, timeout=None,
-          opened_socket=None, stop_filter=None, exceptions=False, *arg, **karg):
+          opened_socket=None, stop_filter=None, exceptions=False, stop_callback=None, *arg, **karg):
     """Sniff packets
 sniff([count=0,] [prn=None,] [store=1,] [offline=None,] [lfilter=None,] + L2ListenSocket args) -> list of packets
 
@@ -562,6 +562,8 @@ stop_filter: python function applied to each packet to determine
              ex: stop_filter = lambda x: x.haslayer(TCP)
 exceptions: reraise caught exceptions such as KeyboardInterrupt
             when a user interrupts sniffing
+stop_callback: Call every loop to determine if we need
+               to stop the capture
     """
     c = 0
     
@@ -585,6 +587,8 @@ exceptions: reraise caught exceptions such as KeyboardInterrupt
                 remain = stoptime-time.time()
                 if remain <= 0:
                     break
+            if stop_callback and stop_callback():
+                break
             sel = select([s],[],[],remain)
             if s in sel[0]:
                 p = s.recv(MTU)
@@ -617,7 +621,7 @@ exceptions: reraise caught exceptions such as KeyboardInterrupt
 
 @conf.commands.register
 def bridge_and_sniff(if1, if2, count=0, store=1, offline=None, prn = None, lfilter=None, L2socket=None, timeout=None,
-                     stop_filter=None, *args, **kargs):
+                     stop_filter=None, stop_callback=None, *args, **kargs):
     """Forward traffic between two interfaces and sniff packets exchanged
 bridge_and_sniff([count=0,] [prn=None,] [store=1,] [offline=None,] [lfilter=None,] + L2Socket args) -> list of packets
 
@@ -634,6 +638,8 @@ L2socket: use the provided L2socket
 stop_filter: python function applied to each packet to determine
              if we have to stop the capture after this packet
              ex: stop_filter = lambda x: x.haslayer(TCP)
+stop_callback: Call every loop to determine if we need
+               to stop the capture
     """
     c = 0
     if L2socket is None:
@@ -653,6 +659,8 @@ stop_filter: python function applied to each packet to determine
                 remain = stoptime-time.time()
                 if remain <= 0:
                     break
+            if stop_callback and stop_callback():
+                break
             ins,outs,errs = select([s1,s2],[],[], remain)
             for s in ins:
                 p = s.recv()

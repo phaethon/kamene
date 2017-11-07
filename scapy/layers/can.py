@@ -22,7 +22,7 @@ LINKTYPE_CAN_SOCKETCAN = 227  # From pcap spec
 
 
 class CAN(Packet):
-    name = 'SocketCAN'
+    name = 'CAN'
     fields_desc = [
         XIntField('id', 0),
         PadField(FieldLenField('dlc', None, length_of='data', fmt='B'), 4),

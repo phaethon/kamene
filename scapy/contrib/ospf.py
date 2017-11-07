@@ -80,12 +80,12 @@ class OSPF_Hdr(Packet):
                 # Checksum is calculated without authentication data
                 # Algorithm is the same as in IP()
                 ck = checksum(p[:16] + p[24:])
-                p = p[:12] + chr(ck >> 8) + chr(ck & 0xff) + p[14:]
+                p = p[:12] + struct.pack('!H',ck) + p[14:]
             # TODO: Handle Crypto: Add message digest  (RFC 2328, D.4.3)
         return p
 
     def hashret(self):
-        return struct.pack("H", self.area) + self.payload.hashret()
+        return struct.pack("4s", inet_aton(self.area)) + self.payload.hashret()
 
     def answers(self, other):
         if (isinstance(other, OSPF_Hdr) and
@@ -220,9 +220,9 @@ def ospf_lsa_checksum(lsa):
 
     c0 = c1 = 0
     # Calculation is done with checksum set to zero
-    lsa = lsa[:CHKSUM_OFFSET] + "\x00\x00" + lsa[CHKSUM_OFFSET + 2:]
+    lsa = lsa[:CHKSUM_OFFSET] + lsa[CHKSUM_OFFSET + 2:]
     for char in lsa[2:]:  #  leave out age
-        c0 += ord(char)
+        c0 += char
         c1 += c0
 
     c0 %= 255
@@ -237,9 +237,10 @@ def ospf_lsa_checksum(lsa):
 
     if (y > 255):
         y -= 255
-    #checksum = (x << 8) + y
 
-    return chr(x) + chr(y)
+    checksum = (x << 8) + y
+
+    return checksum
 
 
 class OSPF_LSA_Hdr(Packet):
@@ -285,7 +286,7 @@ def _LSAGuessPayloadClass(p, **kargs):
     # XXX: This only works if all payload
     cls = conf.raw_layer
     if len(p) >= 4:
-        typ = struct.unpack("!B", p[3])[0]
+        typ = p[3]
         clsname = _OSPF_LSclasses.get(typ, "Raw")
         cls = globals()[clsname]
     return cls(p, **kargs)
@@ -301,7 +302,7 @@ class OSPF_BaseLSA(Packet):
             p = p[:18] + struct.pack("!H", length) + p[20:]
         if self.chksum is None:
             chksum = ospf_lsa_checksum(p)
-            p = p[:16] + chksum + p[18:]
+            p = p[:16] + struct.pack("!H", chksum) + p[18:]
         return p    # p+pay?
 
     def extract_padding(self, s):
