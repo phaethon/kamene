@@ -1,7 +1,7 @@
 # isotp unit tests
 #
 # Type the following command to launch start the tests:
-# $ sudo bash test/run_can_tests -t test/can.uts -F
+# $ sudo bash test/run_tests -t test/isotp.uts -F
 
 % isotp unit tests
 
@@ -23,6 +23,9 @@ bashCommand = "/bin/bash -c 'sudo modprobe vcan; sudo modprobe can-isotp; sudo i
 import os
 import threading
 from time import sleep
+from scapy.layers.isotp import ISOTP, ISOTPSocket
+from scapy.layers.can import CAN, CANSocket
+
 
 = Setup vcan0
 ~ conf command
@@ -32,30 +35,30 @@ from time import sleep
 = ISOTP Socket simple send
 
 def sender():
-    sleep(0.1)
+    sleep(0.2)
     sock = ISOTPSocket('vcan0', 123, 321)
-    sock.send(ISO14229()/ISO14229_RDBIPR()/Raw(load=b'\x11\x22\x33\x11\x22\x33\x11\x22\x33\x11\x22\x33'))
+    sock.send(ISOTP(b'\x11\x22\x33\x11\x22\x33\x11\x22\x33\x11\x22\x33'))
 
 txThread = threading.Thread(target=sender)
 
 sock = ISOTPSocket('vcan0', 321, 123)
 txThread.start()
 rx = sock.recv()
-rx == ISO14229()/ISO14229_RDBIPR()/Raw(load=b'\x11\x22\x33\x11\x22\x33\x11\x22\x33\x11\x22\x33')
+rx == ISOTP(b'\x11\x22\x33\x11\x22\x33\x11\x22\x33\x11\x22\x33')
 
 = ISOTP Socket send with extended addressing
 
 def sender():
-    sleep(0.1)
+    sleep(0.2)
     sock = ISOTPSocket('vcan0', 123, 321, 23, 21)
-    sock.send(ISO14229()/ISO14229_RDBIPR()/Raw(load=b'\x11\x22\x33\x11\x22\x33\x11\x22\x33\x11\x22\x33'))
+    sock.send(ISOTP(b'\x11\x22\x33\x11\x22\x33\x11\x22\x33\x11\x22\x33'))
 
 txThread = threading.Thread(target=sender)
 
 sock = ISOTPSocket('vcan0', 321, 123, 21, 23)
 txThread.start()
 rx = sock.recv()
-rx == ISO14229()/ISO14229_RDBIPR()/Raw(load=b'\x11\x22\x33\x11\x22\x33\x11\x22\x33\x11\x22\x33')
+rx == ISOTP(b'\x11\x22\x33\x11\x22\x33\x11\x22\x33\x11\x22\x33')
 
 = ISOTP Socket validate single frame
 
@@ -78,7 +81,7 @@ def sender():
     sock = ISOTPSocket('vcan0', 0x123, 0x321)
     rx = sock.sr1(Raw(load=b'\x11\x22\x33'), timeout=1)
     rx is not None
-    rx == ISO14229()/ISO14229_NRC(requestServiceId=0x22, negativeResponseCode=0x33)
+    rx == ISOTP(b'\x7f\x22\x33')
 
 txThread = threading.Thread(target=sender)
 
@@ -88,35 +91,35 @@ rx = sock.recv()
 rx == CAN(id=0x321, dlc=4, data=b'\x03\x11\x22\x33')
 sock.send(CAN(id=0x123, dlc=4, data=b'\x03\x7f\x22\x33'))
 
-= ISOTP Socket sr1 and ISO14229 test
+= ISOTP Socket sr1 and ISOTP test
 
 def sender():
     sleep(0.1)
     sock = ISOTPSocket('vcan0', 0x123, 0x321)
-    rx = sock.sr1(ISO14229()/ISO14229_RDBI(dataIdentifier=0x1234), timeout=1)
+    rx = sock.sr1(ISOTP(b'\x11\x22\x33\x11\x22\x33\x11\x22\x33\x11\x22\x33'), timeout=1)
     rx is not None
-    rx == ISO14229()/ISO14229_RDBIPR(dataIdentifier=0x1234)/Raw(load=b'\x11\x22')
+    rx == ISOTP(b'\x11\x22\x33\x11\x22\x33\x11\x22\x33\x11\x22\x33')
 
 txThread = threading.Thread(target=sender)
 
 sock = ISOTPSocket('vcan0', 0x321, 0x123)
 txThread.start()
 rx = sock.recv()
-rx == ISO14229()/ISO14229_RDBI(dataIdentifier=0x1234)
-sock.send(ISO14229()/ISO14229_RDBIPR(dataIdentifier=0x1234)/Raw(load=b'\x11\x22'))
+rx == ISOTP(b'\x11\x22\x33\x11\x22\x33\x11\x22\x33\x11\x22\x33')
+sock.send(ISOTP(b'\x11\x22\x33\x11\x22\x33\x11\x22\x33\x11\x22\x33'))
 
-= ISOTP Socket sr1 and ISO14229 test vice versa
+= ISOTP Socket sr1 and ISOTP test vice versa
 
 def receiver():
     sock = ISOTPSocket('vcan0', 0x321, 0x123)
     rx = sock.recv()
-    rx == ISO14229()/ISO14229_RDBI(dataIdentifier=0x1234)
-    sock.send(ISO14229()/ISO14229_RDBIPR(dataIdentifier=0x1234)/Raw(load=b'\x11\x22'))
+    rx == ISOTP(b'\x11\x22\x33\x11\x22\x33\x11\x22\x33\x11\x22\x33')
+    sock.send(ISOTP(b'\x11\x22\x33\x11\x22\x33\x11\x22\x33\x11\x22\x33'))
 
 rxThread = threading.Thread(target=receiver)
 rxThread.start()
 sleep(0.1)
 sock = ISOTPSocket('vcan0', 0x123, 0x321)
-rx = sock.sr1(ISO14229()/ISO14229_RDBI(dataIdentifier=0x1234), timeout=1)
-rx == ISO14229()/ISO14229_RDBIPR(dataIdentifier=0x1234)/Raw(load=b'\x11\x22')
+rx = sock.sr1(ISOTP(b'\x11\x22\x33\x11\x22\x33\x11\x22\x33\x11\x22\x33'), timeout=1)
+rx == ISOTP(b'\x11\x22\x33\x11\x22\x33\x11\x22\x33\x11\x22\x33')
 

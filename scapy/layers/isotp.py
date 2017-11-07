@@ -16,11 +16,9 @@ from ctypes.util import find_library
 from scapy.packet import *
 from scapy.fields import *
 from scapy.supersocket import SuperSocket
-from scapy.sendrecv import sndrcv
+from scapy.sendrecv import sndrcv, sniff
 from scapy.arch.linux import get_last_packet_timestamp, SIOCGIFINDEX
 import socket
-from scapy.layers.uds import ISO14229
-
 
 if not sys.platform.startswith("win32"):
     libc = ctypes.cdll.LoadLibrary(find_library("c"))
@@ -28,6 +26,25 @@ if not sys.platform.startswith("win32"):
 else:
     warning("libc is unavailable")
     libc = None
+    
+"""
+ISOTP Packet
+"""
+
+class ISOTP(Packet):
+    name = 'ISOTP'
+    fields_desc = [
+        StrField('data', B"")
+    ]
+
+    def hashret(self):
+        """DEV: returns a string that has the same value for a request and its answer."""
+        return self.payload.hashret()
+    def answers(self, other):
+        """DEV: true if self is an answer from other"""
+        if other.__class__ == self.__class__:
+            return self.payload.answers(other.payload)
+        return 0
 
 
 ############
@@ -231,29 +248,32 @@ class ISOTPSocket(SuperSocket):
         if error < 0:
             warning("Couldn't bind socket")
 
-    def __setOptionFlags(self, sock, txaddr=None, rxaddr=None):
+    def __setOptionFlags(self, sock, extended_addr=None, extended_rx_addr=None, listen_only=False):
         option_flags = CAN_ISOTP_DEFAULT_FLAGS
-        if txaddr is not None:
+        if extended_addr is not None:
             option_flags = option_flags | CAN_ISOTP_EXTEND_ADDR
         else:
-            txaddr = CAN_ISOTP_DEFAULT_EXT_ADDRESS
+            extended_addr = CAN_ISOTP_DEFAULT_EXT_ADDRESS
 
-        if rxaddr is not None:
+        if extended_rx_addr is not None:
             option_flags = option_flags | CAN_ISOTP_RX_EXT_ADDR
         else:
-            rxaddr = CAN_ISOTP_DEFAULT_EXT_ADDRESS
+            extended_rx_addr = CAN_ISOTP_DEFAULT_EXT_ADDRESS
+
+        if listen_only:
+            option_flags = option_flags | CAN_ISOTP_LISTEN_MODE
 
         sock.setsockopt(SOL_CAN_ISOTP,
                         CAN_ISOTP_OPTS,
                         self.__build_can_isotp_options(flags=option_flags,
-                                                       ext_address=txaddr,
-                                                       rx_ext_address=rxaddr))
+                                                       ext_address=extended_addr,
+                                                       rx_ext_address=extended_rx_addr))
 
-    def __init__(self, iface=None, sid=0, did=0, txaddr=None, rxaddr=None):
+    def __init__(self, iface=None, sid=0, did=0, extended_addr=None, extended_rx_addr=None, listen_only=False, basecls=ISOTP):
         if iface is None:
             iface = conf.CANiface
         self.ins = socket.socket(socket.PF_CAN, socket.SOCK_DGRAM, CAN_ISOTP)
-        self.__setOptionFlags(self.ins, txaddr, rxaddr)
+        self.__setOptionFlags(self.ins, extended_addr, extended_rx_addr, listen_only)
 
         self.ins.setsockopt(SOL_CAN_ISOTP,
                             CAN_ISOTP_RECV_FC,
@@ -264,6 +284,9 @@ class ISOTPSocket(SuperSocket):
 
         self.__bindSocket(self.ins, iface, sid, did)
         self.outs = self.ins
+        if basecls is None:
+            warning('Provide a basecls ')
+        self.basecls = basecls
 
     def recv(self, x=0xffff):
         try:
@@ -279,7 +302,7 @@ class ISOTPSocket(SuperSocket):
             warning("Captured no data.")
             return None
 
-        q = ISO14229(pkt)
+        q = self.basecls(pkt)
         q.time = get_last_packet_timestamp(self.ins)
         return q
 

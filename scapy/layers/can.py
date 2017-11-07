@@ -8,10 +8,11 @@
 """
 CANSocket.
 """
+
 from scapy.packet import *
 from scapy.fields import *
+import scapy.sendrecv as sendrecv
 from scapy.supersocket import SuperSocket
-from scapy.sendrecv import sndrcv
 from scapy.arch.linux import get_last_packet_timestamp
 
 ############
@@ -20,11 +21,11 @@ from scapy.arch.linux import get_last_packet_timestamp
 CAN_FRAME_SIZE = 16
 LINKTYPE_CAN_SOCKETCAN = 227  # From pcap spec
 
-
 class CAN(Packet):
     name = 'CAN'
     fields_desc = [
-        XIntField('id', 0),
+        FlagsField("flags", 0, 3, ["ERR", "RTR", "EFF"]),
+        XBitField("id", 0, 29),
         PadField(FieldLenField('dlc', None, length_of='data', fmt='B'), 4),
         PadField(StrLenField('data', '', length_from=lambda pkt: min(pkt.dlc, 8)), 8)
     ]
@@ -32,6 +33,13 @@ class CAN(Packet):
     def extract_padding(self, p):
         return '', p
 
+    def pre_dissect(self, s):
+        # need to change the byteoder of the first four bytes
+        return struct.pack('<I12s', *struct.unpack('>I12s', s))
+
+    def post_build(self, pkt, pay):
+        # need to change the byteoder of the first four bytes
+        return struct.pack('<I12s', *struct.unpack('>I12s', pkt))+pay
 
 class CANSocket(SuperSocket):
     desc = "read/write packets at a given CAN interface using PF_CAN sockets"
@@ -83,50 +91,35 @@ class CANSocket(SuperSocket):
             warning("Captured no data.")
             return None
 
-        can_id, can_dlc, data = struct.unpack(self.can_frame_fmt, pkt)
-
-        q = CAN(id=can_id, dlc=can_dlc, data=data[:can_dlc])
+        q = CAN(pkt)
         q.time = get_last_packet_timestamp(self.ins)
         return q
 
-    def send(self, x):
-        can_dlc = len(x.data)
-        data = x.data.ljust(8, b'\x00')
-        sx = struct.pack(self.can_frame_fmt, x.id, can_dlc, data)
-        if hasattr(x, "sent_time"):
-            x.sent_time = time.time()
-        return self.outs.send(sx)
-
     def sr(self, *args, **kargs):
-        return sndrcv(self, *args, **kargs)
-
+        return sendrecv.sndrcv(self, *args, **kargs)
     def sr1(self, *args, **kargs):
-        a, b = sndrcv(self, *args, **kargs)
+        a,b = sendrecv.sndrcv(self, *args, **kargs)
         if len(a) > 0:
             return a[0][1]
         else:
             return None
-
     def sniff(self, *args, **kargs):
-        return sniff(opened_socket=self, *args, **kargs)
-
+        return sendrecv.sniff(opened_socket=self, *args, **kargs)
 
 @conf.commands.register
 def srcan(pkt, iface=None, receive_own_messages=False, filter=None, nofilter=0, *args, **kargs):
     if not "timeout" in kargs:
         kargs["timeout"] = -1
     s = conf.CANSocket(iface, receive_own_messages, filter, nofilter)
-    a, b = sndrcv(s, pkt, *args, **kargs)
+    a, b = s.sr(pkt, *args, **kargs)
     s.close()
     return a, b
-
 
 @conf.commands.register
 def srcanloop(pkts, *args, **kargs):
     """Send a packet at can layer in loop and print the answer each time
 srloop(pkts, [prn], [inter], [count], ...) --> None"""
-    return scapy.sendrecv.__sr_loop(srcan, pkts, *args, **kargs)
-
+    return sendrecv.__sr_loop(srcan, pkts, *args, **kargs)
 
 conf.l2types.register(LINKTYPE_CAN_SOCKETCAN, CAN)
 conf.CANiface = "can0"
