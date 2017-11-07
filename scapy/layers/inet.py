@@ -369,8 +369,8 @@ class TCPOptionsField(StrField):
                     continue
             else:
                 onum = oname
-                if type(oval) is not str:
-                    warning("option [%i] is not string." % onum)
+                if type(oval) is not bytes:
+                    warning("option [%i] is not of type bytes." % onum)
                     continue
             opt += bytes([(onum), (2 + len(oval))]) + oval
         return opt + b"\x00" * (3 - ((len(opt) + 3) % 4))
