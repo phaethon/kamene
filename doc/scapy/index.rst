@@ -21,6 +21,7 @@ The document is under review to update from scapy to scapy3k. Some code samples 
    
    usage
    advanced_usage
+   automotive_usage
    extending
    build_dissect
 
