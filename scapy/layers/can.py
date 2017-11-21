@@ -20,6 +20,7 @@ from scapy.arch.linux import get_last_packet_timestamp
 ############
 CAN_FRAME_SIZE = 16
 LINKTYPE_CAN_SOCKETCAN = 227  # From pcap spec
+CAN_INV_FILTER = 0x20000000
 
 class CAN(Packet):
     name = 'CAN'
@@ -43,9 +44,8 @@ class CAN(Packet):
 
 class CANSocket(SuperSocket):
     desc = "read/write packets at a given CAN interface using PF_CAN sockets"
-    can_frame_fmt = "<IB3x8s"
 
-    def __init__(self, iface=None, receive_own_messages=False, filter=None, nofilter=0):
+    def __init__(self, iface=None, receive_own_messages=False, filter=None):
         if iface is None:
             iface = conf.CANiface
         self.ins = socket.socket(socket.PF_CAN, socket.SOCK_RAW, socket.CAN_RAW)
@@ -56,7 +56,7 @@ class CANSocket(SuperSocket):
         except Exception as e:
             Scapy_Exception("Could not receive own messages (%s)", e)
 
-        if filter is None or nofilter == 0:
+        if filter is None:
             filter = [{
                 'can_id': 0,
                 'can_mask': 0
@@ -107,10 +107,10 @@ class CANSocket(SuperSocket):
         return sendrecv.sniff(opened_socket=self, *args, **kargs)
 
 @conf.commands.register
-def srcan(pkt, iface=None, receive_own_messages=False, filter=None, nofilter=0, *args, **kargs):
+def srcan(pkt, iface=None, receive_own_messages=False, filter=None, *args, **kargs):
     if not "timeout" in kargs:
         kargs["timeout"] = -1
-    s = conf.CANSocket(iface, receive_own_messages, filter, nofilter)
+    s = conf.CANSocket(iface, receive_own_messages, filter)
     a, b = s.sr(pkt, *args, **kargs)
     s.close()
     return a, b
