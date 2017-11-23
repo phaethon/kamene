@@ -131,7 +131,7 @@ def getmacbyip6(ip6, chainCC=0):
 class Net6(Gen): # syntax ex. fec0::/126
     """Generate a list of IPv6s from a network address or a name"""
     name = "ipv6"
-    ipaddress = re.compile(r"^([a-fA-F0-9:]+)(/[1]?[0-3]?[0-9])?$")
+    ipaddress = re.compile(r"^([a-fA-F0-9:]+)(/([1]?[0-3]?[0-9]|[0-9]?[0-9]))?$")
 
     def __init__(self, net):
         self.repr = net
