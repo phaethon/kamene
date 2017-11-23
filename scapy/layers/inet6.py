@@ -159,7 +159,7 @@ class Net6(Gen): # syntax ex. fec0::/126
             netmask = min(8,max(netmask,0))
             a = (int(a) & (0xff<<netmask),(int(a) | (0xff>>(8-netmask)))+1)
             return a
-        self.parsed = map(lambda x,y: parse_digit(x,y), tmp, map(lambda x,nm=self.plen: x-nm, tuple))
+        self.parsed = list(map(lambda x,y: parse_digit(x,y), tmp, map(lambda x,nm=self.plen: x-nm, tuple)))
 
         def rec(n, l): 
             if n and  n % 2 == 0:
