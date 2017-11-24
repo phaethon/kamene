@@ -73,8 +73,8 @@ class AnsweringMachine(object):
                 sniffopt[k] = kargs[k]
             if k in self.send_options_list:
                 sendopt[k] = kargs[k]
-            if k in self.sniff_options_list+self.send_options_list:
-                del(kargs[k])
+            #if k in self.sniff_options_list+self.send_options_list:
+            #    del(kargs[k])
         if mode != 2 or kargs:
             if mode == 1:
                 self.optam0 = kargs

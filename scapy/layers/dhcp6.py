@@ -15,6 +15,7 @@ from scapy.packet import *
 from scapy.fields import *
 from scapy.utils6 import *
 from scapy.layers.inet6 import *
+from scapy.themes import *
 from scapy.ansmachine import AnsweringMachine
 
 #############################################################################
