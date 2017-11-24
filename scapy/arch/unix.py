@@ -80,7 +80,8 @@ def read_routes():
             gw = '0.0.0.0'
         if netif is not None:
             ifaddr = scapy.arch.get_if_addr(netif)
-            routes.append((dest,netmask,gw,netif,ifaddr))
+            if ifaddr:
+                routes.append((dest, netmask, gw, netif, ifaddr))
         else:
             pending_if.append((dest,netmask,gw))
 

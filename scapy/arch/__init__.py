@@ -49,8 +49,13 @@ def str2mac(s):
 
     
 def get_if_addr(iff):
-    return socket.inet_ntoa(get_if_raw_addr(iff))
-    
+    raw_addr = get_if_raw_addr(iff)
+    if raw_addr:
+        return socket.inet_ntoa(raw_addr)
+    else:
+        return None
+
+
 def get_if_hwaddr(iff):
     mac = get_if_raw_hwaddr(iff)
     return str2mac(mac)
