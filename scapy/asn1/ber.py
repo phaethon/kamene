@@ -152,7 +152,6 @@ class BERcodec_Object( metaclass = BERcodec_metaclass):
             context = cls.tag.context
         cls.check_string(s)
         p = (s[0])
-        print(context, type(context))
         if p not in context:
             t = s
             if len(t) > 18:
