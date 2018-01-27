@@ -3,7 +3,7 @@
 
 import unittest
 
-from scapy.all import *
+from scapy3k.all import *
 
 class TestingFuzzingChanges(unittest.TestCase):
 

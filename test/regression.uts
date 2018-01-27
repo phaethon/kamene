@@ -4353,7 +4353,7 @@ p = LLC(s)
 + Test Diagnostics over IP contribution layer
 
 = DoIP - Basic Instantiation
-from scapy.contrib.doip import *
+from scapy3k.contrib.doip import *
 bytes(DoIP()) == b'\x02\xfd\x00\x00\x00\x00\x00\x00'
 
 = DoIP - Basic Dissection

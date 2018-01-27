@@ -1,0 +1,3 @@
+#! /bin/sh
+DIR=$(dirname $0)
+PYTHONPATH=$DIR exec python3 -m scapy3k.__init__

@@ -58,7 +58,7 @@ If it works, you can make it permanenent::
 
    >>> conf.prog.dot = "dot -Gdpi=70"
 
-You can also put this line in your ``~/.scapy_startup.py`` file 
+You can also put this line in your ``~/.scapy3k_startup.py`` file 
 
 
 Getting help
@@ -66,7 +66,7 @@ Getting help
 
 Common problems are answered in the FAQ.
 
-There's a low traffic mailing list at ``scapy.ml(at)secdev.org``  (`archive <http://news.gmane.org/gmane.comp.security.scapy.general>`_, `RSS, NNTP <http://gmane.org/info.php?group=gmane.comp.security.scapy.general>`_). You are encouraged to send questions, bug reports, suggestions, ideas, cool usages of Scapy, etc. to this list. Subscribe by sending a mail to ``scapy.ml-subscribe(at)secdev.org``.
+There is an issue tracking at http://github.com/phaethon/scapy. You are encouraged to send questions, bug reports, suggestions, ideas, cool usages of Scapy3k, etc. to this list.
 
 
 

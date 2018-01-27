@@ -35,7 +35,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General substitutions.
-project = 'Scapy'
+project = 'Scapy3k'
 copyright = '2008, 2009 Philippe Biondi and the Scapy community'
 
 # The default replacements for |version| and |release|, also used in various
@@ -157,8 +157,8 @@ latex_font_size = '11pt'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, document class [howto/manual]).
 latex_documents = [
-  ('index', 'Scapy.tex', 'Scapy Documentation',
-   'Philippe Biondi and the Scapy community', 'manual'),
+  ('index', 'Scapy3k.tex', 'Scapy3k Documentation',
+   'Philippe Biondi, Eriks Dobelis and the Scapy3k community', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

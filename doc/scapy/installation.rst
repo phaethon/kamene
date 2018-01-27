@@ -19,7 +19,7 @@ This document is for scapy3k. It requires python 3.x. See `original scapy homepa
 
 .. note::
 
-   In scapy3k and Scapy v2.x use ``from scapy.all import *`` instead of ``from scapy import *``.
+   In scapy3k use ``from scapy3k.all import *`` instead of ``from scapy import *``.
 
 
 Installing scapy3k
@@ -136,4 +136,4 @@ Windows
 
 Scapy works on Windows 8/2012 and newer version. Unlike earlier versions libdnet is not required. Testing is being done on following configuration: Windows 10/Anaconda 3.5/WinPcap 4.1.3
  
-On Windows 7 (and possibly earlier) scapy can be used for offline packet crafting/dissection. Sniffing and sending requires manual setting of network interface information and routing as corresponding powershell cmdlets used to gather this information are not working on Windows 7.
+On Windows 7 (and possibly earlier) scapy3k can be used for offline packet crafting/dissection. Sniffing and sending requires manual setting of network interface information and routing as corresponding powershell cmdlets used to gather this information are not working on Windows 7.

@@ -20,7 +20,7 @@ when assembling the layer or dissected one by one when disassembling a string.
 The list of fields is held in an attribute named ``fields_desc``. Each field is an instance 
 of a field class:: 
 
-    from scapy.packet import *
+    from scapy3k.packet import *
 
 
     class Disney(Packet): 
@@ -473,7 +473,7 @@ bind_layers() way, it adds the defined next layers to that list.
 
     >>> p=TCP()
     >>> p.payload_guess
-    [({'dport': 2000}, <class 'scapy.Skinny'>), ({'sport': 2000}, <class 'scapy.Skinny'>), ... )]
+    [({'dport': 2000}, <class 'scapy3k.Skinny'>), ({'sport': 2000}, <class 'scapy3k.Skinny'>), ... )]
 
 Then,  when it  needs to  guess  the next  layer class,  it calls  the
 default method ``Packet.guess_payload_class()``.  This method runs through

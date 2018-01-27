@@ -79,8 +79,8 @@ It is important to note that UTScapy uses the truth value from the last Python s
 
 The syntax for UTScapy is shown in Table 3 - UTScapy command line syntax::
 
-    [root@localhost scapy]# ./UTscapy.py –h
-    Usage: UTscapy [-m module] [-f {text|ansi|HTML|LaTeX}] [-o output_file]
+    [root@localhost scapy3k]# ./UTscapy3k.py –h
+    Usage: UTscapy3k [-m module] [-f {text|ansi|HTML|LaTeX}] [-o output_file]
                    [-t testfile] [-k keywords [-k ...]] [-K keywords [-K ...]]
                    [-l] [-d|-D] [-F] [-q[q]]
     -l              : generate local files
@@ -134,7 +134,7 @@ Table 5 shows a simple test campaign with multiple test set definitions. Additio
     # Comment describing this campaign
     #
     # To run this campaign, try:
-    #   ./UTscapy.py -t example_campaign.txt -f html -o example_campaign.html -F
+    #   ./UTscapy3k.py -t example_campaign.txt -f html -o example_campaign.html -F
     #
     
     * This comment is associated with the test campaign and will appear 
@@ -186,8 +186,3 @@ Table 5 shows a simple test campaign with multiple test set definitions. Additio
     print(e)
     e == 1296
 
-To see an example that is targeted to Scapy, go to http://www.secdev.org/projects/UTscapy. Cut and paste the example at the bottom of the page to the file ``demo_campaign.txt`` and run UTScapy against it::
-
-./UTscapy.py -t demo_campaign.txt -f html -o demo_campaign.html –F -l
-
-Examine the output generated in file ``demo_campaign.html``.

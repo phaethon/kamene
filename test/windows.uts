@@ -31,8 +31,8 @@ MacAddress           : 0A-00-27-00-00-10
     def communicate(self, *args, **kwargs):
         return self.powershell_output, ""
 
-from scapy.all import *
-scapy.arch.windows.sp.Popen = Popen
+from scapy3k.all import *
+scapy3k.arch.windows.sp.Popen = Popen
 iface_list = get_windows_if_list()
 
 for iface in iface_list:
@@ -70,6 +70,6 @@ InterfaceIndex Destination     Mask            NextHop       Metric1
     def communicate(self, *args, **kwargs):
         return self.powershell_output, ""
 
-scapy.arch.windows.sp.Popen = Popen
+scapy3k.arch.windows.sp.Popen = Popen
 #assert(len(read_routes()) == 12)
 assert(True)

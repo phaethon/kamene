@@ -2,13 +2,13 @@
 
 #
 # This scripts runs the regression tests
-# based on UTscapy.
+# based on UTscapy3k.
 #
 
 DIR=$(dirname $0)/..
 if [ "$*" == "" ]
 then
-    PYTHONPATH=$DIR exec python3 ${DIR}/scapy/tools/UTscapy.py -t regression.uts -f html -o /tmp/scapy_regression_test_$(date +%Y%M%d-%H%H%S).html
+    PYTHONPATH=$DIR exec python3 ${DIR}/scapy3k/tools/UTscapy.py -t regression.uts -f html -o /tmp/scapy_regression_test_$(date +%Y%M%d-%H%H%S).html
 else
-    PYTHONPATH=$DIR exec python3 ${DIR}/scapy/tools/UTscapy.py "$@"
+    PYTHONPATH=$DIR exec python3 ${DIR}/scapy3k/tools/UTscapy.py "$@"
 fi

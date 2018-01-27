@@ -13,7 +13,7 @@ import os
 
 
 EZIP_HEADER="""#! /bin/sh
-PYTHONPATH=$0/%s exec python3 -m scapy.__init__
+PYTHONPATH=$0/%s exec python3 -m scapy3k.__init__
 """
 
 def make_ezipfile(base_name, base_dir, verbose=0, dry_run=0, **kwargs):
@@ -39,17 +39,17 @@ def make_ezipfile(base_name, base_dir, verbose=0, dry_run=0, **kwargs):
 
 archive_util.ARCHIVE_FORMATS["ezip"] = (make_ezipfile,[],'Executable ZIP file')
 
-SCRIPTS = ['bin/scapy','bin/UTscapy']
+SCRIPTS = ['bin/scapy3k','bin/UTscapy3k']
 # On Windows we also need additional batch files to run the above scripts 
 if os.name == "nt":
-  SCRIPTS += ['bin/scapy.bat','bin/UTscapy.bat']
+  SCRIPTS += ['bin/scapy3k.bat','bin/UTscapy3k.bat']
 
 setup(
     name = 'scapy-python3',
-    version = '0.23',
-    packages=['scapy','scapy/arch', 'scapy/arch/windows', 'scapy/layers','scapy/asn1','scapy/tools','scapy/modules', 'scapy/crypto', 'scapy/contrib'],
+    version = '0.24',
+    packages=['scapy3k','scapy3k/arch', 'scapy3k/arch/windows', 'scapy3k/layers','scapy3k/asn1','scapy3k/tools','scapy3k/modules', 'scapy3k/crypto', 'scapy3k/contrib'],
     scripts = SCRIPTS,
-    data_files = [('share/man/man1', ["doc/scapy.1.gz"])],
+    data_files = [('share/man/man1', ["doc/scapy3k.1.gz"])],
 
     # Metadata
     maintainer = 'Eriks Dobelis',

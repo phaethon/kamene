@@ -12,7 +12,7 @@ Starting Scapy
 Scapy's interactive shell is run in a terminal session. Root privileges are needed to
 send the packets, so we're using ``sudo`` here::
   
-    $ sudo scapy
+    $ sudo scapy3k
     INFO: Please, report issues to https://github.com/phaethon/scapy
     WARNING: IPython not available. Using standard Python shell instead.
     Welcome to Scapy (3.0.0)
@@ -20,7 +20,7 @@ send the packets, so we're using ``sudo`` here::
 
 If you have installed IPython this is an example Scapy startup::
 
-    $ sudo scapy
+    $ sudo scapy3k
     INFO: Please, report issues to https://github.com/phaethon/scapy
     Python 3.4.2 (default, Jul  9 2015, 17:24:30) 
     Type "copyright", "credits" or "license" for more information.
@@ -327,7 +327,7 @@ A DNS query (``rd`` = recursion desired). The host 192.168.5.1 is my DNS server.
      an=<DNSRR rrname='www.slashdot.org.' type=A rclass=IN ttl=3560L rdata='66.35.250.151' |>
      ns=0 ar=0 |<Padding load='\xc6\x94\xc7\xeb' |>>>>
 
-The "send'n'receive" functions family is the heart of scapy. They return a couple of two lists. The first element is a list of couples (packet sent, answer), and the second element is the list of unanswered packets. These two elements are lists, but they are wrapped by an object to present them better, and to provide them with some methods that do most frequently needed actions::
+The "send'n'receive" functions family is the heart of scapy3k. They return a couple of two lists. The first element is a list of couples (packet sent, answer), and the second element is the list of unanswered packets. These two elements are lists, but they are wrapped by an object to present them better, and to provide them with some methods that do most frequently needed actions::
 
     >>> sr(IP(dst="192.168.8.1")/TCP(dport=[21,22,23]))
     Received 6 packets, got 3 answers, remaining 0 packets
@@ -338,7 +338,7 @@ The "send'n'receive" functions family is the heart of scapy. They return a coupl
     IP / TCP 192.168.8.14:20 > 192.168.8.1:22 S ==> Ether / IP / TCP 192.168.8.1:22 > 192.168.8.14:20 RA / Padding
     IP / TCP 192.168.8.14:20 > 192.168.8.1:23 S ==> Ether / IP / TCP 192.168.8.1:23 > 192.168.8.14:20 RA / Padding
     
-If there is a limited rate of answers, you can specify a time interval to wait between two packets with the inter parameter. If some packets are lost or if specifying an interval is not enough, you can resend all the unanswered packets, either by calling the function again, directly with the unanswered list, or by specifying a retry parameter. If retry is 3, scapy will try to resend unanswered packets 3 times. If retry is -3, scapy will resend unanswered packets until no more answer is given for the same set of unanswered packets 3 times in a row. The timeout parameter specify the time to wait after the last packet has been sent::
+If there is a limited rate of answers, you can specify a time interval to wait between two packets with the inter parameter. If some packets are lost or if specifying an interval is not enough, you can resend all the unanswered packets, either by calling the function again, directly with the unanswered list, or by specifying a retry parameter. If retry is 3, scapy3k will try to resend unanswered packets 3 times. If retry is -3, scapy3k will resend unanswered packets until no more answer is given for the same set of unanswered packets 3 times in a row. The timeout parameter specify the time to wait after the last packet has been sent::
 
     >>> sr(IP(dst="172.20.29.5/30")/TCP(dport=[21,22,23]),inter=0.5,retry=-2,timeout=1)
     Begin emission:
@@ -840,7 +840,7 @@ At last Scapy is capable of saving all session variables using the ``save_sessio
 
 >>> dir()
 ['__builtins__', 'conf', 'new_pkt', 'pkt', 'pkt_export', 'pkt_hex', 'pkt_str', 'pkts']
->>> save_session("session.scapy")
+>>> save_session("session.scapy3k")
 
 Variables, which start with `_` are not saved, as well as those typical to IPython (In, Out, or inherited from IPython module). Also, conf is not saved.
 
@@ -848,7 +848,7 @@ Next time you start Scapy you can load the previous saved session using the ``lo
 
     >>> dir()
     ['__builtins__', 'conf']
-    >>> load_session("session.scapy")
+    >>> load_session("session.scapy3k")
     >>> dir()
     ['__builtins__', 'conf', 'new_pkt', 'pkt', 'pkt_export', 'pkt_hex', 'pkt_str', 'pkts']
 
@@ -861,7 +861,7 @@ Making tables
 
 Now we have a demonstration of the ``make_table()`` presentation function. It takes a list as parameter, and a function who returns a 3-uple. The first element is the value on the x axis from an element of the list, the second is about the y value and the third is the value that we want to see at coordinates (x,y). The result is a table. This function has 2 variants, ``make_lined_table()`` and ``make_tex_table()`` to copy/paste into your LaTeX pentest report. Those functions are available as methods of a result object :
 
-Here we can see a multi-parallel traceroute (scapy already has a multi TCP traceroute function. See later)::
+Here we can see a multi-parallel traceroute (scapy3k already has a multi TCP traceroute function. See later)::
 
     >>> ans,unans=sr(IP(dst="www.test.fr/30", ttl=(1,6))/TCP())
     Received 49 packets, got 24 answers, remaining 0 packets
@@ -897,7 +897,7 @@ Routing
 .. index::
    single: Routing, conf.route
 
-Now scapy has its own routing table, so that you can have your packets routed diffrently than the system::
+Now scapy3k has its own routing table, so that you can have your packets routed diffrently than the system::
 
     >>> conf.route
     Network         Netmask         Gateway         Iface
@@ -954,7 +954,7 @@ TCP traceroute (2)
 .. index::
    single: traceroute(), Traceroute
 
-Scapy also has a powerful TCP traceroute function. Unlike other traceroute programs that wait for each node to reply before going to the next, scapy sends all the packets at the same time. This has the disadvantage that it can't know when to stop (thus the maxttl parameter) but the great advantage that it took less than 3 seconds to get this multi-target traceroute result::
+Scapy also has a powerful TCP traceroute function. Unlike other traceroute programs that wait for each node to reply before going to the next, scapy3k sends all the packets at the same time. This has the disadvantage that it can't know when to stop (thus the maxttl parameter) but the great advantage that it took less than 3 seconds to get this multi-target traceroute result::
 
     >>> traceroute(["www.yahoo.com","www.altavista.com","www.wisenut.com","www.copernic.com"],maxttl=20)
     Received 80 packets, got 80 answers, remaining 0 packets
@@ -1376,7 +1376,7 @@ This program uses the ``sniff()`` callback (paramter prn). The store parameter i
 ::
 
     #! /usr/bin/env python
-    from scapy.all import *
+    from scapy3k.all import *
     
     def arp_monitor_callback(pkt):
         if ARP in pkt and pkt[ARP].op in (1,2): #who-has or is-at

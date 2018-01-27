@@ -5,11 +5,11 @@
 
 % CAN unit tests
 
-+ Configuration of scapy3
++ Configuration of scapy3k3
 
 = Load CAN_addon
 ~ conf command
-from scapy.layers.can import CAN, CANSocket, srcan
+from scapy3k.layers.can import CAN, CANSocket, srcan
 
 = Setup string for vcan
 ~ conf command

@@ -20,7 +20,7 @@ This first example takes an IP or a name as the first parameter, sends an ICMP e
     #! /usr/bin/env python3
     
     import sys
-    from scapy.all import sr1,IP,ICMP
+    from scapy3k.all import sr1,IP,ICMP
     
     p=sr1(IP(dst=sys.argv[1])/ICMP())
     if p:
@@ -36,7 +36,7 @@ This is a more complex example which does an ARP ping and reports what it found 
         print("Usage: arping2tex <net>\n  eg: arping2tex 192.168.1.0/24")
         sys.exit(1)
     
-    from scapy.all import srp,Ether,ARP,conf
+    from scapy3k.all import srp,Ether,ARP,conf
     conf.verb=0
     ans,unans=srp(Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst=sys.argv[1]),
                   timeout=2)
@@ -53,7 +53,7 @@ This is a more complex example which does an ARP ping and reports what it found 
 Here is another tool that will constantly monitor all interfaces on a machine and print all ARP request it sees, even on 802.11 frames from a Wi-Fi card in monitor mode. Note the store=0 parameter to sniff() to avoid storing all packets in memory for nothing::
 
     #! /usr/bin/env python3
-    from scapy.all import *
+    from scapy3k.all import *
     
     def arp_monitor_callback(pkt):
         if ARP in pkt and pkt[ARP].op in (1,2): #who-has or is-at
@@ -75,9 +75,9 @@ Once you've done that, you can launch Scapy and import your file, but this is st
     
     # Set log level to benefit from Scapy warnings
     import logging
-    logging.getLogger("scapy").setLevel(1)
+    logging.getLogger("scapy3k").setLevel(1)
     
-    from scapy.all import *
+    from scapy3k.all import *
     
     class Test(Packet):
         name = "Test packet"

@@ -101,15 +101,15 @@ Encoding and decoding are done using class methods provided by the codec. For ex
     >>> BERcodec_STRING.dec('\x03\x03egg')
     Traceback (most recent call last):
       File "<console>", line 1, in ?
-      File "/usr/bin/scapy", line 2099, in dec
+      File "/usr/bin/scapy3k", line 2099, in dec
         return cls.do_dec(s, context, safe)
-      File "/usr/bin/scapy", line 2178, in do_dec
+      File "/usr/bin/scapy3k", line 2178, in do_dec
         l,s,t = cls.check_type_check_len(s)
-      File "/usr/bin/scapy", line 2076, in check_type_check_len
+      File "/usr/bin/scapy3k", line 2076, in check_type_check_len
         l,s3 = cls.check_type_get_len(s)
-      File "/usr/bin/scapy", line 2069, in check_type_get_len
+      File "/usr/bin/scapy3k", line 2069, in check_type_get_len
         s2 = cls.check_type(s)
-      File "/usr/bin/scapy", line 2065, in check_type
+      File "/usr/bin/scapy3k", line 2065, in check_type
         (cls.__name__, ord(s[0]), ord(s[0]),cls.tag), remaining=s)
     BER_BadTag_Decoding_Error: BERcodec_STRING: Got tag [3/0x3] while expecting <ASN1Tag STRING[4]>
     ### Already decoded ###
@@ -181,25 +181,25 @@ By default, decoding is done using the ``Universal`` class, which means objects 
     >>> (dcert,remain) = BERcodec_Object.dec(cert)
     Traceback (most recent call last):
       File "<console>", line 1, in ?
-      File "/usr/bin/scapy", line 2099, in dec
+      File "/usr/bin/scapy3k", line 2099, in dec
         return cls.do_dec(s, context, safe)
-      File "/usr/bin/scapy", line 2094, in do_dec
+      File "/usr/bin/scapy3k", line 2094, in do_dec
         return codec.dec(s,context,safe)
-      File "/usr/bin/scapy", line 2099, in dec
+      File "/usr/bin/scapy3k", line 2099, in dec
         return cls.do_dec(s, context, safe)
-      File "/usr/bin/scapy", line 2218, in do_dec
+      File "/usr/bin/scapy3k", line 2218, in do_dec
         o,s = BERcodec_Object.dec(s, context, safe)
-      File "/usr/bin/scapy", line 2099, in dec
+      File "/usr/bin/scapy3k", line 2099, in dec
         return cls.do_dec(s, context, safe)
-      File "/usr/bin/scapy", line 2094, in do_dec
+      File "/usr/bin/scapy3k", line 2094, in do_dec
         return codec.dec(s,context,safe)
-      File "/usr/bin/scapy", line 2099, in dec
+      File "/usr/bin/scapy3k", line 2099, in dec
         return cls.do_dec(s, context, safe)
-      File "/usr/bin/scapy", line 2218, in do_dec
+      File "/usr/bin/scapy3k", line 2218, in do_dec
         o,s = BERcodec_Object.dec(s, context, safe)
-      File "/usr/bin/scapy", line 2099, in dec
+      File "/usr/bin/scapy3k", line 2099, in dec
         return cls.do_dec(s, context, safe)
-      File "/usr/bin/scapy", line 2092, in do_dec
+      File "/usr/bin/scapy3k", line 2092, in do_dec
         raise BER_Decoding_Error("Unknown prefix [%02x] for [%r]" % (p,t), remaining=s)
     BER_Decoding_Error: Unknown prefix [a0] for ['\xa0\x03\x02\x01\x02\x02\x01\x010\r\x06\t*\x86H...']
     ### Already decoded ###

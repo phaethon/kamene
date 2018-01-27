@@ -3,7 +3,7 @@ Automotive usage
 ****************
 
 .. note::
-    All automotive related features are only supported on linux systems, yet. CAN and ISOTP sockets in scapy are based on linux kernel modules.
+    All automotive related features are only supported on linux systems, yet. CAN and ISOTP sockets in scapy3k are based on linux kernel modules.
     This guide explains the hardware setup on a BeagleBone Black. The BeagleBone Black was chosen because of its two CAN interfaces on the main processor.
     The presence of two CAN interfaces in one device gives the possibility of CAN MITM attacks and session hijacking.
     The Cannelloni framework turns a BeagleBone Black into a CAN-to-UDP interface, which gives you the freedom to run Scapy3k
@@ -336,7 +336,7 @@ Setup
 This commands enable a virtual CAN interface on your machine
 ::
 
-    from scapy.layers.can import *
+    from scapy3k.layers.can import *
     import os
 
     bashCommand = "/bin/bash -c 'sudo modprobe vcan; sudo ip link add name vcan0 type vcan; sudo ip link set dev vcan0 up'"

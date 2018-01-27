@@ -1,5 +1,7 @@
 # scapy for python3 (aka scapy3k) 
 
+N.B.! Module name has changed from scapy to scapy3k. Use `from scapy3k.all import *` now. 
+
 [Follow @scapy3k](https://twitter.com/scapy3k) and/or see [scapy3k news and examples](https://phaethon.github.io/scapy) for recent news. [Original scapy documentation updated for scapy3k](http://phaethon.github.io/scapy/api/index.html)
 
 This is a fork of scapy (http://www.secdev.org) to make it compatible with python3. Fork based on scapy v2.3.1
@@ -32,10 +34,10 @@ On all OS except Linux libpcap should be installed for sending and receiving pac
 
 *N.B.! As a difference from scapy for python2, use `bytes()` instead of `str()` when converting packet to bytes. Also, most arguments expect `bytes` value instead of `str `value except the ones, which are naturally suited for human input (e.g. domain name).*
 
-You can use scapy running scapy command or by importing scapy library from interactive python shell (python or ipython).
+You can use scapy running scapy3k command or by importing scapy3k library from interactive python shell (python or ipython).
 Simple example that you can try from interactive shell:
 ```python
-from scapy.all import *
+from scapy3k.all import *
 p = IP(dst = 'www.somesite.ex') / TCP(dport = 80) / Raw(b'Some raw bytes')
 # to see packet content as bytes use bytes(p) not str(p)
 sr1(p)

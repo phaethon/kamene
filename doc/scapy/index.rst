@@ -1,4 +1,4 @@
-.. Scapy documentation master file, created by sphinx-quickstart on Mon Sep  8 19:37:39 2008.
+.. Scapy3k documentation master file, created by sphinx-quickstart on Mon Sep  8 19:37:39 2008.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
