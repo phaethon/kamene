@@ -129,7 +129,7 @@ def sndrcv(pks, pkt, timeout = None, inter = 0, verbose=None, chainCC=0, retry=0
                                 inp = []
                                 try:
                                     inp, out, err = select(inmask,[],[], remaintime)
-                                except IOError, exc:
+                                except IOError as exc:
                                     if exc.errno != errno.EINTR:
                                         raise
                                 if len(inp) == 0:
