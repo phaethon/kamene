@@ -10,7 +10,8 @@ To clearly separate from original scapy project and decrease ambiguity in naming
 
 Existing PyPI package scapy-python3 will not be updated with new functionality except a warning message on the need to transition to the different package.
 
-N.B.! If you use current code from Github you need to use `from scapy3k.all import *` (instead of `from scapy.all import *`). This is temporary from the next release you will need to use `from kamene.all import *`.
+N.B.! If you use current code from Github you need to use `from scapy3k.all import *` (instead of `from scapy.all import *`).
+This is temporary solution to resolve name clashes. From the next release you will need to use `from kamene.all import *`.
 
 More news to follow on the coming new features once naming transition is finalized. 
 
