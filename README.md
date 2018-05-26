@@ -1,16 +1,35 @@
-# scapy for python3 (aka scapy3k) 
+# kamene (formerly known as "scapy for python3" or scapy3k) 
 
-N.B.! Module name has changed from scapy to scapy3k. Use `from scapy3k.all import *` now. 
+## Important announcement
+
+To clearly separate from original scapy project and decrease ambiguity in naming, we are undergoing renaming. This will include:
+* renaming of the github repo (done)
+* using new package name on PyPI (at present only non functional package as a placeholder is published, do not use it yet)
+* new python module name (renaming currently in development)
+* documentation to be updated (not done yet, including this Readme)
+
+Existing PyPI package scapy-python3 will not be updated with new functionality except a warning message on the need to transition to the different package.
+
+N.B.! If you use current code from Github you need to use `from scapy3k.all import *` (instead of `from scapy.all import *`).
+This is temporary solution to resolve name clashes. From the next release you will need to use `from kamene.all import *`.
+
+More news to follow on the coming new features once naming transition is finalized. 
+
+## General
 
 [Follow @scapy3k](https://twitter.com/scapy3k) and/or see [scapy3k news and examples](https://phaethon.github.io/scapy) for recent news. [Original scapy documentation updated for scapy3k](http://phaethon.github.io/scapy/api/index.html)
 
-This is a fork of scapy (http://www.secdev.org) to make it compatible with python3. Fork based on scapy v2.3.1
+This is a fork of scapy (http://www.secdev.org) originally developed to implement python3 compatibility. It has been used in production on python3 since 2015.
+
 All tests from regression (758 tests), ipsec, and both other test suites pass. Also, I tested full tutorial series [Building Network Tools with Scapy by @thepacketgeek](http://thepacketgeek.com/series/building-network-tools-with-scapy/) using scapy-python3.
 Please, submit all issues https://github.com/phaethon/scapy preferrably with .pcap files for tests. Bugs for individual layers are usually easy to fix.
 
 [winpcapy.py by Massimo Ciani](https://code.google.com/p/winpcapy/) integrated inside code.
 
 ## News
+
+We are undergoing major naming transition, which will be followed with new functionality. More updates to follow.
+
 [Follow @scapy3k](https://twitter.com/scapy3k) and/or see [scapy3k](https://phaethon.github.io/scapy) for recent news.
 
 Scapy3k is included in the [Network Security Toolkit](http://www.networksecuritytoolkit.org/nst/index.html) Release 22. 
