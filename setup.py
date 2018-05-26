@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 """
-Distutils setup file for Scapy.
+Distutils setup file for kamene.
 """
 
 
@@ -13,7 +13,7 @@ import os
 
 
 EZIP_HEADER="""#! /bin/sh
-PYTHONPATH=$0/%s exec python3 -m scapy3k.__init__
+PYTHONPATH=$0/%s exec python3 -m kamene.__init__
 """
 
 def make_ezipfile(base_name, base_dir, verbose=0, dry_run=0, **kwargs):
@@ -39,24 +39,24 @@ def make_ezipfile(base_name, base_dir, verbose=0, dry_run=0, **kwargs):
 
 archive_util.ARCHIVE_FORMATS["ezip"] = (make_ezipfile,[],'Executable ZIP file')
 
-SCRIPTS = ['bin/scapy3k','bin/UTscapy3k']
+SCRIPTS = ['bin/kamene','bin/UTkamene']
 # On Windows we also need additional batch files to run the above scripts 
 if os.name == "nt":
-  SCRIPTS += ['bin/scapy3k.bat','bin/UTscapy3k.bat']
+  SCRIPTS += ['bin/kamene.bat','bin/UTkamene.bat']
 
 setup(
-    name = 'scapy-python3',
-    version = '0.24',
-    packages=['scapy3k','scapy3k/arch', 'scapy3k/arch/windows', 'scapy3k/layers','scapy3k/asn1','scapy3k/tools','scapy3k/modules', 'scapy3k/crypto', 'scapy3k/contrib'],
+    name = 'kamene',
+    version = '0.31',
+    packages=['kamene','kamene/arch', 'kamene/arch/windows', 'kamene/layers','kamene/asn1','kamene/tools','kamene/modules', 'kamene/crypto', 'kamene/contrib'],
     scripts = SCRIPTS,
-    data_files = [('share/man/man1', ["doc/scapy3k.1.gz"])],
+    data_files = [('share/man/man1', ["doc/kamene.1.gz"])],
 
     # Metadata
     maintainer = 'Eriks Dobelis',
     maintainer_email = 'phaethon@users.noreply.github.com',
-    description = 'Packet crafting/sending/sniffing, PCAP processing tool, based on scapy with python3 compatibility',
+    description = 'Packet crafting/sending/sniffing, PCAP processing tool, originally forked from scapy',
     license = 'GPLv2',
-    url = 'https://github.com/phaethon/scapy',
+    url = 'https://github.com/phaethon/kamene',
     keywords = 'network security monitoring packet pcap analytics visualization',
     classifiers = [
       'Development Status :: 5 - Production/Stable',

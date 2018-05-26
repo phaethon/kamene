@@ -3,7 +3,7 @@
 # Includes testing of RadioTap headers
 #
 # Type the following command to launch start the tests:
-# $ test/run_tests -t test/dot11.uts -f html -o /tmp/scapy_dot11_test_$(date +%Y%M%d-%H%H%S).html
+# $ test/run_tests -t test/dot11.uts -f html -o /tmp/kamene_dot11_test_$(date +%Y%M%d-%H%H%S).html
 
 + Test dot11
 

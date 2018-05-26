@@ -3156,7 +3156,7 @@ d
 #######################################
 = IKEv2
 
-from scapy3k.contrib.ikev2 import *
+from kamene.contrib.ikev2 import *
 
 p = UDP(bytes(UDP()/IKEv2()))
 p

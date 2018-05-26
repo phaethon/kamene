@@ -5,11 +5,11 @@
 
 % CAN unit tests
 
-+ Configuration of scapy3k3
++ Configuration of kamene
 
 = Load CAN_addon
 ~ conf command
-from scapy3k.layers.can import CAN, CANSocket, srcan
+from kamene.layers.can import CAN, CANSocket, srcan
 
 = Setup string for vcan
 ~ conf command
@@ -259,7 +259,7 @@ tx.sent_time < rx.time and tx == rx and rx.time > 0
 = Write pcap file
 
 rx = CAN(id=0x7ff,dlc=8,data=b'\x01\x02\x03\x04\x05\x06\x07\x08')
-wrpcap('/tmp/scapyPcapTest.pcap', rx, append=False)
-readPack = rdpcap('/tmp/scapyPcapTest.pcap', 1)
+wrpcap('/tmp/kamenePcapTest.pcap', rx, append=False)
+readPack = rdpcap('/tmp/kamenePcapTest.pcap', 1)
 rx == readPack[0]
 

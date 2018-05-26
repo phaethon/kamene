@@ -1,7 +1,7 @@
 # PPPoE unit tests
 #
 # Type the following command to launch start the tests:
-# $ sudo bash test/run_tests -t test/pppoe.uts -f html -o /tmp/scapy_pppoe_test_$(date +%Y%M%d-%H%H%S).html
+# $ sudo bash test/run_tests -t test/pppoe.uts -f html -o /tmp/kamene_pppoe_test_$(date +%Y%M%d-%H%H%S).html
 
 + Test PPPoE
 

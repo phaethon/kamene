@@ -1,6 +1,6 @@
 include MANIFEST.in
 include README
-include run_scapy3k
+include run_kamene
 recursive-include bin *
 recursive-include doc *
 recursive-include test *

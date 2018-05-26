@@ -5,14 +5,14 @@
 
 % isotp unit tests
 
-+ Configuration of scapy3
++ Configuration of kamene
 
 = Load isotp socket
 ~ conf command
 
-from scapy3k.layers.isotp import ISOTPSocket
-from scapy3k.layers.can import CANSocket, CAN
-from scapy3k.layers.uds import *
+from kamene.layers.isotp import ISOTPSocket
+from kamene.layers.can import CANSocket, CAN
+from kamene.layers.uds import *
 
 = Setup string for vcan
 ~ conf command
@@ -23,8 +23,8 @@ bashCommand = "/bin/bash -c 'sudo modprobe vcan; sudo modprobe can-isotp; sudo i
 import os
 import threading
 from time import sleep
-from scapy3k.layers.isotp import ISOTP, ISOTPSocket
-from scapy3k.layers.can import CAN, CANSocket
+from kamene.layers.isotp import ISOTP, ISOTPSocket
+from kamene.layers.can import CAN, CANSocket
 
 
 = Setup vcan0

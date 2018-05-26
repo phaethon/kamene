@@ -1,11 +1,10 @@
-% Regression tests for Scapy
+% Regression tests for kamene
 
-# More informations at http://www.secdev.org/projects/UTscapy/
 # $Id: regression.uts,v 1.9 2008/07/29 15:30:29 pbi Exp pbi $
 
 ############
 ############
-+ Informations on Scapy
++ Information on kamene
 
 = Get conf
 ~ conf command
@@ -1148,7 +1147,7 @@ assert( bytes(p) == bytes(q) )
 assert( q[PPP_ECP_Option].data == b"ABCDEFG" )
 
 
-# Scapy6 Regression Test Campaign 
+# kamene IPV6 Regression Test Campaign 
 
 
 ########### IPv6 Class ##############################################
@@ -2347,7 +2346,7 @@ a.flags == 0 and b.flags == 0 and c.flags == 0 and d.flags == 0 and e.flags == 0
 # Nonces 
 # hashret and answers
 # payload guess
-# automatic destination address computation when integrated in scapy6
+# automatic destination address computation when integrated in kamene IPV6
 # at least computeNIGroupAddr
 
 
@@ -4353,7 +4352,7 @@ p = LLC(s)
 + Test Diagnostics over IP contribution layer
 
 = DoIP - Basic Instantiation
-from scapy3k.contrib.doip import *
+from kamene.contrib.doip import *
 bytes(DoIP()) == b'\x02\xfd\x00\x00\x00\x00\x00\x00'
 
 = DoIP - Basic Dissection
