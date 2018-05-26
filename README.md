@@ -1,6 +1,6 @@
-# scapy for python3 (aka scapy3k) 
+# kamene (formerly known as "scapy for python3" or scapy3k) 
 
-N.B.! Module name has changed from scapy to scapy3k. Use `from scapy3k.all import *` now. 
+N.B.! Repository name was recently changed from scapy to kamene. Also, the module name will be changed to kamene and new releases on PyPI will, also, have package name kamene. Documentation (including this Readme) is not fully updated yet. If you use current code from Github you need to use `from scapy3k.all import *` (instead of `from scapy.all import *`). More news to follow on the coming new features once naming transition is finalized. 
 
 [Follow @scapy3k](https://twitter.com/scapy3k) and/or see [scapy3k news and examples](https://phaethon.github.io/scapy) for recent news. [Original scapy documentation updated for scapy3k](http://phaethon.github.io/scapy/api/index.html)
 
@@ -11,6 +11,9 @@ Please, submit all issues https://github.com/phaethon/scapy preferrably with .pc
 [winpcapy.py by Massimo Ciani](https://code.google.com/p/winpcapy/) integrated inside code.
 
 ## News
+
+We are undergoing major naming transition, which will be followed with new functionality. More updates to follow.
+
 [Follow @scapy3k](https://twitter.com/scapy3k) and/or see [scapy3k](https://phaethon.github.io/scapy) for recent news.
 
 Scapy3k is included in the [Network Security Toolkit](http://www.networksecuritytoolkit.org/nst/index.html) Release 22. 
