@@ -4,14 +4,13 @@
 
 To clearly separate from original scapy project and decrease ambiguity in naming, we are undergoing renaming. This will include:
 * renaming of the github repo (done)
-* using new package name on PyPI (at present only non functional package as a placeholder is published, do not use it yet)
-* new python module name (renaming currently in development)
-* documentation to be updated (not done yet, including this Readme)
+* using new package name on PyPI (first release published, consider it for testing purposes at this moment)
+* new python module name (done)
+* documentation to be updated (not fully done yet, including this Readme)
 
-Existing PyPI package scapy-python3 will not be updated with new functionality except a warning message on the need to transition to the different package.
+Existing PyPI package scapy-python3 will not be updated with new functionality except a warning message on the need to transition to a different package.
 
-N.B.! If you use current code from Github you need to use `from scapy3k.all import *` (instead of `from scapy.all import *`).
-This is temporary solution to resolve name clashes. From the next release you will need to use `from kamene.all import *`.
+N.B.! If you use current code from Github or new package kamene from PyPI you need to use `from kamene.all import *` (instead of `from scapy.all import *`).
 
 More news to follow on the coming new features once naming transition is finalized. 
 
