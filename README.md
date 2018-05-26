@@ -1,10 +1,23 @@
 # kamene (formerly known as "scapy for python3" or scapy3k) 
 
-N.B.! Repository name was recently changed from scapy to kamene. Also, the module name will be changed to kamene and new releases on PyPI will, also, have package name kamene. Documentation (including this Readme) is not fully updated yet. If you use current code from Github you need to use `from scapy3k.all import *` (instead of `from scapy.all import *`). More news to follow on the coming new features once naming transition is finalized. 
+## Important announcement
+
+To clearly separate from original scapy project and decrease ambiguity in naming, we are undergoing renaming. This will include:
+* renaming of the github repo (done)
+* using new package name on PyPI (at present only non functional package as a placeholder is published, do not use it yet)
+* new python module name (renaming currently in development)
+* documentation to be updated (not done yet, including this Readme)
+
+N.B.! If you use current code from Github you need to use `from scapy3k.all import *` (instead of `from scapy.all import *`). This is temporary from the next release you will need to use `from kamene.all import *`.
+
+More news to follow on the coming new features once naming transition is finalized. 
+
+## General
 
 [Follow @scapy3k](https://twitter.com/scapy3k) and/or see [scapy3k news and examples](https://phaethon.github.io/scapy) for recent news. [Original scapy documentation updated for scapy3k](http://phaethon.github.io/scapy/api/index.html)
 
-This is a fork of scapy (http://www.secdev.org) to make it compatible with python3. Fork based on scapy v2.3.1
+This is a fork of scapy (http://www.secdev.org) originally developed to implement python3 compatibility. It has been used in production on python3 since 2015.
+
 All tests from regression (758 tests), ipsec, and both other test suites pass. Also, I tested full tutorial series [Building Network Tools with Scapy by @thepacketgeek](http://thepacketgeek.com/series/building-network-tools-with-scapy/) using scapy-python3.
 Please, submit all issues https://github.com/phaethon/scapy preferrably with .pcap files for tests. Bugs for individual layers are usually easy to fix.
 
