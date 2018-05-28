@@ -16,7 +16,7 @@ More news to follow on the coming new features once naming transition is finaliz
 
 ## General
 
-[Follow @scapy3k](https://twitter.com/scapy3k) and/or see [scapy3k news and examples](https://phaethon.github.io/scapy) for recent news. [Original scapy documentation updated for scapy3k](http://phaethon.github.io/scapy/api/index.html)
+[Follow @scapy3k](https://twitter.com/scapy3k) and/or see [scapy3k news and examples](https://phaethon.github.io/kamene) for recent news. [Original scapy documentation updated for scapy3k](http://phaethon.github.io/kamene/api/index.html)
 
 This is a fork of scapy (http://www.secdev.org) originally developed to implement python3 compatibility. It has been used in production on python3 since 2015.
 
