@@ -29,7 +29,7 @@ Please, submit all issues https://github.com/phaethon/scapy preferrably with .pc
 
 We are undergoing major naming transition, which will be followed with new functionality. More updates to follow.
 
-[Follow @scapy3k](https://twitter.com/scapy3k) and/or see [scapy3k](https://phaethon.github.io/scapy) for recent news.
+[Follow @scapy3k](https://twitter.com/scapy3k) and/or see [scapy3k](https://phaethon.github.io/kamene) for recent news.
 
 Scapy3k is included in the [Network Security Toolkit](http://www.networksecuritytoolkit.org/nst/index.html) Release 22. 
 
@@ -44,7 +44,7 @@ Classic scapy has been trying to catch up with the improvements in scapy3k. Thes
 
 ## Installation
 
-Install with `python3 setup.py install` from source tree (get it with `git clone https://github.com/phaethon/scapy.git`) or `pip3 install scapy-python3` for latest published version.
+Install with `python3 setup.py install` from source tree (get it with `git clone https://github.com/phaethon/kamene.git`) or `pip3 install kamene` for latest published version.
 
 On all OS except Linux libpcap should be installed for sending and receiving packets (not python modules - just C libraries) or winpcap driver on Windows. On some OS and configurations installing libdnet may improve experience (for MacOS: `brew install libdnet`). On Windows libdnet is not required. On some less common configurations netifaces may improve experience.
 
@@ -99,7 +99,7 @@ Compatible with [scapy-http module](https://github.com/invernizzi/scapy-http)
 
 ## Short cookbook
 
-More examples will be posted at [scapy3k](https://phaethon.github.io/scapy)
+More examples will be posted at [scapy3k](https://phaethon.github.io/kamene)
 
 ### Reading huge pcap file
 rdpcap reads whole pcap file into memory. If you need to process huge file and perform some operation per packet or calculate some statistics, you can use PcapReader with iterator interface.
