@@ -46,7 +46,7 @@ if os.name == "nt":
 
 setup(
     name = 'kamene',
-    version = '0.31',
+    version = '0.32',
     packages=['kamene','kamene/arch', 'kamene/arch/windows', 'kamene/layers','kamene/asn1','kamene/tools','kamene/modules', 'kamene/crypto', 'kamene/contrib'],
     scripts = SCRIPTS,
     data_files = [('share/man/man1', ["doc/kamene.1.gz"])],
