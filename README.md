@@ -16,9 +16,9 @@ More news to follow on the coming new features once naming transition is finaliz
 
 ## General
 
-[Follow @scapy3k](https://twitter.com/scapy3k) for recent news. [Original scapy documentation updated for scapy3k](http://phaethon.github.io/kamene/api/index.html)
+[Follow @pkt_kamene](https://twitter.com/pkt_kamene) for recent news. [Original scapy documentation updated for scapy3k](http://phaethon.github.io/kamene/api/index.html)
 
-This is a fork of scapy (http://www.secdev.org) originally developed to implement python3 compatibility. It has been used in production on python3 since 2015.
+This is a fork of scapy (http://www.secdev.org) originally developed to implement python3 compatibility. It has been used in production on python3 since 2015 (while secdev/scapy implemented python3 compatibility in 2018).
 
 All tests from regression (758 tests), ipsec, and both other test suites pass. Also, I tested full tutorial series [Building Network Tools with Scapy by @thepacketgeek](http://thepacketgeek.com/series/building-network-tools-with-scapy/) using scapy-python3.
 Please, submit all issues https://github.com/phaethon/kamene preferrably with .pcap files for tests. Bugs for individual layers are usually easy to fix.
@@ -29,17 +29,16 @@ Please, submit all issues https://github.com/phaethon/kamene preferrably with .p
 
 We are undergoing major naming transition, which will be followed with new functionality. More updates to follow.
 
-[Follow @pkt_kamene](https://twitter.com/pkt_kamene) for recent news.
-
 Kamene is included in the [Network Security Toolkit](http://www.networksecuritytoolkit.org/nst/index.html) Release 28. It used to be included in NST since Release 22 under former name.
 
-Classic scapy has been trying to catch up with the improvements in scapy3k. These features were first implemented in scapy3k and some of them might have been reimplemented in scapy or not:
+These features were first implemented in kamene and some of them might have been reimplemented in scapy by now:
 * replaced PyCrypto with cryptography.io (thanks to @ThomasFaivre)
 * Windows support without a need for libdnet
 * option to return Networkx graphs instead of image, e.g. for conversations
 * replaced gnuplot with Matplotlib
 * Reading PCAP Next Generation (PCAPNG) files (please, add issues on GitHub for block types and options, which need support. Currently, reading packets only from Enhanced Packet Block)
 * new command tdecode to call tshark decoding on one packet and display results, this is handy for interactive work and debugging
+* python3 support
 * some bugs fixed, which are still present in original scapy
 
 ## Installation
@@ -52,7 +51,7 @@ On all OS except Linux libpcap should be installed for sending and receiving pac
 
 *N.B.! As a difference from scapy for python2, use `bytes()` instead of `str()` when converting packet to bytes. Also, most arguments expect `bytes` value instead of `str `value except the ones, which are naturally suited for human input (e.g. domain name).*
 
-You can use scapy running scapy3k command or by importing scapy3k library from interactive python shell (python or ipython).
+You can use kamene running `kamene` command or by importing kamene as library from interactive python shell (python or ipython) or code.
 Simple example that you can try from interactive shell:
 ```python
 from kamene import *
