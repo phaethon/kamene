@@ -29,9 +29,9 @@ Please, submit all issues https://github.com/phaethon/kamene preferrably with .p
 
 We are undergoing major naming transition, which will be followed with new functionality. More updates to follow.
 
-[Follow @scapy3k](https://twitter.com/scapy3k) and/or see [scapy3k](https://phaethon.github.io/kamene) for recent news.
+[Follow @pkt_kamene](https://twitter.com/pkt_kamene) for recent news.
 
-Scapy3k is included in the [Network Security Toolkit](http://www.networksecuritytoolkit.org/nst/index.html) Release 22. 
+Kamene is included in the [Network Security Toolkit](http://www.networksecuritytoolkit.org/nst/index.html) Release 28. It used to be included in NST since Release 22 under former name.
 
 Classic scapy has been trying to catch up with the improvements in scapy3k. These features were first implemented in scapy3k and some of them might have been reimplemented in scapy or not:
 * replaced PyCrypto with cryptography.io (thanks to @ThomasFaivre)
