@@ -1705,6 +1705,7 @@ class MTR:
     # Make the DOT graph...
     def make_dot_graph(self, ASres=None, padding=0, vspread=0.75, title="Multi-Traceroute (MTR) Probe", timestamp="", rtt=1):
         import datetime
+        import html
         if ASres is None:
             self._asres = conf.AS_resolver
         self._graphasres = ASres
@@ -1769,12 +1770,12 @@ class MTR:
         oip = []			# Only Endpoint IP array
         epprb = []			# Endpoint Target and Probe the same IP array
         for d in self._tlblid:		# Spin thru Target IDs
-            for k, v in d.items():  # Get access to Target Endpoints
+            for k, v in d.items():      # Get access to Target Endpoints
                 h = k
-                if v[6] == 'BH':  # Add a Blackhole Endpoint Target
+                if v[6] == 'BH':        # Add a Blackhole Endpoint Target
                     h = '{bh:s} {bhp:d}/{bht:s}'.format(bh=k, bhp=v[4], bht=v[3])
-                elif v[1] == v[2]:  # When the Target and host running the mtr session are
-                    epprb.append(k)  # the same then append IP to list target and probe the same array
+                elif v[1] == v[2]:      # When the Target and host running the mtr session are
+                    epprb.append(k)     # the same then append IP to list target and probe the same array
                 epip.append(h)
                 oip.append(k)
         #
@@ -1793,9 +1794,9 @@ class MTR:
                 eph = ep[0:f]
             #
             # Build Traceroute Hop Range label...
-            if ep in self._hops:  # Is Endpoint IP in the Hops dictionary
+            if ep in self._hops:        # Is Endpoint IP in the Hops dictionary
                 hr = self._hops[ep]
-            elif eph in self._hops:  # Is Host only endpoint in the Hops dictionary
+            elif eph in self._hops:     # Is Host only endpoint in the Hops dictionary
                 hr = self._hops[eph]
             else:
                 continue		# Not found in the Hops dictionary
@@ -1828,11 +1829,11 @@ class MTR:
             ecs += '\t\t\tfillcolor="white:#a0a0a0";\n'
             ecs += '\t\t\tstyle="filled,rounded";\n'
             ecs += '\t\t\tpenwidth=2;\n'
-            ecs += '\t\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="center"><B>Target: {h:s}{gwl:s}</B></TD></TR><TR><TD><FONT POINT-SIZE="9">{hr:s}</FONT></TD></TR></TABLE>>;\n'.format(h=self._ip2host[eph], gwl=gwl, hr=hrs)
+            ecs += '\t\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="center"><B>Target: {h:s}{gwl:s}</B></TD></TR><TR><TD><FONT POINT-SIZE="9">{hr:s}</FONT></TD></TR></TABLE>>;\n'.format(h=html.escape(self._ip2host[eph]), gwl=html.escape(gwl), hr=html.escape(hrs))
             ecs += '\t\t\tlabelloc="b";\n'
             pre = ''
             if ep in uepprb:		# Special Case: Separate Endpoint Target from Probe
-                pre = '_'			# when they are the same -> Prepend an underscore char: '_'
+                pre = '_'		# when they are the same -> Prepend an underscore char: '_'
             ecs += '\t\t\t"{pre:s}{ep:s}";\n'.format(pre=pre, ep=ep)
             ecs += "\t\t}\n"
             #
@@ -1857,7 +1858,7 @@ class MTR:
             s += '\t\tnode [color="#{s0:s}{s1:s}{s2:s}",gradientangle=270,fillcolor="white:#{s0:s}{s1:s}{s2:s}",style="filled"];\n'.format(s0=col[0], s1=col[1], s2=col[2])
             s += '\t\tfontsize=10;\n'
             s += '\t\tfontname="Sans-Serif";\n'
-            s += '\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="center"><B><FONT POINT-SIZE="11">AS: {asn:d}</FONT></B></TD></TR><TR><TD>[{des:s}]</TD></TR></TABLE>>;\n'.format(asn=asn, des=self._asds[asn])
+            s += '\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="center"><B><FONT POINT-SIZE="11">AS: {asn:d}</FONT></B></TD></TR><TR><TD>[{des:s}]</TD></TR></TABLE>>;\n'.format(asn=asn, des=html.escape(self._asds[asn]))
             s += '\t\tlabelloc="t";\n'
             s += '\t\tpenwidth=3;\n'
             for ip in self._asns[asn]:
@@ -1891,15 +1892,15 @@ class MTR:
                                     s += '\t\t"{uip:s}";\n'.format(uip=uip)
                                     cipall.append(uip)
                 else:
-                    cipcur.append(ip)  # Current list of Endpoints consumed by this ASN Cluster
-                    cepipall.append(ip)  # Accumulated list of Endpoints consumed by all ASN Clusters
+                    cipcur.append(ip)   # Current list of Endpoints consumed by this ASN Cluster
+                    cepipall.append(ip) # Accumulated list of Endpoints consumed by all ASN Clusters
             #
             # Add Endpoint Cluster(s) if part of this ASN Cluster (Nested Clusters)...
             if len(cipcur) > 0:
                 for ip in cipcur:
-                    for e in epc:  # Loop thru each Endpoint Target Clusters
+                    for e in epc:       # Loop thru each Endpoint Target Clusters
                         h = e
-                        f = e.find(' ')  # Strip off 'port/proto'
+                        f = e.find(' ') # Strip off 'port/proto'
                         if f >= 0:
                             h = e[0:f]
                         if h == ip:
@@ -1910,14 +1911,14 @@ class MTR:
         # and not the same as the host running the mtr session...
         for ip in epc:
             h = ip
-            f = h.find(' ')			# Strip off 'port/proto'
+            f = h.find(' ')		# Strip off 'port/proto'
             if f >= 0:
                 h = ip[0:f]
             if not h in cepipall:
-                for k, v in bpip.items():  # Check for target = host running the mtr session - Try to Add
-                    if k != h:		# this Endpoint target to the Probe Target Cluster below.
-                        s += epc[ip]		# Finally add the Endpoint Cluster if Stand-alone and
-                        # not running the mtr session.
+                for k, v in bpip.items():   # Check for target = host running the mtr session - Try to Add
+                    if k != h:		    # this Endpoint target to the Probe Target Cluster below.
+                        s += epc[ip]	    # Finally add the Endpoint Cluster if Stand-alone and
+                                            # not running the mtr session.
 
         #
         # Probe Target Cluster...
@@ -1949,7 +1950,7 @@ class MTR:
                 # Append all associated Target IDs...
                 ti = []
                 for d in self._tlblid:		# Spin thru Target IDs
-                    for k, v in d.items():  # Get access to Target ID (v[0])
+                    for k, v in d.items():      # Get access to Target ID (v[0])
                         if k == ip:
                             ti.append(v[0])
                 lt = len(ti)
@@ -1963,7 +1964,7 @@ class MTR:
                 if c < l:
                     tstr += ', '
             tstr += ')</FONT></TD></TR>'
-        s += '\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="center"><B>{s0:s}</B></TD></TR>'.format(s0=title)
+        s += '\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="center"><B>{s0:s}</B></TD></TR>'.format(s0=html.escape(title))
         if timestamp != "":
             s += '<TR><TD ALIGN="center"><FONT POINT-SIZE="9">{s0:s}</FONT></TD></TR>'.format(s0=timestamp)
         s += '{s0:s}</TABLE>>;\n'.format(s0=tstr)
@@ -1977,7 +1978,7 @@ class MTR:
             f = h.find(' ')		# Strip off 'port/proto'
             if f >= 0:
                 h = ip[0:f]
-            for k, v in bpip.items():  # Check for target = host running the mtr session - Try to Add
+            for k, v in bpip.items():   # Check for target = host running the mtr session - Try to Add
                 if k == h:		# this Endpoint target to the Probe Target Cluster.
                     s += epc[ip]
         s += "\t}\n"
@@ -2086,7 +2087,6 @@ class MTR:
             eps1 = '\t"{pre:s}{ip:s}" [shape="record",color="black",gradientangle=270,fillcolor="darkgreen:green",style="filled,rounded",'.format(pre=pre, ip=k)
             eps2 = 'label="Resolved Target\\n{ip:s}|{tr:s}",tooltip="MTR Resolved Target: {ip:s}"];\n'.format(ip=k, tr=tr)
             s += eps1 + eps2
-
         #
         # Blackholes...
         #
@@ -2229,21 +2229,21 @@ class MTR:
                 #
                 # Enhance target Endpoint (i.e., End of a trace) replacement...
                 for k, v in self._tlblid[t].items():
-                    if v[6] == 'BH':		# Blackhole detection - do not create Enhanced Endpoint
+                    if v[6] == 'BH':		    # Blackhole detection - do not create Enhanced Endpoint
                         #
                         # Check for Last Hop / Backhole (Failed Target) match:
                         lh = trace[max(tk)]
                         lhicmp = False
-                        if lh.find(':I3') >= 0:  # Is last hop and ICMP packet from target?
+                        if lh.find(':I3') >= 0:     # Is last hop and ICMP packet from target?
                             lhicmp = True
-                        f = lh.find(' ')		# Strip off 'port/proto' ''"100.41.207.244":I3'
+                        f = lh.find(' ')	    # Strip off 'port/proto' ''"100.41.207.244":I3'
                         if f >= 0:
                             lh = lh[0:f]
-                        f = lh.find(':')		# Strip off 'proto:port' -> '"100.41.207.244 801/tcp"'
+                        f = lh.find(':')	    # Strip off 'proto:port' -> '"100.41.207.244 801/tcp"'
                         if f >= 0:
                             lh = lh[0:f]
-                        lh = lh.replace('"', '')  # Remove surrounding double quotes ("")
-                        if k == lh:			# Does Hop match final Target?
+                        lh = lh.replace('"', '')    # Remove surrounding double quotes ("")
+                        if k == lh:		    # Does Hop match final Target?
                             #
                             # Backhole last hop matched target:
                             #
