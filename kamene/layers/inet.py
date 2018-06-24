@@ -1829,7 +1829,7 @@ class MTR:
             ecs += '\t\t\tfillcolor="white:#a0a0a0";\n'
             ecs += '\t\t\tstyle="filled,rounded";\n'
             ecs += '\t\t\tpenwidth=2;\n'
-            ecs += '\t\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="center"><B>Target: {h:s}{gwl:s}</B></TD></TR><TR><TD><FONT POINT-SIZE="9">{hr:s}</FONT></TD></TR></TABLE>>;\n'.format(h=html.escape(self._ip2host[eph]), gwl=html.escape(gwl), hr=html.escape(hrs))
+            ecs += '\t\t\tlabel=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="center"><B>Target: {h:s}{gwl:s}</B></TD></TR><TR><TD><FONT POINT-SIZE="9">{hr:s}</FONT></TD></TR></TABLE>>;\n'.format(h=html.escape(self._ip2host[eph]), gwl=html.escape(gwl), hr=hrs)
             ecs += '\t\t\tlabelloc="b";\n'
             pre = ''
             if ep in uepprb:		# Special Case: Separate Endpoint Target from Probe
