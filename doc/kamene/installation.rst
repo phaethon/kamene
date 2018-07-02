@@ -66,7 +66,7 @@ If you always want the latest version with all new features and bugfixes, use Sc
     
 3. Install kamene in the standard distutils way:: 
     
-   $ cd scapy
+   $ cd kamene
    $ sudo python3 setup.py install
     
 Then you can always update to the latest version::
