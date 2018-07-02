@@ -8,14 +8,12 @@ Overview
 ========
 
  0. Install *Python 3.x*.
- 1. Install *Scapy* using pip or by cloning/installing from git.
+ 1. Install *kamene* using pip or by cloning/installing from git.
  2. (For non-Linux platforms): Install *libpcap and libdnet* and their Python wrappers.
  3. (Optional): Install *additional software* for special features.
- 4. Run Scapy with root priviledges.
+ 4. Run *kamene* with root priviledges for sniffing and sending packets.
  
-Each of these steps can be done in a different way dependent on your platform and on the version of Scapy you want to use. 
-
-This document is for kamene. It requires python 3.x. See `original scapy homepage <http://www.secdev.org/projects/scapy/>_` for Scapy v2.x or earlier.
+Each of these steps can be done in a different way dependent on your platform. 
 
 .. note::
 
@@ -41,7 +39,7 @@ Latest release
 
 The easiest way to install the latest kamene package is using `pip <https://pip.pypa.io/en/stable/>`_.::
 
-$ pip3 install scapy-python3
+$ pip3 install kamene
  
 Current development version
 ----------------------------
@@ -50,7 +48,7 @@ Clone `GitHub repository <http://github.com/phaethon/kamene>`_ to a temporary di
 
 $ cd /tmp
 $ git clone https://github.com/phaethon/kamene 
-$ cd scapy
+$ cd kamene
 $ sudo python3 setup.py install
 
 .. index::
@@ -62,11 +60,11 @@ If you always want the latest version with all new features and bugfixes, use Sc
 
       $ sudo apt-get install git
 
-2. Check out a clone of Scapy's repository::
+2. Check out a clone of kamene's repository::
     
    $ git clone https://github.com/phaethon/kamene
     
-3. Install Scapy in the standard distutils way:: 
+3. Install kamene in the standard distutils way:: 
     
    $ cd scapy
    $ sudo python3 setup.py install
@@ -110,7 +108,7 @@ Platform-specific instructions
 Linux native
 ------------
 
-Scapy can run natively on Linux. I does not require libdnet and libpcap.
+*kamene* can run natively on Linux. I does not require libdnet and libpcap.
 
 * Install python3 from your package manager if it is not already present
 * Install `tcpdump <http://www.tcpdump.org>`_ and make sure it is in the $PATH. (It's only used to compile BPF filters (``-ddd option``))
