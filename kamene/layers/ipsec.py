@@ -48,8 +48,11 @@ if not hasattr(socket, 'IPPROTO_AH'):
 if not hasattr(socket, 'IPPROTO_ESP'):
     socket.IPPROTO_ESP = 50
 
-    
-from fractions import gcd
+import sys
+if sys.version_info[:2] >= (3, 9):
+    from math import gcd
+else:
+    from fractions import gcd
 
 from kamene.data import IP_PROTOS
 from kamene.error import log_loading
